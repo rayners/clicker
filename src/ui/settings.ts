@@ -17,6 +17,7 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
   const downloadButton = h('button', { class: 'buy', type: 'button' }, 'DOWNLOAD');
   const importButton = h('button', { class: 'buy', type: 'button' }, 'IMPORT');
   const resetButton = h('button', { class: 'buy cfg-danger', type: 'button' }, 'HARD RESET');
+  const reassignButton = h('button', { class: 'buy', type: 'button' }, 'REQUEST REASSIGNMENT');
   const close = h('button', { class: 'cfg-close', type: 'button', 'aria-label': 'Close' }, 'X');
 
   const dialog = h(
@@ -32,6 +33,8 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
       code,
       h('div', { class: 'cfg-row' }, exportButton, copyButton, downloadButton, importButton),
       status,
+      h('h3', { class: 'panel-subtitle' }, 'CONTRACT'),
+      reassignButton,
       h('h3', { class: 'panel-subtitle' }, 'DANGER'),
       resetButton,
     ),
@@ -39,6 +42,8 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
 
   let resetPending = false;
   let resetTimer: ReturnType<typeof setTimeout> | undefined;
+  let reassignPending = false;
+  let reassignTimer: ReturnType<typeof setTimeout> | undefined;
 
   const show = (open: boolean) => {
     dialog.hidden = !open;
@@ -96,6 +101,24 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
     clearTimeout(resetTimer);
     setText(resetButton, 'HARD RESET');
     store.dispatch({ type: 'hardReset', seed: (Math.random() * 2 ** 31) | 0, now: Date.now() });
+    show(false);
+  });
+
+  reassignButton.addEventListener('click', () => {
+    if (!reassignPending) {
+      reassignPending = true;
+      setText(reassignButton, 'CONFIRM: ABANDON THIS CONTRACT?');
+      clearTimeout(reassignTimer);
+      reassignTimer = setTimeout(() => {
+        reassignPending = false;
+        setText(reassignButton, 'REQUEST REASSIGNMENT');
+      }, CONFIRM_TIMEOUT_MS);
+      return;
+    }
+    reassignPending = false;
+    clearTimeout(reassignTimer);
+    setText(reassignButton, 'REQUEST REASSIGNMENT');
+    store.dispatch({ type: 'requestReassignment' });
     show(false);
   });
 

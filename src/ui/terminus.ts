@@ -1,25 +1,22 @@
 import type { GameState } from '../core/game';
 import { availableEndings, endingRewards, type Ending } from '../core/prestige';
 import type { Store } from '../core/store';
-import { h, setText } from './dom';
+import { h, setAttr, setText } from './dom';
+import { horrorOf, scenarioOf } from '../mission/registry';
+import { interpolate } from '../mission/lexicon';
 
-const ENDINGS: Record<Ending, { title: string; text: string; rewardText: (s: number, c: number) => string }> = {
-  deliver: {
-    title: 'DELIVER THE CARGO',
-    text: 'Seal the hold. Set course for Combine Station Halvard: eleven years. The specimens travel in cryo. Whatever is loose aboard travels too. The crew will not be thawed.',
-    rewardText: (s) => `+${s} SENIORITY // PERMANENT OUTPUT BONUS`,
-  },
-  scuttle: {
-    title: 'SCUTTLE THE SHIP',
-    text: 'Purge the hold and overload the reactor. Surviving crew evacuate in the lifeboat under a distress beacon. Special Projects receives nothing.',
-    rewardText: (_s, c) => `+${c} CONSCIENCE // MORE CREW CAN WAKE, FEWER INCIDENTS`,
-  },
-  broadcast: {
-    title: 'BROADCAST 0-77',
-    text: 'Transmit Special Order 0-77 and the full archive on every frequency, unencrypted. Then bring the cargo home anyway. Let the Combine explain itself.',
-    rewardText: (s, c) => `+${s} SENIORITY // +${c} CONSCIENCE`,
-  },
+const ENDINGS: Record<Ending, { rewardText: (s: number, c: number) => string }> = {
+  deliver: { rewardText: (s) => `+${s} SENIORITY // PERMANENT OUTPUT BONUS` },
+  scuttle: { rewardText: (_s, c) => `+${c} CONSCIENCE // MORE CREW CAN WAKE, FEWER INCIDENTS` },
+  broadcast: { rewardText: (s, c) => `+${s} SENIORITY // +${c} CONSCIENCE` },
 };
+
+/** The horror's wording for an ending, in the scenario's vocabulary. */
+function endingWords(game: GameState, ending: Ending): { title: string; text: string } {
+  const words = horrorOf(game.mission).endings[ending] ?? { title: ending.toUpperCase(), text: '' };
+  const { lexicon } = scenarioOf(game.mission);
+  return { title: interpolate(words.title, lexicon), text: interpolate(words.text, lexicon) };
+}
 
 const CONFIRM_TIMEOUT_MS = 5000;
 
@@ -28,7 +25,8 @@ export function createTerminusPanel(store: Store): { el: HTMLElement; render(gam
   let pendingTimer: ReturnType<typeof setTimeout> | undefined;
 
   const cards = (Object.keys(ENDINGS) as Ending[]).map((ending) => {
-    const def = ENDINGS[ending];
+    const title = h('h3', { class: 'term-title' });
+    const text = h('p', { class: 'sys-desc' });
     const reward = h('p', { class: 'term-reward' });
     const button = h('button', { class: 'buy term-go', type: 'button' }, 'EXECUTE');
     button.addEventListener('click', () => {
@@ -45,13 +43,13 @@ export function createTerminusPanel(store: Store): { el: HTMLElement; render(gam
     });
     const el = h(
       'section',
-      { class: `term-card term-${ending}`, 'aria-label': def.title },
-      h('h3', { class: 'term-title' }, def.title),
-      h('p', { class: 'sys-desc' }, def.text),
+      { class: `term-card term-${ending}` },
+      title,
+      text,
       reward,
       button,
     );
-    return { ending, el, reward, button };
+    return { ending, el, reward, button, title, text };
   });
 
   const el = h(
@@ -67,6 +65,10 @@ export function createTerminusPanel(store: Store): { el: HTMLElement; render(gam
     const rewards = endingRewards(game);
     for (const card of cards) {
       card.el.hidden = !available.includes(card.ending);
+      const words = endingWords(game, card.ending);
+      setText(card.title, words.title);
+      setText(card.text, words.text);
+      setAttr(card.el, 'aria-label', words.title);
       const r = rewards[card.ending];
       setText(card.reward, ENDINGS[card.ending].rewardText(r.seniority, r.conscience));
       setText(card.button, pending === card.ending ? 'CONFIRM: END CONTRACT' : 'EXECUTE');

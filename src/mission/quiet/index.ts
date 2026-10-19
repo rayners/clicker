@@ -9,6 +9,7 @@ export const QUIET: HorrorDef = {
   beats: [],
   pairings: {},
   archive: [],
+  endings: {},
   productionMultiplier: () => 1,
   applyEffect: (m) => m,
 };

@@ -13,4 +13,11 @@ export const EXTRACTION_LEXICON: Lexicon = {
   targetCode: 'LV-0919',
   surveyDescent: 'Probe descended to 3,180 m.',
   surveyLoss: 'Probe telemetry ceased at 3,212 m.',
+  deliverTitle: 'DELIVER THE CARGO',
+  deliverText:
+    'Seal the hold. Set course for Combine Station Halvard: eleven years. The specimens travel in cryo. Whatever is loose aboard travels too. The crew will not be thawed.',
+  scuttleTitle: 'SCUTTLE THE SHIP',
+  scuttleText:
+    'Purge the hold and overload the reactor. Surviving crew evacuate in the lifeboat under a distress beacon. Special Projects receives nothing.',
+  broadcastTail: 'Then bring the cargo home anyway.',
 };

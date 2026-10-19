@@ -5,8 +5,9 @@ import { buyContainmentLevel, buyRig, reinforce, vent } from '../mission/organis
 import { isExtraction, isOrganism, isTerraform, type MissionState, type OrganismMission, type TerraformMission } from '../mission/state';
 import { allocate, buyProcessor, buyReactor, buyTerraformUpgrade, surge } from '../mission/terraform/economy';
 import type { Line } from '../data/terraform/systems';
-import { advance, createGame, type GameState, type Settings } from './game';
-import { completeContract, type Ending } from './prestige';
+import { advance, newGame, type GameState, type Settings } from './game';
+import { chooseAssignment, completeContract, type Ending } from './prestige';
+import type { ScenarioId } from '../mission/state';
 
 export type Action =
   | { type: 'drill' }
@@ -24,6 +25,9 @@ export type Action =
   | { type: 'buyContainmentLevel' }
   | { type: 'vent' }
   | { type: 'completeContract'; ending: Ending; seed: number }
+  | { type: 'chooseAssignment'; scenario: ScenarioId; seed: number }
+  | { type: 'requestReassignment' }
+  | { type: 'cancelReassignment' }
   | { type: 'setSetting'; key: keyof Settings; value: boolean }
   | { type: 'hardReset'; seed: number; now: number }
   | { type: 'tick'; dt: number };
@@ -71,9 +75,15 @@ export function reduce(game: GameState, action: Action): GameState {
     case 'setSetting':
       return { ...game, profile: { ...game.profile, settings: { ...game.profile.settings, [action.key]: action.value } } };
     case 'hardReset': {
-      const fresh = createGame(action.seed, action.now);
+      const fresh = newGame(action.seed, action.now);
       return { ...fresh, profile: { ...fresh.profile, settings: game.profile.settings } };
     }
+    case 'chooseAssignment':
+      return chooseAssignment(game, action.scenario, action.seed);
+    case 'requestReassignment':
+      return { ...game, assigning: 'reassign' };
+    case 'cancelReassignment':
+      return game.assigning === 'reassign' ? { ...game, assigning: false } : game;
     case 'completeContract':
       return completeContract(game, action.ending, action.seed);
     case 'tick':

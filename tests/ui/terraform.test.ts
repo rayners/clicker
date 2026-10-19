@@ -130,3 +130,13 @@ describe('terraform operations monitor', () => {
     expect(rows.map((r) => r.dataset.system)).toEqual(['cells', 'cracker']);
   });
 });
+
+describe('terraform terminus', () => {
+  it("words the horror's endings for a colony rather than a cargo hold", async () => {
+    const user = setup({ act: 4, flags: ['specimens', 'tracker', 'terminus'] });
+    await user.click(screen.getByRole('tab', { name: /terminus/i }));
+    expect(screen.getByRole('region', { name: /certify the colony/i })).toBeTruthy();
+    expect(screen.getByRole('region', { name: /sterilise merrow/i })).toBeTruthy();
+    expect(screen.queryByText(/\{[a-zA-Z]+\}/)).toBeNull();
+  });
+});

@@ -39,16 +39,21 @@ export interface Profile {
   history: ContractRecord[];
 }
 
+/** A new player, a finished contract, or a mid-contract request (the only one that can be cancelled). */
+export type AssignmentReason = 'start' | 'renewal' | 'reassign';
+
 export interface GameState {
   version: number;
   savedAt: number;
   profile: Profile;
   mission: MissionState;
+  /** Waiting for the player to pick the next contract, and why; nothing runs meanwhile. */
+  assigning: false | AssignmentReason;
   /** Reserved for the future Boardroom layer. */
   boardroom?: unknown;
 }
 
-export const GAME_VERSION = 3;
+export const GAME_VERSION = 4;
 
 export function createProfile(): Profile {
   return {
@@ -69,10 +74,17 @@ export function createGame(seed: number, now: number): GameState & { mission: Mi
     savedAt: now,
     profile: createProfile(),
     mission: createMission(DEFAULT_MISSION_CONFIG, seed),
+    assigning: false,
   };
 }
 
+/** A brand-new player: the first thing they do is choose a contract. */
+export function newGame(seed: number, now: number): GameState {
+  return { ...createGame(seed, now), assigning: 'start' };
+}
+
 export function tickGame(game: GameState, dt: number): GameState {
+  if (game.assigning) return game;
   const ctx = { cycle: game.profile.contractsCompleted, endings: game.profile.endingsSeen };
   return { ...game, mission: tickMission(game.mission, dt, ctx) };
 }
@@ -89,6 +101,7 @@ function simulate(game: GameState, seconds: number): GameState {
 }
 
 function simulateAbsence(game: GameState, gapSeconds: number): { game: GameState; elapsed: number } {
+  if (game.assigning) return { game, elapsed: 0 };
   const elapsed = Math.min(gapSeconds, OFFLINE_CAP_SECONDS);
   let g = simulate(game, elapsed);
   if (elapsed >= ABSENCE_LOG_THRESHOLD) {

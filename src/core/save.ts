@@ -1,4 +1,4 @@
-import { createGame, GAME_VERSION, type GameState } from './game';
+import { GAME_VERSION, newGame, type GameState } from './game';
 
 export const SAVE_KEY = 'deep-contract.save';
 export const CORRUPT_BACKUP_KEY = 'deep-contract.corrupt';
@@ -50,6 +50,8 @@ const MIGRATIONS: Record<number, Migration> = {
       },
     };
   },
+  // v4: games can be waiting for the player to choose the next contract.
+  4: (save) => ({ assigning: false, ...save }),
 };
 
 export function migrate(save: RawSave, migrations: Record<number, Migration>, target: number): RawSave {
@@ -100,7 +102,7 @@ export function loadGame(
   seed: number,
 ): { game: GameState; recoveredFromCorruption: boolean } {
   const text = storage.getItem(SAVE_KEY);
-  if (text === null) return { game: createGame(seed, now), recoveredFromCorruption: false };
+  if (text === null) return { game: newGame(seed, now), recoveredFromCorruption: false };
   try {
     return { game: deserialize(text), recoveredFromCorruption: false };
   } catch {
@@ -109,7 +111,7 @@ export function loadGame(
     } catch {
       // Nothing more we can do; starting fresh is still better than a crash.
     }
-    return { game: createGame(seed, now), recoveredFromCorruption: true };
+    return { game: newGame(seed, now), recoveredFromCorruption: true };
   }
 }
 

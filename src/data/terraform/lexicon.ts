@@ -13,4 +13,11 @@ export const TERRAFORM_LEXICON: Lexicon = {
   targetCode: 'KA-T-88',
   surveyDescent: 'Probe descended through the polar cap to 3,180 m.',
   surveyLoss: 'Probe telemetry ceased in a liquid layer at 3,212 m.',
+  deliverTitle: 'CERTIFY THE COLONY',
+  deliverText:
+    'Sign Merrow off as habitable to the final envelope. Special Projects takes possession of the planet. The colonists are already in place. They will not be told what for.',
+  scuttleTitle: 'STERILISE MERROW',
+  scuttleText:
+    'Run every heater past failure and vent the new atmosphere to space. Nothing on the surface survives the winter. Surviving crew leave on the last shuttle. Special Projects receives nothing.',
+  broadcastTail: 'Then certify the colony anyway.',
 };

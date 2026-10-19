@@ -56,6 +56,8 @@ export interface HorrorDef {
   /** Optional extra beats for one specific scenario, keyed by scenario id. */
   pairings: Readonly<Record<string, readonly Beat[]>>;
   archive: readonly ArchiveFile[];
+  /** Title and text for each ending this horror offers at the terminus (lexicon placeholders allowed). */
+  endings: Readonly<Record<string, { title: string; text: string }>>;
   /** Multiplies the scenario's output (e.g. Special Projects funding). */
   productionMultiplier(m: MissionState): number;
   /** Story effects only this horror understands (e.g. a forced breach). */

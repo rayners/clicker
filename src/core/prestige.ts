@@ -19,6 +19,8 @@ export interface Reward {
 }
 
 export const BOARDROOM_UNLOCK_CONTRACTS = 10;
+/** Completed contracts before terraforming is offered. Zero while it is being play-tested; meant to rise. */
+export const TERRAFORM_UNLOCK_CONTRACTS = 0;
 const BROADCAST_MIN_CYCLE = 3;
 const BROADCAST_MIN_CONSCIENCE = 3;
 const SPECIMENS_PER_SENIORITY = 5;
@@ -68,6 +70,16 @@ export function missionConfigFor(profile: Profile, scenario: ScenarioId = 'extra
     extraLifeSupport: profile.conscience,
     incidentMultiplier: 1 / (1 + INCIDENT_REDUCTION_PER_CONSCIENCE * profile.conscience),
   };
+}
+
+export function availableAssignments(profile: Profile): ScenarioId[] {
+  return profile.contractsCompleted >= TERRAFORM_UNLOCK_CONTRACTS ? ['extraction', 'terraform'] : ['extraction'];
+}
+
+/** Starts the chosen contract. Whatever was running is abandoned without reward. */
+export function chooseAssignment(game: GameState, scenario: ScenarioId, seed: number): GameState {
+  if (!availableAssignments(game.profile).includes(scenario)) return game;
+  return { ...game, assigning: false, mission: createMission(missionConfigFor(game.profile, scenario), seed) };
 }
 
 export function availableEndings(game: GameState): Ending[] {
@@ -121,7 +133,8 @@ export function completeContract(game: GameState, ending: Ending, seed: number):
       },
     ],
   };
-  return { ...game, profile, mission: createMission(missionConfigFor(profile), seed) };
+  // The next contract is chosen on the assignment screen; this placeholder never runs.
+  return { ...game, profile, assigning: 'renewal', mission: createMission(missionConfigFor(profile, m.scenario), seed) };
 }
 
 export function isBoardroomUnlocked(profile: Profile): boolean {

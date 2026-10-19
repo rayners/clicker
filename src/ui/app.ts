@@ -14,6 +14,7 @@ import { createProjectsPanel } from './projects';
 import { createArchivePanel, hasArchiveToShow } from './archive';
 import { createTerminusPanel } from './terminus';
 import { createSettings } from './settings';
+import { createAssignment } from './assignment';
 import { createSound, cueForLog } from './sound';
 import { isSpecialProjectsUnlocked } from '../mission/organism/containment';
 import { isOrganism, type ScenarioId } from '../mission/state';
@@ -53,6 +54,7 @@ function scenarioView(ui: ScenarioUi) {
 export function mountApp(root: HTMLElement, store: Store): void {
   const sound = createSound();
   const settings = createSettings(store);
+  const assignment = createAssignment(store);
   // iOS only allows audio to start inside a user gesture.
   root.addEventListener('pointerdown', () => sound.unlock(), { passive: true });
   const shipName = h('span', { class: 'mast-ship' });
@@ -213,7 +215,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
   }
 
   root.classList.add('shell');
-  root.replaceChildren(masthead, status, ...panels.map((p) => p.el), drillBay, tabbar, settings.dialog);
+  root.replaceChildren(masthead, status, ...panels.map((p) => p.el), drillBay, tabbar, settings.dialog, assignment.el);
   selectTab('ops');
   let palette = readPalette(root);
   paintAll(root);
@@ -251,6 +253,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     if (root.dataset.motion !== motion) root.dataset.motion = motion;
     sound.setEnabled(game.profile.settings.sound);
     settings.render(game);
+    assignment.render(game);
     const tracking = m.flags.includes('tracker');
     contacts.el.hidden = !tracking;
     contacts.el.parentElement!.hidden = !tracking;
