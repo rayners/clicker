@@ -20,6 +20,10 @@ These are already in place. Keep them true.
 6. **The story engine is generic** (`runBeats(state, beats, ctx)`). A Boardroom layer can reuse it with its own beat table and state.
 7. **Panels are registered with visibility predicates** in `src/ui/app.ts`. A BOARDROOM view should arrive behind a layer switch, not by rewriting the mission UI.
 
+## Mission kinds
+
+`docs/TERRAFORM.md` plans a second first-tier mission kind. That plan introduces `MissionConfig.kind` and a `MissionKind` registry (`create`, `tick`, `reduce`, `outcome`, `endings`). This is the mission half of the `Layer` interface below. Whichever ships first builds it, and the Boardroom then launches missions of any registered kind.
+
 ## Not yet done (deliberately deferred until the Boardroom is built)
 
 - A generic `Layer` interface (`id`, `init`, `tick`, `serialize`/`migrate`, `render`) and an "active layer" in the loop and UI shell. Skipped under TDD because nothing needs it yet. Introduce it, test-first, as the first Boardroom step.

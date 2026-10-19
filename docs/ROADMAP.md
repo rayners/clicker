@@ -13,6 +13,18 @@ The original plan had 8 implementation steps, each done test-first.
 | 7 | Prestige: endings, persistent currencies, repeat-contract story | done |
 | 8 | PWA, settings (sound, reduced motion, export/import, hard reset), pacing simulator + balance | done |
 
+## After the first phone playtest (2026-10-19)
+
+Feedback: not much feeling of progression; ore/s should be the primary stat but looked secondary; purchases seemed to do nothing until credits grew; no feeling of automation. The user liked the input/output balancing ("reminds me of the paperclip game in a good way").
+
+| Change | Status |
+|---|---|
+| Production flow readout (extract ▸ refine ▸ income) with refinery-load meter and highlighted bottleneck | done |
+| `+X ORE/S` call-outs when a purchase or crew change moves the rate | done |
+| Operations monitor with per-system work-cycle bars | done |
+| Autocycle upgrade line (WARDEN presses the drill); drill ticks show real yield | done |
+| Terraforming as a second mission kind | planned in `docs/TERRAFORM.md`, with open questions for the user |
+
 ## Deviations from the original plan (deliberate)
 
 - **Folder layout:** mission logic lives in `src/mission/` (not `src/systems/`) to keep a mission self-contained for the Boardroom. Story beats are in `src/data/story.ts` (one file, grouped by act), not one file per act.
@@ -32,11 +44,13 @@ The original plan had 8 implementation steps, each done test-first.
 - Sinister directives during Acts III–IV (the directive table currently ends at KA-008).
 - Sound polish: an ambient hum per act, and a typewriter cadence tied to the print animation.
 - An optional first-load boot sequence animation.
+- **Terraforming contracts** (`docs/TERRAFORM.md`): a second first-tier mission kind built around power allocation and target bands. Its first step (a discriminated `MissionKind` registry) is also the Boardroom's first step.
+- More flow feedback: show each purchase's effect on *income* (not just ore/s) on the buy buttons.
 - The **Boardroom** layer (`docs/BOARDROOM.md`).
 
 ## Balance notes
 
-Re-run `npm run simulate` after any economy change. The current first-contract timings (all seeds) are: Act II 54m, Act III 2h29m, Act IV 3h08m, Terminus 4h23m. A repeat contract with Seniority 3 is faster.
+Re-run `npm run simulate` after any economy change. The current first-contract timings (all seeds, with autocycle) are: Act II 52m, Act III 2h25m, Act IV 3h04m, Terminus 4h19m. A repeat contract with Seniority 3 is faster.
 
 Levers, roughly in order of impact:
 - generator `baseRate`

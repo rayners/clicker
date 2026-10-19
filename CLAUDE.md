@@ -5,6 +5,7 @@ Retro-futurist idle clicker (Alien-flavoured, original IP) with a slow-burn horr
 Read before changing things:
 - `docs/DESIGN.md`: premise, economy, the five acts and their pacing targets, prestige, UI/art direction.
 - `docs/BOARDROOM.md`: the planned second-tier layer and the architecture rules it imposes **now**.
+- `docs/TERRAFORM.md`: the planned second mission kind (terraforming) and the `MissionKind` refactor it needs.
 - `docs/ROADMAP.md`: what's built, deliberate deviations from the original plan, and the backlog.
 
 ## Non-negotiable requirements
@@ -29,6 +30,7 @@ Read before changing things:
 - `src/core/`: `GameState = { version, savedAt, profile, mission, boardroom? }`, the store/reducer, offline catch-up (`advance`/`catchUp`, 8h cap), saves (versioned migrations in `save.ts`; **bump `GAME_VERSION` and add a migration for any saved-shape change**), prestige, debug scenarios.
 - `src/data/`: content tables only (generators, upgrades, crew, directives, story beats, archive files, sprites). Content gets **invariant tests** (unique ids, monotonic costs, every beat reachable, sprite dimensions/palette), not per-item tests.
 - `src/ui/`: hand-rolled DOM via `h()`/`setText()` in `dom.ts`; panels are `{ el, render(state) }` registered in `app.ts` with a `visible()` predicate (tabs appear as features unlock). Accessible names and roles are the test hooks (`getByRole`, `aria-label`).
+- The **production flow readout** (`src/ui/flow.ts`) is the game's headline: whichever stage is limiting gets highlighted, and any change in rate gets a call-out. The **operations monitor** (`src/ui/monitor.ts`) shows automation working. Keep new economy features visible there instead of only in panels.
 - Sprites are palette-indexed strings (`. a b c d e`) mapped to CSS variables at draw time, so act themes re-tint them. `corruptFrame` glitches them deterministically.
 - Story beats: `{ id, act?, when({m, ctx}), entries, effects?, urgent? }`. At most one per tick, spaced by `STORY_MIN_GAP` unless urgent. Repeat-contract beats use the `cycle-` id prefix.
 - Match surrounding style: small comments only where intent isn't obvious, short constants at the top of modules, no new dependencies without need.

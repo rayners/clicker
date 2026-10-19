@@ -15,7 +15,8 @@ Original IP: Alien-flavoured, with no direct names, quotes or logos from the fil
 
 ## Core loop and systems
 
-- **Drill (click):** ore per press (`EXECUTE DRILL CYCLE`). Click upgrades plus *telemetry assist* (adds a share of automated output).
+- **Drill (click):** ore per press (`EXECUTE DRILL CYCLE`). Click upgrades plus *telemetry assist* (adds a share of automated output). Each press shows its real yield.
+- **Autocycle:** an early upgrade line (`WARDEN AUTOCYCLE`, then `PARALLEL SCHEDULER`, `PREDICTIVE STRIKE`, `OPERATOR NOT REQUIRED`) where WARDEN fires the drill itself, visibly pressing the button. Auto cycles get drill-head multipliers but **not** the telemetry share; letting them compound with it made pacing about 25% too fast. The upgrade names foreshadow WARDEN taking over control.
 - **Refinery:** converts ore to credits up to its throughput, which is a deliberate bottleneck with its own upgrade line. Credits buy everything.
 - **Generators:** 8 tiers (drone, auger, crawler, mass driver, seismic array, deep-core bore, subsurface habitat, abyssal shaft). Cost ×1.15 per unit; each tier is less cost-efficient than the last. A tier is revealed once the previous one is owned.
 - **Upgrades:** handcrafted click, refinery and global multipliers, plus MK II/III/IV ×2 per generator at 10/25/50 owned.
@@ -53,8 +54,14 @@ Choosing an ending resets the mission and updates the persistent profile:
 
 - **CRT terminal, a 1979 corporate-mainframe feel.** VT323 for terminal text; Michroma (Eurostile-like) for Kessler-Amari branding. Both are self-hosted via `@fontsource`. Phosphor glow, scanlines, vignette, faint flicker. All motion is disabled by `prefers-reduced-motion` or by the in-game setting.
 - **Palette by act** (CSS variables on `.shell[data-act]`): green (I–II), then sickly yellow-green (III), then amber (IV–V). A red alert pulse while contacts are aboard.
+- **Production flow is the headline** (from the first phone playtest: "ore/s should be the primary stat"). Ideally this is the input/output balancing of *Universal Paperclips*.
+  - `EXTRACT ▸ REFINE ▸ INCOME` sits in large type under the masthead, with a refinery-load meter.
+  - The **limiting stage is highlighted**, and when the refinery is full it is inverted, with a note such as "367 ORE/S BACKING UP". This tells the player what to buy next.
+  - Any purchase or crew change that moves ore/s gets a floating `+X ORE/S` call-out (red for losses).
+  - Ore, credits and depth are secondary stats beneath.
+- **Operations monitor** (top of OPS): every running automated system (autocycle and each owned generator) with count, looping work-cycle bar and output. It exists so automation is visible rather than inferred from a growing credit number.
 - **Layout:**
-  - Phone: masthead, a 2-column status grid, the active panel, a pinned drill bay, and a bottom tab bar with short labels.
+  - Phone: masthead, the flow readout and a 3-column secondary stat row, the active panel, a pinned drill bay, and a bottom tab bar with short labels.
   - Desktop (≥900px): status | log + drill | tabbed side panel.
   - Tabs appear only when their feature unlocks: OPS, SYSTEMS, UPGRADES, CREW, DIRECTIVES, SPECIAL PROJECTS, ARCHIVE, TERMINUS.
 - **Comms log:** a print-wipe animation per entry. Kinds `sys`, `corp`, `crew` and `anomaly` are styled differently (anomaly entries tear).
