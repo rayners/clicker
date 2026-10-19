@@ -6,10 +6,14 @@ import { h, setText } from './dom';
 import { createLogView } from './log';
 import { createSystemsPanel } from './systems';
 import { createUpgradesPanel, hasUpgradesToShow } from './upgrades';
+import { createCrewPanel } from './crew';
+import { isCrewUnlocked } from '../mission/crew';
 
 interface Panel {
   id: string;
   label: string;
+  /** Phone tab bars are narrow. */
+  short: string;
   el: HTMLElement;
   render(game: GameState): void;
   visible(game: GameState): boolean;
@@ -60,26 +64,35 @@ export function mountApp(root: HTMLElement, store: Store): void {
 
   const systems = createSystemsPanel(store);
   const upgrades = createUpgradesPanel(store);
+  const crew = createCrewPanel(store);
   const panels: Panel[] = [
     {
       id: 'ops',
       label: 'OPS',
+      short: 'OPS',
       el: h('section', { class: 'panel panel-ops', role: 'tabpanel', id: 'panel-ops', 'aria-labelledby': 'tab-ops' }, log.el),
       render: (g) => log.render(g.mission.log),
       visible: () => true,
     },
-    { id: 'systems', label: 'SYSTEMS', el: systems.el, render: (g) => systems.render(g.mission), visible: () => true },
+    { id: 'systems', label: 'SYSTEMS', short: 'SYS', el: systems.el, render: (g) => systems.render(g.mission), visible: () => true },
     {
       id: 'upgrades',
       label: 'UPGRADES',
+      short: 'UPG',
       el: upgrades.el,
       render: (g) => upgrades.render(g.mission),
       visible: (g) => hasUpgradesToShow(g.mission),
     },
+    { id: 'crew', label: 'CREW', short: 'CREW', el: crew.el, render: (g) => crew.render(g.mission), visible: (g) => isCrewUnlocked(g.mission) },
   ];
 
   const tabs = panels.map((p) => {
-    const b = h('button', { class: `tab tab-${p.id}`, role: 'tab', id: `tab-${p.id}`, 'aria-controls': `panel-${p.id}`, type: 'button' }, p.label);
+    const b = h(
+      'button',
+      { class: `tab tab-${p.id}`, role: 'tab', id: `tab-${p.id}`, 'aria-controls': `panel-${p.id}`, 'aria-label': p.label, type: 'button' },
+      h('span', { class: 'tab-full' }, p.label),
+      h('span', { class: 'tab-short' }, p.short),
+    );
     b.addEventListener('click', () => selectTab(p.id));
     return b;
   });

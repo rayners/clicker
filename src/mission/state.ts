@@ -1,5 +1,6 @@
 import { GENERATORS } from '../data/generators';
 import { appendLog, type LogEntry } from './log';
+import { createCrewState, type CrewMemberState } from './crew';
 
 /** Everything that varies between missions. Plain data so the future Boardroom layer can author it. */
 export interface MissionConfig {
@@ -23,6 +24,7 @@ export interface MissionState {
   generators: Record<string, number>;
   refineryLevel: number;
   upgrades: string[];
+  crew: Record<string, CrewMemberState>;
   log: LogEntry[];
   nextLogId: number;
 }
@@ -38,6 +40,7 @@ export function createMission(config: MissionConfig, seed: number): MissionState
     generators: Object.fromEntries(GENERATORS.map((g) => [g.id, 0])),
     refineryLevel: 0,
     upgrades: [],
+    crew: createCrewState(),
     log: [],
     nextLogId: 1,
   };

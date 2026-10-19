@@ -1,5 +1,6 @@
 import { buyGenerator, buyRefinery, drill } from '../mission/economy';
 import { buyUpgrade } from '../mission/upgrades';
+import { sleepCrew, wakeCrew } from '../mission/crew';
 import { advance, type GameState } from './game';
 
 export type Action =
@@ -7,6 +8,8 @@ export type Action =
   | { type: 'buyGenerator'; id: string }
   | { type: 'buyRefinery' }
   | { type: 'buyUpgrade'; id: string }
+  | { type: 'wakeCrew'; id: string }
+  | { type: 'sleepCrew'; id: string }
   | { type: 'tick'; dt: number };
 
 export function reduce(game: GameState, action: Action): GameState {
@@ -19,6 +22,10 @@ export function reduce(game: GameState, action: Action): GameState {
       return { ...game, mission: buyRefinery(game.mission) };
     case 'buyUpgrade':
       return { ...game, mission: buyUpgrade(game.mission, action.id) };
+    case 'wakeCrew':
+      return { ...game, mission: wakeCrew(game.mission, action.id) };
+    case 'sleepCrew':
+      return { ...game, mission: sleepCrew(game.mission, action.id) };
     case 'tick':
       return advance(game, action.dt).game;
   }

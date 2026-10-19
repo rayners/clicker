@@ -353,6 +353,88 @@ button:focus-visible {
   font-size: 0.85em;
 }
 
+.crew-life {
+  margin: 0 var(--gutter) 6px;
+  color: var(--phosphor-dim);
+}
+
+.crew-list {
+  padding: 0 var(--gutter) 16px;
+}
+
+.crew-card {
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--phosphor-faint);
+}
+
+.crew-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.crew-portrait {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  image-rendering: pixelated;
+  border: 1px solid var(--phosphor-faint);
+  background: var(--bg-raise);
+}
+
+.crew-id {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.crew-name {
+  color: var(--phosphor-hi);
+}
+
+.crew-role,
+.crew-fatigue {
+  color: var(--phosphor-dim);
+  font-size: 0.85em;
+}
+
+.crew-meter {
+  display: inline;
+}
+
+.crew-status {
+  padding: 0 6px;
+  border: 1px solid var(--phosphor-dim);
+  font-size: 0.85em;
+}
+
+.crew-card[data-status='awake'] .crew-status {
+  background: var(--phosphor);
+  color: var(--bg);
+  text-shadow: none;
+}
+
+.crew-card[data-status='exhausted'] .crew-status {
+  border-style: dashed;
+  animation: blink 1s steps(1) infinite;
+}
+
+.crew-card[data-status='cryo'] .crew-portrait {
+  opacity: 0.45;
+}
+
+.crew-boost {
+  margin-bottom: 6px;
+  font-size: 0.9em;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+
 .tab[hidden] {
   display: none;
 }
@@ -375,6 +457,10 @@ button:focus-visible {
   background: transparent;
   letter-spacing: 0.1em;
   color: var(--phosphor-dim);
+}
+
+.tab-full {
+  display: none;
 }
 
 .tab:last-child {
@@ -446,6 +532,14 @@ button:focus-visible {
   }
 
   .tab-ops {
+    display: none;
+  }
+
+  .tab-full {
+    display: inline;
+  }
+
+  .tab-short {
     display: none;
   }
 
