@@ -1,6 +1,7 @@
 import { GENERATORS } from '../data/generators';
 import { appendLog, type LogEntry } from './log';
 import { createCrewState, type CrewMemberState } from './crew';
+import type { ActiveDirective, DirectiveResult } from './directives';
 
 /** Everything that varies between missions. Plain data so the future Boardroom layer can author it. */
 export interface MissionConfig {
@@ -21,10 +22,14 @@ export interface MissionState {
   ore: number;
   credits: number;
   lifetimeOre: number;
+  lifetimeCredits: number;
   generators: Record<string, number>;
   refineryLevel: number;
   upgrades: string[];
   crew: Record<string, CrewMemberState>;
+  directive: ActiveDirective | null;
+  directiveResults: Record<string, DirectiveResult>;
+  lastDirectiveAt: number | null;
   log: LogEntry[];
   nextLogId: number;
 }
@@ -37,10 +42,14 @@ export function createMission(config: MissionConfig, seed: number): MissionState
     ore: 0,
     credits: 0,
     lifetimeOre: 0,
+    lifetimeCredits: 0,
     generators: Object.fromEntries(GENERATORS.map((g) => [g.id, 0])),
     refineryLevel: 0,
     upgrades: [],
     crew: createCrewState(),
+    directive: null,
+    directiveResults: {},
+    lastDirectiveAt: null,
     log: [],
     nextLogId: 1,
   };

@@ -7,6 +7,7 @@ import { createLogView } from './log';
 import { createSystemsPanel } from './systems';
 import { createUpgradesPanel, hasUpgradesToShow } from './upgrades';
 import { createCrewPanel } from './crew';
+import { createDirectivesPanel, hasDirectivesToShow } from './directives';
 import { isCrewUnlocked } from '../mission/crew';
 
 interface Panel {
@@ -65,6 +66,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const systems = createSystemsPanel(store);
   const upgrades = createUpgradesPanel(store);
   const crew = createCrewPanel(store);
+  const directives = createDirectivesPanel();
   const panels: Panel[] = [
     {
       id: 'ops',
@@ -84,6 +86,14 @@ export function mountApp(root: HTMLElement, store: Store): void {
       visible: (g) => hasUpgradesToShow(g.mission),
     },
     { id: 'crew', label: 'CREW', short: 'CREW', el: crew.el, render: (g) => crew.render(g.mission), visible: (g) => isCrewUnlocked(g.mission) },
+    {
+      id: 'directives',
+      label: 'DIRECTIVES',
+      short: 'DIR',
+      el: directives.el,
+      render: (g) => directives.render(g.mission),
+      visible: (g) => hasDirectivesToShow(g.mission),
+    },
   ];
 
   const tabs = panels.map((p) => {

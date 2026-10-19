@@ -112,10 +112,10 @@ describe('fatigue', () => {
     let m = wakeCrew(fresh(), tech.id);
     m = tickMission(m, FATIGUE_SECONDS + 1);
     expect(clickPower(m)).toBe(1);
-    expect(m.log.at(-1)!.text).toContain(tech.exhaustedLine);
-    const logged = m.log.length;
+    const exhaustedEntries = (s: MissionState) => s.log.filter((e) => e.text.includes(tech.exhaustedLine)).length;
+    expect(exhaustedEntries(m)).toBe(1);
     m = tickMission(m, 10);
-    expect(m.log.length).toBe(logged);
+    expect(exhaustedEntries(m)).toBe(1);
   });
 
   it('recovers in cryo', () => {
