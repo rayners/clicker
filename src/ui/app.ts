@@ -9,6 +9,7 @@ import { createUpgradesPanel, hasUpgradesToShow } from './upgrades';
 import { createCrewPanel } from './crew';
 import { createDirectivesPanel, hasDirectivesToShow } from './directives';
 import { isCrewUnlocked } from '../mission/crew';
+import { advanceFrame, paintAll, paintSprite, readPalette, spriteCanvas } from './sprites';
 
 interface Panel {
   id: string;
@@ -32,7 +33,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     'header',
     { class: 'masthead' },
     h('div', { class: 'mast-brand' }, h('span', { class: 'brand-mark', 'aria-hidden': 'true' }, 'K/A'), 'KESSLER-AMARI COMBINE'),
-    h('div', { class: 'mast-line' }, shipName, clock),
+    h('div', { class: 'mast-line' }, h('span', { class: 'mast-ship-wrap' }, spriteCanvas('ship', 'mast-sprite'), shipName), clock),
   );
 
   const ore = stat('ORE', 'Ore');
@@ -42,15 +43,20 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const status = h(
     'section',
     { class: 'status', 'aria-label': 'Ship status' },
+    h('div', { class: 'status-target' }, spriteCanvas('moonlet', 'status-moon'), h('span', { class: 'status-target-name' })),
     h('dl', { class: 'stats' }, ore.el, credits.el, rate.el, refinery.el),
   );
+  const targetName = status.querySelector('.status-target-name')!;
 
   const log = createLogView();
-  const drill = h('button', { class: 'drill', type: 'button' }, h('span', { class: 'drill-label' }, 'EXECUTE DRILL CYCLE'));
+  const drillBit = spriteCanvas('drill', 'drill-sprite');
+  const drill = h('button', { class: 'drill', type: 'button' }, drillBit, h('span', { class: 'drill-label' }, 'EXECUTE DRILL CYCLE'));
   drill.setAttribute('aria-label', 'Execute drill cycle');
   const drillOnce = () => {
     store.dispatch({ type: 'drill' });
     spawnTick(drill);
+    advanceFrame(drillBit);
+    paintSprite(drillBit, palette);
   };
   // pointerdown fires immediately on touch (no click delay) so rapid tapping on phones feels right.
   drill.addEventListener('pointerdown', (e) => {
@@ -125,10 +131,13 @@ export function mountApp(root: HTMLElement, store: Store): void {
   root.classList.add('shell');
   root.replaceChildren(masthead, status, ...panels.map((p) => p.el), drillBay, tabbar);
   selectTab('ops');
+  const palette = readPalette(root);
+  paintAll(root);
 
   function render(game: GameState) {
     const m = game.mission;
     setText(shipName, m.config.shipName.toUpperCase());
+    setText(targetName, m.config.targetBody.toUpperCase());
     setText(clock, `T+${formatClock(m.elapsed)}`);
     setText(ore.value, formatNumber(m.ore));
     setText(credits.value, formatNumber(m.credits));

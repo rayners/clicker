@@ -36,6 +36,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .shell::after,
+  .status-moon,
   .log-entry,
   .drill-tick {
     animation: none;

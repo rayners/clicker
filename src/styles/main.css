@@ -57,6 +57,12 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+.sprite {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(0 0 3px var(--glow));
+}
+
 /* ---------- shell layout (mobile first) ---------- */
 
 .shell {
@@ -107,6 +113,19 @@ button:focus-visible {
   color: var(--phosphor-dim);
 }
 
+.mast-ship-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mast-sprite {
+  width: 48px;
+  height: 18px;
+  flex: none;
+}
+
 .mast-clock {
   font-variant-numeric: tabular-nums;
 }
@@ -115,6 +134,10 @@ button:focus-visible {
   grid-area: status;
   padding: 8px var(--gutter);
   border-bottom: 1px solid var(--phosphor-faint);
+}
+
+.status-target {
+  display: none;
 }
 
 .stats {
@@ -219,12 +242,29 @@ button:focus-visible {
   background:
     repeating-linear-gradient(135deg, transparent 0 10px, rgba(93, 255, 143, 0.05) 10px 20px),
     var(--bg-raise);
-  font-size: 1.5em;
-  letter-spacing: 0.12em;
+  font-size: 1.35em;
+  letter-spacing: 0.08em;
   box-shadow: 0 0 18px rgba(93, 255, 143, 0.18), inset 0 0 22px rgba(93, 255, 143, 0.08);
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
+}
+
+.drill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.drill-sprite {
+  width: 28px;
+  height: 28px;
+  flex: none;
+}
+
+.drill:active .drill-sprite {
+  filter: none;
 }
 
 .drill-label::before {
@@ -429,6 +469,15 @@ button:focus-visible {
   font-size: 0.9em;
 }
 
+@keyframes drift {
+  from {
+    transform: translateY(-3px) rotate(-2deg);
+  }
+  to {
+    transform: translateY(3px) rotate(2deg);
+  }
+}
+
 @keyframes blink {
   50% {
     opacity: 0.2;
@@ -550,6 +599,35 @@ button:focus-visible {
   .stats {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+
+  .status-target {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0 18px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--phosphor-faint);
+    color: var(--phosphor-dim);
+    font-size: 0.85em;
+    text-align: center;
+  }
+
+  .status-moon {
+    width: 96px;
+    height: 96px;
+    animation: drift 18s ease-in-out infinite alternate;
+  }
+
+  .mast-sprite {
+    width: 64px;
+    height: 24px;
+  }
+
+  .drill-sprite {
+    width: 36px;
+    height: 36px;
   }
 
   .drill {

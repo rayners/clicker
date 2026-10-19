@@ -1,0 +1,190 @@
+/**
+ * Palette-indexed pixel art. Keys map to theme colours at draw time, so every sprite
+ * re-tints automatically when the terminal palette shifts between acts.
+ *   .  transparent   a  faint   b  dim   c  phosphor   d  bright   e  white/corp
+ */
+export const PALETTE_KEYS = ['.', 'a', 'b', 'c', 'd', 'e'] as const;
+
+export interface Sprite {
+  width: number;
+  height: number;
+  frames: string[][];
+}
+
+function sprite(...frames: string[][]): Sprite {
+  return { width: frames[0]![0]!.length, height: frames[0]!.length, frames };
+}
+
+const ship = sprite([
+  '................................',
+  '.........dd.....................',
+  '........dccd....................',
+  '....bbbbccccccccccccbbbbb.......',
+  '...bccccccccccccccccccccccb.....',
+  '..bccdcdcdcdccccccccccccccccbb..',
+  '.bcccccccccccccccccccccccccccdde',
+  '..bccccccccccccccccccccccccccbb.',
+  '...bbbbccccccbbbbbbbccccccbb....',
+  '.......bccccb.......bccccb......',
+  '........bbbb.........bbbb.......',
+  '................................',
+]);
+
+const drill = sprite(
+  [
+    '....dddd....',
+    '....cccc....',
+    '...bccccb...',
+    '...bccccb...',
+    '....cccc....',
+    '....dccd....',
+    '.....cc.....',
+    '....c..c....',
+    '.....cc.....',
+    '....c..c....',
+    '.....cc.....',
+    '.....dd.....',
+  ],
+  [
+    '....dddd....',
+    '....cccc....',
+    '...bccccb...',
+    '...bccccb...',
+    '....cccc....',
+    '....dccd....',
+    '....c..c....',
+    '.....cc.....',
+    '....c..c....',
+    '.....cc.....',
+    '....c..c....',
+    '...e.dd.e...',
+  ],
+);
+
+const moonlet = sprite([
+  '.....bbbbbb.....',
+  '...bbccccccbb...',
+  '..bccccaccccdb..',
+  '.bcccaacccccccb.',
+  '.bccccccccbbccb.',
+  'bccccccccbaabccb',
+  'bcccbbcccbaabccb',
+  'bccbaabccccbbccb',
+  'bccbaabcccccccdb',
+  'bcccbbccccccccdb',
+  'bcccccccccaacccb',
+  '.bccccccccaaccb.',
+  '.bcccccccccccdb.',
+  '..bccccccccccb..',
+  '...bbccccccbb...',
+  '.....bbbbbb.....',
+]);
+
+// 12x12 crew portraits: d = hair, c = skin, a = eyes, b = mouth/uniform, e = insignia/glasses.
+const portraits: Record<string, string[]> = {
+  okonkwo: [
+    '............',
+    '....dddd....',
+    '...dddddd...',
+    '...dccccd...',
+    '...cacca....',
+    '...cccccc...',
+    '...ccbbcc...',
+    '....cccc....',
+    '.....cc.....',
+    '..bbbebbbb..',
+    '.bbbbebbbbb.',
+    '.bbbbbbbbbb.',
+  ],
+  sorensen: [
+    '............',
+    '....dddd....',
+    '...dddddd...',
+    '...cccccc...',
+    '...caccac...',
+    '...cccccc...',
+    '...dcbbcd...',
+    '....dddd....',
+    '.....dd.....',
+    '..bbbbbbbb..',
+    '.bbbbbbbbbb.',
+    '.bebbbbbbbb.',
+  ],
+  lam: [
+    '...dddddd...',
+    '..dddddddd..',
+    '..dddccddd..',
+    '..dccccccd..',
+    '..dcaccacd..',
+    '..dccccccd..',
+    '..dccbbccd..',
+    '..ddccccdd..',
+    '..dd.cc.dd..',
+    '..bbbbbbbb..',
+    '.bbbbbbbbbb.',
+    '.bbbbbbbbbb.',
+  ],
+  brandt: [
+    '............',
+    '...bbbbbb...',
+    '..bbbbbbbb..',
+    '.bbbbbbbbbb.',
+    '...caccac...',
+    '...cccccc...',
+    '...ccbbcc...',
+    '....cccc....',
+    '.....cc.....',
+    '..bbbbbbbb..',
+    '.bbbebbebbb.',
+    '.bbbbbbbbbb.',
+  ],
+  voss: [
+    '.....dd.....',
+    '....dddd....',
+    '...dddddd...',
+    '...dccccd...',
+    '...caccac...',
+    '...cccccc...',
+    '...ccbbcc...',
+    '....cccc....',
+    '.....cc.....',
+    '..eeeeeeee..',
+    '.eeebeebeee.',
+    '.eeeeeeeeee.',
+  ],
+  kane: [
+    '............',
+    '...dddddd...',
+    '...ddddddd..',
+    '...cccccc...',
+    '..eeeceeee..',
+    '...eaeeae...',
+    '...cccccc...',
+    '...cbbbbc...',
+    '....cccc....',
+    '..eeebbeee..',
+    '.eeeebbeeee.',
+    '.eeeebbeeee.',
+  ],
+  'amari-reyes': [
+    '...d.d.d....',
+    '..dddddddd..',
+    '...dddddd...',
+    '...cccccc...',
+    '...caccac...',
+    '...cccccc...',
+    '...cbbbbc...',
+    '....cccc....',
+    '.....cc.....',
+    '..bbbbbbbb..',
+    '.bbbbbbbbbb.',
+    '.bbbbbbbbbe.',
+  ],
+};
+
+export const SPRITES: Record<string, Sprite> = {
+  ship,
+  drill,
+  moonlet,
+  ...Object.fromEntries(Object.entries(portraits).map(([id, rows]) => [`crew-${id}`, sprite(rows)])),
+};
