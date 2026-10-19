@@ -3,7 +3,7 @@ import { createMission, DEFAULT_MISSION_CONFIG, type MissionState } from '../../
 import { runBeats, STORY_MIN_GAP, type Beat, type MissionContext } from '../../src/mission/story';
 import { depth } from '../../src/mission/progress';
 
-const ctx: MissionContext = { cycle: 0 };
+const ctx: MissionContext = { cycle: 0, endings: [] };
 const fresh = (patch: Partial<MissionState> = {}): MissionState => ({
   ...createMission(DEFAULT_MISSION_CONFIG, 1),
   ...patch,
@@ -61,8 +61,8 @@ describe('story engine', () => {
 
   it('gives conditions the mission context (e.g. how many contracts came before)', () => {
     const beats = [beat('veteran', ({ ctx }) => ctx.cycle > 0)];
-    expect(runBeats(fresh(), beats, { cycle: 0 }).beats.veteran).toBeUndefined();
-    expect(runBeats(fresh(), beats, { cycle: 1 }).beats.veteran).toBeDefined();
+    expect(runBeats(fresh(), beats, { cycle: 0, endings: [] }).beats.veteran).toBeUndefined();
+    expect(runBeats(fresh(), beats, { cycle: 1, endings: [] }).beats.veteran).toBeDefined();
   });
 });
 

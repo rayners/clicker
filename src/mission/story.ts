@@ -9,6 +9,8 @@ export const STORY_MIN_GAP = 20;
 export interface MissionContext {
   /** Contracts completed before this one. */
   cycle: number;
+  /** Endings reached on previous contracts. */
+  endings: readonly string[];
 }
 
 export type BeatEffect = { kind: 'setAct'; act: number } | { kind: 'setFlag'; flag: string } | { kind: 'breach' };

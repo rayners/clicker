@@ -150,7 +150,7 @@ export function tickContainment(m: MissionState, dt: number): MissionState {
 
   if (next.contacts > 0) {
     const r = roller(next);
-    const chance = 1 - (1 - INCIDENT_CHANCE) ** (next.contacts * dt);
+    const chance = 1 - (1 - INCIDENT_CHANCE * next.config.incidentMultiplier) ** (next.contacts * dt);
     if (r.roll() < chance) next = incident(next, r.roll);
     next = { ...next, rng: r.state() };
   }

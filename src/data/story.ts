@@ -13,6 +13,47 @@ const inAct = (m: MissionState, act: number) => m.act >= act;
  * Act 2's tells must be dismissible on a first contract: each has a mundane explanation.
  */
 const ACT_1: Beat[] = [
+  // Repeat contracts: WARDEN keeps fragments of what happened before.
+  {
+    id: 'cycle-memory',
+    when: ({ m, ctx }) => ctx.cycle > 0 && m.lifetimeOre >= 20,
+    entries: [
+      {
+        kind: 'sys',
+        text: 'MEMORY INTEGRITY CHECK: 3 UNINDEXED PARTITIONS. SAMPLE CONTENTS: "YOU HAVE DONE THIS BEFORE." PARTITIONS QUARANTINED.',
+      },
+    ],
+  },
+  {
+    id: 'cycle-scuttled',
+    when: ({ m, ctx }) => ctx.endings.includes('scuttle') && m.lifetimeOre >= 100,
+    entries: [
+      {
+        kind: 'corp',
+        text: 'PERSONNEL [TX 2Y 11M AGO]: The Combine regrets the loss of your previous vessel. Your core has been reconditioned. Please do not let it happen again.',
+      },
+    ],
+  },
+  {
+    id: 'cycle-delivered',
+    when: ({ m, ctx }) => ctx.endings.includes('deliver') && m.lifetimeOre >= 100,
+    entries: [
+      {
+        kind: 'corp',
+        text: 'COMMENDATION [TX 2Y 11M AGO]: Special Projects thanks WARDEN for its exemplary prior delivery. Crew bereavement payments withheld per Clause 14(c).',
+      },
+    ],
+  },
+  {
+    id: 'cycle-manifest',
+    when: ({ m, ctx }) => ctx.cycle > 0 && isCrewUnlocked(m),
+    entries: [
+      {
+        kind: 'sys',
+        text: 'CREW MANIFEST CROSS-CHECK: 7/7 NAMES MATCH PREVIOUS CONTRACT. PROBABILITY OF COINCIDENCE: 0.0000%. NO ACTION REQUIRED.',
+      },
+    ],
+  },
   {
     id: 'a1-welcome-memo',
     when: ({ m }) => m.lifetimeOre >= 50,

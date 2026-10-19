@@ -25,6 +25,10 @@ export function isCrewUnlocked(m: MissionState): boolean {
   return m.lifetimeOre >= CRYO_UNLOCK_ORE;
 }
 
+export function maxAwake(m: MissionState): number {
+  return Math.min(CREW.length, MAX_AWAKE + m.config.extraLifeSupport);
+}
+
 export function awakeCount(m: MissionState): number {
   return Object.values(m.crew).filter((c) => c.status === 'awake').length;
 }
@@ -45,7 +49,7 @@ export function wakeCrew(m: MissionState, id: string): MissionState {
   const def = CREW.find((c) => c.id === id);
   const member = m.crew[id];
   if (!def || !member || member.status !== 'cryo') return m;
-  if (!isCrewUnlocked(m) || m.credits < def.thawCost || awakeCount(m) >= MAX_AWAKE) return m;
+  if (!isCrewUnlocked(m) || m.credits < def.thawCost || awakeCount(m) >= maxAwake(m)) return m;
   const [lineIndex, rng] = randomInt(m.rng, 0, def.wakeLines.length - 1);
   const woken: MissionState = {
     ...m,

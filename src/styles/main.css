@@ -658,6 +658,72 @@ button:focus-visible {
   color: var(--phosphor-hi);
 }
 
+.arc-standing {
+  margin: 0 var(--gutter) 6px;
+  color: var(--phosphor-hi);
+  font-size: 0.9em;
+}
+
+.arc-record {
+  margin: 0;
+  padding: 0 var(--gutter) 16px;
+  list-style: none;
+}
+
+.arc-contract {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  padding: 6px 0;
+  border-bottom: 1px dotted var(--phosphor-faint);
+}
+
+.arc-detail {
+  grid-column: 1 / -1;
+  color: var(--phosphor-dim);
+  font-size: 0.8em;
+}
+
+/* ---------- terminus ---------- */
+
+.term-intro {
+  margin: 0 var(--gutter) 10px;
+  color: var(--anomaly);
+}
+
+.term-card {
+  margin: 0 var(--gutter) 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--phosphor-dim);
+  background: var(--bg-raise);
+}
+
+.term-title {
+  margin: 0 0 4px;
+  font-weight: normal;
+  color: var(--phosphor-hi);
+  letter-spacing: 0.1em;
+}
+
+.term-reward {
+  margin: 0 0 8px;
+  color: var(--phosphor-hi);
+}
+
+.term-go {
+  width: 100%;
+}
+
+.term-card.is-pending {
+  border-color: var(--danger);
+}
+
+.term-card.is-pending .term-go {
+  border-color: var(--danger);
+  color: var(--danger);
+  animation: blink 0.6s steps(1) infinite;
+}
+
 /* ---------- alert state ---------- */
 
 .stat-alert .stat-value,

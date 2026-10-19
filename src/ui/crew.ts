@@ -1,7 +1,7 @@
 import { formatNumber } from '../core/format';
 import type { Store } from '../core/store';
 import { CREW } from '../data/crew';
-import { awakeCount, crewStatus, MAX_AWAKE } from '../mission/crew';
+import { awakeCount, crewStatus, maxAwake } from '../mission/crew';
 import type { MissionState } from '../mission/state';
 import { h, setAttr, setText } from './dom';
 
@@ -56,7 +56,7 @@ export function createCrewPanel(store: Store): { el: HTMLElement; render(m: Miss
 
   function render(m: MissionState) {
     const awake = awakeCount(m);
-    setText(lifeSupport, `AWAKE ${awake}/${MAX_AWAKE}`);
+    setText(lifeSupport, `AWAKE ${awake}/${maxAwake(m)}`);
     for (const card of cards) {
       const state = m.crew[card.def.id];
       if (!state) continue;
@@ -77,7 +77,7 @@ export function createCrewPanel(store: Store): { el: HTMLElement; render(m: Miss
       } else {
         setText(card.button, `WAKE ${formatNumber(card.def.thawCost)} CR`);
         setAttr(card.button, 'aria-label', `Wake ${card.def.name} for ${formatNumber(card.def.thawCost)} credits`);
-        card.button.disabled = m.credits < card.def.thawCost || awake >= MAX_AWAKE;
+        card.button.disabled = m.credits < card.def.thawCost || awake >= maxAwake(m);
       }
     }
   }

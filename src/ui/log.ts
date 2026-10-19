@@ -2,11 +2,18 @@ import { formatClock } from '../core/format';
 import { LOG_LIMIT, type LogEntry } from '../mission/log';
 import { h } from './dom';
 
-export function createLogView(): { el: HTMLOListElement; render(entries: LogEntry[]): void } {
+export function createLogView(): { el: HTMLOListElement; render(entries: LogEntry[], contract: string): void } {
   const el = h('ol', { class: 'log', role: 'log', 'aria-live': 'polite', 'aria-label': 'Comms log' });
   let lastId = 0;
+  let currentContract = '';
 
-  function render(entries: LogEntry[]) {
+  function render(entries: LogEntry[], contract: string) {
+    // A new contract restarts log ids: start the feed over.
+    if (contract !== currentContract) {
+      currentContract = contract;
+      el.replaceChildren();
+      lastId = 0;
+    }
     const fresh = entries.filter((e) => e.id > lastId);
     if (fresh.length === 0) return;
     const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 48;

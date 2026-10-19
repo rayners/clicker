@@ -13,6 +13,10 @@ const ABSENCE_LOG_THRESHOLD = 60;
 export interface ContractRecord {
   shipName: string;
   ending: string;
+  lifetimeOre: number;
+  specimens: number;
+  crewSurvived: number;
+  duration: number;
 }
 
 /** Progress that survives prestige resets. */
@@ -50,7 +54,8 @@ export function createGame(seed: number, now: number): GameState {
 }
 
 export function tickGame(game: GameState, dt: number): GameState {
-  return { ...game, mission: tickMission(game.mission, dt, { cycle: game.profile.contractsCompleted }) };
+  const ctx = { cycle: game.profile.contractsCompleted, endings: game.profile.endingsSeen };
+  return { ...game, mission: tickMission(game.mission, dt, ctx) };
 }
 
 function simulate(game: GameState, seconds: number): GameState {

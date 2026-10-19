@@ -6,7 +6,7 @@ import { tickContainment } from './containment';
 import { runBeats, type MissionContext } from './story';
 import { STORY } from '../data/story';
 
-const NO_HISTORY: MissionContext = { cycle: 0 };
+const NO_HISTORY: MissionContext = { cycle: 0, endings: [] };
 
 export function tickMission(m: MissionState, dt: number, ctx: MissionContext = NO_HISTORY): MissionState {
   const mined = oreRate(m) * dt;

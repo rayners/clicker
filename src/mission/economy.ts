@@ -46,7 +46,7 @@ function applyEffect(result: Multipliers, e: UpgradeEffect): void {
 }
 
 function multipliers(m: MissionState): Multipliers {
-  const result: Multipliers = { click: 1, clickRateShare: 0, global: fundingMultiplier(m), refinery: 1, generator: {} };
+  const result: Multipliers = { click: 1, clickRateShare: 0, global: fundingMultiplier(m) * m.config.productionMultiplier, refinery: 1, generator: {} };
   for (const u of UPGRADES) if (m.upgrades.includes(u.id)) applyEffect(result, u.effect);
   for (const c of CREW) {
     if (c.boost.kind !== 'fatigueMultiplier' && isCrewEffective(m, c.id)) applyEffect(result, c.boost);

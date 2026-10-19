@@ -10,9 +10,9 @@ import { createUpgradesPanel, hasUpgradesToShow } from './upgrades';
 import { createCrewPanel } from './crew';
 import { createDirectivesPanel, hasDirectivesToShow } from './directives';
 import { createProjectsPanel } from './projects';
-import { createArchivePanel } from './archive';
+import { createArchivePanel, hasArchiveToShow } from './archive';
+import { createTerminusPanel } from './terminus';
 import { isSpecialProjectsUnlocked } from '../mission/containment';
-import { unlockedFiles } from '../mission/archive';
 import { isCrewUnlocked } from '../mission/crew';
 import { advanceFrame, paintAll, paintSprite, readPalette, spriteCanvas } from './sprites';
 
@@ -86,13 +86,14 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const directives = createDirectivesPanel();
   const projects = createProjectsPanel(store);
   const archive = createArchivePanel();
+  const terminus = createTerminusPanel(store);
   const panels: Panel[] = [
     {
       id: 'ops',
       label: 'OPS',
       short: 'OPS',
       el: h('section', { class: 'panel panel-ops', role: 'tabpanel', id: 'panel-ops', 'aria-labelledby': 'tab-ops' }, log.el),
-      render: (g) => log.render(g.mission.log),
+      render: (g) => log.render(g.mission.log, `${g.mission.config.shipName}:${g.mission.seed}`),
       visible: () => true,
     },
     { id: 'systems', label: 'SYSTEMS', short: 'SYS', el: systems.el, render: (g) => systems.render(g.mission), visible: () => true },
@@ -126,8 +127,16 @@ export function mountApp(root: HTMLElement, store: Store): void {
       label: 'ARCHIVE',
       short: 'ARC',
       el: archive.el,
-      render: (g) => archive.render(g.mission),
-      visible: (g) => unlockedFiles(g.mission).length > 0,
+      render: (g) => archive.render(g),
+      visible: hasArchiveToShow,
+    },
+    {
+      id: 'terminus',
+      label: 'TERMINUS',
+      short: 'END',
+      el: terminus.el,
+      render: (g) => terminus.render(g),
+      visible: (g) => g.mission.flags.includes('terminus'),
     },
   ];
 

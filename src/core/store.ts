@@ -4,6 +4,7 @@ import { sleepCrew, wakeCrew } from '../mission/crew';
 import { buyContainmentLevel, buyRig, reinforce, vent } from '../mission/containment';
 import type { MissionState } from '../mission/state';
 import { advance, type GameState } from './game';
+import { completeContract, type Ending } from './prestige';
 
 export type Action =
   | { type: 'drill' }
@@ -16,6 +17,7 @@ export type Action =
   | { type: 'reinforce' }
   | { type: 'buyContainmentLevel' }
   | { type: 'vent' }
+  | { type: 'completeContract'; ending: Ending; seed: number }
   | { type: 'tick'; dt: number };
 
 const MISSION_ACTIONS: Partial<Record<Action['type'], (m: MissionState) => MissionState>> = {
@@ -41,6 +43,8 @@ export function reduce(game: GameState, action: Action): GameState {
       return { ...game, mission: wakeCrew(game.mission, action.id) };
     case 'sleepCrew':
       return { ...game, mission: sleepCrew(game.mission, action.id) };
+    case 'completeContract':
+      return completeContract(game, action.ending, action.seed);
     case 'tick':
       return advance(game, action.dt).game;
     default:

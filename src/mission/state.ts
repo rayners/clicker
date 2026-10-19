@@ -7,16 +7,27 @@ import type { ActiveDirective, DirectiveResult } from './directives';
 export interface MissionConfig {
   shipName: string;
   targetBody: string;
+  /** Multiplies all ore output (seniority from past contracts). */
+  productionMultiplier: number;
+  /** Extra crew who can be awake at once. */
+  extraLifeSupport: number;
+  /** Scales the chance of incidents caused by loose contacts. */
+  incidentMultiplier: number;
 }
 
 export const DEFAULT_MISSION_CONFIG: MissionConfig = {
   shipName: 'MSV Calloway Reach',
   targetBody: 'LV-0919 "Tethys Minor"',
+  productionMultiplier: 1,
+  extraLifeSupport: 0,
+  incidentMultiplier: 1,
 };
 
 /** A single mission, fully self-contained and JSON-serializable. */
 export interface MissionState {
   config: MissionConfig;
+  /** The seed this mission started from; with the ship name it identifies the contract. */
+  seed: number;
   rng: number;
   elapsed: number;
   ore: number;
@@ -50,6 +61,7 @@ export interface MissionState {
 export function createMission(config: MissionConfig, seed: number): MissionState {
   const blank: MissionState = {
     config: { ...config },
+    seed,
     rng: seed,
     elapsed: 0,
     ore: 0,

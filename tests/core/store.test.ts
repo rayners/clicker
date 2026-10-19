@@ -73,3 +73,13 @@ describe('reduce: crew', () => {
     expect(reduce(awake, { type: 'sleepCrew', id: 'sorensen' }).mission.crew.sorensen!.status).toBe('cryo');
   });
 });
+
+describe('reduce: contracts', () => {
+  it('completes a contract with the given ending and seed', () => {
+    const g = createGame(1, NOW);
+    const ready = { ...g, mission: { ...g.mission, flags: ['terminus'] } };
+    const after = reduce(ready, { type: 'completeContract', ending: 'scuttle', seed: 77 });
+    expect(after.profile.contractsCompleted).toBe(1);
+    expect(after.mission.rng).toBe(77);
+  });
+});
