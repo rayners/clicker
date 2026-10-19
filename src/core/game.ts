@@ -50,7 +50,7 @@ export function createGame(seed: number, now: number): GameState {
 }
 
 export function tickGame(game: GameState, dt: number): GameState {
-  return { ...game, mission: tickMission(game.mission, dt) };
+  return { ...game, mission: tickMission(game.mission, dt, { cycle: game.profile.contractsCompleted }) };
 }
 
 function simulate(game: GameState, seconds: number): GameState {

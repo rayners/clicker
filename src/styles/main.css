@@ -219,6 +219,17 @@ button:focus-visible {
   color: var(--anomaly);
 }
 
+.log-anomaly {
+  animation: print 0.5s steps(18, end) both, tear 0.9s steps(2, end) 0.5s 2;
+}
+
+@keyframes tear {
+  50% {
+    transform: translateX(3px) skewX(-8deg);
+    opacity: 0.6;
+  }
+}
+
 @keyframes print {
   from {
     clip-path: inset(0 100% 0 0);

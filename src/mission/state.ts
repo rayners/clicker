@@ -30,6 +30,11 @@ export interface MissionState {
   directive: ActiveDirective | null;
   directiveResults: Record<string, DirectiveResult>;
   lastDirectiveAt: number | null;
+  act: number;
+  /** Story beat id -> mission time it fired. */
+  beats: Record<string, number>;
+  lastBeatAt: number | null;
+  flags: string[];
   log: LogEntry[];
   nextLogId: number;
 }
@@ -50,6 +55,10 @@ export function createMission(config: MissionConfig, seed: number): MissionState
     directive: null,
     directiveResults: {},
     lastDirectiveAt: null,
+    act: 1,
+    beats: {},
+    lastBeatAt: null,
+    flags: [],
     log: [],
     nextLogId: 1,
   };

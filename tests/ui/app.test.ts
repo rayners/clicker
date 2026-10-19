@@ -114,3 +114,15 @@ describe('navigation', () => {
     expect(root.dataset.tab).toBe('systems');
   });
 });
+
+describe('story presentation', () => {
+  it('shows shaft depth in the status area', () => {
+    setup((g) => ({ ...g, mission: { ...g.mission, lifetimeOre: 1e5 } }));
+    expect(status(/shaft depth/i).textContent).toBe('1,000 M');
+  });
+
+  it('marks the current act on the shell so the theme can shift', () => {
+    setup((g) => ({ ...g, mission: { ...g.mission, act: 2 } }));
+    expect(root.dataset.act).toBe('2');
+  });
+});

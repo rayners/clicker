@@ -2,6 +2,7 @@ import { formatClock, formatNumber } from '../core/format';
 import type { GameState } from '../core/game';
 import type { Store } from '../core/store';
 import { oreRate, refineryCapacity } from '../mission/economy';
+import { depth } from '../mission/progress';
 import { h, setText } from './dom';
 import { createLogView } from './log';
 import { createSystemsPanel } from './systems';
@@ -40,11 +41,12 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const rate = stat('ORE/S', 'Ore per second');
   const credits = stat('CREDITS', 'Credits');
   const refinery = stat('REFINE/S', 'Refinery throughput');
+  const shaft = stat('DEPTH', 'Shaft depth');
   const status = h(
     'section',
     { class: 'status', 'aria-label': 'Ship status' },
     h('div', { class: 'status-target' }, spriteCanvas('moonlet', 'status-moon'), h('span', { class: 'status-target-name' })),
-    h('dl', { class: 'stats' }, ore.el, credits.el, rate.el, refinery.el),
+    h('dl', { class: 'stats' }, ore.el, credits.el, rate.el, refinery.el, shaft.el),
   );
   const targetName = status.querySelector('.status-target-name')!;
 
@@ -143,6 +145,8 @@ export function mountApp(root: HTMLElement, store: Store): void {
     setText(credits.value, formatNumber(m.credits));
     setText(rate.value, formatNumber(oreRate(m)));
     setText(refinery.value, formatNumber(refineryCapacity(m)));
+    setText(shaft.value, `${depth(m).toLocaleString('en-US')} M`);
+    if (root.dataset.act !== String(m.act)) root.dataset.act = String(m.act);
     panels.forEach((p, i) => {
       const visible = p.visible(game);
       tabs[i]!.hidden = !visible;
