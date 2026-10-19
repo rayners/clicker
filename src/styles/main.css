@@ -168,9 +168,236 @@ button:focus-visible {
 
 .stats {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px 12px;
+  margin: 6px 0 0;
+  font-size: 0.85em;
+}
+
+.stats .stat-value {
+  font-size: 1.2em;
+}
+
+.stat[hidden] {
+  display: none;
+}
+
+/* ---------- production flow: the input/output balance is the headline ---------- */
+
+.flow-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.flow-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 2px 3px;
+  border: 1px solid var(--phosphor-faint);
+  line-height: 1;
+  transition: background 0.3s, color 0.3s;
+}
+
+.flow-label,
+.flow-unit {
+  font-size: 0.7em;
+  letter-spacing: 0.12em;
+  color: var(--phosphor-dim);
+}
+
+.flow-value {
+  font-size: 1.75em;
+  color: var(--phosphor-hi);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.flow-arrow {
+  align-self: center;
+  padding: 0 3px;
+  color: var(--phosphor-dim);
+  animation: flow-pulse 1.2s steps(2, end) infinite;
+}
+
+@keyframes flow-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* The stage holding production back is inverted, so the next thing to buy is obvious. */
+.flow[data-bottleneck='extraction'] .flow-extract,
+.flow[data-bottleneck='refinery'] .flow-refine {
+  border-color: var(--phosphor);
+  box-shadow: inset 0 0 0 1px var(--phosphor), 0 0 10px var(--glow);
+}
+
+.flow[data-bottleneck='refinery'] .flow-refine {
+  background: var(--phosphor);
+  text-shadow: none;
+}
+
+.flow[data-bottleneck='refinery'] .flow-refine * {
+  color: var(--bg);
+}
+
+.flow-meter {
+  position: relative;
+  height: 10px;
+  margin-top: 5px;
+  border: 1px solid var(--phosphor-dim);
+  background: repeating-linear-gradient(to right, transparent 0 7px, var(--phosphor-faint) 7px 8px);
+}
+
+.flow-fill {
+  display: block;
+  height: 100%;
+  background: repeating-linear-gradient(to right, var(--phosphor) 0 6px, transparent 6px 8px);
+  box-shadow: 0 0 6px var(--glow);
+  transition: width 0.4s steps(6, end);
+}
+
+.flow[data-bottleneck='refinery'] .flow-fill {
+  animation: overload 0.8s steps(2, end) infinite;
+}
+
+@keyframes overload {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.flow-note {
+  margin: 3px 0 0;
+  font-size: 0.75em;
+  letter-spacing: 0.06em;
+  color: var(--phosphor-dim);
+  text-align: center;
+}
+
+.flow[data-bottleneck='refinery'] .flow-note {
+  color: var(--phosphor-hi);
+}
+
+.flow-extract.is-bumped {
+  animation: bump 0.6s ease-out;
+}
+
+@keyframes bump {
+  0% {
+    background: var(--phosphor);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+.rate-delta {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  z-index: 2;
+  pointer-events: none;
+  white-space: nowrap;
+  font-size: 1.05em;
+  color: var(--phosphor-hi);
+  background: var(--bg);
+  padding: 0 4px;
+  border: 1px solid var(--phosphor);
+  animation: delta-rise 1.4s ease-out forwards;
+}
+
+.rate-delta.is-loss {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+@keyframes delta-rise {
+  0% {
+    transform: translate(-50%, 6px);
+    opacity: 0;
+  }
+  15% {
+    transform: translate(-50%, -4px);
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -22px);
+    opacity: 0;
+  }
+}
+
+/* ---------- operations monitor: automation visibly working ---------- */
+
+.monitor {
+  flex: none;
+  padding: 6px var(--gutter);
+  border-bottom: 1px solid var(--phosphor-faint);
+  font-size: 0.8em;
+}
+
+.mon-list {
+  display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px 16px;
+  gap: 2px 14px;
   margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mon-row {
+  display: grid;
+  grid-template-columns: auto auto minmax(16px, 1fr) auto;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.mon-count {
+  color: var(--phosphor-dim);
+}
+
+.mon-out {
+  color: var(--phosphor-hi);
+  font-variant-numeric: tabular-nums;
+}
+
+.mon-bar {
+  height: 7px;
+  border: 1px solid var(--phosphor-faint);
+}
+
+.mon-bar i {
+  display: block;
+  height: 100%;
+  background: var(--phosphor);
+  box-shadow: 0 0 4px var(--glow);
+  animation: work-cycle var(--period, 1.5s) steps(8, end) infinite;
+}
+
+@keyframes work-cycle {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.mon-idle {
+  margin: 0;
+  color: var(--phosphor-dim);
+  animation: flow-pulse 2s steps(2, end) infinite;
+}
+
+.mon-idle[hidden] {
+  display: none;
 }
 
 .stat {
@@ -316,6 +543,15 @@ button:focus-visible {
   background: var(--phosphor);
   color: var(--bg);
   text-shadow: none;
+}
+
+.drill-tick.is-auto {
+  font-size: 0.65em;
+  color: var(--phosphor-dim);
+}
+
+.drill[data-auto='on'] .drill-label::after {
+  content: ' ] · AUTO';
 }
 
 .drill-tick {
@@ -921,6 +1157,39 @@ button:focus-visible {
   .stats {
     grid-template-columns: 1fr;
     gap: 10px;
+    margin-top: 16px;
+    font-size: 1em;
+  }
+
+  .flow-row {
+    grid-template-columns: 1fr;
+  }
+
+  .flow-cell {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 8px;
+  }
+
+  .flow-label {
+    flex: 1;
+  }
+
+  .flow-arrow {
+    justify-self: center;
+    transform: rotate(90deg);
+    padding: 0;
+    line-height: 0.9;
+  }
+
+  .monitor {
+    font-size: 0.9em;
+  }
+
+  .mon-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .status-target {

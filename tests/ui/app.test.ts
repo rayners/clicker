@@ -8,6 +8,8 @@ import { mountApp } from '../../src/ui/app';
 import { GENERATORS } from '../../src/data/generators';
 import { appendLog } from '../../src/mission/log';
 import { depth } from '../../src/mission/progress';
+import { creditRate, generatorRate, oreRate, refineryCapacity } from '../../src/mission/economy';
+import { formatNumber } from '../../src/core/format';
 
 let store: Store;
 let root: HTMLElement;
@@ -125,5 +127,94 @@ describe('story presentation', () => {
   it('marks the current act on the shell so the theme can shift', () => {
     setup((g) => ({ ...g, mission: { ...g.mission, act: 2 } }));
     expect(root.dataset.act).toBe('2');
+  });
+});
+
+describe('production flow readout (extraction -> refinery -> income)', () => {
+  const flow = () => within(screen.getByRole('region', { name: /production flow/i }));
+  const withDrones = (n: number, patch = {}) => (g: ReturnType<typeof createGame>) => ({
+    ...g,
+    mission: { ...g.mission, generators: { ...g.mission.generators, [GENERATORS[0]!.id]: n }, ...patch },
+  });
+
+  it('headlines ore per second, refinery throughput and income', () => {
+    setup(withDrones(10));
+    const m = store.getState().mission;
+    expect(flow().getByLabelText(/ore per second/i).textContent).toBe(formatNumber(oreRate(m)));
+    expect(flow().getByLabelText(/refinery throughput/i).textContent).toBe(formatNumber(refineryCapacity(m)));
+    expect(flow().getByLabelText(/income/i).textContent).toBe(formatNumber(creditRate(m)));
+  });
+
+  it('shows how much refinery capacity is spare while extraction is the limit', () => {
+    setup(withDrones(10));
+    expect(flow().getByRole('meter', { name: /refinery load/i }).getAttribute('aria-valuenow')).toBe('20');
+    expect(flow().getByText(/80% SPARE CAPACITY/i)).toBeTruthy();
+  });
+
+  it('warns that ore is backing up when the refinery is the bottleneck', () => {
+    setup(withDrones(200));
+    expect(flow().getByRole('meter', { name: /refinery load/i }).getAttribute('aria-valuenow')).toBe('100');
+    expect(flow().getByText(/REFINERY AT CAPACITY/i)).toBeTruthy();
+    expect(screen.getByRole('region', { name: /production flow/i }).dataset.bottleneck).toBe('refinery');
+  });
+
+  it('calls out the gain when a purchase raises ore per second', async () => {
+    const user = setup((g) => ({ ...g, mission: { ...g.mission, credits: 100 } }));
+    await user.click(screen.getByRole('tab', { name: /systems/i }));
+    await user.click(screen.getByRole('button', { name: new RegExp(`acquire ${GENERATORS[0]!.name}`, 'i') }));
+    expect(root.querySelector('.rate-delta')?.textContent).toBe(`+${formatNumber(GENERATORS[0]!.baseRate)} ORE/S`);
+  });
+
+  it('does not call out changes on the first render', () => {
+    setup(withDrones(10));
+    expect(root.querySelector('.rate-delta')).toBeNull();
+  });
+});
+
+describe('operations monitor (automation at a glance)', () => {
+  const monitor = () => screen.getByRole('region', { name: /operations monitor/i });
+
+  it('says no automation is running at the start', () => {
+    setup();
+    expect(monitor().textContent).toMatch(/NO AUTOMATED SYSTEMS/);
+  });
+
+  it('lists each owned extraction system with its count and output', () => {
+    setup((g) => ({ ...g, mission: { ...g.mission, generators: { ...g.mission.generators, drone: 12, auger: 3 } } }));
+    const rows = within(monitor()).getAllByRole('listitem');
+    expect(rows.map((r) => r.dataset.system)).toEqual(['drone', 'auger']);
+    const m = store.getState().mission;
+    expect(rows[0]!.textContent).toContain('×12');
+    expect(rows[0]!.textContent).toContain(`${formatNumber(12 * generatorRate(m, GENERATORS[0]!))}/S`);
+  });
+
+  it("shows WARDEN's autocycle once installed", () => {
+    setup((g) => ({ ...g, mission: { ...g.mission, upgrades: ['warden-autocycle'] } }));
+    const row = within(monitor()).getAllByRole('listitem')[0]!;
+    expect(row.dataset.system).toBe('autocycle');
+    expect(row.textContent).toContain('1/S');
+  });
+});
+
+describe('autocycle feedback on the drill', () => {
+  it('marks the drill as automated and fires visible cycles as time passes', () => {
+    setup((g) => ({ ...g, mission: { ...g.mission, upgrades: ['warden-autocycle'] } }));
+    const drill = screen.getByRole('button', { name: /execute drill cycle/i });
+    expect(drill.dataset.auto).toBe('on');
+    store.dispatch({ type: 'tick', dt: 1.1 });
+    expect(drill.querySelector('.drill-tick')).toBeTruthy();
+  });
+
+  it('is manual-only before the upgrade', () => {
+    setup();
+    expect(screen.getByRole('button', { name: /execute drill cycle/i }).dataset.auto).toBe('off');
+  });
+});
+
+describe('drill press feedback', () => {
+  it('shows how much ore each press actually extracted', async () => {
+    const user = setup((g) => ({ ...g, mission: { ...g.mission, upgrades: ['tungsten-bits'] } }));
+    await user.click(screen.getByRole('button', { name: /execute drill cycle/i }));
+    expect(root.querySelector('.drill-tick')?.textContent).toBe('+2');
   });
 });

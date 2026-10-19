@@ -1,6 +1,8 @@
 export interface GeneratorDef {
   id: string;
   name: string;
+  /** For the narrow operations monitor. */
+  short: string;
   description: string;
   baseCost: number;
   /** Ore per second per unit. */
@@ -11,6 +13,7 @@ export const GENERATORS: readonly GeneratorDef[] = [
   {
     id: 'drone',
     name: 'SURVEY DRONE',
+    short: 'DRONES',
     description: 'Kessler-Amari SD-4 "Prospector". Skims surface regolith. Cheerful status lights.',
     baseCost: 15,
     baseRate: 0.1,
@@ -18,6 +21,7 @@ export const GENERATORS: readonly GeneratorDef[] = [
   {
     id: 'auger',
     name: 'AUGER RIG',
+    short: 'AUGERS',
     description: 'Tripod-mounted rotary auger. Bolts straight into the crust.',
     baseCost: 120,
     baseRate: 0.7,
@@ -25,6 +29,7 @@ export const GENERATORS: readonly GeneratorDef[] = [
   {
     id: 'crawler',
     name: 'CRAWLER EXCAVATOR',
+    short: 'CRAWLERS',
     description: 'Tracked strip-miner. Leaves long, straight scars across the plain.',
     baseCost: 1_100,
     baseRate: 5,
@@ -32,6 +37,7 @@ export const GENERATORS: readonly GeneratorDef[] = [
   {
     id: 'massdriver',
     name: 'MASS DRIVER',
+    short: 'MASS DRV',
     description: 'Magnetic rail. Flings ore canisters up to the Reach in low gravity.',
     baseCost: 12_000,
     baseRate: 40,
@@ -39,6 +45,7 @@ export const GENERATORS: readonly GeneratorDef[] = [
   {
     id: 'seismic',
     name: 'SEISMIC CHARGE ARRAY',
+    short: 'SEISMIC',
     description: 'Shaped charges fracture the deep strata. Readings come back... textured.',
     baseCost: 130_000,
     baseRate: 260,
@@ -46,6 +53,7 @@ export const GENERATORS: readonly GeneratorDef[] = [
   {
     id: 'bore',
     name: 'DEEP-CORE BORE',
+    short: 'BORES',
     description: 'Sinks a shaft kilometres down. Corporate has asked for core samples.',
     baseCost: 1_400_000,
     baseRate: 1_400,
@@ -53,6 +61,7 @@ export const GENERATORS: readonly GeneratorDef[] = [
   {
     id: 'habitat',
     name: 'SUBSURFACE HABITAT',
+    short: 'HABITATS',
     description: 'Pressurised work module at depth. The walls stay warm without heating.',
     baseCost: 20_000_000,
     baseRate: 7_800,
@@ -60,6 +69,7 @@ export const GENERATORS: readonly GeneratorDef[] = [
   {
     id: 'abyssal',
     name: 'ABYSSAL SHAFT',
+    short: 'ABYSSAL',
     description: 'Do not record what the shaft reaches. Per directive.',
     baseCost: 330_000_000,
     baseRate: 44_000,

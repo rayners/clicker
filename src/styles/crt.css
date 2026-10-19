@@ -60,8 +60,16 @@
   .masthead,
   .status-moon,
   .log-entry,
-  .drill-tick {
+  .drill-tick,
+  .flow-arrow,
+  .flow-fill,
+  .mon-bar i,
+  .mon-idle {
     animation: none;
+  }
+
+  .mon-bar i {
+    width: 100%;
   }
 }
 
@@ -71,4 +79,9 @@
 .shell[data-motion='reduced'] *,
 .shell[data-motion='reduced'] .masthead {
   animation: none !important;
+}
+
+/* Without motion the work-cycle bars read as "running" rather than empty. */
+.shell[data-motion='reduced'] .mon-bar i {
+  width: 100%;
 }

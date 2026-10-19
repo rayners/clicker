@@ -90,10 +90,15 @@ function generatorOutput(m: MissionState): number {
   return GENERATORS.reduce((sum, g) => sum + (m.generators[g.id] ?? 0) * generatorRate(m, g), 0);
 }
 
-/** All automated extraction: generators plus WARDEN's own drill cycles (drill-head upgrades only, no telemetry share). */
-export function oreRate(m: MissionState): number {
+/** Ore per second from WARDEN's own drill cycles: drill-head upgrades apply, the telemetry share does not. */
+export function autoDrillOutput(m: MissionState): number {
   const mult = multipliers(m);
-  return generatorOutput(m) + mult.autoDrill * BASE_CLICK * mult.click;
+  return mult.autoDrill * BASE_CLICK * mult.click;
+}
+
+/** All automated extraction: generators plus WARDEN's own drill cycles. */
+export function oreRate(m: MissionState): number {
+  return generatorOutput(m) + autoDrillOutput(m);
 }
 
 /** Credits per second: whatever the refinery can process, from the hopper plus fresh extraction. */

@@ -1,10 +1,12 @@
 import { formatClock, formatNumber } from '../core/format';
 import type { GameState } from '../core/game';
 import type { Store } from '../core/store';
-import { oreRate, refineryCapacity } from '../mission/economy';
+import { autoDrillOutput, autoDrillRate, clickPower } from '../mission/economy';
 import { depth } from '../mission/progress';
 import { h, setText } from './dom';
 import { createLogView } from './log';
+import { createFlow } from './flow';
+import { createMonitor } from './monitor';
 import { createSystemsPanel } from './systems';
 import { createUpgradesPanel, hasUpgradesToShow } from './upgrades';
 import { createCrewPanel } from './crew';
@@ -21,6 +23,8 @@ import { advanceFrame, paintAll, paintSprite, readPalette, spriteCanvas } from '
 const SPRITE_CORRUPTION: Record<number, number> = { 1: 0, 2: 0, 3: 0.15, 4: 0.45 };
 const GLITCH_INTERVAL = 1.5;
 const TRACKER_PING_INTERVAL = 2.5;
+/** Visible autocycle presses are capped so high rates don't flood the drill with ticks. */
+const MAX_AUTO_TICKS_PER_SECOND = 4;
 
 interface Panel {
   id: string;
@@ -58,17 +62,18 @@ export function mountApp(root: HTMLElement, store: Store): void {
   );
 
   const ore = stat('ORE', 'Ore');
-  const rate = stat('ORE/S', 'Ore per second');
   const credits = stat('CREDITS', 'Credits');
-  const refinery = stat('REFINE/S', 'Refinery throughput');
   const shaft = stat('DEPTH', 'Shaft depth');
   const contacts = stat('CONTACTS', 'Unknown contacts');
   contacts.el.classList.add('stat-alert');
+  ore.el.querySelector('.stat-label')!.textContent = 'ORE HOPPER';
+  const flow = createFlow();
   const status = h(
     'section',
     { class: 'status', 'aria-label': 'Ship status' },
     h('div', { class: 'status-target' }, spriteCanvas('moonlet', 'status-moon'), h('span', { class: 'status-target-name' })),
-    h('dl', { class: 'stats' }, ore.el, credits.el, rate.el, refinery.el, shaft.el, contacts.el),
+    flow.el,
+    h('dl', { class: 'stats' }, ore.el, credits.el, shaft.el, contacts.el),
   );
   const targetName = status.querySelector('.status-target-name')!;
 
@@ -77,9 +82,10 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const drill = h('button', { class: 'drill', type: 'button' }, drillBit, h('span', { class: 'drill-label' }, 'EXECUTE DRILL CYCLE'));
   drill.setAttribute('aria-label', 'Execute drill cycle');
   const drillOnce = () => {
+    const power = clickPower(store.getState().mission);
     store.dispatch({ type: 'drill' });
     sound.play('click');
-    spawnTick(drill);
+    spawnTick(drill, `+${formatNumber(power)}`);
     advanceFrame(drillBit);
     paintSprite(drillBit, palette);
   };
@@ -94,6 +100,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
   // Outside the panels so it stays reachable on phones whichever tab is open.
   const drillBay = h('div', { class: 'drill-bay' }, drill);
 
+  const monitor = createMonitor();
   const systems = createSystemsPanel(store);
   const upgrades = createUpgradesPanel(store);
   const crew = createCrewPanel(store);
@@ -106,8 +113,9 @@ export function mountApp(root: HTMLElement, store: Store): void {
       id: 'ops',
       label: 'OPS',
       short: 'OPS',
-      el: h('section', { class: 'panel panel-ops', role: 'tabpanel', id: 'panel-ops', 'aria-labelledby': 'tab-ops' }, log.el),
+      el: h('section', { class: 'panel panel-ops', role: 'tabpanel', id: 'panel-ops', 'aria-labelledby': 'tab-ops' }, monitor.el, log.el),
       render: (g) => {
+        monitor.render(g.mission);
         const fresh = log.render(g.mission.log, `${g.mission.config.shipName}:${g.mission.seed}`);
         const last = fresh[fresh.length - 1];
         if (last) sound.play(cueForLog(last.kind));
@@ -192,6 +200,8 @@ export function mountApp(root: HTMLElement, store: Store): void {
   let paintedAct = 0;
   let lastGlitch = -Infinity;
   let lastPing = -Infinity;
+  let lastElapsed: number | null = null;
+  let autoClock = 0;
 
   function render(game: GameState) {
     const m = game.mission;
@@ -200,8 +210,8 @@ export function mountApp(root: HTMLElement, store: Store): void {
     setText(clock, `T+${formatClock(m.elapsed)}`);
     setText(ore.value, formatNumber(m.ore));
     setText(credits.value, formatNumber(m.credits));
-    setText(rate.value, formatNumber(oreRate(m)));
-    setText(refinery.value, formatNumber(refineryCapacity(m)));
+    flow.render(game);
+    autoCycle(m);
     setText(shaft.value, `${depth(m).toLocaleString('en-US')} M`);
     if (root.dataset.act !== String(m.act)) root.dataset.act = String(m.act);
     const motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
@@ -232,6 +242,24 @@ export function mountApp(root: HTMLElement, store: Store): void {
     });
   }
 
+  /** WARDEN's autocycle visibly presses the drill on its own. */
+  function autoCycle(m: GameState['mission']) {
+    const cycles = autoDrillRate(m);
+    const auto = cycles > 0 ? 'on' : 'off';
+    if (drill.dataset.auto !== auto) drill.dataset.auto = auto;
+    const dt = lastElapsed === null || m.elapsed < lastElapsed ? 0 : m.elapsed - lastElapsed;
+    lastElapsed = m.elapsed;
+    if (cycles === 0) return;
+    const interval = 1 / Math.min(cycles, MAX_AUTO_TICKS_PER_SECOND);
+    autoClock += dt;
+    if (autoClock < interval) return;
+    autoClock = Math.min(autoClock - interval, interval);
+    const perPress = autoDrillOutput(m) * interval;
+    spawnTick(drill, `+${formatNumber(perPress)}`, 'drill-tick is-auto');
+    advanceFrame(drillBit);
+    paintSprite(drillBit, palette);
+  }
+
   /** Sprites re-tint when the act changes the palette, and glitch intermittently from act 3 on. */
   function repaintSprites(act: number, elapsed: number) {
     const corruption = SPRITE_CORRUPTION[act] ?? 0.5;
@@ -250,8 +278,8 @@ export function mountApp(root: HTMLElement, store: Store): void {
   render(store.getState());
 }
 
-function spawnTick(anchor: HTMLElement) {
-  const tick = h('span', { class: 'drill-tick', 'aria-hidden': 'true', style: `--x:${Math.round(Math.random() * 60 - 30)}px` }, '+1');
+function spawnTick(anchor: HTMLElement, text: string, cls = 'drill-tick') {
+  const tick = h('span', { class: cls, 'aria-hidden': 'true', style: `--x:${Math.round(Math.random() * 60 - 30)}px` }, text);
   anchor.append(tick);
   setTimeout(() => tick.remove(), 700);
 }

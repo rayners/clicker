@@ -28,3 +28,12 @@ describe('generator table', () => {
     }
   });
 });
+
+describe('generator short names', () => {
+  it('fit a narrow phone monitor row', () => {
+    for (const g of GENERATORS) {
+      expect(g.short.length).toBeGreaterThan(0);
+      expect(g.short.length).toBeLessThanOrEqual(8);
+    }
+  });
+});
