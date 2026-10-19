@@ -1,9 +1,10 @@
 import { CREW } from '../data/crew';
 import { randomInt } from '../core/rng';
 import { appendLog } from './log';
-import type { MissionState } from './state';
+import type { MissionCore } from './state';
 
-export const CRYO_UNLOCK_ORE = 500;
+/** Lifetime credits before the cryo bay opens. Credits are common to every scenario. */
+export const CRYO_UNLOCK_CREDITS = 500;
 export const MAX_AWAKE = 3;
 /** Seconds awake to go from rested to exhausted. */
 export const FATIGUE_SECONDS = 20 * 60;
@@ -21,19 +22,19 @@ export function createCrewState(): Record<string, CrewMemberState> {
   return Object.fromEntries(CREW.map((c) => [c.id, { status: 'cryo', fatigue: 0 }]));
 }
 
-export function isCrewUnlocked(m: MissionState): boolean {
-  return m.lifetimeOre >= CRYO_UNLOCK_ORE;
+export function isCrewUnlocked(m: MissionCore): boolean {
+  return m.lifetimeCredits >= CRYO_UNLOCK_CREDITS;
 }
 
-export function maxAwake(m: MissionState): number {
+export function maxAwake(m: MissionCore): number {
   return Math.min(CREW.length, MAX_AWAKE + m.config.extraLifeSupport);
 }
 
-export function awakeCount(m: MissionState): number {
+export function awakeCount(m: MissionCore): number {
   return Object.values(m.crew).filter((c) => c.status === 'awake').length;
 }
 
-export function crewStatus(m: MissionState, id: string): 'cryo' | 'awake' | 'exhausted' | 'lost' {
+export function crewStatus(m: MissionCore, id: string): 'cryo' | 'awake' | 'exhausted' | 'lost' {
   const c = m.crew[id];
   if (!c || c.status === 'cryo') return 'cryo';
   if (c.status === 'lost') return 'lost';
@@ -41,17 +42,17 @@ export function crewStatus(m: MissionState, id: string): 'cryo' | 'awake' | 'exh
 }
 
 /** Awake and not exhausted: their boost applies. */
-export function isCrewEffective(m: MissionState, id: string): boolean {
+export function isCrewEffective(m: MissionCore, id: string): boolean {
   return crewStatus(m, id) === 'awake';
 }
 
-export function wakeCrew(m: MissionState, id: string): MissionState {
+export function wakeCrew<M extends MissionCore>(m: M, id: string): M {
   const def = CREW.find((c) => c.id === id);
   const member = m.crew[id];
   if (!def || !member || member.status !== 'cryo') return m;
   if (!isCrewUnlocked(m) || m.credits < def.thawCost || awakeCount(m) >= maxAwake(m)) return m;
   const [lineIndex, rng] = randomInt(m.rng, 0, def.wakeLines.length - 1);
-  const woken: MissionState = {
+  const woken: M = {
     ...m,
     rng,
     credits: m.credits - def.thawCost,
@@ -60,23 +61,20 @@ export function wakeCrew(m: MissionState, id: string): MissionState {
   return appendLog(woken, 'crew', `${def.callsign}: "${def.wakeLines[lineIndex]}"`);
 }
 
-export function sleepCrew(m: MissionState, id: string): MissionState {
+export function sleepCrew<M extends MissionCore>(m: M, id: string): M {
   const member = m.crew[id];
   if (!member || member.status !== 'awake') return m;
   return { ...m, crew: { ...m.crew, [id]: { ...member, status: 'cryo' } } };
 }
 
-function fatigueMultiplier(m: MissionState): number {
-  return CREW.reduce(
-    (mult, c) => (c.boost.kind === 'fatigueMultiplier' && isCrewEffective(m, c.id) ? mult * c.boost.value : mult),
-    1,
-  );
+function fatigueMultiplier(m: MissionCore): number {
+  return CREW.reduce((mult, c) => (c.fatigueRelief !== undefined && isCrewEffective(m, c.id) ? mult * c.fatigueRelief : mult), 1);
 }
 
-export function tickCrew(m: MissionState, dt: number): MissionState {
+export function tickCrew<M extends MissionCore>(m: M, dt: number): M {
   const gain = (dt / FATIGUE_SECONDS) * MAX_FATIGUE * fatigueMultiplier(m);
   const loss = (dt / RECOVERY_SECONDS) * MAX_FATIGUE;
-  let next: MissionState = { ...m, crew: { ...m.crew } };
+  let next: M = { ...m, crew: { ...m.crew } };
   for (const def of CREW) {
     const c = m.crew[def.id];
     if (!c) continue;

@@ -2,7 +2,7 @@ import { buyGenerator, buyRefinery, drill } from '../mission/extraction/economy'
 import { buyUpgrade } from '../mission/extraction/upgrades';
 import { sleepCrew, wakeCrew } from '../mission/crew';
 import { buyContainmentLevel, buyRig, reinforce, vent } from '../mission/organism/containment';
-import type { MissionState } from '../mission/state';
+import { isExtraction, isOrganism, type MissionState, type OrganismMission } from '../mission/state';
 import { advance, createGame, type GameState, type Settings } from './game';
 import { completeContract, type Ending } from './prestige';
 
@@ -22,25 +22,31 @@ export type Action =
   | { type: 'hardReset'; seed: number; now: number }
   | { type: 'tick'; dt: number };
 
+/** Horror actions only apply to missions running that horror. */
+const organism = (f: (m: OrganismMission) => OrganismMission) => (m: MissionState) => (isOrganism(m) ? f(m) : m);
+
 const MISSION_ACTIONS: Partial<Record<Action['type'], (m: MissionState) => MissionState>> = {
-  buyRig,
-  reinforce,
-  buyContainmentLevel,
-  vent,
+  buyRig: organism(buyRig),
+  reinforce: organism(reinforce),
+  buyContainmentLevel: organism(buyContainmentLevel),
+  vent: organism(vent),
 };
+
+const extraction = (game: GameState, f: (m: Extract<MissionState, { scenario: 'extraction' }>) => MissionState): GameState =>
+  isExtraction(game.mission) ? { ...game, mission: f(game.mission) } : game;
 
 export function reduce(game: GameState, action: Action): GameState {
   const simple = MISSION_ACTIONS[action.type];
   if (simple) return { ...game, mission: simple(game.mission) };
   switch (action.type) {
     case 'drill':
-      return { ...game, mission: drill(game.mission) };
+      return extraction(game, drill);
     case 'buyGenerator':
-      return { ...game, mission: buyGenerator(game.mission, action.id) };
+      return extraction(game, (m) => buyGenerator(m, action.id));
     case 'buyRefinery':
-      return { ...game, mission: buyRefinery(game.mission) };
+      return extraction(game, buyRefinery);
     case 'buyUpgrade':
-      return { ...game, mission: buyUpgrade(game.mission, action.id) };
+      return extraction(game, (m) => buyUpgrade(m, action.id));
     case 'wakeCrew':
       return { ...game, mission: wakeCrew(game.mission, action.id) };
     case 'sleepCrew':

@@ -67,7 +67,7 @@ describe('reduce: upgrades', () => {
 describe('reduce: crew', () => {
   it('wakes and sleeps crew', () => {
     const g = createGame(1, NOW);
-    const rich = { ...g, mission: { ...g.mission, credits: 1e6, lifetimeOre: 1e6 } };
+    const rich = { ...g, mission: { ...g.mission, credits: 1e6, lifetimeCredits: 1e6 } };
     const awake = reduce(rich, { type: 'wakeCrew', id: 'sorensen' });
     expect(awake.mission.crew.sorensen!.status).toBe('awake');
     expect(reduce(awake, { type: 'sleepCrew', id: 'sorensen' }).mission.crew.sorensen!.status).toBe('cryo');

@@ -17,6 +17,7 @@ import { createTerminusPanel } from './terminus';
 import { createSettings } from './settings';
 import { createSound, cueForLog } from './sound';
 import { isSpecialProjectsUnlocked } from '../mission/organism/containment';
+import { isOrganism } from '../mission/state';
 import { isCrewUnlocked } from '../mission/crew';
 import { advanceFrame, paintAll, paintSprite, readPalette, spriteCanvas } from './sprites';
 
@@ -145,8 +146,8 @@ export function mountApp(root: HTMLElement, store: Store): void {
       label: 'SPECIAL PROJECTS',
       short: 'S.P.',
       el: projects.el,
-      render: (g) => projects.render(g.mission),
-      visible: (g) => isSpecialProjectsUnlocked(g.mission),
+      render: (g) => isOrganism(g.mission) && projects.render(g.mission),
+      visible: (g) => isOrganism(g.mission) && isSpecialProjectsUnlocked(g.mission),
     },
     {
       id: 'archive',
@@ -220,11 +221,12 @@ export function mountApp(root: HTMLElement, store: Store): void {
     settings.render(game);
     const tracking = m.flags.includes('tracker');
     contacts.el.hidden = !tracking;
-    setText(contacts.value, String(m.contacts));
-    const alert = String(m.contacts > 0);
+    const loose = isOrganism(m) ? m.contacts : 0;
+    setText(contacts.value, String(loose));
+    const alert = String(loose > 0);
     if (root.dataset.alert !== alert) root.dataset.alert = alert;
     repaintSprites(m.act, m.elapsed);
-    if (m.contacts > 0 && m.elapsed - lastPing >= TRACKER_PING_INTERVAL) {
+    if (loose > 0 && m.elapsed - lastPing >= TRACKER_PING_INTERVAL) {
       lastPing = m.elapsed;
       sound.play('ping');
     }

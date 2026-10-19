@@ -1,6 +1,7 @@
-import { createMission, DEFAULT_MISSION_CONFIG, type MissionState, type ScenarioId } from '../mission/state';
+import { createMission, DEFAULT_MISSION_CONFIG, type MissionOf, type MissionState, type ScenarioId } from '../mission/state';
 import { tickMission } from '../mission/tick';
 import { appendLog } from '../mission/log';
+import { scenarioOf } from '../mission/registry';
 import { formatDuration, formatNumber } from './format';
 
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
@@ -61,7 +62,8 @@ export function createProfile(): Profile {
   };
 }
 
-export function createGame(seed: number, now: number): GameState {
+/** A brand-new game starts on the default contract: extraction, with the organism horror. */
+export function createGame(seed: number, now: number): GameState & { mission: MissionOf<'extraction', 'organism'> } {
   return {
     version: GAME_VERSION,
     savedAt: now,
@@ -90,9 +92,11 @@ function simulateAbsence(game: GameState, gapSeconds: number): { game: GameState
   const elapsed = Math.min(gapSeconds, OFFLINE_CAP_SECONDS);
   let g = simulate(game, elapsed);
   if (elapsed >= ABSENCE_LOG_THRESHOLD) {
-    const ore = g.mission.lifetimeOre - game.mission.lifetimeOre;
+    const before = scenarioOf(game.mission).outcome(game.mission);
+    const after = scenarioOf(g.mission).outcome(g.mission);
     const credits = g.mission.credits - game.mission.credits;
-    const text = `LOW-POWER INTERVAL: ${formatDuration(elapsed)}. AUTOMATED OPS YIELD +${formatNumber(ore)} ORE, +${formatNumber(credits)} CR.`;
+    const yielded = `+${formatNumber(after.output - before.output)} ${after.outputUnit}`;
+    const text = `LOW-POWER INTERVAL: ${formatDuration(elapsed)}. AUTOMATED OPS YIELD ${yielded}, +${formatNumber(credits)} CR.`;
     g = { ...g, mission: appendLog(g.mission, 'sys', text) };
   }
   return { game: g, elapsed };

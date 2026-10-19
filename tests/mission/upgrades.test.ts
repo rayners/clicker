@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { createMission, DEFAULT_MISSION_CONFIG, type MissionState } from '../../src/mission/state';
+import { createMission, DEFAULT_MISSION_CONFIG, type MissionOf } from '../../src/mission/state';
+
+/** The default contract: extraction with the organism horror. */
+type MissionState = MissionOf<'extraction', 'organism'>;
 import { drill, oreRate, refineryCapacity, clickPower, autoDrillRate } from '../../src/mission/extraction/economy';
 import { tickMission } from '../../src/mission/tick';
 import { buyUpgrade, isUpgradeUnlocked, availableUpgrades } from '../../src/mission/extraction/upgrades';

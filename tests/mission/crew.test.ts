@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { createMission, DEFAULT_MISSION_CONFIG, type MissionState } from '../../src/mission/state';
+import { createMission, DEFAULT_MISSION_CONFIG, type MissionOf } from '../../src/mission/state';
+
+/** The default contract: extraction with the organism horror. */
+type MissionState = MissionOf<'extraction', 'organism'>;
 import {
   wakeCrew,
   sleepCrew,
@@ -7,7 +10,7 @@ import {
   awakeCount,
   crewStatus,
   MAX_AWAKE,
-  CRYO_UNLOCK_ORE,
+  CRYO_UNLOCK_CREDITS,
   FATIGUE_SECONDS,
   RECOVERY_SECONDS,
 } from '../../src/mission/crew';
@@ -15,18 +18,23 @@ import { tickMission } from '../../src/mission/tick';
 import { clickPower, oreRate, refineryCapacity } from '../../src/mission/extraction/economy';
 import { CREW } from '../../src/data/crew';
 import { GENERATORS } from '../../src/data/extraction/generators';
+import { CREW_BOOSTS } from '../../src/data/extraction/crew-boosts';
 
-const byBoost = (kind: string) => CREW.find((c) => c.boost.kind === kind)!;
+/** A crew member by what they boost on an extraction contract. */
+const byBoost = (kind: string) => {
+  const [id, b] = Object.entries(CREW_BOOSTS).find(([, b]) => b.effect.kind === kind)!;
+  return { ...CREW.find((c) => c.id === id)!, boost: b.effect };
+};
 const fresh = (patch: Partial<MissionState> = {}): MissionState => ({
   ...createMission(DEFAULT_MISSION_CONFIG, 1),
-  lifetimeOre: CRYO_UNLOCK_ORE,
+  lifetimeCredits: CRYO_UNLOCK_CREDITS,
   credits: 1e9,
   ...patch,
 });
 
 describe('cryo bay access', () => {
-  it('opens once enough ore has been extracted', () => {
-    expect(isCrewUnlocked(fresh({ lifetimeOre: CRYO_UNLOCK_ORE - 1 }))).toBe(false);
+  it('opens once the contract has earned enough credits', () => {
+    expect(isCrewUnlocked(fresh({ lifetimeCredits: CRYO_UNLOCK_CREDITS - 1 }))).toBe(false);
     expect(isCrewUnlocked(fresh())).toBe(true);
   });
 
@@ -55,7 +63,7 @@ describe('waking crew', () => {
   });
 
   it('is refused when locked, unaffordable, already awake, or life support is full', () => {
-    const locked = fresh({ lifetimeOre: 0 });
+    const locked = fresh({ lifetimeCredits: 0 });
     expect(wakeCrew(locked, tech.id)).toBe(locked);
     const poor = fresh({ credits: 0 });
     expect(wakeCrew(poor, tech.id)).toBe(poor);
@@ -127,9 +135,9 @@ describe('fatigue', () => {
   });
 
   it('builds more slowly while the medic is awake', () => {
-    const medic = byBoost('fatigueMultiplier');
+    const medic = CREW.find((c) => c.fatigueRelief !== undefined)!;
     let m = wakeCrew(wakeCrew(fresh(), medic.id), tech.id);
     m = tickMission(m, FATIGUE_SECONDS / 2);
-    expect(m.crew[tech.id]!.fatigue).toBeCloseTo(50 * medic.boost.value);
+    expect(m.crew[tech.id]!.fatigue).toBeCloseTo(50 * medic.fatigueRelief!);
   });
 });

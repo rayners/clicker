@@ -1,5 +1,5 @@
 import { UPGRADES, type UpgradeDef } from '../../data/extraction/upgrades';
-import type { MissionState } from '../state';
+import type { ExtractionMission as MissionState } from '../state';
 
 export function isUpgradeUnlocked(m: MissionState, u: UpgradeDef): boolean {
   const { lifetimeOre, generator } = u.unlock;

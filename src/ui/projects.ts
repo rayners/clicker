@@ -10,7 +10,7 @@ import {
   ventCost,
 } from '../mission/organism/containment';
 import { awakeCount } from '../mission/crew';
-import type { MissionState } from '../mission/state';
+import type { OrganismMission as MissionState } from '../mission/state';
 import { h, setAttr, setText } from './dom';
 import { createTracker } from './tracker';
 

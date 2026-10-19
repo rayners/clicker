@@ -1,6 +1,7 @@
 import { CREW } from '../data/crew';
 import { crewStatus } from '../mission/crew';
-import { createMission, DEFAULT_MISSION_CONFIG, type MissionConfig } from '../mission/state';
+import { createMission, DEFAULT_MISSION_CONFIG, isOrganism, type MissionConfig, type MissionState } from '../mission/state';
+import { scenarioOf } from '../mission/registry';
 import type { GameState, Profile } from './game';
 
 export type Ending = 'deliver' | 'scuttle' | 'broadcast';
@@ -35,7 +36,7 @@ export function shipNameFor(cycle: number): string {
 /** The next mission is shaped by everything WARDEN carried out of previous ones. */
 export function missionConfigFor(profile: Profile): MissionConfig {
   return {
-    ...DEFAULT_MISSION_CONFIG,
+    ...(DEFAULT_MISSION_CONFIG as MissionConfig),
     shipName: shipNameFor(profile.contractsCompleted),
     productionMultiplier: 1 + SENIORITY_PRODUCTION * profile.seniority,
     extraLifeSupport: profile.conscience,
@@ -51,12 +52,17 @@ export function availableEndings(game: GameState): Ending[] {
   return endings;
 }
 
+/** Specimens held for the Combine: zero for horrors that have none. */
+function specimensHeld(m: MissionState): number {
+  return isOrganism(m) ? Math.floor(m.specimens) : 0;
+}
+
 function survivors(game: GameState): number {
   return CREW.filter((c) => crewStatus(game.mission, c.id) !== 'lost').length;
 }
 
 export function endingRewards(game: GameState): Record<Ending, Reward> {
-  const seniority = 1 + Math.floor(Math.floor(game.mission.specimens) / SPECIMENS_PER_SENIORITY);
+  const seniority = 1 + Math.floor(specimensHeld(game.mission) / SPECIMENS_PER_SENIORITY);
   const conscience = 1 + survivors(game);
   return {
     deliver: { seniority, conscience: 0 },
@@ -82,9 +88,8 @@ export function completeContract(game: GameState, ending: Ending, seed: number):
         scenario: m.scenario,
         shipName: m.config.shipName,
         ending,
-        output: m.lifetimeOre,
-        outputUnit: 'ORE',
-        specimens: Math.floor(m.specimens),
+        ...scenarioOf(m).outcome(m),
+        specimens: specimensHeld(m),
         crewSurvived: survivors(game),
         duration: m.elapsed,
       },

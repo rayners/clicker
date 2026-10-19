@@ -2,14 +2,17 @@
 import { describe, it, expect } from 'vitest';
 import { screen, within } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
-import { createGame, type GameState } from '../../src/core/game';
+import { createGame } from '../../src/core/game';
 import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
+import type { MissionOf } from '../../src/mission/state';
+
+type MissionState = MissionOf<'extraction', 'organism'>;
 
 let store: Store;
 let root: HTMLElement;
 
-function setup(mission: Partial<GameState['mission']> = {}) {
+function setup(mission: Partial<MissionState> = {}) {
   document.body.innerHTML = '<div id="app"></div>';
   root = document.getElementById('app')!;
   const g = createGame(1, 0);
@@ -20,6 +23,8 @@ function setup(mission: Partial<GameState['mission']> = {}) {
 
 const tab = (name: RegExp) => screen.queryByRole('tab', { name });
 const unlocked = { flags: ['specimens'], credits: 1e12, act: 3 };
+
+const mission = () => store.getState().mission as MissionState;
 
 describe('special projects panel', () => {
   it('is hidden until special projects begins', () => {
@@ -32,7 +37,7 @@ describe('special projects panel', () => {
     await user.click(tab(/special projects/i)!);
     expect(screen.getByLabelText('Specimens held').textContent).toBe('3');
     await user.click(screen.getByRole('button', { name: /commission recovery rig/i }));
-    expect(store.getState().mission.rigs).toBe(1);
+    expect(mission().rigs).toBe(1);
   });
 
   it('shows containment integrity and reinforces it', async () => {
@@ -40,9 +45,9 @@ describe('special projects panel', () => {
     await user.click(tab(/special projects/i)!);
     expect(screen.getByRole('meter', { name: /containment integrity/i }).getAttribute('aria-valuenow')).toBe('40');
     await user.click(screen.getByRole('button', { name: /reinforce containment/i }));
-    expect(store.getState().mission.integrity).toBe(65);
+    expect(mission().integrity).toBe(65);
     await user.click(screen.getByRole('button', { name: /upgrade containment/i }));
-    expect(store.getState().mission.containmentLevel).toBe(1);
+    expect(mission().containmentLevel).toBe(1);
   });
 
   it('offers venting only when something is loose, warning about awake crew', async () => {
@@ -52,12 +57,12 @@ describe('special projects panel', () => {
     expect(screen.queryByRole('button', { name: /vent decks/i })).toBeNull();
     store.replace({
       ...store.getState(),
-      mission: { ...store.getState().mission, contacts: 4, crew: { ...g.mission.crew, lam: { status: 'awake', fatigue: 0 } } },
+      mission: { ...mission(), contacts: 4, crew: { ...g.mission.crew, lam: { status: 'awake', fatigue: 0 } } },
     });
     expect(screen.getByRole('img', { name: /motion tracker: 4 contacts/i })).toBeTruthy();
     expect(screen.getByText(/1 crew awake/i)).toBeTruthy();
     await user.click(screen.getByRole('button', { name: /vent decks/i }));
-    expect(store.getState().mission.vents).toBe(1);
+    expect(mission().vents).toBe(1);
   });
 });
 
@@ -82,7 +87,7 @@ describe('archive panel', () => {
 describe('infestation presentation', () => {
   it('shows lost crew as lost, with no way to wake them', async () => {
     const g = createGame(1, 0);
-    const user = setup({ lifetimeOre: 1e6, crew: { ...g.mission.crew, brandt: { status: 'lost', fatigue: 0 } } });
+    const user = setup({ lifetimeCredits: 1e6, crew: { ...g.mission.crew, brandt: { status: 'lost', fatigue: 0 } } });
     await user.click(tab(/crew/i)!);
     const card = screen.getByRole('article', { name: /teodor brandt/i });
     expect(within(card).getByText('LOST')).toBeTruthy();

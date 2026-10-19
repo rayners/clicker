@@ -1,8 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { STORY } from '../../src/data/story';
-import { createMission, DEFAULT_MISSION_CONFIG, type MissionState } from '../../src/mission/state';
-import { runBeats, STORY_MIN_GAP } from '../../src/mission/story';
+import { createMission, DEFAULT_MISSION_CONFIG, type MissionOf } from '../../src/mission/state';
+
+/** The default contract: extraction with the organism horror. */
+type MissionState = MissionOf<'extraction', 'organism'>;
+import { STORY_MIN_GAP, type MissionContext } from '../../src/mission/story';
+import { runStory, storyBeats } from '../../src/mission/tick';
+import { HORRORS, SCENARIOS } from '../../src/mission/registry';
 import { GENERATORS } from '../../src/data/extraction/generators';
+
+/** The extraction x organism story, as the game composes it. */
+const STORY = storyBeats(SCENARIOS.extraction, HORRORS.organism);
+const runBeats = (m: MissionState, _beats: unknown, ctx: MissionContext) => runStory(m, ctx);
 
 describe('story content', () => {
   it('has unique beat ids', () => {
@@ -25,6 +33,7 @@ describe('story content', () => {
     let m: MissionState = {
       ...createMission(DEFAULT_MISSION_CONFIG, 1),
       lifetimeOre: 5e9,
+      lifetimeCredits: 5e9,
       generators: Object.fromEntries(GENERATORS.map((g, i) => [g.id, i < 6 ? 1 : 0])),
     };
     // Repeat-contract beats (cycle-*) can't fire on a first contract; they're covered below.
@@ -54,6 +63,7 @@ describe('later acts', () => {
     let m: MissionState = {
       ...createMission(DEFAULT_MISSION_CONFIG, 1),
       lifetimeOre: 5e9,
+      lifetimeCredits: 5e9,
       generators: Object.fromEntries(GENERATORS.map((g, i) => [g.id, i < 6 ? 1 : 0])),
     };
     const step = (patch: Partial<MissionState> = {}, times = 40) => {
@@ -80,7 +90,7 @@ describe('later acts', () => {
 
 describe('repeat contracts', () => {
   const play = (cycle: number, endings: string[] = []) => {
-    let m: MissionState = { ...createMission(DEFAULT_MISSION_CONFIG, 1), lifetimeOre: 600 };
+    let m: MissionState = { ...createMission(DEFAULT_MISSION_CONFIG, 1), lifetimeOre: 600, lifetimeCredits: 600 };
     for (let i = 0; i < 30; i++) {
       m = runBeats({ ...m, elapsed: m.elapsed + STORY_MIN_GAP + 1 }, STORY, { cycle, endings });
     }

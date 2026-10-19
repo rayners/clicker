@@ -9,7 +9,7 @@ describe('directive table', () => {
 
   it('unlocks in order of progress', () => {
     for (let i = 1; i < DIRECTIVES.length; i++) {
-      expect(DIRECTIVES[i]!.unlockOre).toBeGreaterThan(DIRECTIVES[i - 1]!.unlockOre);
+      expect(DIRECTIVES[i]!.unlockCredits).toBeGreaterThan(DIRECTIVES[i - 1]!.unlockCredits);
     }
   });
 
@@ -19,7 +19,7 @@ describe('directive table', () => {
       expect(d.reward).toBeGreaterThan(0);
       expect(d.duration).toBeGreaterThan(0);
       expect(d.goal.target).toBeGreaterThan(0);
-      if (d.goal.kind === 'ownGenerators') expect(ids.has(d.goal.generator)).toBe(true);
+      if (d.goal.metric.startsWith('gen:')) expect(ids.has(d.goal.metric.slice(4))).toBe(true);
       expect(d.title && d.brief && d.lag).toBeTruthy();
     }
   });

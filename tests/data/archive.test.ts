@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { ARCHIVE } from '../../src/data/archive';
+import { EXTRACTION_ARCHIVE } from '../../src/data/extraction/archive';
+import { ORGANISM_ARCHIVE } from '../../src/data/organism/archive';
+
+const ARCHIVE = [...EXTRACTION_ARCHIVE, ...ORGANISM_ARCHIVE];
 import { createMission, DEFAULT_MISSION_CONFIG } from '../../src/mission/state';
 import { unlockedFiles } from '../../src/mission/archive';
 

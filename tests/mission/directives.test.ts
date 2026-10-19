@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { createMission, DEFAULT_MISSION_CONFIG, type MissionState } from '../../src/mission/state';
+import { createMission, DEFAULT_MISSION_CONFIG, type MissionOf } from '../../src/mission/state';
+
+/** The default contract: extraction with the organism horror. */
+type MissionState = MissionOf<'extraction', 'organism'>;
 import { tickDirectives, directiveProgress, DIRECTIVE_COOLDOWN } from '../../src/mission/directives';
 import { tickMission } from '../../src/mission/tick';
 import { DIRECTIVES } from '../../src/data/extraction/directives';
@@ -9,7 +12,7 @@ const fresh = (patch: Partial<MissionState> = {}): MissionState => ({
   ...createMission(DEFAULT_MISSION_CONFIG, 1),
   ...patch,
 });
-const issued = () => tickDirectives(fresh({ lifetimeOre: first.unlockOre }));
+const issued = () => tickDirectives(fresh({ lifetimeCredits: first.unlockCredits }));
 
 describe('issuing directives', () => {
   it('waits until the first directive unlocks', () => {
@@ -51,7 +54,7 @@ describe('resolving directives', () => {
 
   it('waits a cooldown before issuing the next one', () => {
     let m = issued();
-    m = tickDirectives({ ...m, lifetimeOre: 1e12, generators: Object.fromEntries(Object.keys(m.generators).map((k) => [k, 1000])) });
+    m = tickDirectives({ ...m, lifetimeOre: 1e12, lifetimeCredits: 1e12, generators: Object.fromEntries(Object.keys(m.generators).map((k) => [k, 1000])) });
     expect(m.directive).toBeNull();
     m = tickDirectives({ ...m, elapsed: m.elapsed + DIRECTIVE_COOLDOWN - 1 });
     expect(m.directive).toBeNull();
@@ -75,20 +78,18 @@ describe('progress', () => {
 });
 
 describe('goal kinds', () => {
-  const kind = (k: string) => DIRECTIVES.find((d) => d.goal.kind === k)!;
-
-  it('ownGenerators counts how many are owned in total', () => {
-    const d = kind('ownGenerators');
-    if (d.goal.kind !== 'ownGenerators') throw new Error('bad fixture');
+  it('level goals count how many of something are owned in total', () => {
+    const d = DIRECTIVES.find((x) => x.goal.mode === 'level')!;
+    const generator = d.goal.metric.replace('gen:', '');
     const m = fresh({
       directive: { id: d.id, issuedAt: 0, baseline: 0 },
-      generators: { ...fresh().generators, [d.goal.generator]: 2 },
+      generators: { ...fresh().generators, [generator]: 2 },
     });
     expect(directiveProgress(m).current).toBe(2);
   });
 
-  it('earnCredits counts credits refined since issue', () => {
-    const d = kind('earnCredits');
+  it('credit goals count credits refined since issue, whatever the scenario', () => {
+    const d = DIRECTIVES.find((x) => x.goal.metric === 'credits')!;
     const m = fresh({ directive: { id: d.id, issuedAt: 0, baseline: 100 }, lifetimeCredits: 350 });
     expect(directiveProgress(m).current).toBe(250);
   });
@@ -101,6 +102,6 @@ describe('integration with the mission tick', () => {
   });
 
   it('issues directives as part of ticking', () => {
-    expect(tickMission(fresh({ lifetimeOre: first.unlockOre }), 0.1).directive?.id).toBe(first.id);
+    expect(tickMission(fresh({ lifetimeCredits: first.unlockCredits }), 0.1).directive?.id).toBe(first.id);
   });
 });

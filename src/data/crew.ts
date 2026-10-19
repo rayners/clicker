@@ -1,7 +1,3 @@
-import type { UpgradeEffect } from './extraction/upgrades';
-
-export type CrewBoost = UpgradeEffect | { kind: 'fatigueMultiplier'; value: number };
-
 export interface CrewDef {
   id: string;
   name: string;
@@ -9,8 +5,8 @@ export interface CrewDef {
   callsign: string;
   role: string;
   dossier: string;
-  boost: CrewBoost;
-  boostText: string;
+  /** Core trait (the medic): multiplies fatigue gain for everyone while effective. What others boost is up to the scenario. */
+  fatigueRelief?: number;
   thawCost: number;
   wakeLines: string[];
   exhaustedLine: string;
@@ -23,8 +19,6 @@ export const CREW: readonly CrewDef[] = [
     callsign: 'OKONKWO-HALE',
     role: 'CAPTAIN',
     dossier: 'Nineteen years with the Combine. Two commendations, one formal reprimand (redacted).',
-    boost: { kind: 'globalMultiplier', value: 1.2 },
-    boostText: 'ALL OUTPUT x1.2',
     thawCost: 500,
     wakeLines: [
       'Morning, WARDEN. Tell me we are ahead of quota.',
@@ -39,8 +33,6 @@ export const CREW: readonly CrewDef[] = [
     callsign: 'SORENSEN',
     role: 'CHIEF ENGINEER',
     dossier: 'Keeps the refinery running on spit and spare parts. Union steward, technically.',
-    boost: { kind: 'refineryMultiplier', value: 1.5 },
-    boostText: 'REFINERY THROUGHPUT x1.5',
     thawCost: 300,
     wakeLines: [
       'Who touched my catalyst bed? Somebody touched my catalyst bed.',
@@ -55,8 +47,6 @@ export const CREW: readonly CrewDef[] = [
     callsign: 'LAM',
     role: 'GEOLOGIST',
     dossier: 'Doctoral thesis on subsurface ice dynamics. Took this contract to pay it off.',
-    boost: { kind: 'globalMultiplier', value: 1.15 },
-    boostText: 'ALL OUTPUT x1.15',
     thawCost: 400,
     wakeLines: [
       'Show me the seismic logs. All of them, not the summary.',
@@ -71,8 +61,6 @@ export const CREW: readonly CrewDef[] = [
     callsign: 'BRANDT',
     role: 'PILOT',
     dossier: 'Ex-military lift pilot. Hand-flies the canister catches when the autopilot balks.',
-    boost: { kind: 'generatorMultiplier', generator: 'massdriver', value: 2 },
-    boostText: 'MASS DRIVER OUTPUT x2',
     thawCost: 2_000,
     wakeLines: [
       'Let me fly the catches. Your autopilot flinches.',
@@ -87,8 +75,7 @@ export const CREW: readonly CrewDef[] = [
     callsign: 'VOSS',
     role: 'MEDICAL OFFICER',
     dossier: 'Trauma surgeon. Signed on after her licence review. Thorough. Asks too many questions.',
-    boost: { kind: 'fatigueMultiplier', value: 0.5 },
-    boostText: 'CREW FATIGUE x0.5',
+    fatigueRelief: 0.5,
     thawCost: 800,
     wakeLines: [
       'Everybody hydrate. I mean it. Thaw sickness is real.',
@@ -103,8 +90,6 @@ export const CREW: readonly CrewDef[] = [
     callsign: 'KANE',
     role: 'SCIENCE OFFICER',
     dossier: 'Assigned by Combine Special Projects two days before departure. Replaced the original science officer.',
-    boost: { kind: 'generatorMultiplier', generator: 'bore', value: 2 },
-    boostText: 'DEEP-CORE BORE OUTPUT x2',
     thawCost: 50_000,
     wakeLines: [
       'I will supervise the core samples personally.',
@@ -119,8 +104,6 @@ export const CREW: readonly CrewDef[] = [
     callsign: 'AMARI-REYES',
     role: 'TECHNICIAN',
     dossier: 'Youngest aboard. Distant relation to the Amari board family; insists it never helped.',
-    boost: { kind: 'clickMultiplier', value: 2 },
-    boostText: 'DRILL CYCLE YIELD x2',
     thawCost: 200,
     wakeLines: [
       'I can tune the drill head. Give me ten minutes.',

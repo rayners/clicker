@@ -3,6 +3,13 @@ import type { Store } from '../core/store';
 import { CREW } from '../data/crew';
 import { awakeCount, crewStatus, maxAwake } from '../mission/crew';
 import type { MissionState } from '../mission/state';
+import { scenarioOf } from '../mission/registry';
+
+/** What the crew member contributes: the scenario's boost, or a core trait such as the medic's. */
+function boostText(m: MissionState, id: string, fatigueRelief?: number): string {
+  const text = scenarioOf(m).crewBoostText[id] ?? (fatigueRelief !== undefined ? `CREW FATIGUE x${fatigueRelief}` : '');
+  return `> ${text}`;
+}
 import { h, setAttr, setText } from './dom';
 
 const BAR_CELLS = 10;
@@ -28,6 +35,7 @@ export function createCrewPanel(store: Store): { el: HTMLElement; render(m: Miss
       const awake = store.getState().mission.crew[def.id]?.status === 'awake';
       store.dispatch({ type: awake ? 'sleepCrew' : 'wakeCrew', id: def.id });
     });
+    const boost = h('div', { class: 'crew-boost' });
     const portrait = h('canvas', { class: 'crew-portrait', width: 16, height: 16, 'data-sprite': `crew-${def.id}`, 'aria-hidden': 'true' });
     const el = h(
       'article',
@@ -40,10 +48,10 @@ export function createCrewPanel(store: Store): { el: HTMLElement; render(m: Miss
         status,
       ),
       h('p', { class: 'sys-desc' }, def.dossier),
-      h('div', { class: 'crew-boost' }, `> ${def.boostText}`),
+      boost,
       h('div', { class: 'sys-foot' }, h('span', { class: 'crew-fatigue' }, 'FATIGUE ', meter), button),
     );
-    return { def, el, status, meter, button };
+    return { def, el, status, meter, button, boost };
   });
 
   const el = h(
@@ -55,6 +63,7 @@ export function createCrewPanel(store: Store): { el: HTMLElement; render(m: Miss
   );
 
   function render(m: MissionState) {
+    for (const card of cards) setText(card.boost, boostText(m, card.def.id, card.def.fatigueRelief));
     const awake = awakeCount(m);
     setText(lifeSupport, `AWAKE ${awake}/${maxAwake(m)}`);
     for (const card of cards) {

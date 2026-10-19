@@ -1,7 +1,30 @@
 import { formatDuration, formatNumber } from '../core/format';
-import { DIRECTIVES, type DirectiveDef } from '../data/extraction/directives';
 import { appendLog } from './log';
 import type { MissionState } from './state';
+import type { ScenarioDef } from './kinds';
+import { scenarioOf } from './registry';
+
+export interface DirectiveGoal {
+  /** 'credits' is common to every scenario; anything else is asked of the scenario's metric(). */
+  metric: string;
+  target: number;
+  /** 'since': counts from issue time (extract X more). 'level': the counter itself (own N of something). */
+  mode: 'since' | 'level';
+}
+
+export interface DirectiveDef {
+  id: string;
+  title: string;
+  brief: string;
+  /** Light-lag flavour: how long ago HQ sent it. */
+  lag: string;
+  /** Lifetime credits before it can be issued. */
+  unlockCredits: number;
+  goal: DirectiveGoal;
+  /** Seconds allowed. */
+  duration: number;
+  reward: number;
+}
 
 /** Seconds between one directive resolving and the next being issued. */
 export const DIRECTIVE_COOLDOWN = 90;
@@ -15,26 +38,19 @@ export interface ActiveDirective {
 
 export type DirectiveResult = 'completed' | 'failed';
 
-export function directiveDef(id: string): DirectiveDef | undefined {
-  return DIRECTIVES.find((d) => d.id === id);
+export function directiveDef(id: string, scenario: ScenarioDef): DirectiveDef | undefined {
+  return scenario.directives.find((d) => d.id === id);
 }
 
-function counter(m: MissionState, def: DirectiveDef): number {
-  switch (def.goal.kind) {
-    case 'extractOre':
-      return m.lifetimeOre;
-    case 'earnCredits':
-      return m.lifetimeCredits;
-    case 'ownGenerators':
-      return m.generators[def.goal.generator] ?? 0;
-  }
+function counter(m: MissionState, def: DirectiveDef, scenario: ScenarioDef): number {
+  return def.goal.metric === 'credits' ? m.lifetimeCredits : scenario.metric(m, def.goal.metric);
 }
 
-export function directiveProgress(m: MissionState): { current: number; target: number } {
-  const def = m.directive && directiveDef(m.directive.id);
+export function directiveProgress(m: MissionState, scenario: ScenarioDef = scenarioOf(m)): { current: number; target: number } {
+  const def = m.directive && directiveDef(m.directive.id, scenario);
   if (!m.directive || !def) return { current: 0, target: 0 };
-  const value = counter(m, def);
-  const current = def.goal.kind === 'ownGenerators' ? value : value - m.directive.baseline;
+  const value = counter(m, def, scenario);
+  const current = def.goal.mode === 'level' ? value : value - m.directive.baseline;
   return { current: Math.max(0, Math.min(current, def.goal.target)), target: def.goal.target };
 }
 
@@ -53,19 +69,19 @@ function resolve(m: MissionState, def: DirectiveDef, result: DirectiveResult): M
   return appendLog(resolved, 'corp', text);
 }
 
-export function tickDirectives(m: MissionState): MissionState {
+export function tickDirectives(m: MissionState, scenario: ScenarioDef = scenarioOf(m)): MissionState {
   if (m.directive) {
-    const def = directiveDef(m.directive.id);
+    const def = directiveDef(m.directive.id, scenario);
     if (!def) return { ...m, directive: null };
-    const { current, target } = directiveProgress(m);
+    const { current, target } = directiveProgress(m, scenario);
     if (current >= target) return resolve(m, def, 'completed');
     if (m.elapsed - m.directive.issuedAt > def.duration) return resolve(m, def, 'failed');
     return m;
   }
   if (m.lastDirectiveAt !== null && m.elapsed - m.lastDirectiveAt < DIRECTIVE_COOLDOWN) return m;
-  const next = DIRECTIVES.find((d) => !(d.id in m.directiveResults) && m.lifetimeOre >= d.unlockOre);
+  const next = scenario.directives.find((d) => !(d.id in m.directiveResults) && m.lifetimeCredits >= d.unlockCredits);
   if (!next) return m;
-  const issued: MissionState = { ...m, directive: { id: next.id, issuedAt: m.elapsed, baseline: counter(m, next) } };
+  const issued: MissionState = { ...m, directive: { id: next.id, issuedAt: m.elapsed, baseline: counter(m, next, scenario) } };
   return appendLog(
     issued,
     'corp',

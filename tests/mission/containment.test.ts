@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { createMission, DEFAULT_MISSION_CONFIG, type MissionState } from '../../src/mission/state';
+import { createMission, DEFAULT_MISSION_CONFIG, type MissionOf } from '../../src/mission/state';
+
+/** The default contract: extraction with the organism horror. */
+type MissionState = MissionOf<'extraction', 'organism'>;
 import {
   isSpecialProjectsUnlocked,
   rigCost,
@@ -18,6 +21,10 @@ import {
   BREACH_RESET_INTEGRITY,
 } from '../../src/mission/organism/containment';
 import { tickMission } from '../../src/mission/tick';
+import { SCENARIOS } from '../../src/mission/registry';
+
+/** Incidents reach scenario equipment only through this hook. */
+const hooks = { loseEquipment: SCENARIOS.extraction.loseEquipment };
 import { oreRate } from '../../src/mission/extraction/economy';
 import { crewStatus, wakeCrew, awakeCount } from '../../src/mission/crew';
 import { GENERATORS } from '../../src/data/extraction/generators';
@@ -28,6 +35,7 @@ const unlocked = (patch: Partial<MissionState> = {}): MissionState => ({
   flags: ['specimens'],
   credits: 1e15,
   lifetimeOre: 1e10,
+  lifetimeCredits: 1e10,
   ...patch,
 });
 
@@ -58,7 +66,7 @@ describe('recovery rigs', () => {
   });
 
   it('recover specimens over time', () => {
-    const m = tickContainment(unlocked({ rigs: 2 }), 100);
+    const m = tickContainment(unlocked({ rigs: 2 }), 100, hooks);
     expect(m.specimens).toBeCloseTo(2 * RIG_RATE * 100);
     expect(m.specimensRecovered).toBeCloseTo(2 * RIG_RATE * 100);
   });
@@ -81,13 +89,13 @@ describe('containment', () => {
   });
 
   it('is strained by held specimens, and only by them', () => {
-    expect(tickContainment(unlocked({ specimens: 0 }), 100).integrity).toBe(100);
-    expect(tickContainment(unlocked({ specimens: 5 }), 10).integrity).toBeLessThan(100);
+    expect(tickContainment(unlocked({ specimens: 0 }), 100, hooks).integrity).toBe(100);
+    expect(tickContainment(unlocked({ specimens: 5 }), 10, hooks).integrity).toBeLessThan(100);
   });
 
   it('strains more slowly at higher containment levels', () => {
-    const base = tickContainment(unlocked({ specimens: 5 }), 10).integrity;
-    const upgraded = tickContainment(buyContainmentLevel(unlocked({ specimens: 5 })), 10).integrity;
+    const base = tickContainment(unlocked({ specimens: 5 }), 10, hooks).integrity;
+    const upgraded = tickContainment(buyContainmentLevel(unlocked({ specimens: 5 })), 10, hooks).integrity;
     expect(upgraded).toBeGreaterThan(base);
   });
 
@@ -125,7 +133,7 @@ describe('breaches', () => {
   });
 
   it('happen when integrity runs out during a tick', () => {
-    const m = tickContainment(unlocked({ specimens: 10, integrity: 0.01 }), 1);
+    const m = tickContainment(unlocked({ specimens: 10, integrity: 0.01 }), 1, hooks);
     expect(m.breaches).toBe(1);
     expect(m.contacts).toBeGreaterThan(0);
   });
@@ -139,7 +147,7 @@ describe('incidents caused by loose contacts', () => {
     });
 
   const run = (m: MissionState, seconds: number) => {
-    for (let i = 0; i < seconds; i++) m = tickContainment(m, 1);
+    for (let i = 0; i < seconds; i++) m = tickContainment(m, 1, hooks);
     return m;
   };
 

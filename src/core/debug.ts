@@ -1,5 +1,5 @@
 import { GENERATORS } from '../data/extraction/generators';
-import type { MissionState } from '../mission/state';
+import type { MissionOf, MissionState } from '../mission/state';
 import type { GameState } from './game';
 
 /** Developer shortcuts (?debug=act3 etc.) for testing pacing and theming without hours of play. */
@@ -8,7 +8,7 @@ export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus'] as const;
 const owned = (upTo: number, count: number) =>
   Object.fromEntries(GENERATORS.map((g, i) => [g.id, i < upTo ? count : 0]));
 
-const PATCHES: Record<string, Partial<MissionState>> = {
+const PATCHES: Record<string, Partial<MissionOf<'extraction', 'organism'>>> = {
   act2: { act: 2, lifetimeOre: 2.5e6, credits: 5e4, generators: owned(4, 15), refineryLevel: 6 },
   act3: {
     act: 3,
@@ -49,5 +49,6 @@ const PATCHES: Record<string, Partial<MissionState>> = {
 export function applyScenario(game: GameState, name: string): GameState {
   const patch = PATCHES[name];
   if (!patch) return game;
-  return { ...game, mission: { ...game.mission, ...patch, beats: { ...game.mission.beats, ...patch.beats } } };
+  const mission = { ...game.mission, ...patch, beats: { ...game.mission.beats, ...patch.beats } } as MissionState;
+  return { ...game, mission };
 }

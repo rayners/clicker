@@ -1,3 +1,4 @@
+import type { MissionOf } from '../../src/mission/state';
 import { describe, it, expect } from 'vitest';
 import { createGame } from '../../src/core/game';
 import { applyScenario, SCENARIOS } from '../../src/core/debug';
@@ -20,13 +21,13 @@ describe('debug scenarios', () => {
   it('act3 opens special projects', () => {
     const g = applyScenario(base(), 'act3');
     expect(g.mission.act).toBe(3);
-    expect(isSpecialProjectsUnlocked(g.mission)).toBe(true);
+    expect(isSpecialProjectsUnlocked(g.mission as MissionOf<'extraction', 'organism'>)).toBe(true);
   });
 
   it('act4 has contacts aboard and tracking on', () => {
     const g = applyScenario(base(), 'act4');
     expect(g.mission.act).toBe(4);
-    expect(g.mission.contacts).toBeGreaterThan(0);
+    expect((g.mission as MissionOf<'extraction', 'organism'>).contacts).toBeGreaterThan(0);
     expect(g.mission.flags).toContain('tracker');
   });
 

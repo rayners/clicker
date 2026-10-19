@@ -1,9 +1,9 @@
 import { GENERATORS, type GeneratorDef } from '../../data/extraction/generators';
 import { UPGRADES, type UpgradeEffect } from '../../data/extraction/upgrades';
-import { CREW } from '../../data/crew';
+import { CREW_BOOSTS } from '../../data/extraction/crew-boosts';
 import { isCrewEffective } from '../crew';
-import { fundingMultiplier } from '../organism/containment';
-import type { MissionState } from '../state';
+import { horrorProductionMultiplier } from '../horrors';
+import type { ExtractionMission as MissionState } from '../state';
 
 export const COST_GROWTH = 1.15;
 export const ORE_PRICE = 1;
@@ -50,11 +50,10 @@ function applyEffect(result: Multipliers, e: UpgradeEffect): void {
 }
 
 function multipliers(m: MissionState): Multipliers {
-  const result: Multipliers = { click: 1, clickRateShare: 0, autoDrill: 0, global: fundingMultiplier(m) * m.config.productionMultiplier, refinery: 1, generator: {} };
+  const global = horrorProductionMultiplier(m) * m.config.productionMultiplier;
+  const result: Multipliers = { click: 1, clickRateShare: 0, autoDrill: 0, global, refinery: 1, generator: {} };
   for (const u of UPGRADES) if (m.upgrades.includes(u.id)) applyEffect(result, u.effect);
-  for (const c of CREW) {
-    if (c.boost.kind !== 'fatigueMultiplier' && isCrewEffective(m, c.id)) applyEffect(result, c.boost);
-  }
+  for (const [id, boost] of Object.entries(CREW_BOOSTS)) if (isCrewEffective(m, id)) applyEffect(result, boost.effect);
   return result;
 }
 
@@ -127,4 +126,18 @@ export function buyRefinery(m: MissionState): MissionState {
 /** The first tier is always visible; each further tier appears once the one before it is owned. */
 export function isGeneratorRevealed(m: MissionState, index: number): boolean {
   return index === 0 || GENERATORS.slice(index - 1).some((g) => (m.generators[g.id] ?? 0) > 0);
+}
+
+/** Mines into the hopper, then refines what the refinery can take into credits. */
+export function tickExtraction(m: MissionState, dt: number): MissionState {
+  const mined = oreRate(m) * dt;
+  const hopper = m.ore + mined;
+  const refined = Math.min(hopper, refineryCapacity(m) * dt);
+  return {
+    ...m,
+    ore: hopper - refined,
+    lifetimeOre: m.lifetimeOre + mined,
+    credits: m.credits + refined * ORE_PRICE,
+    lifetimeCredits: m.lifetimeCredits + refined * ORE_PRICE,
+  };
 }

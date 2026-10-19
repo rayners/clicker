@@ -1,26 +1,7 @@
-import type { MissionState } from '../mission/state';
-import { depth } from '../mission/extraction/progress';
+import type { ArchiveFile } from '../../mission/kinds';
 
-export interface ArchiveFile {
-  id: string;
-  title: string;
-  classification: string;
-  body: string[];
-  unlock(m: MissionState): boolean;
-}
-
-export const ARCHIVE: readonly ArchiveFile[] = [
-  {
-    id: 'crew-contract',
-    title: 'CREW CONTRACT KA-7781',
-    classification: 'STANDARD',
-    unlock: (m) => depth(m) >= 500,
-    body: [
-      'Contracted crew shall receive shares in proportion to refined tonnage delivered to Combine facilities.',
-      'Cryostasis periods are unpaid. Travel time is unpaid.',
-      'Clause 14(c): In the event of a Special Projects designation, mission priorities may be amended without notice to crew.',
-    ],
-  },
+/** Restricted files for the organism horror. Scenario details come from the lexicon. */
+export const ORGANISM_ARCHIVE: readonly ArchiveFile[] = [
   {
     id: 'warden-changelog',
     title: 'WARDEN v4.1.7 RELEASE NOTES',
@@ -28,20 +9,20 @@ export const ARCHIVE: readonly ArchiveFile[] = [
     unlock: (m) => m.act >= 2,
     body: [
       '+ Improved quota forecasting.',
-      '+ Cheerier drone status lights.',
+      '+ {cheerfulTweak}',
       '+ Discretionary override of crew safety interlocks under Special Projects authority.',
       '- Removed: crew-visible audit log.',
     ],
   },
   {
     id: 'survey-lv0919',
-    title: 'SURVEY PROBE KA-SP-3 // LV-0919',
+    title: 'SURVEY PROBE KA-SP-3 // {targetCode}',
     classification: 'SPECIAL PROJECTS',
     unlock: (m) => m.act >= 3,
     body: [
-      'Probe descended to 3,180 m. Periodic acoustic signal detected, 0.2 Hz.',
+      '{surveyDescent} Periodic acoustic signal detected, 0.2 Hz.',
       'Atmospheric void beneath crust. Temperature 304 K. Organic chemistry: positive.',
-      'Probe telemetry ceased at 3,212 m. Last frame attached: [IMAGE CORRUPTED].',
+      '{surveyLoss} Last frame attached: [IMAGE CORRUPTED].',
       'Recommendation: crewed follow-up under commercial cover.',
     ],
   },

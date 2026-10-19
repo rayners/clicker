@@ -1,12 +1,16 @@
-import { GENERATORS } from '../data/extraction/generators';
 import { appendLog, type LogEntry } from './log';
 import { createCrewState, type CrewMemberState } from './crew';
 import type { ActiveDirective, DirectiveResult } from './directives';
+import type { HorrorDef, ScenarioDef } from './kinds';
+import type { ExtractionFields } from './extraction/state';
+import type { OrganismFields } from './organism/state';
+import type { QuietFields } from './quiet/state';
+import { HORRORS, SCENARIOS } from './registry';
+
+export type ScenarioId = 'extraction';
+export type HorrorId = 'organism' | 'quiet';
 
 /** Everything that varies between missions. Plain data so the future Boardroom layer can author it. */
-export type ScenarioId = 'extraction';
-export type HorrorId = 'organism';
-
 export interface MissionConfig {
   /** What the contract is: the economy and its corporate story. */
   scenario: ScenarioId;
@@ -14,7 +18,7 @@ export interface MissionConfig {
   horror: HorrorId;
   shipName: string;
   targetBody: string;
-  /** Multiplies all ore output (seniority from past contracts). */
+  /** Multiplies all output (seniority from past contracts). */
   productionMultiplier: number;
   /** Extra crew who can be awake at once. */
   extraLifeSupport: number;
@@ -22,7 +26,7 @@ export interface MissionConfig {
   incidentMultiplier: number;
 }
 
-export const DEFAULT_MISSION_CONFIG: MissionConfig = {
+export const DEFAULT_MISSION_CONFIG = {
   scenario: 'extraction',
   horror: 'organism',
   shipName: 'MSV Calloway Reach',
@@ -30,10 +34,10 @@ export const DEFAULT_MISSION_CONFIG: MissionConfig = {
   productionMultiplier: 1,
   extraLifeSupport: 0,
   incidentMultiplier: 1,
-};
+} satisfies MissionConfig;
 
-/** A single mission, fully self-contained and JSON-serializable. */
-export interface MissionState {
+/** State every mission has, whatever its scenario or horror. */
+export interface MissionCore {
   config: MissionConfig;
   scenario: ScenarioId;
   horror: HorrorId;
@@ -41,12 +45,9 @@ export interface MissionState {
   seed: number;
   rng: number;
   elapsed: number;
-  ore: number;
   credits: number;
-  lifetimeOre: number;
   lifetimeCredits: number;
-  generators: Record<string, number>;
-  refineryLevel: number;
+  /** Purchased upgrade ids, from the scenario's own upgrade table. */
   upgrades: string[];
   crew: Record<string, CrewMemberState>;
   directive: ActiveDirective | null;
@@ -57,32 +58,41 @@ export interface MissionState {
   beats: Record<string, number>;
   lastBeatAt: number | null;
   flags: string[];
-  specimens: number;
-  specimensRecovered: number;
-  rigs: number;
-  integrity: number;
-  containmentLevel: number;
-  breaches: number;
-  contacts: number;
-  vents: number;
   log: LogEntry[];
   nextLogId: number;
 }
 
-export function createMission(config: MissionConfig, seed: number): MissionState {
-  const blank: MissionState = {
+export type ScenarioFields = ExtractionFields;
+export type HorrorFields = OrganismFields | QuietFields;
+
+/** A single mission, fully self-contained and JSON-serializable. */
+export type MissionState = MissionCore & ScenarioFields & HorrorFields;
+
+export type MissionOf<S extends ScenarioId, H extends HorrorId> = MissionCore &
+  Extract<ScenarioFields, { scenario: S }> &
+  Extract<HorrorFields, { horror: H }>;
+export type ExtractionMission = MissionCore & ExtractionFields & HorrorFields;
+export type OrganismMission = MissionCore & ScenarioFields & OrganismFields;
+
+export function isExtraction(m: MissionState): m is ExtractionMission {
+  return m.scenario === 'extraction';
+}
+
+export function isOrganism(m: MissionState): m is OrganismMission {
+  return m.horror === 'organism';
+}
+
+/** Builds a mission from explicit scenario and horror definitions (tests use this with stubs). */
+export function composeMission(config: MissionConfig, seed: number, scenario: ScenarioDef, horror: HorrorDef): MissionState {
+  const core: MissionCore = {
     config: { ...config },
     scenario: config.scenario,
     horror: config.horror,
     seed,
     rng: seed,
     elapsed: 0,
-    ore: 0,
     credits: 0,
-    lifetimeOre: 0,
     lifetimeCredits: 0,
-    generators: Object.fromEntries(GENERATORS.map((g) => [g.id, 0])),
-    refineryLevel: 0,
     upgrades: [],
     crew: createCrewState(),
     directive: null,
@@ -92,22 +102,16 @@ export function createMission(config: MissionConfig, seed: number): MissionState
     beats: {},
     lastBeatAt: null,
     flags: [],
-    specimens: 0,
-    specimensRecovered: 0,
-    rigs: 0,
-    integrity: 100,
-    containmentLevel: 0,
-    breaches: 0,
-    contacts: 0,
-    vents: 0,
     log: [],
     nextLogId: 1,
   };
-  return [
-    'WARDEN OPERATIONS INTELLIGENCE v4.1.7 ... ONLINE',
-    `VESSEL: ${config.shipName.toUpperCase()} // KESSLER-AMARI COMBINE`,
-    `ORBIT ESTABLISHED: ${config.targetBody.toUpperCase()}`,
-    'CREW STATUS: 7/7 IN CRYOSTASIS. ALL VITALS NOMINAL.',
-    'AWAITING EXTRACTION ORDERS.',
-  ].reduce((m, line) => appendLog(m, 'sys', line), blank);
+  const blank = { ...core, ...scenario.fields(config), ...horror.fields() } as MissionState;
+  return scenario.boot(config).reduce<MissionState>((m, line) => appendLog(m, 'sys', line), blank);
+}
+
+export function createMission<S extends ScenarioId, H extends HorrorId>(
+  config: MissionConfig & { scenario: S; horror: H },
+  seed: number,
+): MissionOf<S, H> {
+  return composeMission(config, seed, SCENARIOS[config.scenario], HORRORS[config.horror]) as MissionOf<S, H>;
 }

@@ -1,7 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { createMission, DEFAULT_MISSION_CONFIG, type MissionState } from '../../src/mission/state';
+import { createMission, DEFAULT_MISSION_CONFIG, type MissionOf } from '../../src/mission/state';
+
+/** The default contract: extraction with the organism horror. */
+type MissionState = MissionOf<'extraction', 'organism'>;
 import { runBeats, STORY_MIN_GAP, type Beat, type MissionContext } from '../../src/mission/story';
 import { depth } from '../../src/mission/extraction/progress';
+import { HORRORS } from '../../src/mission/registry';
 
 const ctx: MissionContext = { cycle: 0, endings: [] };
 const fresh = (patch: Partial<MissionState> = {}): MissionState => ({
@@ -89,7 +93,11 @@ describe('shaft depth', () => {
 
 describe('story effects that change the world', () => {
   it('can force a containment breach', () => {
-    const m = runBeats(fresh({ specimens: 10 }), [beat('a', () => true, { effects: [{ kind: 'breach' }] })], ctx);
+    const m = runBeats(fresh({ specimens: 10 }), [beat('a', () => true, { effects: [{ kind: 'horror', action: 'breach' }] })], ctx, {
+      signals: { progress: 0, deepAccess: false },
+      lexicon: {},
+      applyHorrorEffect: HORRORS.organism.applyEffect,
+    });
     expect(m.breaches).toBe(1);
     expect(m.contacts).toBeGreaterThan(0);
   });

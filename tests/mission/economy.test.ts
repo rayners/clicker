@@ -139,7 +139,7 @@ describe('mission isolation (protects the future Boardroom layer)', () => {
   it('runs two missions side by side without sharing state', () => {
     let a = createMission(DEFAULT_MISSION_CONFIG, 1);
     let b = createMission({ ...DEFAULT_MISSION_CONFIG, shipName: 'MSV Other' }, 2);
-    a = buyGenerator({ ...drill(a), credits: 1000 }, drone.id);
+    a = buyGenerator({ ...drill(a), credits: 1000 }, drone.id) as typeof a;
     b = tickMission(b, 5);
     expect(b.generators[drone.id]).toBe(0);
     expect(b.ore).toBe(0);

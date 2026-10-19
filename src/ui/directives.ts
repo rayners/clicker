@@ -1,6 +1,7 @@
 import { formatDuration, formatNumber } from '../core/format';
 import { directiveDef, directiveProgress } from '../mission/directives';
 import type { MissionState } from '../mission/state';
+import { scenarioOf } from '../mission/registry';
 import { h, setAttr, setText } from './dom';
 
 const BAR_CELLS = 20;
@@ -40,7 +41,8 @@ export function createDirectivesPanel(): { el: HTMLElement; render(m: MissionSta
   );
 
   function render(m: MissionState) {
-    const def = m.directive && directiveDef(m.directive.id);
+    const scenario = scenarioOf(m);
+    const def = m.directive && directiveDef(m.directive.id, scenario);
     activeBody.hidden = !def;
     idle.hidden = !!def;
     if (m.directive && def) {
@@ -63,7 +65,7 @@ export function createDirectivesPanel(): { el: HTMLElement; render(m: MissionSta
           h(
             'li',
             { class: `dir-past dir-${result}` },
-            h('span', {}, `${id.toUpperCase()} ${directiveDef(id)?.title ?? ''}`),
+            h('span', {}, `${id.toUpperCase()} ${directiveDef(id, scenario)?.title ?? ''}`),
             h('span', { class: 'dir-outcome' }, result === 'completed' ? 'COMPLETE' : 'LAPSED'),
           ),
         ),

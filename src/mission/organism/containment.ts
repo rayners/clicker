@@ -1,9 +1,9 @@
 import { nextRandom } from '../../core/rng';
 import { CREW } from '../../data/crew';
-import { GENERATORS } from '../../data/extraction/generators';
 import { crewStatus } from '../crew';
 import { appendLog, type LogKind } from '../log';
-import type { MissionState } from '../state';
+import type { OrganismMission as MissionState } from '../state';
+import type { HorrorHooks } from '../kinds';
 
 export const RIG_BASE_COST = 1e6;
 const RIG_COST_GROWTH = 1.8;
@@ -117,19 +117,15 @@ function lose(m: MissionState, id: string): MissionState {
   return { ...m, crew: { ...m.crew, [id]: { ...member, status: 'lost' } } };
 }
 
-function incident(m: MissionState, roll: Roll): MissionState {
+function incident(m: MissionState, roll: Roll, hooks: HorrorHooks): MissionState {
   const kind = roll();
-  const owned = GENERATORS.filter((g) => (m.generators[g.id] ?? 0) > 0);
   const awake = CREW.filter((c) => m.crew[c.id]?.status === 'awake');
   const living = CREW.filter((c) => crewStatus(m, c.id) !== 'lost');
   const log = (next: MissionState, kindOf: LogKind, text: string) => appendLog(next, kindOf, text);
 
-  if (kind < 0.5 && owned.length > 0) {
-    const g = pick(owned, roll);
-    const count = m.generators[g.id] ?? 0;
-    const lost = Math.max(1, Math.floor(count * 0.1));
-    const next = { ...m, generators: { ...m.generators, [g.id]: count - lost } };
-    return log(next, 'sys', pick(EQUIPMENT_LINES, roll)(g.name));
+  if (kind < 0.5) {
+    const lost = hooks.loseEquipment(m, roll);
+    if (lost) return log(lost.m as MissionState, 'sys', pick(EQUIPMENT_LINES, roll)(lost.name));
   }
   if (kind < 0.8 && living.length > 0) {
     const victim = pick(awake.length > 0 ? awake : living, roll);
@@ -138,7 +134,7 @@ function incident(m: MissionState, roll: Roll): MissionState {
   return log({ ...m, integrity: Math.max(0, m.integrity - 15) }, 'sys', 'CONTAINMENT HOUSING STRUCK FROM OUTSIDE. INTEGRITY -15%.');
 }
 
-export function tickContainment(m: MissionState, dt: number): MissionState {
+export function tickContainment(m: MissionState, dt: number, hooks: HorrorHooks): MissionState {
   if (!isSpecialProjectsUnlocked(m) && m.contacts === 0) return m;
   const recovered = m.rigs * RIG_RATE * dt;
   let next: MissionState = {
@@ -152,7 +148,7 @@ export function tickContainment(m: MissionState, dt: number): MissionState {
   if (next.contacts > 0) {
     const r = roller(next);
     const chance = 1 - (1 - INCIDENT_CHANCE * next.config.incidentMultiplier) ** (next.contacts * dt);
-    if (r.roll() < chance) next = incident(next, r.roll);
+    if (r.roll() < chance) next = incident(next, r.roll, hooks);
     next = { ...next, rng: r.state() };
   }
   return next;

@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { createGame, type GameState } from '../../src/core/game';
 import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
-import { CRYO_UNLOCK_ORE, MAX_AWAKE } from '../../src/mission/crew';
+import { CRYO_UNLOCK_CREDITS, MAX_AWAKE } from '../../src/mission/crew';
 
 let store: Store;
 
@@ -24,12 +24,12 @@ describe('crew panel', () => {
   it('is hidden until the cryo bay is accessible', () => {
     setup();
     expect(crewTab()).toBeNull();
-    store.replace({ ...store.getState(), mission: { ...store.getState().mission, lifetimeOre: CRYO_UNLOCK_ORE } });
+    store.replace({ ...store.getState(), mission: { ...store.getState().mission, lifetimeCredits: CRYO_UNLOCK_CREDITS } });
     expect(crewTab()).not.toBeNull();
   });
 
   it('shows all seven crew, in cryo', async () => {
-    const user = setup({ lifetimeOre: CRYO_UNLOCK_ORE });
+    const user = setup({ lifetimeCredits: CRYO_UNLOCK_CREDITS });
     await user.click(crewTab()!);
     expect(screen.getAllByRole('article').length).toBe(7);
     expect(within(card(/sorensen/i)).getByText('CRYO')).toBeTruthy();
@@ -37,7 +37,7 @@ describe('crew panel', () => {
   });
 
   it('wakes a crew member and can put them back', async () => {
-    const user = setup({ lifetimeOre: CRYO_UNLOCK_ORE, credits: 10_000 });
+    const user = setup({ lifetimeCredits: CRYO_UNLOCK_CREDITS, credits: 10_000 });
     await user.click(crewTab()!);
     await user.click(screen.getByRole('button', { name: /wake dmitri sorensen/i }));
     expect(within(card(/sorensen/i)).getByText('AWAKE')).toBeTruthy();
@@ -47,7 +47,7 @@ describe('crew panel', () => {
   });
 
   it('disables waking when it cannot be afforded', async () => {
-    const user = setup({ lifetimeOre: CRYO_UNLOCK_ORE, credits: 0 });
+    const user = setup({ lifetimeCredits: CRYO_UNLOCK_CREDITS, credits: 0 });
     await user.click(crewTab()!);
     expect((screen.getByRole('button', { name: /wake dmitri sorensen/i }) as HTMLButtonElement).disabled).toBe(true);
   });
@@ -55,7 +55,7 @@ describe('crew panel', () => {
   it('shows fatigue as a meter', async () => {
     const g = createGame(1, 0);
     const user = setup({
-      lifetimeOre: CRYO_UNLOCK_ORE,
+      lifetimeCredits: CRYO_UNLOCK_CREDITS,
       crew: { ...g.mission.crew, sorensen: { status: 'awake', fatigue: 40 } },
     });
     await user.click(crewTab()!);
@@ -66,7 +66,7 @@ describe('crew panel', () => {
   it('marks exhausted crew', async () => {
     const g = createGame(1, 0);
     const user = setup({
-      lifetimeOre: CRYO_UNLOCK_ORE,
+      lifetimeCredits: CRYO_UNLOCK_CREDITS,
       crew: { ...g.mission.crew, sorensen: { status: 'awake', fatigue: 100 } },
     });
     await user.click(crewTab()!);

@@ -7,7 +7,7 @@ import { generatorCost, generatorRate, oreRate, refineryCapacity, refineryCost }
 import { availableUpgrades } from '../mission/extraction/upgrades';
 import { crewStatus, isCrewUnlocked, maxAwake, awakeCount } from '../mission/crew';
 import { containmentLevelCost, isSpecialProjectsUnlocked, reinforceCost, rigCost, ventCost } from '../mission/organism/containment';
-import { createMission } from '../mission/state';
+import { createMission, type MissionOf } from '../mission/state';
 
 export interface SimOptions {
   seed: number;
@@ -29,7 +29,7 @@ export interface SimResult {
 
 /** A sensible, greedy player. Not optimal: idle-ish after the first stretch, checks in periodically. */
 function decide(game: GameState): Action | null {
-  const m = game.mission;
+  const m = game.mission as MissionOf<'extraction', 'organism'>;
 
   // Containment emergencies first.
   if (m.contacts >= 3 && m.credits >= ventCost(m)) {
@@ -75,7 +75,7 @@ function decide(game: GameState): Action | null {
 
 export function simulateRun(options: SimOptions): SimResult {
   const { seed, maxSeconds, seniority = 0, activeClicks = 4, activeSeconds = 20 * 60, decisionInterval = 5 } = options;
-  let game = createGame(seed, 0);
+  let game: GameState = createGame(seed, 0);
   if (seniority > 0) {
     const profile = { ...createProfile(), seniority, contractsCompleted: 1, endingsSeen: ['deliver'] };
     game = { ...game, profile, mission: createMission(missionConfigFor(profile), seed) };
