@@ -15,10 +15,11 @@ import { createArchivePanel, hasArchiveToShow } from './archive';
 import { createTerminusPanel } from './terminus';
 import { createSettings } from './settings';
 import { createAssignment } from './assignment';
+import { createAlerts } from './alerts';
 import { createSound, cueForLog } from './sound';
 import { isSpecialProjectsUnlocked } from '../mission/organism/containment';
 import { isOrganism, type ScenarioId } from '../mission/state';
-import { isCrewUnlocked } from '../mission/crew';
+import { crewNeedingAttention, isCrewUnlocked } from '../mission/crew';
 import { advanceFrame, paintAll, paintSprite, readPalette, spriteCanvas } from './sprites';
 
 const SPRITE_CORRUPTION: Record<number, number> = { 1: 0, 2: 0, 3: 0.15, 4: 0.45 };
@@ -35,6 +36,8 @@ interface Panel {
   el: HTMLElement;
   render(game: GameState): void;
   visible(game: GameState): boolean;
+  /** Draws the eye to the tab: 'active' (something running) or 'alert' (something needs doing). */
+  attention?(game: GameState): 'active' | 'alert' | null;
 }
 
 function stat(label: string, ariaLabel: string) {
@@ -84,9 +87,12 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const upgradesSlot = h('div', { class: 'panel-slot' });
   const contacts = stat('CONTACTS', 'Unknown contacts');
   contacts.el.classList.add('stat-alert');
+  // selectTab is declared below; alerts only call it on a tap, long after mounting.
+  const alerts = createAlerts((panel) => selectTab(panel));
   const status = h(
     'section',
     { class: 'status', 'aria-label': 'Ship status' },
+    alerts.el,
     h('div', { class: 'status-target' }, spriteCanvas('moonlet', 'status-moon'), h('span', { class: 'status-target-name' })),
     statusSlot,
     h('dl', { class: 'stats stats-horror' }, contacts.el),
@@ -153,7 +159,18 @@ export function mountApp(root: HTMLElement, store: Store): void {
       render: (g) => view.ui.upgrades.render(g.mission),
       visible: (g) => views[g.mission.scenario].ui.upgrades.hasAny(g.mission),
     },
-    { id: 'crew', label: 'CREW', short: 'CREW', el: crew.el, render: (g) => crew.render(g.mission), visible: (g) => isCrewUnlocked(g.mission) },
+    {
+      id: 'crew',
+      label: 'CREW',
+      short: 'CREW',
+      el: crew.el,
+      render: (g) => crew.render(g.mission),
+      visible: (g) => isCrewUnlocked(g.mission),
+      attention: (g) => {
+        const { exhausted, tiring } = crewNeedingAttention(g.mission);
+        return exhausted.length > 0 ? 'alert' : tiring.length > 0 ? 'active' : null;
+      },
+    },
     {
       id: 'directives',
       label: 'DIRECTIVES',
@@ -161,6 +178,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
       el: directives.el,
       render: (g) => directives.render(g.mission),
       visible: (g) => hasDirectivesToShow(g.mission),
+      attention: (g) => (g.mission.directive ? 'active' : null),
     },
     {
       id: 'projects',
@@ -266,9 +284,17 @@ export function mountApp(root: HTMLElement, store: Store): void {
       lastPing = m.elapsed;
       sound.play('ping');
     }
+    alerts.render(m);
     panels.forEach((p, i) => {
       const visible = p.visible(game);
-      tabs[i]!.hidden = !visible;
+      const tab = tabs[i]!;
+      tab.hidden = !visible;
+      const attention = visible ? (p.attention?.(game) ?? null) : null;
+      if ((tab.dataset.attention ?? null) !== attention) {
+        if (attention) tab.dataset.attention = attention;
+        else delete tab.dataset.attention;
+        tab.setAttribute('aria-label', attention ? `${p.label} (${attention === 'alert' ? 'needs attention' : 'active'})` : p.label);
+      }
       if (!visible && current === p.id) selectTab('ops');
       if (!visible) return;
       try {

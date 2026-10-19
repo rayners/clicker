@@ -11,6 +11,8 @@ export const FATIGUE_SECONDS = 20 * 60;
 /** Seconds in cryo to recover fully. */
 export const RECOVERY_SECONDS = 5 * 60;
 const MAX_FATIGUE = 100;
+/** Awake crew at or above this fatigue are worth warning about before they give out. */
+export const TIRING_FATIGUE = 80;
 
 export type CrewStatus = 'cryo' | 'awake' | 'lost';
 export interface CrewMemberState {
@@ -89,4 +91,16 @@ export function tickCrew<M extends MissionCore>(m: M, dt: number): M {
     }
   }
   return next;
+}
+
+/** Crew the player should look at: exhausted (boost lost) and awake-but-tiring. */
+export function crewNeedingAttention(m: MissionCore): { exhausted: string[]; tiring: string[] } {
+  const exhausted: string[] = [];
+  const tiring: string[] = [];
+  for (const def of CREW) {
+    const status = crewStatus(m, def.id);
+    if (status === 'exhausted') exhausted.push(def.id);
+    else if (status === 'awake' && (m.crew[def.id]?.fatigue ?? 0) >= TIRING_FATIGUE) tiring.push(def.id);
+  }
+  return { exhausted, tiring };
 }

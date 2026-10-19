@@ -183,6 +183,53 @@ button:focus-visible {
   display: none;
 }
 
+/* ---------- alerts strip: active directive, tired crew ---------- */
+
+.alerts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-bottom: 6px;
+}
+
+.alerts[hidden],
+.alert[hidden] {
+  display: none;
+}
+
+.alert {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+  padding: 2px 8px;
+  border: 1px dashed var(--phosphor-dim);
+  background: transparent;
+  font-size: 0.8em;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.alert-bar {
+  flex: 1;
+  text-align: center;
+  color: var(--phosphor-hi);
+  overflow: hidden;
+}
+
+.alert-time {
+  color: var(--phosphor-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.alert-crew[data-level='alert'] {
+  border-style: solid;
+  border-color: var(--phosphor);
+  animation: tab-alert 1s steps(2, end) infinite;
+}
+
 /* ---------- production flow: the input/output balance is the headline ---------- */
 
 .flow-row {
@@ -1233,6 +1280,37 @@ button:focus-visible {
 
 .tab-full {
   display: none;
+}
+
+/* Something running behind this tab (a directive, tiring crew): a lit marker. */
+.tab[data-attention] {
+  position: relative;
+  color: var(--phosphor-hi);
+}
+
+.tab[data-attention]::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  background: var(--phosphor);
+  box-shadow: 0 0 6px var(--glow);
+  animation: flow-pulse 1.2s steps(2, end) infinite;
+}
+
+/* Something needs doing (exhausted crew): the whole tab blinks inverted. */
+.tab[data-attention='alert'] {
+  animation: tab-alert 1s steps(2, end) infinite;
+}
+
+@keyframes tab-alert {
+  50% {
+    background: var(--phosphor);
+    color: var(--bg);
+    text-shadow: none;
+  }
 }
 
 .tab:last-child {
