@@ -1,4 +1,4 @@
-import { createMission, DEFAULT_MISSION_CONFIG, type MissionState } from '../mission/state';
+import { createMission, DEFAULT_MISSION_CONFIG, type MissionState, type ScenarioId } from '../mission/state';
 import { tickMission } from '../mission/tick';
 import { appendLog } from '../mission/log';
 import { formatDuration, formatNumber } from './format';
@@ -11,9 +11,12 @@ const ABSENCE_LOG_THRESHOLD = 60;
 
 /** Compact record of a finished mission, kept forever in the profile. */
 export interface ContractRecord {
+  scenario: ScenarioId;
   shipName: string;
   ending: string;
-  lifetimeOre: number;
+  /** The scenario's headline output (ore extracted, units processed, ...). */
+  output: number;
+  outputUnit: string;
   specimens: number;
   crewSurvived: number;
   duration: number;
@@ -44,7 +47,7 @@ export interface GameState {
   boardroom?: unknown;
 }
 
-export const GAME_VERSION = 2;
+export const GAME_VERSION = 3;
 
 export function createProfile(): Profile {
   return {

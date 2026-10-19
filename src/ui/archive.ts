@@ -69,7 +69,7 @@ export function createArchivePanel(): { el: HTMLElement; render(game: GameState)
               h(
                 'span',
                 { class: 'arc-detail' },
-                `${formatNumber(c.lifetimeOre)} ORE // ${c.specimens} SPECIMENS // ${c.crewSurvived}/7 CREW // ${formatDuration(c.duration)}`,
+                `${formatNumber(c.output)} ${c.outputUnit} // ${c.specimens} SPECIMENS // ${c.crewSurvived}/7 CREW // ${formatDuration(c.duration)}`,
               ),
             ),
           )

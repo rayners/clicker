@@ -145,4 +145,29 @@ describe('real migrations', () => {
     expect(upgraded.mission.seed).toBe(g.mission.rng);
     expect(upgraded.mission.config).toMatchObject({ productionMultiplier: 1, extraLifeSupport: 0, incidentMultiplier: 1 });
   });
+
+  it('upgrades a version 2 save: every existing contract is an extraction contract with the organism horror', () => {
+    const g = played();
+    const v2 = JSON.parse(serialize(g));
+    v2.version = 2;
+    delete v2.mission.scenario;
+    delete v2.mission.horror;
+    delete v2.mission.config.scenario;
+    delete v2.mission.config.horror;
+    v2.profile.history = [{ shipName: 'MSV Calloway Reach', ending: 'deliver', lifetimeOre: 5e8, specimens: 12, crewSurvived: 2, duration: 9000 }];
+    const upgraded = deserialize(JSON.stringify(v2));
+    expect(upgraded.mission.scenario).toBe('extraction');
+    expect(upgraded.mission.horror).toBe('organism');
+    expect(upgraded.mission.config).toMatchObject({ scenario: 'extraction', horror: 'organism' });
+    expect(upgraded.profile.history[0]).toEqual({
+      scenario: 'extraction',
+      shipName: 'MSV Calloway Reach',
+      ending: 'deliver',
+      output: 5e8,
+      outputUnit: 'ORE',
+      specimens: 12,
+      crewSurvived: 2,
+      duration: 9000,
+    });
+  });
 });

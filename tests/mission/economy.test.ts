@@ -28,6 +28,11 @@ describe('a new mission', () => {
     expect(Object.values(m.generators).every((n) => n === 0)).toBe(true);
   });
 
+  it('records which scenario and horror it is running', () => {
+    expect(fresh().scenario).toBe('extraction');
+    expect(fresh().horror).toBe('organism');
+  });
+
   it('records the config it was created from', () => {
     expect(fresh().config.shipName).toBe(DEFAULT_MISSION_CONFIG.shipName);
   });

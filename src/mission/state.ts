@@ -4,7 +4,14 @@ import { createCrewState, type CrewMemberState } from './crew';
 import type { ActiveDirective, DirectiveResult } from './directives';
 
 /** Everything that varies between missions. Plain data so the future Boardroom layer can author it. */
+export type ScenarioId = 'extraction';
+export type HorrorId = 'organism';
+
 export interface MissionConfig {
+  /** What the contract is: the economy and its corporate story. */
+  scenario: ScenarioId;
+  /** What goes wrong. Independent of the scenario (see docs/TERRAFORM.md). */
+  horror: HorrorId;
   shipName: string;
   targetBody: string;
   /** Multiplies all ore output (seniority from past contracts). */
@@ -16,6 +23,8 @@ export interface MissionConfig {
 }
 
 export const DEFAULT_MISSION_CONFIG: MissionConfig = {
+  scenario: 'extraction',
+  horror: 'organism',
   shipName: 'MSV Calloway Reach',
   targetBody: 'LV-0919 "Tethys Minor"',
   productionMultiplier: 1,
@@ -26,6 +35,8 @@ export const DEFAULT_MISSION_CONFIG: MissionConfig = {
 /** A single mission, fully self-contained and JSON-serializable. */
 export interface MissionState {
   config: MissionConfig;
+  scenario: ScenarioId;
+  horror: HorrorId;
   /** The seed this mission started from; with the ship name it identifies the contract. */
   seed: number;
   rng: number;
@@ -61,6 +72,8 @@ export interface MissionState {
 export function createMission(config: MissionConfig, seed: number): MissionState {
   const blank: MissionState = {
     config: { ...config },
+    scenario: config.scenario,
+    horror: config.horror,
     seed,
     rng: seed,
     elapsed: 0,

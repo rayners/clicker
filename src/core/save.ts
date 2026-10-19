@@ -25,6 +25,31 @@ const MIGRATIONS: Record<number, Migration> = {
       },
     };
   },
+  // v3: contracts name their scenario and horror; contract records keep a generic headline output.
+  3: (save) => {
+    const profile = save.profile as Record<string, unknown>;
+    const mission = save.mission as Record<string, unknown>;
+    const config = mission.config as Record<string, unknown>;
+    const history = (profile.history as Record<string, unknown>[] | undefined) ?? [];
+    return {
+      ...save,
+      profile: {
+        ...profile,
+        history: history.map(({ lifetimeOre, ...record }) => ({
+          scenario: 'extraction',
+          ...record,
+          output: lifetimeOre,
+          outputUnit: 'ORE',
+        })),
+      },
+      mission: {
+        scenario: 'extraction',
+        horror: 'organism',
+        ...mission,
+        config: { scenario: 'extraction', horror: 'organism', ...config },
+      },
+    };
+  },
 };
 
 export function migrate(save: RawSave, migrations: Record<number, Migration>, target: number): RawSave {

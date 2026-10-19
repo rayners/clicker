@@ -79,9 +79,11 @@ export function completeContract(game: GameState, ending: Ending, seed: number):
     history: [
       ...game.profile.history,
       {
+        scenario: m.scenario,
         shipName: m.config.shipName,
         ending,
-        lifetimeOre: m.lifetimeOre,
+        output: m.lifetimeOre,
+        outputUnit: 'ORE',
         specimens: Math.floor(m.specimens),
         crewSurvived: survivors(game),
         duration: m.elapsed,
