@@ -9,8 +9,15 @@ import { createSystemsPanel } from './systems';
 import { createUpgradesPanel, hasUpgradesToShow } from './upgrades';
 import { createCrewPanel } from './crew';
 import { createDirectivesPanel, hasDirectivesToShow } from './directives';
+import { createProjectsPanel } from './projects';
+import { createArchivePanel } from './archive';
+import { isSpecialProjectsUnlocked } from '../mission/containment';
+import { unlockedFiles } from '../mission/archive';
 import { isCrewUnlocked } from '../mission/crew';
 import { advanceFrame, paintAll, paintSprite, readPalette, spriteCanvas } from './sprites';
+
+const SPRITE_CORRUPTION: Record<number, number> = { 1: 0, 2: 0, 3: 0.15, 4: 0.45 };
+const GLITCH_INTERVAL = 1.5;
 
 interface Panel {
   id: string;
@@ -42,11 +49,13 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const credits = stat('CREDITS', 'Credits');
   const refinery = stat('REFINE/S', 'Refinery throughput');
   const shaft = stat('DEPTH', 'Shaft depth');
+  const contacts = stat('CONTACTS', 'Unknown contacts');
+  contacts.el.classList.add('stat-alert');
   const status = h(
     'section',
     { class: 'status', 'aria-label': 'Ship status' },
     h('div', { class: 'status-target' }, spriteCanvas('moonlet', 'status-moon'), h('span', { class: 'status-target-name' })),
-    h('dl', { class: 'stats' }, ore.el, credits.el, rate.el, refinery.el, shaft.el),
+    h('dl', { class: 'stats' }, ore.el, credits.el, rate.el, refinery.el, shaft.el, contacts.el),
   );
   const targetName = status.querySelector('.status-target-name')!;
 
@@ -75,6 +84,8 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const upgrades = createUpgradesPanel(store);
   const crew = createCrewPanel(store);
   const directives = createDirectivesPanel();
+  const projects = createProjectsPanel(store);
+  const archive = createArchivePanel();
   const panels: Panel[] = [
     {
       id: 'ops',
@@ -101,6 +112,22 @@ export function mountApp(root: HTMLElement, store: Store): void {
       el: directives.el,
       render: (g) => directives.render(g.mission),
       visible: (g) => hasDirectivesToShow(g.mission),
+    },
+    {
+      id: 'projects',
+      label: 'SPECIAL PROJECTS',
+      short: 'S.P.',
+      el: projects.el,
+      render: (g) => projects.render(g.mission),
+      visible: (g) => isSpecialProjectsUnlocked(g.mission),
+    },
+    {
+      id: 'archive',
+      label: 'ARCHIVE',
+      short: 'ARC',
+      el: archive.el,
+      render: (g) => archive.render(g.mission),
+      visible: (g) => unlockedFiles(g.mission).length > 0,
     },
   ];
 
@@ -133,8 +160,10 @@ export function mountApp(root: HTMLElement, store: Store): void {
   root.classList.add('shell');
   root.replaceChildren(masthead, status, ...panels.map((p) => p.el), drillBay, tabbar);
   selectTab('ops');
-  const palette = readPalette(root);
+  let palette = readPalette(root);
   paintAll(root);
+  let paintedAct = 0;
+  let lastGlitch = -Infinity;
 
   function render(game: GameState) {
     const m = game.mission;
@@ -147,12 +176,38 @@ export function mountApp(root: HTMLElement, store: Store): void {
     setText(refinery.value, formatNumber(refineryCapacity(m)));
     setText(shaft.value, `${depth(m).toLocaleString('en-US')} M`);
     if (root.dataset.act !== String(m.act)) root.dataset.act = String(m.act);
+    const tracking = m.flags.includes('tracker');
+    contacts.el.hidden = !tracking;
+    setText(contacts.value, String(m.contacts));
+    const alert = String(m.contacts > 0);
+    if (root.dataset.alert !== alert) root.dataset.alert = alert;
+    repaintSprites(m.act, m.elapsed);
     panels.forEach((p, i) => {
       const visible = p.visible(game);
       tabs[i]!.hidden = !visible;
       if (!visible && current === p.id) selectTab('ops');
-      if (visible) p.render(game);
+      if (!visible) return;
+      try {
+        p.render(game);
+      } catch (error) {
+        // One broken panel must never freeze the whole game loop.
+        console.error(`panel ${p.id} failed to render`, error);
+      }
     });
+  }
+
+  /** Sprites re-tint when the act changes the palette, and glitch intermittently from act 3 on. */
+  function repaintSprites(act: number, elapsed: number) {
+    const corruption = SPRITE_CORRUPTION[act] ?? 0.5;
+    if (act !== paintedAct) {
+      paintedAct = act;
+      palette = readPalette(root);
+      paintAll(root);
+    }
+    if (corruption === 0 || elapsed - lastGlitch < GLITCH_INTERVAL) return;
+    lastGlitch = elapsed;
+    const glitching = Math.random() < (act >= 4 ? 0.6 : 0.25);
+    paintAll(root, glitching ? corruption : 0, Math.floor(elapsed));
   }
 
   store.subscribe(render);

@@ -35,7 +35,7 @@ export function directiveProgress(m: MissionState): { current: number; target: n
   if (!m.directive || !def) return { current: 0, target: 0 };
   const value = counter(m, def);
   const current = def.goal.kind === 'ownGenerators' ? value : value - m.directive.baseline;
-  return { current: Math.min(current, def.goal.target), target: def.goal.target };
+  return { current: Math.max(0, Math.min(current, def.goal.target)), target: def.goal.target };
 }
 
 function resolve(m: MissionState, def: DirectiveDef, result: DirectiveResult): MissionState {

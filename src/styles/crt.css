@@ -27,6 +27,26 @@
   }
 }
 
+/* From act III the masthead occasionally tears, just for a frame. */
+.shell[data-act='3'] .masthead,
+.shell[data-act='4'] .masthead {
+  animation: tear-mast 11s infinite steps(1);
+}
+
+@keyframes tear-mast {
+  0%,
+  96%,
+  100% {
+    transform: none;
+  }
+  97% {
+    transform: translateX(4px) skewX(-6deg);
+  }
+  98% {
+    transform: translateX(-2px);
+  }
+}
+
 @media (max-width: 899px) {
   .shell::after {
     background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px),
@@ -36,6 +56,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .shell::after,
+  .shell::before,
+  .masthead,
   .status-moon,
   .log-entry,
   .drill-tick {

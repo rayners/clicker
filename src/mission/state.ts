@@ -35,6 +35,14 @@ export interface MissionState {
   beats: Record<string, number>;
   lastBeatAt: number | null;
   flags: string[];
+  specimens: number;
+  specimensRecovered: number;
+  rigs: number;
+  integrity: number;
+  containmentLevel: number;
+  breaches: number;
+  contacts: number;
+  vents: number;
   log: LogEntry[];
   nextLogId: number;
 }
@@ -59,6 +67,14 @@ export function createMission(config: MissionConfig, seed: number): MissionState
     beats: {},
     lastBeatAt: null,
     flags: [],
+    specimens: 0,
+    specimensRecovered: 0,
+    rigs: 0,
+    integrity: 100,
+    containmentLevel: 0,
+    breaches: 0,
+    contacts: 0,
+    vents: 0,
     log: [],
     nextLogId: 1,
   };

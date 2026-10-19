@@ -67,6 +67,13 @@ describe('resolving directives', () => {
   });
 });
 
+describe('progress', () => {
+  it('is never negative, even if a counter is somehow below its baseline', () => {
+    const m = fresh({ directive: { id: first.id, issuedAt: 0, baseline: 500 }, lifetimeOre: 100 });
+    expect(directiveProgress(m).current).toBe(0);
+  });
+});
+
 describe('goal kinds', () => {
   const kind = (k: string) => DIRECTIVES.find((d) => d.goal.kind === k)!;
 

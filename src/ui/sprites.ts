@@ -10,6 +10,8 @@ const PALETTE_VARS: Record<string, string> = {
   e: '--corp',
 };
 
+const LOST_CORRUPTION = 0.9;
+
 export type Palette = Record<string, string>;
 
 export function readPalette(el: Element): Palette {
@@ -52,5 +54,9 @@ export function advanceFrame(canvas: HTMLCanvasElement): void {
 
 export function paintAll(root: HTMLElement, corruption = 0, rng = 0): void {
   const palette = readPalette(root);
-  root.querySelectorAll<HTMLCanvasElement>('canvas[data-sprite]').forEach((c, i) => paintSprite(c, palette, corruption, rng + i));
+  root.querySelectorAll<HTMLCanvasElement>('canvas[data-sprite]').forEach((c, i) => {
+    // Portraits of lost crew are always badly degraded.
+    const amount = c.closest('[data-status="lost"]') ? LOST_CORRUPTION : corruption;
+    paintSprite(c, palette, amount, rng + i);
+  });
 }

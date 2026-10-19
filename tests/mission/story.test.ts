@@ -86,3 +86,11 @@ describe('shaft depth', () => {
     expect(Number.isInteger(depth(fresh({ lifetimeOre: 12345 })))).toBe(true);
   });
 });
+
+describe('story effects that change the world', () => {
+  it('can force a containment breach', () => {
+    const m = runBeats(fresh({ specimens: 10 }), [beat('a', () => true, { effects: [{ kind: 'breach' }] })], ctx);
+    expect(m.breaches).toBe(1);
+    expect(m.contacts).toBeGreaterThan(0);
+  });
+});

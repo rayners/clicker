@@ -1,0 +1,50 @@
+import { GENERATORS } from '../data/generators';
+import type { MissionState } from '../mission/state';
+import type { GameState } from './game';
+
+/** Developer shortcuts (?debug=act3 etc.) for testing pacing and theming without hours of play. */
+export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus'] as const;
+
+const owned = (upTo: number, count: number) =>
+  Object.fromEntries(GENERATORS.map((g, i) => [g.id, i < upTo ? count : 0]));
+
+const PATCHES: Record<string, Partial<MissionState>> = {
+  act2: { act: 2, lifetimeOre: 1.2e5, credits: 5e4, generators: owned(3, 10) },
+  act3: {
+    act: 3,
+    lifetimeOre: 2e9,
+    credits: 1e9,
+    generators: owned(6, 15),
+    flags: ['specimens'],
+    beats: { 'a3-entry': 0, 'a3-special-projects': 0 },
+  },
+  act4: {
+    act: 4,
+    lifetimeOre: 2e10,
+    credits: 2e10,
+    generators: owned(7, 25),
+    flags: ['specimens', 'tracker', 'archive-0-77'],
+    specimens: 12,
+    rigs: 4,
+    contacts: 3,
+    breaches: 1,
+    integrity: 45,
+  },
+  terminus: {
+    act: 4,
+    lifetimeOre: 5e10,
+    credits: 5e10,
+    generators: owned(8, 30),
+    flags: ['specimens', 'tracker', 'archive-0-77', 'terminus'],
+    specimens: 30,
+    specimensRecovered: 34,
+    contacts: 5,
+    breaches: 2,
+  },
+};
+
+export function applyScenario(game: GameState, name: string): GameState {
+  const patch = PATCHES[name];
+  if (!patch) return game;
+  return { ...game, mission: { ...game.mission, ...patch, beats: { ...game.mission.beats, ...patch.beats } } };
+}

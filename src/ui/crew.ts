@@ -66,7 +66,11 @@ export function createCrewPanel(store: Store): { el: HTMLElement; render(m: Miss
       const fatigue = Math.round(state.fatigue);
       setAttr(card.meter, 'aria-valuenow', String(fatigue));
       setText(card.meter, bar(state.fatigue));
-      if (state.status === 'awake') {
+      if (state.status === 'lost') {
+        setText(card.button, 'SIGNAL LOST');
+        setAttr(card.button, 'aria-label', `${card.def.name}: signal lost`);
+        card.button.disabled = true;
+      } else if (state.status === 'awake') {
         setText(card.button, 'TO CRYO');
         setAttr(card.button, 'aria-label', `Return ${card.def.name} to cryo`);
         card.button.disabled = false;

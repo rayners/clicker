@@ -6,6 +6,7 @@ import { catchUp } from './core/game';
 import { loadGame, saveGame } from './core/save';
 import { createStore } from './core/store';
 import { mountApp } from './ui/app';
+import { applyScenario } from './core/debug';
 
 const TICK_MS = 100;
 const AUTOSAVE_MS = 10_000;
@@ -13,7 +14,9 @@ const AUTOSAVE_MS = 10_000;
 const storage = window.localStorage;
 const seed = (Math.random() * 2 ** 31) | 0;
 const loaded = loadGame(storage, Date.now(), seed);
-const store = createStore(catchUp(loaded.game, Date.now()).game);
+const debug = new URLSearchParams(location.search).get('debug');
+const initial = catchUp(loaded.game, Date.now()).game;
+const store = createStore(debug ? applyScenario(initial, debug) : initial);
 
 mountApp(document.getElementById('app')!, store);
 

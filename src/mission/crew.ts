@@ -11,7 +11,7 @@ export const FATIGUE_SECONDS = 20 * 60;
 export const RECOVERY_SECONDS = 5 * 60;
 const MAX_FATIGUE = 100;
 
-export type CrewStatus = 'cryo' | 'awake';
+export type CrewStatus = 'cryo' | 'awake' | 'lost';
 export interface CrewMemberState {
   status: CrewStatus;
   fatigue: number;
@@ -29,9 +29,10 @@ export function awakeCount(m: MissionState): number {
   return Object.values(m.crew).filter((c) => c.status === 'awake').length;
 }
 
-export function crewStatus(m: MissionState, id: string): 'cryo' | 'awake' | 'exhausted' {
+export function crewStatus(m: MissionState, id: string): 'cryo' | 'awake' | 'exhausted' | 'lost' {
   const c = m.crew[id];
   if (!c || c.status === 'cryo') return 'cryo';
+  if (c.status === 'lost') return 'lost';
   return c.fatigue >= MAX_FATIGUE ? 'exhausted' : 'awake';
 }
 
@@ -81,7 +82,7 @@ export function tickCrew(m: MissionState, dt: number): MissionState {
       if (c.fatigue < MAX_FATIGUE && fatigue >= MAX_FATIGUE) {
         next = appendLog(next, 'crew', `${def.callsign}: "${def.exhaustedLine}"`);
       }
-    } else if (c.fatigue > 0) {
+    } else if (c.status === 'cryo' && c.fatigue > 0) {
       next.crew[def.id] = { ...c, fatigue: Math.max(0, c.fatigue - loss) };
     }
   }

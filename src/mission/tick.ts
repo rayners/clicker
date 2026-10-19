@@ -2,6 +2,7 @@ import { ORE_PRICE, oreRate, refineryCapacity } from './economy';
 import type { MissionState } from './state';
 import { tickCrew } from './crew';
 import { tickDirectives } from './directives';
+import { tickContainment } from './containment';
 import { runBeats, type MissionContext } from './story';
 import { STORY } from '../data/story';
 
@@ -19,5 +20,5 @@ export function tickMission(m: MissionState, dt: number, ctx: MissionContext = N
     credits: m.credits + refined * ORE_PRICE,
     lifetimeCredits: m.lifetimeCredits + refined * ORE_PRICE,
   }, dt);
-  return runBeats(tickDirectives(next), STORY, ctx);
+  return runBeats(tickDirectives(tickContainment(next, dt)), STORY, ctx);
 }

@@ -2,6 +2,7 @@ import { GENERATORS, type GeneratorDef } from '../data/generators';
 import { UPGRADES, type UpgradeEffect } from '../data/upgrades';
 import { CREW } from '../data/crew';
 import { isCrewEffective } from './crew';
+import { fundingMultiplier } from './containment';
 import type { MissionState } from './state';
 
 export const COST_GROWTH = 1.15;
@@ -45,7 +46,7 @@ function applyEffect(result: Multipliers, e: UpgradeEffect): void {
 }
 
 function multipliers(m: MissionState): Multipliers {
-  const result: Multipliers = { click: 1, clickRateShare: 0, global: 1, refinery: 1, generator: {} };
+  const result: Multipliers = { click: 1, clickRateShare: 0, global: fundingMultiplier(m), refinery: 1, generator: {} };
   for (const u of UPGRADES) if (m.upgrades.includes(u.id)) applyEffect(result, u.effect);
   for (const c of CREW) {
     if (c.boost.kind !== 'fatigueMultiplier' && isCrewEffective(m, c.id)) applyEffect(result, c.boost);

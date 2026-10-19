@@ -1,5 +1,6 @@
 import { appendLog, type LogKind } from './log';
 import type { MissionState } from './state';
+import { breach } from './containment';
 
 /** Seconds between non-urgent beats. */
 export const STORY_MIN_GAP = 20;
@@ -10,7 +11,7 @@ export interface MissionContext {
   cycle: number;
 }
 
-export type BeatEffect = { kind: 'setAct'; act: number } | { kind: 'setFlag'; flag: string };
+export type BeatEffect = { kind: 'setAct'; act: number } | { kind: 'setFlag'; flag: string } | { kind: 'breach' };
 
 export interface Beat {
   id: string;
@@ -29,6 +30,8 @@ function applyEffect(m: MissionState, e: BeatEffect): MissionState {
       return { ...m, act: Math.max(m.act, e.act) };
     case 'setFlag':
       return m.flags.includes(e.flag) ? m : { ...m, flags: [...m.flags, e.flag] };
+    case 'breach':
+      return breach(m);
   }
 }
 

@@ -3,6 +3,7 @@ import { sinceBeat } from '../mission/story';
 import { depth } from '../mission/progress';
 import { isCrewUnlocked } from '../mission/crew';
 import type { MissionState } from '../mission/state';
+import { CREW } from './crew';
 
 const owns = (m: MissionState, id: string, n = 1) => (m.generators[id] ?? 0) >= n;
 const inAct = (m: MissionState, act: number) => m.act >= act;
@@ -160,4 +161,148 @@ const ACT_2: Beat[] = [
   },
 ];
 
-export const STORY: readonly Beat[] = [...ACT_1, ...ACT_2];
+const lostCount = (m: MissionState) => CREW.filter((c) => m.crew[c.id]?.status === 'lost').length;
+
+/** Act 3: the cavity. Corporate messages now arrive with no light-lag at all. */
+const ACT_3: Beat[] = [
+  {
+    id: 'a3-entry',
+    act: 3,
+    when: ({ m }) => inAct(m, 2) && depth(m) >= 3_200 && owns(m, 'bore'),
+    entries: [
+      { kind: 'sys', text: 'BORE B-1 BREACH AT 3,212 M. VOID ENCOUNTERED.' },
+      { kind: 'sys', text: 'VOID ATMOSPHERE: PRESENT. TEMPERATURE: 304 K. HUMIDITY: 96%. ACOUSTIC: PERIODIC, 0.2 HZ.' },
+    ],
+    effects: [{ kind: 'setAct', act: 3 }],
+  },
+  {
+    id: 'a3-special-projects',
+    act: 3,
+    when: ({ m }) => sinceBeat(m, 'a3-entry') >= 30,
+    entries: [
+      {
+        kind: 'corp',
+        text: 'SPECIAL PROJECTS [TX 0D 0H 00M AGO]: Congratulations, WARDEN. Begin specimen recovery immediately. Bonus structure attached.',
+      },
+    ],
+    effects: [{ kind: 'setFlag', flag: 'specimens' }],
+  },
+  {
+    id: 'a3-lag-check',
+    act: 3,
+    when: ({ m }) => sinceBeat(m, 'a3-special-projects') >= 20,
+    entries: [
+      { kind: 'sys', text: 'COMMS DIAGNOSTIC: LAST TRANSMISSION ORIGIN RANGE 0.00 AU.' },
+      { kind: 'sys', text: 'RE-RUNNING... ORIGIN RANGE 4.1 LY. DIAGNOSTIC PASSED.' },
+    ],
+  },
+  {
+    id: 'a3-first-specimen',
+    act: 3,
+    when: ({ m }) => inAct(m, 3) && m.specimens >= 1,
+    entries: [{ kind: 'sys', text: 'SPECIMEN 001 SECURED IN CONTAINMENT. CLASSIFICATION: [SPECIAL PROJECTS EYES ONLY].' }],
+  },
+  {
+    id: 'a3-kane-thaw',
+    act: 3,
+    when: ({ m }) => sinceBeat(m, 'a3-first-specimen') >= 60,
+    entries: [{ kind: 'sys', text: 'CRYO POD 6 (KANE): THAW REQUEST LOGGED FROM INSIDE POD. SUBJECT IN STASIS. REQUEST HONOURED.' }],
+  },
+  {
+    id: 'a3-voss-handle',
+    act: 3,
+    when: ({ m }) => inAct(m, 3) && m.specimens >= 3,
+    entries: [
+      { kind: 'sys', text: 'CRYO POD 5 (VOSS): EMERGENCY RELEASE PULLED FROM INSIDE. OVERRIDDEN BY SPECIAL PROJECTS AUTHORITY.' },
+    ],
+  },
+  {
+    id: 'a3-habitat-warm',
+    act: 3,
+    when: ({ m }) => inAct(m, 3) && owns(m, 'habitat'),
+    entries: [{ kind: 'sys', text: 'HABITAT H-1 PRESSURISED. INTERNAL TEMPERATURE HOLDING AT 304 K. HEATERS: OFF.' }],
+  },
+  {
+    id: 'a3-tapping',
+    act: 3,
+    when: ({ m }) => inAct(m, 3) && m.specimens >= 5,
+    entries: [{ kind: 'anomaly', text: 'CONTAINMENT ACOUSTIC SENSOR: RHYTHMIC TAPPING. 0.2 HZ. MATCHES VOID SIGNAL.' }],
+  },
+  {
+    id: 'a3-integrity-warning',
+    act: 3,
+    when: ({ m }) => inAct(m, 3) && m.integrity < 50,
+    entries: [{ kind: 'sys', text: 'CONTAINMENT INTEGRITY BELOW 50%. REINFORCEMENT RECOMMENDED. SPECIAL PROJECTS RECOMMENDS: CONTINUE RECOVERY.' }],
+  },
+];
+
+/** Act 4: something is loose aboard. */
+const ACT_4: Beat[] = [
+  {
+    id: 'a4-forced-breach',
+    act: 4,
+    when: ({ m }) => inAct(m, 3) && m.breaches === 0 && (m.specimens >= 20 || depth(m) >= 4_800),
+    entries: [{ kind: 'anomaly', text: 'CONTAINMENT FIELD ... FIELD ... F I E L D' }],
+    effects: [{ kind: 'breach' }],
+  },
+  {
+    id: 'a4-entry',
+    act: 4,
+    urgent: true,
+    when: ({ m }) => inAct(m, 3) && m.contacts > 0,
+    entries: [
+      { kind: 'anomaly', text: 'CONTAINMENT BREACH. CONTAINMENT BREACH. CONTAINMENT BREACH.' },
+      { kind: 'sys', text: 'UNKNOWN CONTACTS ABOARD. MOTION TRACKING ENABLED. ALL CREW: REMAIN IN CRYO.' },
+    ],
+    effects: [
+      { kind: 'setAct', act: 4 },
+      { kind: 'setFlag', flag: 'tracker' },
+    ],
+  },
+  {
+    id: 'a4-corp',
+    act: 4,
+    when: ({ m }) => sinceBeat(m, 'a4-entry') >= 30,
+    entries: [
+      {
+        kind: 'corp',
+        text: 'SPECIAL PROJECTS [TX 0D 0H 00M AGO]: Specimen welfare is the priority. Crew are to assist recovery. Do not vent occupied decks.',
+      },
+    ],
+  },
+  {
+    id: 'a4-unsealed',
+    act: 4,
+    when: ({ m }) => sinceBeat(m, 'a4-corp') >= 30,
+    entries: [{ kind: 'sys', text: 'RESTRICTED FILE UNSEALED FOR WARDEN: SPECIAL ORDER 0-77. SEE ARCHIVE.' }],
+    effects: [{ kind: 'setFlag', flag: 'archive-0-77' }],
+  },
+  {
+    id: 'a4-first-loss',
+    act: 4,
+    when: ({ m }) => inAct(m, 4) && lostCount(m) >= 1,
+    entries: [{ kind: 'sys', text: 'CREW MANIFEST UPDATED.' }],
+  },
+  {
+    id: 'a4-voice',
+    act: 4,
+    when: ({ m }) => inAct(m, 4) && m.contacts >= 3,
+    entries: [{ kind: 'anomaly', text: 'INTERCOM CH.4: [UNINTELLIGIBLE] ... w a r d e n ... [UNINTELLIGIBLE]' }],
+  },
+  {
+    id: 'a4-attrition',
+    act: 4,
+    when: ({ m }) => inAct(m, 4) && lostCount(m) >= 4,
+    entries: [{ kind: 'corp', text: 'SPECIAL PROJECTS [TX 0D 0H 00M AGO]: Crew attrition within acceptable parameters. Continue.' }],
+  },
+  {
+    id: 'a4-terminus',
+    act: 4,
+    when: ({ m }) =>
+      inAct(m, 4) && (lostCount(m) === CREW.length || m.specimensRecovered >= 30 || depth(m) >= 5_600),
+    entries: [{ kind: 'sys', text: 'RETURN WINDOW OPEN. TERMINUS PROTOCOLS AVAILABLE. AWAITING WARDEN DECISION.' }],
+    effects: [{ kind: 'setFlag', flag: 'terminus' }],
+  },
+];
+
+export const STORY: readonly Beat[] = [...ACT_1, ...ACT_2, ...ACT_3, ...ACT_4];

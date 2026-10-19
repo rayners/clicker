@@ -1,6 +1,8 @@
 import { buyGenerator, buyRefinery, drill } from '../mission/economy';
 import { buyUpgrade } from '../mission/upgrades';
 import { sleepCrew, wakeCrew } from '../mission/crew';
+import { buyContainmentLevel, buyRig, reinforce, vent } from '../mission/containment';
+import type { MissionState } from '../mission/state';
 import { advance, type GameState } from './game';
 
 export type Action =
@@ -10,9 +12,22 @@ export type Action =
   | { type: 'buyUpgrade'; id: string }
   | { type: 'wakeCrew'; id: string }
   | { type: 'sleepCrew'; id: string }
+  | { type: 'buyRig' }
+  | { type: 'reinforce' }
+  | { type: 'buyContainmentLevel' }
+  | { type: 'vent' }
   | { type: 'tick'; dt: number };
 
+const MISSION_ACTIONS: Partial<Record<Action['type'], (m: MissionState) => MissionState>> = {
+  buyRig,
+  reinforce,
+  buyContainmentLevel,
+  vent,
+};
+
 export function reduce(game: GameState, action: Action): GameState {
+  const simple = MISSION_ACTIONS[action.type];
+  if (simple) return { ...game, mission: simple(game.mission) };
   switch (action.type) {
     case 'drill':
       return { ...game, mission: drill(game.mission) };
@@ -28,6 +43,8 @@ export function reduce(game: GameState, action: Action): GameState {
       return { ...game, mission: sleepCrew(game.mission, action.id) };
     case 'tick':
       return advance(game, action.dt).game;
+    default:
+      return game;
   }
 }
 
