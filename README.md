@@ -25,3 +25,10 @@ Debug jumps: `?debug=act2`, `act3`, `act4`, `terminus`.
 - `src/data/`: content tables (generators, upgrades, crew, directives, story beats, archive files, sprites).
 - `src/ui/`: framework-free DOM panels, canvas sprites, motion tracker, sound.
 - `src/sim/`: the pacing bot used by `tests/sim/pacing.test.ts`.
+
+## Docs
+
+- [`docs/DESIGN.md`](docs/DESIGN.md): premise, systems, acts and pacing, prestige, UI direction.
+- [`docs/BOARDROOM.md`](docs/BOARDROOM.md): the planned second-tier layer and the architecture rules it imposes.
+- [`docs/ROADMAP.md`](docs/ROADMAP.md): status, deviations from the plan, backlog, balance notes.
+- [`CLAUDE.md`](CLAUDE.md): working rules (TDD, mobile + desktop, no backend, mission isolation).
