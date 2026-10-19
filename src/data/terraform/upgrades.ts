@@ -40,10 +40,10 @@ const HANDCRAFTED: TerraformUpgradeDef[] = [
   {
     id: 'tf-grid-sync',
     name: 'GRID SYNCHRONISATION',
-    description: 'Phase-locks every generator on the station bus. Reactor output x2.',
+    description: 'Phase-locks every generator on the station bus. Reactor output x1.5.',
     cost: 300,
     unlock: { lifetimeUnits: 200 },
-    effect: { kind: 'reactorMultiplier', value: 2 },
+    effect: { kind: 'reactorMultiplier', value: 1.5 },
   },
   {
     id: 'tf-pressure-cascade',
@@ -72,10 +72,10 @@ const HANDCRAFTED: TerraformUpgradeDef[] = [
   {
     id: 'tf-superconducting-bus',
     name: 'SUPERCONDUCTING BUS',
-    description: 'Station power trunk recast at 4 K. Reactor output x2.',
+    description: 'Station power trunk recast at 4 K. Reactor output x1.5.',
     cost: 20_000,
     unlock: { lifetimeUnits: 15_000 },
-    effect: { kind: 'reactorMultiplier', value: 2 },
+    effect: { kind: 'reactorMultiplier', value: 1.5 },
   },
   {
     id: 'tf-colony-marketing',
@@ -96,10 +96,10 @@ const HANDCRAFTED: TerraformUpgradeDef[] = [
   {
     id: 'tf-mirror-focusing',
     name: 'ADAPTIVE FOCUSING',
-    description: 'Every reflective surface on the station retasked to the collectors. Reactor output x3.',
+    description: 'Every reflective surface on the station retasked to the collectors. Reactor output x2.',
     cost: 2_000_000,
     unlock: { lifetimeUnits: 1_500_000 },
-    effect: { kind: 'reactorMultiplier', value: 3 },
+    effect: { kind: 'reactorMultiplier', value: 2 },
   },
   {
     id: 'tf-autosurge-iv',

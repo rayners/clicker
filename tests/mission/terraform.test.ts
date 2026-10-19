@@ -24,6 +24,7 @@ import {
   surgePower,
   throughput,
   COST_GROWTH,
+  REACTOR_COST_GROWTH,
   BASE_POWER,
 } from '../../src/mission/terraform/economy';
 import { SCENARIOS } from '../../src/mission/registry';
@@ -62,7 +63,7 @@ describe('manual surge (the click)', () => {
 });
 
 describe('building', () => {
-  it('buys reactors and processors with credits, each 15% dearer than the last', () => {
+  it('buys reactors and processors with credits; processors get 15% dearer, reactors faster (power is the brake)', () => {
     const r = REACTORS[0]!;
     const p = tier1('atmosphere');
     expect(COST_GROWTH).toBe(1.15);
@@ -72,7 +73,8 @@ describe('building', () => {
     expect(m.reactors[r.id]).toBe(1);
     expect(m.processors[p.id]).toBe(1);
     expect(m.credits).toBe(1e6 - r.baseCost - p.baseCost);
-    expect(reactorCost(r, 1)).toBe(Math.ceil(r.baseCost * 1.15));
+    expect(REACTOR_COST_GROWTH).toBeGreaterThan(COST_GROWTH);
+    expect(reactorCost(r, 1)).toBe(Math.ceil(r.baseCost * REACTOR_COST_GROWTH));
     expect(processorCost(p, 3)).toBe(Math.ceil(p.baseCost * 1.15 ** 3));
   });
 

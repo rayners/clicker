@@ -6,6 +6,8 @@ import { horrorProductionMultiplier } from '../horrors';
 import type { TerraformMission as MissionState } from '../state';
 
 export const COST_GROWTH = 1.15;
+/** Power is the brake (as the refinery is for extraction): reactors get dearer much faster than processors. */
+export const REACTOR_COST_GROWTH = 1.2;
 /** Megawatts the station provides before any reactor is built. */
 export const BASE_POWER = 1;
 const CREDITS_PER_UNIT = 1;
@@ -73,7 +75,7 @@ function multipliers(m: MissionState): Multipliers {
 }
 
 export function reactorCost(def: ReactorDef, owned: number): number {
-  return Math.ceil(def.baseCost * COST_GROWTH ** owned);
+  return Math.ceil(def.baseCost * REACTOR_COST_GROWTH ** owned);
 }
 
 export function processorCost(def: ProcessorDef, owned: number): number {
