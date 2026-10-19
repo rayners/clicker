@@ -1,5 +1,7 @@
 # Terraforming contracts, and scenarios × horrors
 
+**Status: built** (2026-10-19). See *As built* at the end for where the implementation differs from this plan.
+
 A second first-tier mission **scenario** alongside extraction. It was proposed after the first phone playtest (2026-10-19), where the user liked managing and balancing input against output ("reminds me of the paperclip game in a good way").
 
 ## Decisions (user, 2026-10-19)
@@ -96,3 +98,19 @@ The horror is not shown or chosen; it is a surprise. `organism` is the only opti
 5. Assignment choice at new game, terminus and CFG. Debug jumps.
 6. Terraform pacing bot and tuning, then the organism × terraform pairing (nursery).
 7. iPhone e2e journey for terraform.
+
+## As built (differences from the plan above)
+
+- **Five processors per line**, at roughly 30× cost steps, not three or four. The bigger ~100× gaps stalled play (and the bot) between tiers.
+- **Power is the brake**, as the refinery is for extraction:
+  - reactors get 20% dearer per unit (processors 15%);
+  - each reactor costs about the same per MW as a processor costs per unit/s;
+  - reactor upgrades are ×1.5, ×1.5 and ×2.
+- **Allocation:** `+` takes a 10% step from idle power, otherwise from the largest other line, so a single tap always works on a phone. `−` returns the step to idle.
+- **Auto-balance** (`WARDEN LOAD BALANCER`): runs every line on spec as far as the weakest line allows, then spills spare power into lines that have spare processors. Each spilled unit still earns that line's spec weight. The manual buttons disappear.
+- **Planet readings** are cosmetic and shown under each line: pressure 0→101.3 kPa, temperature 61→304 K, hydrosphere 0→96%. The end values are the void's.
+- **Spec revisions** happen at story progress 600, 1,500, 2,400 and 3,600. **Colonist waves** happen at 800, 1,600, 2,600, 3,800, 5,200 and 7,000, each adding +25% income.
+- **Deep access** (needed for the horror's discovery) means owning a Deep Aquifer Tap, tier 4 of the water line.
+- **Endings** belong to the horror (`src/data/organism/endings.ts`) and are worded through the lexicon: CERTIFY THE COLONY / STERILISE MERROW on terraform, DELIVER THE CARGO / SCUTTLE THE SHIP on extraction.
+- **Assignment:** saves are v4. `GameState.assigning` is `false | 'start' | 'renewal' | 'reassign'`, and only `'reassign'` (from CFG) can be cancelled. Nothing ticks while it is set.
+- **Pacing:** the terraform bot (`npm run simulate terraform`) hits Act II at 1h08m, Act III at 2h29m, Act IV at 2h52m and the terminus at 4h07m. Extraction is unchanged (52m / 2h25m / 3h04m / 4h19m). Both are enforced in `tests/sim/pacing.test.ts`.

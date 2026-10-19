@@ -23,7 +23,10 @@ Feedback: not much feeling of progression; ore/s should be the primary stat but 
 | `+X ORE/S` call-outs when a purchase or crew change moves the rate | done |
 | Operations monitor with per-system work-cycle bars | done |
 | Autocycle upgrade line (WARDEN presses the drill); drill ticks show real yield | done |
-| Terraforming as a second mission kind | planned in `docs/TERRAFORM.md`, with open questions for the user |
+| Terraforming as a second scenario (user: unlock later, available from the start for now; ±10% buttons) | done, see `docs/TERRAFORM.md` |
+| Horror decoupled from scenario (user: avoid hard coupling, horrors should be swappable) | done: `ScenarioDef` × `HorrorDef`, signals, lexicon, hooks, pairings |
+| Contract assignment screen (new game, renewal, CFG reassignment) | done |
+| Directive tab highlight, top progress strip, tired-crew indicator (second round of feedback) | done |
 
 ## Deviations from the original plan (deliberate)
 
@@ -44,7 +47,9 @@ Feedback: not much feeling of progression; ore/s should be the primary stat but 
 - Sinister directives during Acts III–IV (the directive table currently ends at KA-008).
 - Sound polish: an ambient hum per act, and a typewriter cadence tied to the print animation.
 - An optional first-load boot sequence animation.
-- **Terraforming contracts** (`docs/TERRAFORM.md`): a second first-tier mission kind built around power allocation and target bands. Its first step (a discriminated `MissionKind` registry) is also the Boardroom's first step.
+- **Raise `TERRAFORM_UNLOCK_CONTRACTS`** (currently 0 so it can be play-tested) once the user is happy with it.
+- **A second horror.** The architecture is ready: add `src/mission/<horror>/`, a `HorrorDef`, lexicon keys each scenario must supply, and optional pairings. Choosing a horror per contract (random or cycled from the profile) is still to be designed.
+- Terraform polish: collapse the allocation controls to a one-line summary once WARDEN auto-balances (it frees phone space); terraform-specific sprites (station masthead and planet instead of ship and moonlet).
 - More flow feedback: show each purchase's effect on *income* (not just ore/s) on the buy buttons.
 - The **Boardroom** layer (`docs/BOARDROOM.md`).
 

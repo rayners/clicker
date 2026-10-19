@@ -13,7 +13,11 @@ Original IP: Alien-flavoured, with no direct names, quotes or logos from the fil
 - The job is to strip-mine the moonlet **LV-0919 "Tethys Minor"** and haul the ore home, 11 years away. Corporate messages arrive with light-lag (`[TX 2Y 11M AGO]`).
 - The truth: a prior Combine probe (KA-SP-3) found an organism in a warm void 3,200 m down. The contract is commercial cover. WARDEN's sealed **Special Order 0-77** says the organism's recovery supersedes everything and crew survival is not a mission parameter. The science officer, Dr. Kane, was swapped in by Special Projects two days before departure.
 
-## Core loop and systems
+## Scenarios and horrors
+
+A contract is a **scenario** (the economy and corporate story) paired with a **horror** (Acts II–V). Today there are two scenarios, extraction (described below) and terraforming (`docs/TERRAFORM.md`), and one horror, the organism (also described below). Horrors are written once against story signals and each scenario's lexicon, so they can be swapped.
+
+## Core loop and systems (extraction)
 
 - **Drill (click):** ore per press (`EXECUTE DRILL CYCLE`). Click upgrades plus *telemetry assist* (adds a share of automated output). Each press shows its real yield.
 - **Autocycle:** an early upgrade line (`WARDEN AUTOCYCLE`, then `PARALLEL SCHEDULER`, `PREDICTIVE STRIKE`, `OPERATOR NOT REQUIRED`) where WARDEN fires the drill itself, visibly pressing the button. Auto cycles get drill-head multipliers but **not** the telemetry share; letting them compound with it made pacing about 25% too fast. The upgrade names foreshadow WARDEN taking over control.
@@ -64,6 +68,8 @@ Choosing an ending resets the mission and updates the persistent profile:
   - Phone: masthead, the flow readout and a 3-column secondary stat row, the active panel, a pinned drill bay, and a bottom tab bar with short labels.
   - Desktop (≥900px): status | log + drill | tabbed side panel.
   - Tabs appear only when their feature unlocks: OPS, SYSTEMS, UPGRADES, CREW, DIRECTIVES, SPECIAL PROJECTS, ARCHIVE, TERMINUS.
+- Tabs with something running behind them carry a lit marker; DIRECTIVES while one is active, CREW when crew are tiring. CREW blinks when someone is exhausted.
+- The **alerts strip** at the top shows the active directive (id, progress bar, countdown) and tired or exhausted crew. Tapping an item opens its panel.
 - **Comms log:** a print-wipe animation per entry. Kinds `sys`, `corp`, `crew` and `anomaly` are styled differently (anomaly entries tear).
 - **Pixel accents in code:** ship (masthead), animated drill bit (in the button), moonlet (desktop status), 12×12 crew portraits, and the motion-tracker canvas. Lost crew portraits render heavily corrupted. PWA icons are generated from the moonlet sprite.
 - **Sound** (off by default): WebAudio click, teletype, corporate chime, anomaly drone, tracker ping. Unlocked on the first gesture for iOS.
