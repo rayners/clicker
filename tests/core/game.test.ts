@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createGame, tickGame, catchUp, OFFLINE_CAP_SECONDS } from '../../src/core/game';
+import { createGame, tickGame, catchUp, advance, OFFLINE_CAP_SECONDS } from '../../src/core/game';
 import { buyGenerator } from '../../src/mission/economy';
 import { GENERATORS } from '../../src/data/generators';
 
@@ -57,5 +57,33 @@ describe('offline catch-up', () => {
 
   it('updates savedAt to now so the same gap is never counted twice', () => {
     expect(catchUp(withDrones(), NOW + 10_000).game.savedAt).toBe(NOW + 10_000);
+  });
+});
+
+describe('advance (the live loop)', () => {
+  it('ticks normally for short frame gaps', () => {
+    const g = createGame(5, NOW);
+    const { game, offlineSeconds } = advance(g, 0.1);
+    expect(game.mission.elapsed).toBeCloseTo(0.1);
+    expect(offlineSeconds).toBe(0);
+  });
+
+  it('treats a long gap (backgrounded tab, sleeping phone) as offline time, capped', () => {
+    const g = createGame(5, NOW);
+    const { game, offlineSeconds } = advance(g, 20 * 3600);
+    expect(offlineSeconds).toBe(OFFLINE_CAP_SECONDS);
+    expect(game.mission.elapsed).toBeCloseTo(OFFLINE_CAP_SECONDS);
+  });
+
+  it('writes a "while you slept" summary to the log after a meaningful absence', () => {
+    const g = createGame(5, NOW);
+    const { game } = advance(g, 3600);
+    expect(game.mission.log.at(-1)!.text).toMatch(/1h 0m/);
+  });
+
+  it('does not log brief absences', () => {
+    const g = createGame(5, NOW);
+    const { game } = advance(g, 30);
+    expect(game.mission.log.length).toBe(g.mission.log.length);
   });
 });

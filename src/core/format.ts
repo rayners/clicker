@@ -35,3 +35,9 @@ export function formatDuration(totalSeconds: number): string {
   if (minutes > 0) return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
   return `${seconds}s`;
 }
+
+export function formatClock(totalSeconds: number): string {
+  const s = Math.floor(totalSeconds);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
+}

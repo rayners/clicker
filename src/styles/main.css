@@ -1,0 +1,433 @@
+:root {
+  --bg: #020804;
+  --bg-raise: #06130a;
+  --phosphor: #5dff8f;
+  --phosphor-hi: #c9ffd9;
+  --phosphor-dim: #2a9a52;
+  --phosphor-faint: #0f3d20;
+  --glow: rgba(93, 255, 143, 0.55);
+  --corp: #e8fff0;
+  --crew: #8fe9d2;
+  --anomaly: #5dff8f;
+  --danger: #ff4a3d;
+  --font-term: 'VT323', ui-monospace, monospace;
+  --font-corp: 'Michroma', 'VT323', sans-serif;
+  --gutter: 16px;
+  --tabbar-h: 56px;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--phosphor);
+  font-family: var(--font-term);
+  font-size: clamp(19px, 4.6vw, 22px);
+  line-height: 1.15;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+body {
+  text-shadow: 0 0 4px var(--glow), 0 0 12px rgba(93, 255, 143, 0.15);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  text-shadow: inherit;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+button:focus-visible {
+  outline: 2px dashed var(--phosphor-hi);
+  outline-offset: 2px;
+}
+
+/* ---------- shell layout (mobile first) ---------- */
+
+.shell {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  grid-template-areas: 'mast' 'status' 'main' 'drill' 'tabs';
+  height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(40, 120, 70, 0.12), transparent 70%),
+    var(--bg);
+}
+
+.masthead {
+  grid-area: mast;
+  padding: 10px var(--gutter) 6px;
+  border-bottom: 1px solid var(--phosphor-faint);
+}
+
+.mast-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-corp);
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  color: var(--phosphor-hi);
+}
+
+.brand-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 18px;
+  border: 1px solid currentColor;
+  font-size: 8px;
+  letter-spacing: 0.05em;
+}
+
+.mast-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+  color: var(--phosphor-dim);
+}
+
+.mast-clock {
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  grid-area: status;
+  padding: 8px var(--gutter);
+  border-bottom: 1px solid var(--phosphor-faint);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 16px;
+  margin: 0;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  border-bottom: 1px dotted var(--phosphor-faint);
+}
+
+.stat-label {
+  color: var(--phosphor-dim);
+  font-size: 0.85em;
+}
+
+.stat-value {
+  margin: 0;
+  font-size: 1.35em;
+  color: var(--phosphor-hi);
+  font-variant-numeric: tabular-nums;
+}
+
+.panel {
+  grid-area: main;
+  min-height: 0;
+  display: none;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shell[data-tab='ops'] .panel-ops,
+.shell[data-tab='systems'] .panel-systems {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- ops: log + drill ---------- */
+
+.panel-ops {
+  overflow: hidden;
+}
+
+.log {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 10px var(--gutter);
+  list-style: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.log-entry {
+  margin: 0 0 6px;
+  animation: print 0.5s steps(18, end) both;
+  animation-delay: var(--delay, 0s);
+}
+
+.log-time {
+  color: var(--phosphor-dim);
+  font-size: 0.8em;
+}
+
+.log-corp .log-text {
+  color: var(--corp);
+}
+
+.log-crew .log-text {
+  color: var(--crew);
+}
+
+.log-anomaly .log-text {
+  color: var(--anomaly);
+}
+
+@keyframes print {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.drill-bay {
+  grid-area: drill;
+  padding: 8px var(--gutter);
+  border-top: 1px solid var(--phosphor-faint);
+}
+
+.drill {
+  position: relative;
+  width: 100%;
+  min-height: 60px;
+  border: 2px solid var(--phosphor);
+  background:
+    repeating-linear-gradient(135deg, transparent 0 10px, rgba(93, 255, 143, 0.05) 10px 20px),
+    var(--bg-raise);
+  font-size: 1.5em;
+  letter-spacing: 0.12em;
+  box-shadow: 0 0 18px rgba(93, 255, 143, 0.18), inset 0 0 22px rgba(93, 255, 143, 0.08);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.drill-label::before {
+  content: '[ ';
+}
+
+.drill-label::after {
+  content: ' ]';
+}
+
+.drill:active {
+  background: var(--phosphor);
+  color: var(--bg);
+  text-shadow: none;
+}
+
+.drill-tick {
+  position: absolute;
+  left: calc(50% + var(--x, 0px));
+  top: 0;
+  pointer-events: none;
+  color: var(--phosphor-hi);
+  font-size: 0.8em;
+  animation: rise 0.7s ease-out forwards;
+}
+
+@keyframes rise {
+  from {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(-50%, -48px);
+    opacity: 0;
+  }
+}
+
+/* ---------- systems panel ---------- */
+
+.panel-title {
+  margin: 0;
+  padding: 12px var(--gutter) 6px;
+  font-family: var(--font-corp);
+  font-size: 11px;
+  font-weight: normal;
+  letter-spacing: 0.3em;
+  color: var(--phosphor-hi);
+}
+
+.sys-list {
+  margin: 0;
+  padding: 0 var(--gutter) 16px;
+  list-style: none;
+}
+
+.sys-row {
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--phosphor-faint);
+}
+
+.sys-head,
+.sys-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.sys-name {
+  color: var(--phosphor-hi);
+}
+
+.sys-owned {
+  font-size: 1.3em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sys-desc {
+  margin: 2px 0 8px;
+  color: var(--phosphor-dim);
+  font-size: 0.85em;
+}
+
+.sys-rate {
+  color: var(--phosphor-dim);
+  font-size: 0.85em;
+}
+
+.buy {
+  min-height: 44px;
+  min-width: 132px;
+  padding: 4px 12px;
+  border: 1px solid var(--phosphor);
+  background: transparent;
+}
+
+.buy:not(:disabled):active {
+  background: var(--phosphor);
+  color: var(--bg);
+  text-shadow: none;
+}
+
+.buy:disabled {
+  border-color: var(--phosphor-faint);
+  color: var(--phosphor-faint);
+  text-shadow: none;
+}
+
+/* ---------- tab bar ---------- */
+
+.tabbar {
+  grid-area: tabs;
+  display: flex;
+  border-top: 1px solid var(--phosphor-dim);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--bg);
+}
+
+.tab {
+  flex: 1;
+  min-height: var(--tabbar-h);
+  border: 0;
+  border-right: 1px solid var(--phosphor-faint);
+  background: transparent;
+  letter-spacing: 0.1em;
+  color: var(--phosphor-dim);
+}
+
+.tab:last-child {
+  border-right: 0;
+}
+
+.tab[aria-selected='true'] {
+  color: var(--bg);
+  background: var(--phosphor);
+  text-shadow: none;
+}
+
+/* ---------- desktop ---------- */
+
+@media (min-width: 900px) {
+  .shell {
+    grid-template-columns: 260px minmax(0, 1fr) minmax(340px, 420px);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'mast mast mast'
+      'status ops tabs'
+      'status ops side'
+      'status drill side';
+  }
+
+  .status {
+    border-bottom: 0;
+    border-right: 1px solid var(--phosphor-faint);
+    padding-top: 16px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .drill {
+    min-height: 72px;
+  }
+
+  .panel-ops {
+    grid-area: ops;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel:not(.panel-ops) {
+    grid-area: side;
+    border-left: 1px solid var(--phosphor-faint);
+  }
+
+  /* The ops column is always visible on desktop; the side column defaults to systems. */
+  .shell[data-tab='ops'] .panel-systems {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tabbar {
+    grid-area: tabs;
+    border-top: 0;
+    border-left: 1px solid var(--phosphor-faint);
+    border-bottom: 1px solid var(--phosphor-faint);
+    padding-bottom: 0;
+  }
+
+  .tab {
+    min-height: 40px;
+  }
+
+  .tab-ops {
+    display: none;
+  }
+
+  .shell[data-tab='ops'] .tab-systems {
+    color: var(--bg);
+    background: var(--phosphor);
+    text-shadow: none;
+  }
+}

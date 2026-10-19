@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatNumber, formatDuration } from '../../src/core/format';
+import { formatNumber, formatDuration, formatClock } from '../../src/core/format';
 
 describe('formatNumber', () => {
   it('shows small whole numbers as-is', () => {
@@ -55,5 +55,16 @@ describe('formatDuration', () => {
 
   it('shows days and hours beyond that', () => {
     expect(formatDuration(3 * 86400 + 4 * 3600)).toBe('3d 4h');
+  });
+});
+
+describe('formatClock', () => {
+  it('shows mission time as zero-padded hh:mm:ss', () => {
+    expect(formatClock(0)).toBe('00:00:00');
+    expect(formatClock(3725.9)).toBe('01:02:05');
+  });
+
+  it('lets hours run past a day, like a mission elapsed timer', () => {
+    expect(formatClock(26 * 3600)).toBe('26:00:00');
   });
 });

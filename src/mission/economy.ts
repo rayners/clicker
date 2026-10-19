@@ -43,3 +43,8 @@ export function buyRefinery(m: MissionState): MissionState {
   if (m.credits < cost) return m;
   return { ...m, credits: m.credits - cost, refineryLevel: m.refineryLevel + 1 };
 }
+
+/** The first tier is always visible; each further tier appears once the one before it is owned. */
+export function isGeneratorRevealed(m: MissionState, index: number): boolean {
+  return index === 0 || GENERATORS.slice(index - 1).some((g) => (m.generators[g.id] ?? 0) > 0);
+}

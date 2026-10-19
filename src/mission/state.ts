@@ -1,4 +1,5 @@
 import { GENERATORS } from '../data/generators';
+import { appendLog, type LogEntry } from './log';
 
 /** Everything that varies between missions. Plain data so the future Boardroom layer can author it. */
 export interface MissionConfig {
@@ -21,10 +22,12 @@ export interface MissionState {
   lifetimeOre: number;
   generators: Record<string, number>;
   refineryLevel: number;
+  log: LogEntry[];
+  nextLogId: number;
 }
 
 export function createMission(config: MissionConfig, seed: number): MissionState {
-  return {
+  const blank: MissionState = {
     config: { ...config },
     rng: seed,
     elapsed: 0,
@@ -33,5 +36,14 @@ export function createMission(config: MissionConfig, seed: number): MissionState
     lifetimeOre: 0,
     generators: Object.fromEntries(GENERATORS.map((g) => [g.id, 0])),
     refineryLevel: 0,
+    log: [],
+    nextLogId: 1,
   };
+  return [
+    'WARDEN OPERATIONS INTELLIGENCE v4.1.7 ... ONLINE',
+    `VESSEL: ${config.shipName.toUpperCase()} // KESSLER-AMARI COMBINE`,
+    `ORBIT ESTABLISHED: ${config.targetBody.toUpperCase()}`,
+    'CREW STATUS: 7/7 IN CRYOSTASIS. ALL VITALS NOMINAL.',
+    'AWAITING EXTRACTION ORDERS.',
+  ].reduce((m, line) => appendLog(m, 'sys', line), blank);
 }

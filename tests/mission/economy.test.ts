@@ -10,6 +10,7 @@ import {
   buyRefinery,
   COST_GROWTH,
   ORE_PRICE,
+  isGeneratorRevealed,
 } from '../../src/mission/economy';
 import { tickMission } from '../../src/mission/tick';
 import { GENERATORS } from '../../src/data/generators';
@@ -143,5 +144,19 @@ describe('mission isolation (protects the future Boardroom layer)', () => {
   it('is plain JSON data so it can be saved and run headlessly', () => {
     const m = tickMission(drill(fresh()), 1);
     expect(JSON.parse(JSON.stringify(m))).toEqual(m);
+  });
+});
+
+describe('generator discovery', () => {
+  it('reveals only the first tier at the start', () => {
+    const m = fresh();
+    expect(isGeneratorRevealed(m, 0)).toBe(true);
+    expect(isGeneratorRevealed(m, 1)).toBe(false);
+  });
+
+  it('reveals one tier beyond the highest tier owned', () => {
+    const m = { ...fresh(), generators: { ...fresh().generators, [GENERATORS[2]!.id]: 1 } };
+    expect(isGeneratorRevealed(m, 3)).toBe(true);
+    expect(isGeneratorRevealed(m, 4)).toBe(false);
   });
 });
