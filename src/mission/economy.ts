@@ -20,6 +20,7 @@ export function generatorCost(def: GeneratorDef, owned: number): number {
 interface Multipliers {
   click: number;
   clickRateShare: number;
+  autoDrill: number;
   global: number;
   refinery: number;
   generator: Record<string, number>;
@@ -32,6 +33,9 @@ function applyEffect(result: Multipliers, e: UpgradeEffect): void {
       break;
     case 'clickRateShare':
       result.clickRateShare += e.value;
+      break;
+    case 'autoDrill':
+      result.autoDrill += e.value;
       break;
     case 'globalMultiplier':
       result.global *= e.value;
@@ -46,7 +50,7 @@ function applyEffect(result: Multipliers, e: UpgradeEffect): void {
 }
 
 function multipliers(m: MissionState): Multipliers {
-  const result: Multipliers = { click: 1, clickRateShare: 0, global: fundingMultiplier(m) * m.config.productionMultiplier, refinery: 1, generator: {} };
+  const result: Multipliers = { click: 1, clickRateShare: 0, autoDrill: 0, global: fundingMultiplier(m) * m.config.productionMultiplier, refinery: 1, generator: {} };
   for (const u of UPGRADES) if (m.upgrades.includes(u.id)) applyEffect(result, u.effect);
   for (const c of CREW) {
     if (c.boost.kind !== 'fatigueMultiplier' && isCrewEffective(m, c.id)) applyEffect(result, c.boost);
@@ -56,7 +60,11 @@ function multipliers(m: MissionState): Multipliers {
 
 export function clickPower(m: MissionState): number {
   const mult = multipliers(m);
-  return BASE_CLICK * mult.click + oreRate(m) * mult.clickRateShare;
+  return BASE_CLICK * mult.click + generatorOutput(m) * mult.clickRateShare;
+}
+
+export function autoDrillRate(m: MissionState): number {
+  return multipliers(m).autoDrill;
 }
 
 export function drill(m: MissionState): MissionState {
@@ -78,8 +86,23 @@ export function generatorRate(m: MissionState, def: GeneratorDef): number {
   return def.baseRate * (mult.generator[def.id] ?? 1) * mult.global;
 }
 
-export function oreRate(m: MissionState): number {
+function generatorOutput(m: MissionState): number {
   return GENERATORS.reduce((sum, g) => sum + (m.generators[g.id] ?? 0) * generatorRate(m, g), 0);
+}
+
+/** All automated extraction: generators plus WARDEN's own drill cycles (drill-head upgrades only, no telemetry share). */
+export function oreRate(m: MissionState): number {
+  const mult = multipliers(m);
+  return generatorOutput(m) + mult.autoDrill * BASE_CLICK * mult.click;
+}
+
+/** Credits per second: whatever the refinery can process, from the hopper plus fresh extraction. */
+export function creditRate(m: MissionState): number {
+  return Math.min(m.ore + oreRate(m), refineryCapacity(m)) * ORE_PRICE;
+}
+
+export function bottleneck(m: MissionState): 'extraction' | 'refinery' {
+  return oreRate(m) >= refineryCapacity(m) ? 'refinery' : 'extraction';
 }
 
 export function refineryCapacity(m: MissionState): number {

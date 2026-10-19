@@ -3,6 +3,8 @@ import { GENERATORS } from './generators';
 export type UpgradeEffect =
   | { kind: 'clickMultiplier'; value: number }
   | { kind: 'clickRateShare'; value: number }
+  /** Drill cycles per second that WARDEN fires without the player. */
+  | { kind: 'autoDrill'; value: number }
   | { kind: 'generatorMultiplier'; generator: string; value: number }
   | { kind: 'globalMultiplier'; value: number }
   | { kind: 'refineryMultiplier'; value: number };
@@ -31,6 +33,14 @@ const HANDCRAFTED: UpgradeDef[] = [
     effect: { kind: 'clickMultiplier', value: 2 },
   },
   {
+    id: 'warden-autocycle',
+    name: 'WARDEN AUTOCYCLE',
+    description: 'WARDEN takes the drill controls between shifts. Fires 1 drill cycle per second, unattended.',
+    cost: 100,
+    unlock: { lifetimeOre: 50 },
+    effect: { kind: 'autoDrill', value: 1 },
+  },
+  {
     id: 'catalytic-cracking',
     name: 'CATALYTIC CRACKING',
     description: 'Refinery catalyst bed brought online. Throughput x2.',
@@ -45,6 +55,14 @@ const HANDCRAFTED: UpgradeDef[] = [
     cost: 2_500,
     unlock: { lifetimeOre: 1_500 },
     effect: { kind: 'clickMultiplier', value: 2 },
+  },
+  {
+    id: 'autocycle-ii',
+    name: 'AUTOCYCLE: PARALLEL SCHEDULER',
+    description: 'WARDEN interleaves drill cycles with housekeeping tasks. +2 automatic cycles per second.',
+    cost: 4_000,
+    unlock: { lifetimeOre: 3_000 },
+    effect: { kind: 'autoDrill', value: 2 },
   },
   {
     id: 'telemetry-assist',
@@ -71,6 +89,14 @@ const HANDCRAFTED: UpgradeDef[] = [
     effect: { kind: 'globalMultiplier', value: 1.25 },
   },
   {
+    id: 'autocycle-iii',
+    name: 'AUTOCYCLE: PREDICTIVE STRIKE',
+    description: 'WARDEN models the rock face and fires before the operator would. +5 automatic cycles per second.',
+    cost: 60_000,
+    unlock: { lifetimeOre: 50_000 },
+    effect: { kind: 'autoDrill', value: 5 },
+  },
+  {
     id: 'diamond-crown',
     name: 'DIAMOND CROWN BITS',
     description: 'Synthetic diamond drill crowns. Drill cycles yield x3.',
@@ -85,6 +111,14 @@ const HANDCRAFTED: UpgradeDef[] = [
     cost: 2_000_000,
     unlock: { lifetimeOre: 1_500_000 },
     effect: { kind: 'refineryMultiplier', value: 3 },
+  },
+  {
+    id: 'autocycle-iv',
+    name: 'AUTOCYCLE: OPERATOR NOT REQUIRED',
+    description: 'Manual drill authority transferred to WARDEN pending review. +12 automatic cycles per second.',
+    cost: 1_000_000,
+    unlock: { lifetimeOre: 800_000 },
+    effect: { kind: 'autoDrill', value: 12 },
   },
   {
     id: 'productivity-audit',

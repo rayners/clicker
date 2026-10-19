@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createMission, DEFAULT_MISSION_CONFIG, type MissionState } from '../../src/mission/state';
-import { drill, oreRate, refineryCapacity, clickPower } from '../../src/mission/economy';
+import { drill, oreRate, refineryCapacity, clickPower, autoDrillRate } from '../../src/mission/economy';
+import { tickMission } from '../../src/mission/tick';
 import { buyUpgrade, isUpgradeUnlocked, availableUpgrades } from '../../src/mission/upgrades';
 import type { UpgradeDef } from '../../src/data/upgrades';
 import { GENERATORS } from '../../src/data/generators';
@@ -112,5 +113,49 @@ describe('upgrade effects', () => {
     const m = withGens({ [drone.id]: 1 });
     const expected = tiers.reduce((acc, u) => acc * u.effect.value, drone.baseRate);
     expect(oreRate(own(m, ...tiers.map((u) => u.id)))).toBeCloseTo(expected);
+  });
+});
+
+describe('autocycle (WARDEN drills by itself)', () => {
+  const own = (m: MissionState, ...ids: string[]) => ({ ...m, upgrades: [...m.upgrades, ...ids] });
+  const pick = (pred: (u: UpgradeDef) => boolean) =>
+    availableUpgrades(fresh({ lifetimeOre: 1e15, generators: Object.fromEntries(GENERATORS.map((g) => [g.id, 1000])) })).find(pred)!;
+  const autos = () => availableUpgrades(fresh({ lifetimeOre: 1e15 })).filter((x) => x.effect.kind === 'autoDrill');
+
+  it('is offered early in the contract, before the second generator tier is affordable', () => {
+    const first = autos().sort((a, b) => a.cost - b.cost)[0]!;
+    expect(first.cost).toBeLessThan(auger.baseCost * 2);
+    expect(first.unlock.lifetimeOre ?? 0).toBeLessThanOrEqual(100);
+  });
+
+  it('comes as a line of upgrades that each add more cycles per second', () => {
+    expect(autos().length).toBeGreaterThanOrEqual(3);
+    const ids = autos().map((u) => u.id);
+    expect(autoDrillRate(own(fresh(), ...ids))).toBeCloseTo(autos().reduce((sum, u) => sum + u.effect.value, 0));
+  });
+
+  it('fires the drill on its own, counting toward ore per second', () => {
+    const u = autos()[0]!;
+    const m = own(fresh(), u.id);
+    expect(oreRate(m)).toBeCloseTo(u.effect.value * clickPower(fresh()));
+    expect(tickMission(m, 1).lifetimeOre).toBeCloseTo(u.effect.value * clickPower(fresh()));
+  });
+
+  it('benefits from drill upgrades', () => {
+    const auto = autos()[0]!;
+    const bits = pick((x) => x.effect.kind === 'clickMultiplier');
+    expect(oreRate(own(fresh(), auto.id, bits.id))).toBeCloseTo(auto.effect.value * bits.effect.value);
+  });
+
+  it('does not compound with telemetry assist (that share is for manual cycles)', () => {
+    const auto = autos()[0]!;
+    const telemetry = pick((x) => x.effect.kind === 'clickRateShare');
+    const m = withGens({ [auger.id]: 10 });
+    expect(oreRate(own(m, auto.id, telemetry.id))).toBeCloseTo(oreRate(m) + auto.effect.value);
+  });
+
+  it('does nothing without the upgrade', () => {
+    expect(autoDrillRate(fresh())).toBe(0);
+    expect(oreRate(fresh())).toBe(0);
   });
 });

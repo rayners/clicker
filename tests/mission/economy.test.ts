@@ -11,6 +11,8 @@ import {
   COST_GROWTH,
   ORE_PRICE,
   isGeneratorRevealed,
+  creditRate,
+  bottleneck,
 } from '../../src/mission/economy';
 import { tickMission } from '../../src/mission/tick';
 import { GENERATORS } from '../../src/data/generators';
@@ -158,5 +160,33 @@ describe('generator discovery', () => {
     const m = { ...fresh(), generators: { ...fresh().generators, [GENERATORS[2]!.id]: 1 } };
     expect(isGeneratorRevealed(m, 3)).toBe(true);
     expect(isGeneratorRevealed(m, 4)).toBe(false);
+  });
+});
+
+describe('income (credits per second)', () => {
+  const withDrones = (n: number, patch = {}) => ({ ...fresh(), generators: { ...fresh().generators, [drone.id]: n }, ...patch });
+
+  it('equals extraction while the refinery has spare capacity', () => {
+    const m = withDrones(10);
+    expect(oreRate(m)).toBeLessThan(refineryCapacity(m));
+    expect(creditRate(m)).toBeCloseTo(oreRate(m) * ORE_PRICE);
+    expect(bottleneck(m)).toBe('extraction');
+  });
+
+  it('is capped by the refinery once extraction outpaces it', () => {
+    const m = withDrones(200);
+    expect(oreRate(m)).toBeGreaterThan(refineryCapacity(m));
+    expect(creditRate(m)).toBeCloseTo(refineryCapacity(m) * ORE_PRICE);
+    expect(bottleneck(m)).toBe('refinery');
+  });
+
+  it('runs the refinery at full capacity while there is a stockpile of ore to work through', () => {
+    const m = withDrones(0, { ore: 1_000 });
+    expect(creditRate(m)).toBeCloseTo(refineryCapacity(m) * ORE_PRICE);
+  });
+
+  it('matches what a tick actually earns', () => {
+    const m = withDrones(200);
+    expect(tickMission(m, 1).credits - m.credits).toBeCloseTo(creditRate(m));
   });
 });
