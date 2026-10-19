@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { acceptContract, freshGame } from './helpers';
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/');
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
+  await freshGame(page);
 });
 
 test('export a save, wipe the game, and import it back', async ({ page }) => {
@@ -20,6 +19,7 @@ test('export a save, wipe the game, and import it back', async ({ page }) => {
 
   await dialog.getByRole('button', { name: /hard reset/i }).click();
   await dialog.getByRole('button', { name: /confirm/i }).click();
+  await acceptContract(page);
   await expect(status.getByLabel('Credits')).toHaveText('0');
 
   await page.getByRole('button', { name: /system configuration/i }).click();

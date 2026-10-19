@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { freshGame } from './helpers';
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/');
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
+  await freshGame(page);
 });
 
 test('drill, earn credits, buy a drone, and keep progress across a reload', async ({ page, isMobile }) => {

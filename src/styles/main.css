@@ -1157,6 +1157,48 @@ button:focus-visible {
   box-shadow: 0 0 30px var(--glow);
 }
 
+/* ---------- contract assignment ---------- */
+
+.assign .cfg-box {
+  padding: 0 12px 12px;
+}
+
+.assign-card {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--phosphor-dim);
+}
+
+.assign-card[hidden] {
+  display: none;
+}
+
+.assign-card .term-title {
+  margin: 0 0 4px;
+}
+
+.assign-where {
+  margin: 0 0 6px;
+  font-size: 0.8em;
+  color: var(--phosphor-dim);
+}
+
+.assign-go {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 4px;
+}
+
+.assign-warning {
+  font-size: 0.8em;
+  color: var(--phosphor-hi);
+}
+
+.assign-warning[hidden],
+.assign .buy[hidden] {
+  display: none;
+}
+
 .cfg-head {
   display: flex;
   justify-content: space-between;
