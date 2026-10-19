@@ -1,4 +1,4 @@
-import { GENERATORS } from '../data/generators';
+import { GENERATORS } from '../data/extraction/generators';
 import { appendLog, type LogEntry } from './log';
 import { createCrewState, type CrewMemberState } from './crew';
 import type { ActiveDirective, DirectiveResult } from './directives';

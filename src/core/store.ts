@@ -1,7 +1,7 @@
-import { buyGenerator, buyRefinery, drill } from '../mission/economy';
-import { buyUpgrade } from '../mission/upgrades';
+import { buyGenerator, buyRefinery, drill } from '../mission/extraction/economy';
+import { buyUpgrade } from '../mission/extraction/upgrades';
 import { sleepCrew, wakeCrew } from '../mission/crew';
-import { buyContainmentLevel, buyRig, reinforce, vent } from '../mission/containment';
+import { buyContainmentLevel, buyRig, reinforce, vent } from '../mission/organism/containment';
 import type { MissionState } from '../mission/state';
 import { advance, createGame, type GameState, type Settings } from './game';
 import { completeContract, type Ending } from './prestige';

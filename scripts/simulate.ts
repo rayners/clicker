@@ -1,6 +1,6 @@
 import { simulateRun } from '../src/sim/bot';
 import { formatDuration, formatNumber } from '../src/core/format';
-import { depth } from '../src/mission/progress';
+import { depth } from '../src/mission/extraction/progress';
 
 const seeds = [1, 7, 42];
 for (const seed of seeds) {

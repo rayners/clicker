@@ -1,6 +1,6 @@
 import { appendLog, type LogKind } from './log';
 import type { MissionState } from './state';
-import { breach } from './containment';
+import { breach } from './organism/containment';
 
 /** Seconds between non-urgent beats. */
 export const STORY_MIN_GAP = 20;

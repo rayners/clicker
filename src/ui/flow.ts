@@ -1,6 +1,6 @@
 import { formatNumber } from '../core/format';
 import type { GameState } from '../core/game';
-import { bottleneck, creditRate, oreRate, refineryCapacity } from '../mission/economy';
+import { bottleneck, creditRate, oreRate, refineryCapacity } from '../mission/extraction/economy';
 import { h, setAttr, setText } from './dom';
 
 const DELTA_LIFETIME = 1400;

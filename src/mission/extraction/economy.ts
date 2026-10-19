@@ -1,9 +1,9 @@
-import { GENERATORS, type GeneratorDef } from '../data/generators';
-import { UPGRADES, type UpgradeEffect } from '../data/upgrades';
-import { CREW } from '../data/crew';
-import { isCrewEffective } from './crew';
-import { fundingMultiplier } from './containment';
-import type { MissionState } from './state';
+import { GENERATORS, type GeneratorDef } from '../../data/extraction/generators';
+import { UPGRADES, type UpgradeEffect } from '../../data/extraction/upgrades';
+import { CREW } from '../../data/crew';
+import { isCrewEffective } from '../crew';
+import { fundingMultiplier } from '../organism/containment';
+import type { MissionState } from '../state';
 
 export const COST_GROWTH = 1.15;
 export const ORE_PRICE = 1;

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { UPGRADES } from '../../src/data/upgrades';
-import { GENERATORS } from '../../src/data/generators';
+import { UPGRADES } from '../../src/data/extraction/upgrades';
+import { GENERATORS } from '../../src/data/extraction/generators';
 
 describe('upgrade table', () => {
   it('has unique ids', () => {

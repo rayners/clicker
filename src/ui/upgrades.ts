@@ -1,8 +1,8 @@
 import { formatNumber } from '../core/format';
 import type { Store } from '../core/store';
-import { UPGRADES } from '../data/upgrades';
+import { UPGRADES } from '../data/extraction/upgrades';
 import type { MissionState } from '../mission/state';
-import { availableUpgrades } from '../mission/upgrades';
+import { availableUpgrades } from '../mission/extraction/upgrades';
 import { h, setAttr, setText } from './dom';
 
 export function hasUpgradesToShow(m: MissionState): boolean {

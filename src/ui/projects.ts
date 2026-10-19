@@ -8,7 +8,7 @@ import {
   fundingMultiplier,
   strainRate,
   ventCost,
-} from '../mission/containment';
+} from '../mission/organism/containment';
 import { awakeCount } from '../mission/crew';
 import type { MissionState } from '../mission/state';
 import { h, setAttr, setText } from './dom';

@@ -8,7 +8,7 @@ import {
   BOARDROOM_UNLOCK_CONTRACTS,
   missionConfigFor,
 } from '../../src/core/prestige';
-import { oreRate } from '../../src/mission/economy';
+import { oreRate } from '../../src/mission/extraction/economy';
 import { maxAwake } from '../../src/mission/crew';
 import { CREW } from '../../src/data/crew';
 

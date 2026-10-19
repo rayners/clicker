@@ -1,6 +1,6 @@
 import { formatNumber } from '../core/format';
-import { GENERATORS } from '../data/generators';
-import { autoDrillOutput, autoDrillRate, generatorRate } from '../mission/economy';
+import { GENERATORS } from '../data/extraction/generators';
+import { autoDrillOutput, autoDrillRate, generatorRate } from '../mission/extraction/economy';
 import type { MissionState } from '../mission/state';
 import { h, setText } from './dom';
 

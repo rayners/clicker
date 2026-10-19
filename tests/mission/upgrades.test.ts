@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { createMission, DEFAULT_MISSION_CONFIG, type MissionState } from '../../src/mission/state';
-import { drill, oreRate, refineryCapacity, clickPower, autoDrillRate } from '../../src/mission/economy';
+import { drill, oreRate, refineryCapacity, clickPower, autoDrillRate } from '../../src/mission/extraction/economy';
 import { tickMission } from '../../src/mission/tick';
-import { buyUpgrade, isUpgradeUnlocked, availableUpgrades } from '../../src/mission/upgrades';
-import type { UpgradeDef } from '../../src/data/upgrades';
-import { GENERATORS } from '../../src/data/generators';
+import { buyUpgrade, isUpgradeUnlocked, availableUpgrades } from '../../src/mission/extraction/upgrades';
+import type { UpgradeDef } from '../../src/data/extraction/upgrades';
+import { GENERATORS } from '../../src/data/extraction/generators';
 
 const drone = GENERATORS[0]!;
 const auger = GENERATORS[1]!;

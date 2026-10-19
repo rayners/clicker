@@ -1,8 +1,8 @@
 import { formatClock, formatNumber } from '../core/format';
 import type { GameState } from '../core/game';
 import type { Store } from '../core/store';
-import { autoDrillOutput, autoDrillRate, clickPower } from '../mission/economy';
-import { depth } from '../mission/progress';
+import { autoDrillOutput, autoDrillRate, clickPower } from '../mission/extraction/economy';
+import { depth } from '../mission/extraction/progress';
 import { h, setText } from './dom';
 import { createLogView } from './log';
 import { createFlow } from './flow';
@@ -16,7 +16,7 @@ import { createArchivePanel, hasArchiveToShow } from './archive';
 import { createTerminusPanel } from './terminus';
 import { createSettings } from './settings';
 import { createSound, cueForLog } from './sound';
-import { isSpecialProjectsUnlocked } from '../mission/containment';
+import { isSpecialProjectsUnlocked } from '../mission/organism/containment';
 import { isCrewUnlocked } from '../mission/crew';
 import { advanceFrame, paintAll, paintSprite, readPalette, spriteCanvas } from './sprites';
 

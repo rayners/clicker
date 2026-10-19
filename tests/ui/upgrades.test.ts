@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { createGame, type GameState } from '../../src/core/game';
 import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
-import { GENERATORS } from '../../src/data/generators';
+import { GENERATORS } from '../../src/data/extraction/generators';
 
 let store: Store;
 

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { STORY } from '../../src/data/story';
 import { createMission, DEFAULT_MISSION_CONFIG, type MissionState } from '../../src/mission/state';
 import { runBeats, STORY_MIN_GAP } from '../../src/mission/story';
-import { GENERATORS } from '../../src/data/generators';
+import { GENERATORS } from '../../src/data/extraction/generators';
 
 describe('story content', () => {
   it('has unique beat ids', () => {

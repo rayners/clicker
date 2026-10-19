@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createGame } from '../../src/core/game';
 import { reduce, createStore } from '../../src/core/store';
-import { GENERATORS } from '../../src/data/generators';
+import { GENERATORS } from '../../src/data/extraction/generators';
 
 const NOW = 1_000;
 

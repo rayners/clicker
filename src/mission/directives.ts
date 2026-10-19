@@ -1,5 +1,5 @@
 import { formatDuration, formatNumber } from '../core/format';
-import { DIRECTIVES, type DirectiveDef } from '../data/directives';
+import { DIRECTIVES, type DirectiveDef } from '../data/extraction/directives';
 import { appendLog } from './log';
 import type { MissionState } from './state';
 

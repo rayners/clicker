@@ -1,5 +1,5 @@
 import type { MissionState } from '../mission/state';
-import { depth } from '../mission/progress';
+import { depth } from '../mission/extraction/progress';
 
 export interface ArchiveFile {
   id: string;

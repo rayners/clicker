@@ -13,7 +13,7 @@ import {
   importSave,
   type StorageLike,
 } from '../../src/core/save';
-import { drill } from '../../src/mission/economy';
+import { drill } from '../../src/mission/extraction/economy';
 
 const NOW = 1_700_000_000_000;
 

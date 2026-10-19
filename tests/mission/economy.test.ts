@@ -13,9 +13,9 @@ import {
   isGeneratorRevealed,
   creditRate,
   bottleneck,
-} from '../../src/mission/economy';
+} from '../../src/mission/extraction/economy';
 import { tickMission } from '../../src/mission/tick';
-import { GENERATORS } from '../../src/data/generators';
+import { GENERATORS } from '../../src/data/extraction/generators';
 
 const fresh = () => createMission(DEFAULT_MISSION_CONFIG, 1);
 const drone = GENERATORS[0]!;

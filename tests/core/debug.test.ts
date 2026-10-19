@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { createGame } from '../../src/core/game';
 import { applyScenario, SCENARIOS } from '../../src/core/debug';
-import { depth } from '../../src/mission/progress';
-import { isSpecialProjectsUnlocked } from '../../src/mission/containment';
+import { depth } from '../../src/mission/extraction/progress';
+import { isSpecialProjectsUnlocked } from '../../src/mission/organism/containment';
 
 const base = () => createGame(1, 0);
 

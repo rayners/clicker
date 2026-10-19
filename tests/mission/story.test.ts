@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createMission, DEFAULT_MISSION_CONFIG, type MissionState } from '../../src/mission/state';
 import { runBeats, STORY_MIN_GAP, type Beat, type MissionContext } from '../../src/mission/story';
-import { depth } from '../../src/mission/progress';
+import { depth } from '../../src/mission/extraction/progress';
 
 const ctx: MissionContext = { cycle: 0, endings: [] };
 const fresh = (patch: Partial<MissionState> = {}): MissionState => ({

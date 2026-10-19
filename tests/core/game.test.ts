@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createGame, tickGame, catchUp, advance, OFFLINE_CAP_SECONDS } from '../../src/core/game';
-import { buyGenerator } from '../../src/mission/economy';
-import { GENERATORS } from '../../src/data/generators';
+import { buyGenerator } from '../../src/mission/extraction/economy';
+import { GENERATORS } from '../../src/data/extraction/generators';
 
 const NOW = 1_000_000;
 

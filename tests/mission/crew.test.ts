@@ -12,9 +12,9 @@ import {
   RECOVERY_SECONDS,
 } from '../../src/mission/crew';
 import { tickMission } from '../../src/mission/tick';
-import { clickPower, oreRate, refineryCapacity } from '../../src/mission/economy';
+import { clickPower, oreRate, refineryCapacity } from '../../src/mission/extraction/economy';
 import { CREW } from '../../src/data/crew';
-import { GENERATORS } from '../../src/data/generators';
+import { GENERATORS } from '../../src/data/extraction/generators';
 
 const byBoost = (kind: string) => CREW.find((c) => c.boost.kind === kind)!;
 const fresh = (patch: Partial<MissionState> = {}): MissionState => ({

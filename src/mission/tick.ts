@@ -1,8 +1,8 @@
-import { ORE_PRICE, oreRate, refineryCapacity } from './economy';
+import { ORE_PRICE, oreRate, refineryCapacity } from './extraction/economy';
 import type { MissionState } from './state';
 import { tickCrew } from './crew';
 import { tickDirectives } from './directives';
-import { tickContainment } from './containment';
+import { tickContainment } from './organism/containment';
 import { runBeats, type MissionContext } from './story';
 import { STORY } from '../data/story';
 

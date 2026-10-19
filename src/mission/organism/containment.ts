@@ -1,9 +1,9 @@
-import { nextRandom } from '../core/rng';
-import { CREW } from '../data/crew';
-import { GENERATORS } from '../data/generators';
-import { crewStatus } from './crew';
-import { appendLog, type LogKind } from './log';
-import type { MissionState } from './state';
+import { nextRandom } from '../../core/rng';
+import { CREW } from '../../data/crew';
+import { GENERATORS } from '../../data/extraction/generators';
+import { crewStatus } from '../crew';
+import { appendLog, type LogKind } from '../log';
+import type { MissionState } from '../state';
 
 export const RIG_BASE_COST = 1e6;
 const RIG_COST_GROWTH = 1.8;

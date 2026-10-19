@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { CREW } from '../../src/data/crew';
-import { GENERATORS } from '../../src/data/generators';
+import { GENERATORS } from '../../src/data/extraction/generators';
 
 describe('crew roster', () => {
   it('has seven crew with unique ids', () => {

@@ -1,4 +1,4 @@
-import { GENERATORS } from '../data/generators';
+import { GENERATORS } from '../data/extraction/generators';
 import type { MissionState } from '../mission/state';
 import type { GameState } from './game';
 

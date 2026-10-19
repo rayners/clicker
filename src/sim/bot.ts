@@ -2,11 +2,11 @@ import { createGame, createProfile, tickGame, type GameState } from '../core/gam
 import { missionConfigFor } from '../core/prestige';
 import { reduce, type Action } from '../core/store';
 import { CREW } from '../data/crew';
-import { GENERATORS } from '../data/generators';
-import { generatorCost, generatorRate, oreRate, refineryCapacity, refineryCost } from '../mission/economy';
-import { availableUpgrades } from '../mission/upgrades';
+import { GENERATORS } from '../data/extraction/generators';
+import { generatorCost, generatorRate, oreRate, refineryCapacity, refineryCost } from '../mission/extraction/economy';
+import { availableUpgrades } from '../mission/extraction/upgrades';
 import { crewStatus, isCrewUnlocked, maxAwake, awakeCount } from '../mission/crew';
-import { containmentLevelCost, isSpecialProjectsUnlocked, reinforceCost, rigCost, ventCost } from '../mission/containment';
+import { containmentLevelCost, isSpecialProjectsUnlocked, reinforceCost, rigCost, ventCost } from '../mission/organism/containment';
 import { createMission } from '../mission/state';
 
 export interface SimOptions {

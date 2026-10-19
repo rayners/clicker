@@ -1,4 +1,4 @@
-import type { UpgradeEffect } from './upgrades';
+import type { UpgradeEffect } from './extraction/upgrades';
 
 export type CrewBoost = UpgradeEffect | { kind: 'fatigueMultiplier'; value: number };
 

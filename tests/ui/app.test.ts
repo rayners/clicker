@@ -5,10 +5,10 @@ import userEvent from '@testing-library/user-event';
 import { createGame } from '../../src/core/game';
 import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
-import { GENERATORS } from '../../src/data/generators';
+import { GENERATORS } from '../../src/data/extraction/generators';
 import { appendLog } from '../../src/mission/log';
-import { depth } from '../../src/mission/progress';
-import { creditRate, generatorRate, oreRate, refineryCapacity } from '../../src/mission/economy';
+import { depth } from '../../src/mission/extraction/progress';
+import { creditRate, generatorRate, oreRate, refineryCapacity } from '../../src/mission/extraction/economy';
 import { formatNumber } from '../../src/core/format';
 
 let store: Store;

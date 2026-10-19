@@ -1,6 +1,6 @@
 import type { Beat } from '../mission/story';
 import { sinceBeat } from '../mission/story';
-import { depth } from '../mission/progress';
+import { depth } from '../mission/extraction/progress';
 import { isCrewUnlocked } from '../mission/crew';
 import type { MissionState } from '../mission/state';
 import { CREW } from './crew';

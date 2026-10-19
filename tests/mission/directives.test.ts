@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createMission, DEFAULT_MISSION_CONFIG, type MissionState } from '../../src/mission/state';
 import { tickDirectives, directiveProgress, DIRECTIVE_COOLDOWN } from '../../src/mission/directives';
 import { tickMission } from '../../src/mission/tick';
-import { DIRECTIVES } from '../../src/data/directives';
+import { DIRECTIVES } from '../../src/data/extraction/directives';
 
 const first = DIRECTIVES[0]!;
 const fresh = (patch: Partial<MissionState> = {}): MissionState => ({

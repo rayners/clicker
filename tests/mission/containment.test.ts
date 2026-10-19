@@ -16,11 +16,11 @@ import {
   vent,
   ventCost,
   BREACH_RESET_INTEGRITY,
-} from '../../src/mission/containment';
+} from '../../src/mission/organism/containment';
 import { tickMission } from '../../src/mission/tick';
-import { oreRate } from '../../src/mission/economy';
+import { oreRate } from '../../src/mission/extraction/economy';
 import { crewStatus, wakeCrew, awakeCount } from '../../src/mission/crew';
-import { GENERATORS } from '../../src/data/generators';
+import { GENERATORS } from '../../src/data/extraction/generators';
 import { CREW } from '../../src/data/crew';
 
 const unlocked = (patch: Partial<MissionState> = {}): MissionState => ({

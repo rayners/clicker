@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { DIRECTIVES } from '../../src/data/directives';
-import { GENERATORS } from '../../src/data/generators';
+import { DIRECTIVES } from '../../src/data/extraction/directives';
+import { GENERATORS } from '../../src/data/extraction/generators';
 
 describe('directive table', () => {
   it('has unique ids', () => {

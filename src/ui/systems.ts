@@ -1,13 +1,13 @@
 import { formatNumber } from '../core/format';
 import type { Store } from '../core/store';
-import { GENERATORS } from '../data/generators';
+import { GENERATORS } from '../data/extraction/generators';
 import {
   generatorCost,
   generatorRate,
   isGeneratorRevealed,
   refineryCapacity,
   refineryCost,
-} from '../mission/economy';
+} from '../mission/extraction/economy';
 import type { MissionState } from '../mission/state';
 import { h, setAttr, setText } from './dom';
 
