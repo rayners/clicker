@@ -85,3 +85,33 @@ describe('terraform story', () => {
     for (const b of beats.filter((x) => (x.act ?? 1) === 1)) for (const e of b.entries) expect(e.kind).not.toBe('anomaly');
   });
 });
+
+describe('the nursery (organism x terraform pairing)', () => {
+  const pairing = HORRORS.organism.pairings.terraform ?? [];
+
+  it('exists only for terraforming contracts', () => {
+    expect(pairing.length).toBeGreaterThan(0);
+    const extractionIds = new Set(storyBeats(SCENARIOS.extraction, HORRORS.organism).map((b) => b.id));
+    for (const b of pairing) expect(extractionIds.has(b.id)).toBe(false);
+  });
+
+  it('only reveals what the spec has become after the discovery', () => {
+    for (const b of pairing) expect(b.act ?? 1).toBeGreaterThanOrEqual(3);
+  });
+
+  it('can be reached by playing a terraforming contract deep into the infestation', () => {
+    let m: T = {
+      ...createMission(TERRAFORM_MISSION_CONFIG, 1),
+      act: 4,
+      lifetimeCredits: 1e12,
+      lifetimeUnits: 1e12,
+      processed: 1e12,
+      flags: ['specimens', 'tracker'],
+      beats: { 'a3-entry': 0, 'a4-entry': 0 },
+      contacts: 3,
+      processors: Object.fromEntries(PROCESSORS.map((p) => [p.id, 1])),
+    };
+    for (let i = 0; i < 80; i++) m = runStory({ ...m, elapsed: m.elapsed + STORY_MIN_GAP + 61 });
+    expect(pairing.filter((b) => m.beats[b.id] === undefined).map((b) => b.id)).toEqual([]);
+  });
+});
