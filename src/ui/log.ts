@@ -2,7 +2,7 @@ import { formatClock } from '../core/format';
 import { LOG_LIMIT, type LogEntry } from '../mission/log';
 import { h } from './dom';
 
-export function createLogView(): { el: HTMLOListElement; render(entries: LogEntry[], contract: string): void } {
+export function createLogView(): { el: HTMLOListElement; render(entries: LogEntry[], contract: string): LogEntry[] } {
   const el = h('ol', { class: 'log', role: 'log', 'aria-live': 'polite', 'aria-label': 'Comms log' });
   let lastId = 0;
   let currentContract = '';
@@ -15,7 +15,7 @@ export function createLogView(): { el: HTMLOListElement; render(entries: LogEntr
       lastId = 0;
     }
     const fresh = entries.filter((e) => e.id > lastId);
-    if (fresh.length === 0) return;
+    if (fresh.length === 0) return fresh;
     const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 48;
     fresh.forEach((entry, i) => {
       const li = h(
@@ -30,6 +30,7 @@ export function createLogView(): { el: HTMLOListElement; render(entries: LogEntr
     while (el.children.length > LOG_LIMIT) el.firstElementChild?.remove();
     lastId = fresh[fresh.length - 1]!.id;
     if (nearBottom) el.scrollTop = el.scrollHeight;
+    return fresh;
   }
 
   return { el, render };

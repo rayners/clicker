@@ -12,12 +12,15 @@ import { createDirectivesPanel, hasDirectivesToShow } from './directives';
 import { createProjectsPanel } from './projects';
 import { createArchivePanel, hasArchiveToShow } from './archive';
 import { createTerminusPanel } from './terminus';
+import { createSettings } from './settings';
+import { createSound, cueForLog } from './sound';
 import { isSpecialProjectsUnlocked } from '../mission/containment';
 import { isCrewUnlocked } from '../mission/crew';
 import { advanceFrame, paintAll, paintSprite, readPalette, spriteCanvas } from './sprites';
 
 const SPRITE_CORRUPTION: Record<number, number> = { 1: 0, 2: 0, 3: 0.15, 4: 0.45 };
 const GLITCH_INTERVAL = 1.5;
+const TRACKER_PING_INTERVAL = 2.5;
 
 interface Panel {
   id: string;
@@ -35,12 +38,22 @@ function stat(label: string, ariaLabel: string) {
 }
 
 export function mountApp(root: HTMLElement, store: Store): void {
+  const sound = createSound();
+  const settings = createSettings(store);
+  // iOS only allows audio to start inside a user gesture.
+  root.addEventListener('pointerdown', () => sound.unlock(), { passive: true });
   const shipName = h('span', { class: 'mast-ship' });
   const clock = h('span', { class: 'mast-clock' });
   const masthead = h(
     'header',
     { class: 'masthead' },
-    h('div', { class: 'mast-brand' }, h('span', { class: 'brand-mark', 'aria-hidden': 'true' }, 'K/A'), 'KESSLER-AMARI COMBINE'),
+    h(
+      'div',
+      { class: 'mast-brand' },
+      h('span', { class: 'brand-mark', 'aria-hidden': 'true' }, 'K/A'),
+      h('span', { class: 'brand-name' }, 'KESSLER-AMARI COMBINE'),
+      settings.button,
+    ),
     h('div', { class: 'mast-line' }, h('span', { class: 'mast-ship-wrap' }, spriteCanvas('ship', 'mast-sprite'), shipName), clock),
   );
 
@@ -65,6 +78,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
   drill.setAttribute('aria-label', 'Execute drill cycle');
   const drillOnce = () => {
     store.dispatch({ type: 'drill' });
+    sound.play('click');
     spawnTick(drill);
     advanceFrame(drillBit);
     paintSprite(drillBit, palette);
@@ -93,7 +107,11 @@ export function mountApp(root: HTMLElement, store: Store): void {
       label: 'OPS',
       short: 'OPS',
       el: h('section', { class: 'panel panel-ops', role: 'tabpanel', id: 'panel-ops', 'aria-labelledby': 'tab-ops' }, log.el),
-      render: (g) => log.render(g.mission.log, `${g.mission.config.shipName}:${g.mission.seed}`),
+      render: (g) => {
+        const fresh = log.render(g.mission.log, `${g.mission.config.shipName}:${g.mission.seed}`);
+        const last = fresh[fresh.length - 1];
+        if (last) sound.play(cueForLog(last.kind));
+      },
       visible: () => true,
     },
     { id: 'systems', label: 'SYSTEMS', short: 'SYS', el: systems.el, render: (g) => systems.render(g.mission), visible: () => true },
@@ -167,12 +185,13 @@ export function mountApp(root: HTMLElement, store: Store): void {
   }
 
   root.classList.add('shell');
-  root.replaceChildren(masthead, status, ...panels.map((p) => p.el), drillBay, tabbar);
+  root.replaceChildren(masthead, status, ...panels.map((p) => p.el), drillBay, tabbar, settings.dialog);
   selectTab('ops');
   let palette = readPalette(root);
   paintAll(root);
   let paintedAct = 0;
   let lastGlitch = -Infinity;
+  let lastPing = -Infinity;
 
   function render(game: GameState) {
     const m = game.mission;
@@ -185,12 +204,20 @@ export function mountApp(root: HTMLElement, store: Store): void {
     setText(refinery.value, formatNumber(refineryCapacity(m)));
     setText(shaft.value, `${depth(m).toLocaleString('en-US')} M`);
     if (root.dataset.act !== String(m.act)) root.dataset.act = String(m.act);
+    const motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
+    if (root.dataset.motion !== motion) root.dataset.motion = motion;
+    sound.setEnabled(game.profile.settings.sound);
+    settings.render(game);
     const tracking = m.flags.includes('tracker');
     contacts.el.hidden = !tracking;
     setText(contacts.value, String(m.contacts));
     const alert = String(m.contacts > 0);
     if (root.dataset.alert !== alert) root.dataset.alert = alert;
     repaintSprites(m.act, m.elapsed);
+    if (m.contacts > 0 && m.elapsed - lastPing >= TRACKER_PING_INTERVAL) {
+      lastPing = m.elapsed;
+      sound.play('ping');
+    }
     panels.forEach((p, i) => {
       const visible = p.visible(game);
       tabs[i]!.hidden = !visible;

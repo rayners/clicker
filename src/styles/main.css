@@ -724,6 +724,116 @@ button:focus-visible {
   animation: blink 0.6s steps(1) infinite;
 }
 
+/* ---------- settings ---------- */
+
+.mast-brand .brand-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cfg-open {
+  min-width: 44px;
+  min-height: 28px;
+  border: 1px solid var(--phosphor-dim);
+  background: transparent;
+  font-family: var(--font-term);
+  font-size: 16px;
+  letter-spacing: 0.1em;
+}
+
+.cfg {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: calc(env(safe-area-inset-top) + 16px) var(--gutter) calc(env(safe-area-inset-bottom) + 16px);
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.cfg-box {
+  width: min(520px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding-bottom: 12px;
+  border: 1px solid var(--phosphor);
+  background: var(--bg);
+  box-shadow: 0 0 30px var(--glow);
+}
+
+.cfg-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 8px;
+}
+
+.cfg-close {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  font-size: 1.2em;
+}
+
+.cfg-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 var(--gutter);
+  cursor: pointer;
+}
+
+.cfg-toggle input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--phosphor);
+}
+
+.cfg-code {
+  display: block;
+  width: calc(100% - 2 * var(--gutter));
+  margin: 0 var(--gutter);
+  padding: 8px;
+  border: 1px solid var(--phosphor-dim);
+  background: var(--bg-raise);
+  color: var(--phosphor-hi);
+  font-family: var(--font-term);
+  font-size: 16px; /* 16px+ stops iOS Safari zooming the page on focus */
+  word-break: break-all;
+  resize: vertical;
+}
+
+.cfg-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px var(--gutter) 0;
+}
+
+.cfg-row .buy {
+  flex: 1 1 40%;
+  min-width: 0;
+}
+
+.cfg-status {
+  min-height: 1.2em;
+  margin: 6px var(--gutter);
+  color: var(--phosphor-hi);
+}
+
+.cfg-danger {
+  display: block;
+  width: calc(100% - 2 * var(--gutter));
+  margin: 0 var(--gutter);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
 /* ---------- alert state ---------- */
 
 .stat-alert .stat-value,

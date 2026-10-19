@@ -3,7 +3,7 @@ import { buyUpgrade } from '../mission/upgrades';
 import { sleepCrew, wakeCrew } from '../mission/crew';
 import { buyContainmentLevel, buyRig, reinforce, vent } from '../mission/containment';
 import type { MissionState } from '../mission/state';
-import { advance, type GameState } from './game';
+import { advance, createGame, type GameState, type Settings } from './game';
 import { completeContract, type Ending } from './prestige';
 
 export type Action =
@@ -18,6 +18,8 @@ export type Action =
   | { type: 'buyContainmentLevel' }
   | { type: 'vent' }
   | { type: 'completeContract'; ending: Ending; seed: number }
+  | { type: 'setSetting'; key: keyof Settings; value: boolean }
+  | { type: 'hardReset'; seed: number; now: number }
   | { type: 'tick'; dt: number };
 
 const MISSION_ACTIONS: Partial<Record<Action['type'], (m: MissionState) => MissionState>> = {
@@ -43,6 +45,12 @@ export function reduce(game: GameState, action: Action): GameState {
       return { ...game, mission: wakeCrew(game.mission, action.id) };
     case 'sleepCrew':
       return { ...game, mission: sleepCrew(game.mission, action.id) };
+    case 'setSetting':
+      return { ...game, profile: { ...game.profile, settings: { ...game.profile.settings, [action.key]: action.value } } };
+    case 'hardReset': {
+      const fresh = createGame(action.seed, action.now);
+      return { ...fresh, profile: { ...fresh.profile, settings: game.profile.settings } };
+    }
     case 'completeContract':
       return completeContract(game, action.ending, action.seed);
     case 'tick':

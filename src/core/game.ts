@@ -19,8 +19,14 @@ export interface ContractRecord {
   duration: number;
 }
 
+export interface Settings {
+  sound: boolean;
+  reducedMotion: boolean;
+}
+
 /** Progress that survives prestige resets. */
 export interface Profile {
+  settings: Settings;
   seniority: number;
   conscience: number;
   contractsCompleted: number;
@@ -38,10 +44,18 @@ export interface GameState {
   boardroom?: unknown;
 }
 
-export const GAME_VERSION = 1;
+export const GAME_VERSION = 2;
 
 export function createProfile(): Profile {
-  return { seniority: 0, conscience: 0, contractsCompleted: 0, deliveries: 0, endingsSeen: [], history: [] };
+  return {
+    settings: { sound: false, reducedMotion: false },
+    seniority: 0,
+    conscience: 0,
+    contractsCompleted: 0,
+    deliveries: 0,
+    endingsSeen: [],
+    history: [],
+  };
 }
 
 export function createGame(seed: number, now: number): GameState {

@@ -128,3 +128,21 @@ describe('export / import', () => {
     expect(() => importSave('nope!!')).toThrow();
   });
 });
+
+describe('real migrations', () => {
+  it('upgrades a version 1 save (no settings, no mission seed, no config modifiers)', () => {
+    const g = played();
+    const v1 = JSON.parse(serialize(g));
+    v1.version = 1;
+    delete v1.profile.settings;
+    delete v1.mission.seed;
+    delete v1.mission.config.productionMultiplier;
+    delete v1.mission.config.extraLifeSupport;
+    delete v1.mission.config.incidentMultiplier;
+    const upgraded = deserialize(JSON.stringify(v1));
+    expect(upgraded.version).toBe(CURRENT_VERSION);
+    expect(upgraded.profile.settings).toEqual({ sound: false, reducedMotion: false });
+    expect(upgraded.mission.seed).toBe(g.mission.rng);
+    expect(upgraded.mission.config).toMatchObject({ productionMultiplier: 1, extraLifeSupport: 0, incidentMultiplier: 1 });
+  });
+});

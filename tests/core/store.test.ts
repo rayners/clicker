@@ -83,3 +83,20 @@ describe('reduce: contracts', () => {
     expect(after.mission.rng).toBe(77);
   });
 });
+
+describe('reduce: settings and reset', () => {
+  it('changes a setting', () => {
+    const after = reduce(createGame(1, NOW), { type: 'setSetting', key: 'sound', value: true });
+    expect(after.profile.settings.sound).toBe(true);
+  });
+
+  it('hard reset wipes everything, keeping only settings', () => {
+    const g = createGame(1, NOW);
+    const played = { ...g, profile: { ...g.profile, seniority: 5, settings: { sound: true, reducedMotion: false } }, mission: { ...g.mission, ore: 99 } };
+    const after = reduce(played, { type: 'hardReset', seed: 3, now: NOW + 1 });
+    expect(after.profile.seniority).toBe(0);
+    expect(after.profile.settings.sound).toBe(true);
+    expect(after.mission.ore).toBe(0);
+    expect(after.mission.seed).toBe(3);
+  });
+});

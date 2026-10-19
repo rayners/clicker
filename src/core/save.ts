@@ -9,7 +9,23 @@ type RawSave = Record<string, unknown> & { version: number };
 type Migration = (save: Record<string, unknown>) => Record<string, unknown>;
 
 /** MIGRATIONS[n] upgrades a version n-1 save to version n. */
-const MIGRATIONS: Record<number, Migration> = {};
+const MIGRATIONS: Record<number, Migration> = {
+  // v2: settings, a stable mission seed, and per-mission config modifiers (prestige).
+  2: (save) => {
+    const profile = save.profile as Record<string, unknown>;
+    const mission = save.mission as Record<string, unknown>;
+    const config = mission.config as Record<string, unknown>;
+    return {
+      ...save,
+      profile: { settings: { sound: false, reducedMotion: false }, ...profile },
+      mission: {
+        seed: mission.rng,
+        ...mission,
+        config: { productionMultiplier: 1, extraLifeSupport: 0, incidentMultiplier: 1, ...config },
+      },
+    };
+  },
+};
 
 export function migrate(save: RawSave, migrations: Record<number, Migration>, target: number): RawSave {
   let current: Record<string, unknown> = save;

@@ -64,3 +64,11 @@
     animation: none;
   }
 }
+
+/* Player-chosen reduced motion mirrors the system preference. */
+.shell[data-motion='reduced']::after,
+.shell[data-motion='reduced']::before,
+.shell[data-motion='reduced'] *,
+.shell[data-motion='reduced'] .masthead {
+  animation: none !important;
+}
