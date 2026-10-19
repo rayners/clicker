@@ -9,19 +9,21 @@ const owned = (upTo: number, count: number) =>
   Object.fromEntries(GENERATORS.map((g, i) => [g.id, i < upTo ? count : 0]));
 
 const PATCHES: Record<string, Partial<MissionState>> = {
-  act2: { act: 2, lifetimeOre: 1.2e5, credits: 5e4, generators: owned(3, 10) },
+  act2: { act: 2, lifetimeOre: 2.5e6, credits: 5e4, generators: owned(4, 15), refineryLevel: 6 },
   act3: {
     act: 3,
-    lifetimeOre: 2e9,
-    credits: 1e9,
+    lifetimeOre: 6e7,
+    credits: 2e6,
+    refineryLevel: 11,
     generators: owned(6, 15),
     flags: ['specimens'],
     beats: { 'a3-entry': 0, 'a3-special-projects': 0 },
   },
   act4: {
     act: 4,
-    lifetimeOre: 2e10,
-    credits: 2e10,
+    lifetimeOre: 3e8,
+    credits: 5e7,
+    refineryLevel: 12,
     generators: owned(7, 25),
     flags: ['specimens', 'tracker', 'archive-0-77'],
     specimens: 12,
@@ -32,8 +34,9 @@ const PATCHES: Record<string, Partial<MissionState>> = {
   },
   terminus: {
     act: 4,
-    lifetimeOre: 5e10,
-    credits: 5e10,
+    lifetimeOre: 6e8,
+    credits: 1e8,
+    refineryLevel: 13,
     generators: owned(8, 30),
     flags: ['specimens', 'tracker', 'archive-0-77', 'terminus'],
     specimens: 30,

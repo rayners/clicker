@@ -202,6 +202,9 @@ const ACT_2: Beat[] = [
   },
 ];
 
+/** However the infestation goes, the return window opens eventually. */
+const TERMINUS_AFTER_BREACH = 75 * 60;
+
 const lostCount = (m: MissionState) => CREW.filter((c) => m.crew[c.id]?.status === 'lost').length;
 
 /** Act 3: the cavity. Corporate messages now arrive with no light-lag at all. */
@@ -282,7 +285,7 @@ const ACT_4: Beat[] = [
   {
     id: 'a4-forced-breach',
     act: 4,
-    when: ({ m }) => inAct(m, 3) && m.breaches === 0 && (m.specimens >= 20 || depth(m) >= 4_800),
+    when: ({ m }) => inAct(m, 3) && m.breaches === 0 && m.specimens >= 1 && (m.specimens >= 20 || depth(m) >= 6_500),
     entries: [{ kind: 'anomaly', text: 'CONTAINMENT FIELD ... FIELD ... F I E L D' }],
     effects: [{ kind: 'breach' }],
   },
@@ -340,7 +343,8 @@ const ACT_4: Beat[] = [
     id: 'a4-terminus',
     act: 4,
     when: ({ m }) =>
-      inAct(m, 4) && (lostCount(m) === CREW.length || m.specimensRecovered >= 30 || depth(m) >= 5_600),
+      inAct(m, 4) &&
+      (lostCount(m) === CREW.length || m.specimensRecovered >= 300 || sinceBeat(m, 'a4-entry') >= TERMINUS_AFTER_BREACH),
     entries: [{ kind: 'sys', text: 'RETURN WINDOW OPEN. TERMINUS PROTOCOLS AVAILABLE. AWAITING WARDEN DECISION.' }],
     effects: [{ kind: 'setFlag', flag: 'terminus' }],
   },

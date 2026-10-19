@@ -7,6 +7,7 @@ import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
 import { GENERATORS } from '../../src/data/generators';
 import { appendLog } from '../../src/mission/log';
+import { depth } from '../../src/mission/progress';
 
 let store: Store;
 let root: HTMLElement;
@@ -117,8 +118,8 @@ describe('navigation', () => {
 
 describe('story presentation', () => {
   it('shows shaft depth in the status area', () => {
-    setup((g) => ({ ...g, mission: { ...g.mission, lifetimeOre: 1e5 } }));
-    expect(status(/shaft depth/i).textContent).toBe('1,000 M');
+    setup((g) => ({ ...g, mission: { ...g.mission, lifetimeOre: 1e7 } }));
+    expect(status(/shaft depth/i).textContent).toBe(`${depth(store.getState().mission).toLocaleString('en-US')} M`);
   });
 
   it('marks the current act on the shell so the theme can shift', () => {

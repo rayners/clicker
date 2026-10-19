@@ -5,22 +5,23 @@ import { crewStatus } from './crew';
 import { appendLog, type LogKind } from './log';
 import type { MissionState } from './state';
 
-export const RIG_BASE_COST = 2e8;
-const RIG_COST_GROWTH = 1.5;
+export const RIG_BASE_COST = 1e6;
+const RIG_COST_GROWTH = 1.8;
 /** Specimens per second per recovery rig. */
 export const RIG_RATE = 0.01;
-const FUNDING_PER_SPECIMEN = 0.15;
+/** Funding grows with the square root of specimens held, so hoarding has diminishing returns. */
+const FUNDING_SCALE = 0.5;
 /** Integrity percentage points lost per second per held specimen, before containment levels. */
-const STRAIN_PER_SPECIMEN = 0.03;
+const STRAIN_PER_SPECIMEN = 0.015;
 export const REINFORCE_AMOUNT = 25;
-const REINFORCE_BASE_COST = 1e8;
-const CONTAINMENT_BASE_COST = 5e8;
+const REINFORCE_BASE_COST = 2e5;
+const CONTAINMENT_BASE_COST = 5e6;
 const CONTAINMENT_COST_GROWTH = 3;
 const BREACH_ESCAPE_FRACTION = 0.3;
 export const BREACH_RESET_INTEGRITY = 60;
 /** Chance per loose contact per second of an incident. */
-const INCIDENT_CHANCE = 0.004;
-const VENT_BASE_COST = 1e9;
+const INCIDENT_CHANCE = 0.0008;
+const VENT_BASE_COST = 2e6;
 const VENT_COST_GROWTH = 2;
 const VENT_CONTACT_SURVIVAL = 0.4;
 const VENT_CREW_LOSS = 0.3;
@@ -40,7 +41,7 @@ export function buyRig(m: MissionState): MissionState {
 }
 
 export function fundingMultiplier(m: MissionState): number {
-  return 1 + FUNDING_PER_SPECIMEN * Math.floor(m.specimens);
+  return 1 + FUNDING_SCALE * Math.sqrt(Math.floor(m.specimens));
 }
 
 export function containmentLevelCost(m: MissionState): number {
