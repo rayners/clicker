@@ -54,3 +54,12 @@ describe('store', () => {
     expect(store.getState()).toBe(other);
   });
 });
+
+describe('reduce: upgrades', () => {
+  it('buys an upgrade', () => {
+    const g = createGame(1, NOW);
+    const rich = { ...g, mission: { ...g.mission, credits: 1e6, lifetimeOre: 1e6 } };
+    const after = reduce(rich, { type: 'buyUpgrade', id: 'tungsten-bits' });
+    expect(after.mission.upgrades).toContain('tungsten-bits');
+  });
+});

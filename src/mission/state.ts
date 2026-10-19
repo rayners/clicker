@@ -22,6 +22,7 @@ export interface MissionState {
   lifetimeOre: number;
   generators: Record<string, number>;
   refineryLevel: number;
+  upgrades: string[];
   log: LogEntry[];
   nextLogId: number;
 }
@@ -36,6 +37,7 @@ export function createMission(config: MissionConfig, seed: number): MissionState
     lifetimeOre: 0,
     generators: Object.fromEntries(GENERATORS.map((g) => [g.id, 0])),
     refineryLevel: 0,
+    upgrades: [],
     log: [],
     nextLogId: 1,
   };

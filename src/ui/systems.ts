@@ -3,6 +3,7 @@ import type { Store } from '../core/store';
 import { GENERATORS } from '../data/generators';
 import {
   generatorCost,
+  generatorRate,
   isGeneratorRevealed,
   refineryCapacity,
   refineryCost,
@@ -53,7 +54,7 @@ export function createSystemsPanel(store: Store): { el: HTMLElement; render(m: M
       const count = m.generators[row.def.id] ?? 0;
       const cost = generatorCost(row.def, count);
       setText(row.owned, String(count));
-      setText(row.rate, `+${formatNumber(row.def.baseRate)} ORE/S EA`);
+      setText(row.rate, `+${formatNumber(generatorRate(m, row.def))} ORE/S EA`);
       setText(row.button, `ACQUIRE ${formatNumber(cost)} CR`);
       setAttr(row.button, 'aria-label', `Acquire ${row.def.name} for ${formatNumber(cost)} credits`);
       row.button.disabled = m.credits < cost;

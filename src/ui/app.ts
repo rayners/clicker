@@ -5,13 +5,15 @@ import { oreRate, refineryCapacity } from '../mission/economy';
 import { h, setText } from './dom';
 import { createLogView } from './log';
 import { createSystemsPanel } from './systems';
+import { createUpgradesPanel, hasUpgradesToShow } from './upgrades';
 
-const TABS = [
-  { id: 'ops', label: 'OPS' },
-  { id: 'systems', label: 'SYSTEMS' },
-] as const;
-
-type TabId = (typeof TABS)[number]['id'];
+interface Panel {
+  id: string;
+  label: string;
+  el: HTMLElement;
+  render(game: GameState): void;
+  visible(game: GameState): boolean;
+}
 
 function stat(label: string, ariaLabel: string) {
   const value = h('dd', { class: 'stat-value', 'aria-label': ariaLabel }, '0');
@@ -53,31 +55,52 @@ export function mountApp(root: HTMLElement, store: Store): void {
   drill.addEventListener('click', (e) => {
     if (e.detail === 0) drillOnce();
   });
-
-  const ops = h(
-    'section',
-    { class: 'panel panel-ops', role: 'tabpanel', id: 'panel-ops', 'aria-labelledby': 'tab-ops' },
-    log.el,
-  );
   // Outside the panels so it stays reachable on phones whichever tab is open.
   const drillBay = h('div', { class: 'drill-bay' }, drill);
 
   const systems = createSystemsPanel(store);
+  const upgrades = createUpgradesPanel(store);
+  const panels: Panel[] = [
+    {
+      id: 'ops',
+      label: 'OPS',
+      el: h('section', { class: 'panel panel-ops', role: 'tabpanel', id: 'panel-ops', 'aria-labelledby': 'tab-ops' }, log.el),
+      render: (g) => log.render(g.mission.log),
+      visible: () => true,
+    },
+    { id: 'systems', label: 'SYSTEMS', el: systems.el, render: (g) => systems.render(g.mission), visible: () => true },
+    {
+      id: 'upgrades',
+      label: 'UPGRADES',
+      el: upgrades.el,
+      render: (g) => upgrades.render(g.mission),
+      visible: (g) => hasUpgradesToShow(g.mission),
+    },
+  ];
 
-  const tabButtons = TABS.map((t) => {
-    const b = h('button', { class: `tab tab-${t.id}`, role: 'tab', id: `tab-${t.id}`, 'aria-controls': `panel-${t.id}`, type: 'button' }, t.label);
-    b.addEventListener('click', () => selectTab(t.id));
+  const tabs = panels.map((p) => {
+    const b = h('button', { class: `tab tab-${p.id}`, role: 'tab', id: `tab-${p.id}`, 'aria-controls': `panel-${p.id}`, type: 'button' }, p.label);
+    b.addEventListener('click', () => selectTab(p.id));
     return b;
   });
-  const tabbar = h('nav', { class: 'tabbar', role: 'tablist', 'aria-label': 'Panels' }, ...tabButtons);
+  const tabbar = h('nav', { class: 'tabbar', role: 'tablist', 'aria-label': 'Panels' }, ...tabs);
 
-  function selectTab(id: TabId) {
+  let current = 'ops';
+  function selectTab(id: string) {
+    current = id;
     root.dataset.tab = id;
-    tabButtons.forEach((b, i) => b.setAttribute('aria-selected', String(TABS[i]!.id === id)));
+    // On desktop the ops column is always visible, so the side column shows systems while "ops" is selected.
+    const side = id === 'ops' ? 'systems' : id;
+    panels.forEach((p, i) => {
+      p.el.classList.toggle('is-active', p.id === id);
+      p.el.classList.toggle('is-side', p.id === side);
+      tabs[i]!.classList.toggle('is-side', p.id === side);
+      tabs[i]!.setAttribute('aria-selected', String(p.id === id));
+    });
   }
 
   root.classList.add('shell');
-  root.replaceChildren(masthead, status, ops, systems.el, drillBay, tabbar);
+  root.replaceChildren(masthead, status, ...panels.map((p) => p.el), drillBay, tabbar);
   selectTab('ops');
 
   function render(game: GameState) {
@@ -88,8 +111,12 @@ export function mountApp(root: HTMLElement, store: Store): void {
     setText(credits.value, formatNumber(m.credits));
     setText(rate.value, formatNumber(oreRate(m)));
     setText(refinery.value, formatNumber(refineryCapacity(m)));
-    log.render(m.log);
-    systems.render(m);
+    panels.forEach((p, i) => {
+      const visible = p.visible(game);
+      tabs[i]!.hidden = !visible;
+      if (!visible && current === p.id) selectTab('ops');
+      if (visible) p.render(game);
+    });
   }
 
   store.subscribe(render);

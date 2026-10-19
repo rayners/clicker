@@ -152,8 +152,7 @@ button:focus-visible {
   -webkit-overflow-scrolling: touch;
 }
 
-.shell[data-tab='ops'] .panel-ops,
-.shell[data-tab='systems'] .panel-systems {
+.panel.is-active {
   display: flex;
   flex-direction: column;
 }
@@ -334,6 +333,30 @@ button:focus-visible {
   text-shadow: none;
 }
 
+.panel-subtitle {
+  margin: 8px var(--gutter) 4px;
+  font-weight: normal;
+  font-size: 0.85em;
+  color: var(--phosphor-dim);
+  letter-spacing: 0.15em;
+}
+
+.upg-list,
+.upg-installed {
+  margin: 0;
+  padding: 0 var(--gutter) 12px;
+  list-style: none;
+}
+
+.upg-done {
+  color: var(--phosphor-dim);
+  font-size: 0.85em;
+}
+
+.tab[hidden] {
+  display: none;
+}
+
 /* ---------- tab bar ---------- */
 
 .tabbar {
@@ -401,10 +424,11 @@ button:focus-visible {
   .panel:not(.panel-ops) {
     grid-area: side;
     border-left: 1px solid var(--phosphor-faint);
+    display: none;
   }
 
-  /* The ops column is always visible on desktop; the side column defaults to systems. */
-  .shell[data-tab='ops'] .panel-systems {
+  /* The ops column is always visible on desktop; the side column shows the selected panel. */
+  .panel.is-side {
     display: flex;
     flex-direction: column;
   }
@@ -425,7 +449,7 @@ button:focus-visible {
     display: none;
   }
 
-  .shell[data-tab='ops'] .tab-systems {
+  .tab.is-side {
     color: var(--bg);
     background: var(--phosphor);
     text-shadow: none;

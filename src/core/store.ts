@@ -1,10 +1,12 @@
 import { buyGenerator, buyRefinery, drill } from '../mission/economy';
+import { buyUpgrade } from '../mission/upgrades';
 import { advance, type GameState } from './game';
 
 export type Action =
   | { type: 'drill' }
   | { type: 'buyGenerator'; id: string }
   | { type: 'buyRefinery' }
+  | { type: 'buyUpgrade'; id: string }
   | { type: 'tick'; dt: number };
 
 export function reduce(game: GameState, action: Action): GameState {
@@ -15,6 +17,8 @@ export function reduce(game: GameState, action: Action): GameState {
       return { ...game, mission: buyGenerator(game.mission, action.id) };
     case 'buyRefinery':
       return { ...game, mission: buyRefinery(game.mission) };
+    case 'buyUpgrade':
+      return { ...game, mission: buyUpgrade(game.mission, action.id) };
     case 'tick':
       return advance(game, action.dt).game;
   }

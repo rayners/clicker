@@ -1,20 +1,61 @@
 import { GENERATORS, type GeneratorDef } from '../data/generators';
+import { UPGRADES } from '../data/upgrades';
 import type { MissionState } from './state';
 
 export const COST_GROWTH = 1.15;
 export const ORE_PRICE = 1;
-const CLICK_POWER = 1;
+const BASE_CLICK = 1;
 const REFINERY_BASE_CAPACITY = 5;
 const REFINERY_CAPACITY_GROWTH = 2;
 const REFINERY_BASE_COST = 50;
-const REFINERY_COST_GROWTH = 3;
+const REFINERY_COST_GROWTH = 2.2;
 
 export function generatorCost(def: GeneratorDef, owned: number): number {
   return Math.ceil(def.baseCost * COST_GROWTH ** owned);
 }
 
+interface Multipliers {
+  click: number;
+  clickRateShare: number;
+  global: number;
+  refinery: number;
+  generator: Record<string, number>;
+}
+
+function multipliers(m: MissionState): Multipliers {
+  const result: Multipliers = { click: 1, clickRateShare: 0, global: 1, refinery: 1, generator: {} };
+  for (const u of UPGRADES) {
+    if (!m.upgrades.includes(u.id)) continue;
+    const e = u.effect;
+    switch (e.kind) {
+      case 'clickMultiplier':
+        result.click *= e.value;
+        break;
+      case 'clickRateShare':
+        result.clickRateShare += e.value;
+        break;
+      case 'globalMultiplier':
+        result.global *= e.value;
+        break;
+      case 'refineryMultiplier':
+        result.refinery *= e.value;
+        break;
+      case 'generatorMultiplier':
+        result.generator[e.generator] = (result.generator[e.generator] ?? 1) * e.value;
+        break;
+    }
+  }
+  return result;
+}
+
+export function clickPower(m: MissionState): number {
+  const mult = multipliers(m);
+  return BASE_CLICK * mult.click + oreRate(m) * mult.clickRateShare;
+}
+
 export function drill(m: MissionState): MissionState {
-  return { ...m, ore: m.ore + CLICK_POWER, lifetimeOre: m.lifetimeOre + CLICK_POWER };
+  const power = clickPower(m);
+  return { ...m, ore: m.ore + power, lifetimeOre: m.lifetimeOre + power };
 }
 
 export function buyGenerator(m: MissionState, id: string): MissionState {
@@ -26,12 +67,17 @@ export function buyGenerator(m: MissionState, id: string): MissionState {
   return { ...m, credits: m.credits - cost, generators: { ...m.generators, [id]: owned + 1 } };
 }
 
+export function generatorRate(m: MissionState, def: GeneratorDef): number {
+  const mult = multipliers(m);
+  return def.baseRate * (mult.generator[def.id] ?? 1) * mult.global;
+}
+
 export function oreRate(m: MissionState): number {
-  return GENERATORS.reduce((sum, g) => sum + (m.generators[g.id] ?? 0) * g.baseRate, 0);
+  return GENERATORS.reduce((sum, g) => sum + (m.generators[g.id] ?? 0) * generatorRate(m, g), 0);
 }
 
 export function refineryCapacity(m: MissionState): number {
-  return REFINERY_BASE_CAPACITY * REFINERY_CAPACITY_GROWTH ** m.refineryLevel;
+  return REFINERY_BASE_CAPACITY * REFINERY_CAPACITY_GROWTH ** m.refineryLevel * multipliers(m).refinery;
 }
 
 export function refineryCost(m: MissionState): number {
