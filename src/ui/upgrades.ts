@@ -1,30 +1,42 @@
 import { formatNumber } from '../core/format';
 import type { Store } from '../core/store';
-import { UPGRADES } from '../data/extraction/upgrades';
 import type { MissionState } from '../mission/state';
-import { availableUpgrades } from '../mission/extraction/upgrades';
 import { h, setAttr, setText } from './dom';
 
-export function hasUpgradesToShow(m: MissionState): boolean {
-  return m.upgrades.length > 0 || availableUpgrades(m).length > 0;
+interface UpgradeEntry {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
 }
 
-export function createUpgradesPanel(store: Store): { el: HTMLElement; render(m: MissionState): void } {
+/** A scenario's upgrade table and which entries are on offer right now. */
+export interface UpgradeCatalogue<M extends MissionState> {
+  all: readonly UpgradeEntry[];
+  available(m: M): readonly UpgradeEntry[];
+}
+
+export function createUpgradesPanel<M extends MissionState>(
+  store: Store,
+  catalogue: UpgradeCatalogue<M>,
+): { el: HTMLElement; render(m: M): void; hasAny(m: M): boolean } {
+  const { all: UPGRADES, available: availableUpgrades } = catalogue;
+  const hasAny = (m: M) => m.upgrades.length > 0 || availableUpgrades(m).length > 0;
   const available = h('ul', { class: 'upg-list' });
   const installed = h('ul', { class: 'upg-installed' });
   const rows = new Map<string, { el: HTMLLIElement; button: HTMLButtonElement }>();
   let installedCount = -1;
 
   const el = h(
-    'section',
-    { class: 'panel panel-upgrades', role: 'tabpanel', id: 'panel-upgrades', 'aria-labelledby': 'tab-upgrades' },
+    'div',
+    { class: 'panel-body' },
     h('h2', { class: 'panel-title' }, 'REQUISITIONS'),
     available,
     h('h3', { class: 'panel-subtitle' }, 'INSTALLED'),
     installed,
   );
 
-  function render(m: MissionState) {
+  function render(m: M) {
     const list = availableUpgrades(m);
     const ids = new Set(list.map((u) => u.id));
     for (const [id, row] of rows) {
@@ -66,5 +78,5 @@ export function createUpgradesPanel(store: Store): { el: HTMLElement; render(m: 
     setText(el.querySelector('.panel-subtitle')!, `INSTALLED (${m.upgrades.length})`);
   }
 
-  return { el, render };
+  return { el, render, hasAny };
 }

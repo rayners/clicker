@@ -34,7 +34,7 @@ export function rigCost(m: MissionState): number {
   return Math.ceil(RIG_BASE_COST * RIG_COST_GROWTH ** m.rigs);
 }
 
-export function buyRig(m: MissionState): MissionState {
+export function buyRig<M extends MissionState>(m: M): M {
   const cost = rigCost(m);
   if (!isSpecialProjectsUnlocked(m) || m.credits < cost) return m;
   return { ...m, credits: m.credits - cost, rigs: m.rigs + 1 };
@@ -48,7 +48,7 @@ export function containmentLevelCost(m: MissionState): number {
   return CONTAINMENT_BASE_COST * CONTAINMENT_COST_GROWTH ** m.containmentLevel;
 }
 
-export function buyContainmentLevel(m: MissionState): MissionState {
+export function buyContainmentLevel<M extends MissionState>(m: M): M {
   const cost = containmentLevelCost(m);
   if (!isSpecialProjectsUnlocked(m) || m.credits < cost) return m;
   return { ...m, credits: m.credits - cost, containmentLevel: m.containmentLevel + 1 };
@@ -58,7 +58,7 @@ export function reinforceCost(m: MissionState): number {
   return REINFORCE_BASE_COST * (1 + Math.floor(m.specimens));
 }
 
-export function reinforce(m: MissionState): MissionState {
+export function reinforce<M extends MissionState>(m: M): M {
   const cost = reinforceCost(m);
   if (m.integrity >= 100 || m.credits < cost) return m;
   return { ...m, credits: m.credits - cost, integrity: Math.min(100, m.integrity + REINFORCE_AMOUNT) };
@@ -68,10 +68,10 @@ export function strainRate(m: MissionState): number {
   return (Math.floor(m.specimens) * STRAIN_PER_SPECIMEN) / (1 + m.containmentLevel);
 }
 
-export function breach(m: MissionState): MissionState {
+export function breach<M extends MissionState>(m: M): M {
   const held = Math.floor(m.specimens);
   const escaped = held === 0 ? 0 : Math.max(1, Math.round(held * BREACH_ESCAPE_FRACTION));
-  const next: MissionState = {
+  const next: M = {
     ...m,
     specimens: m.specimens - escaped,
     contacts: m.contacts + escaped,
@@ -111,21 +111,21 @@ const CREW_LINES = [
   (name: string) => `CRYO POD OPENED FROM OUTSIDE. ${name} NOT IN POD.`,
 ];
 
-function lose(m: MissionState, id: string): MissionState {
+function lose<M extends MissionState>(m: M, id: string): M {
   const member = m.crew[id];
   if (!member) return m;
   return { ...m, crew: { ...m.crew, [id]: { ...member, status: 'lost' } } };
 }
 
-function incident(m: MissionState, roll: Roll, hooks: HorrorHooks): MissionState {
+function incident<M extends MissionState>(m: M, roll: Roll, hooks: HorrorHooks): M {
   const kind = roll();
   const awake = CREW.filter((c) => m.crew[c.id]?.status === 'awake');
   const living = CREW.filter((c) => crewStatus(m, c.id) !== 'lost');
-  const log = (next: MissionState, kindOf: LogKind, text: string) => appendLog(next, kindOf, text);
+  const log = (next: M, kindOf: LogKind, text: string) => appendLog(next, kindOf, text);
 
   if (kind < 0.5) {
     const lost = hooks.loseEquipment(m, roll);
-    if (lost) return log(lost.m as MissionState, 'sys', pick(EQUIPMENT_LINES, roll)(lost.name));
+    if (lost) return log(lost.m as M, 'sys', pick(EQUIPMENT_LINES, roll)(lost.name));
   }
   if (kind < 0.8 && living.length > 0) {
     const victim = pick(awake.length > 0 ? awake : living, roll);
@@ -134,10 +134,10 @@ function incident(m: MissionState, roll: Roll, hooks: HorrorHooks): MissionState
   return log({ ...m, integrity: Math.max(0, m.integrity - 15) }, 'sys', 'CONTAINMENT HOUSING STRUCK FROM OUTSIDE. INTEGRITY -15%.');
 }
 
-export function tickContainment(m: MissionState, dt: number, hooks: HorrorHooks): MissionState {
+export function tickContainment<M extends MissionState>(m: M, dt: number, hooks: HorrorHooks): M {
   if (!isSpecialProjectsUnlocked(m) && m.contacts === 0) return m;
   const recovered = m.rigs * RIG_RATE * dt;
-  let next: MissionState = {
+  let next: M = {
     ...m,
     specimens: m.specimens + recovered,
     specimensRecovered: m.specimensRecovered + recovered,
@@ -158,13 +158,13 @@ export function ventCost(m: MissionState): number {
   return VENT_BASE_COST * VENT_COST_GROWTH ** m.vents;
 }
 
-export function vent(m: MissionState): MissionState {
+export function vent<M extends MissionState>(m: M): M {
   const cost = ventCost(m);
   if (m.contacts === 0 || m.credits < cost) return m;
   const r = roller(m);
   let survivors = 0;
   for (let i = 0; i < m.contacts; i++) if (r.roll() < VENT_CONTACT_SURVIVAL) survivors++;
-  let next: MissionState = { ...m, credits: m.credits - cost, vents: m.vents + 1, contacts: survivors };
+  let next: M = { ...m, credits: m.credits - cost, vents: m.vents + 1, contacts: survivors };
   const victims = CREW.filter((c) => m.crew[c.id]?.status === 'awake' && r.roll() < VENT_CREW_LOSS);
   for (const v of victims) next = lose(next, v.id);
   next = { ...next, rng: r.state() };

@@ -178,7 +178,8 @@ button:focus-visible {
   font-size: 1.2em;
 }
 
-.stat[hidden] {
+.stat[hidden],
+.stats[hidden] {
   display: none;
 }
 
@@ -229,19 +230,25 @@ button:focus-visible {
 }
 
 /* The stage holding production back is inverted, so the next thing to buy is obvious. */
-.flow[data-bottleneck='extraction'] .flow-extract,
-.flow[data-bottleneck='refinery'] .flow-refine {
+.flow-cell.is-limit {
   border-color: var(--phosphor);
   box-shadow: inset 0 0 0 1px var(--phosphor), 0 0 10px var(--glow);
 }
 
-.flow[data-bottleneck='refinery'] .flow-refine {
+/* Saturated constraint (refinery full, reactors short): inverted so it can't be missed. */
+.flow[data-severe='true'] .flow-cell.is-limit {
   background: var(--phosphor);
   text-shadow: none;
 }
 
-.flow[data-bottleneck='refinery'] .flow-refine * {
+.flow[data-severe='true'] .flow-cell.is-limit * {
   color: var(--bg);
+}
+
+/* Off spec: the meter itself is the problem. */
+.flow[data-bottleneck='balance'] .flow-meter {
+  border-color: var(--phosphor-hi);
+  box-shadow: 0 0 10px var(--glow);
 }
 
 .flow-meter {
@@ -260,7 +267,7 @@ button:focus-visible {
   transition: width 0.4s steps(6, end);
 }
 
-.flow[data-bottleneck='refinery'] .flow-fill {
+.flow[data-severe='true'] .flow-fill {
   animation: overload 0.8s steps(2, end) infinite;
 }
 
@@ -278,11 +285,11 @@ button:focus-visible {
   text-align: center;
 }
 
-.flow[data-bottleneck='refinery'] .flow-note {
+.flow[data-severe='true'] .flow-note {
   color: var(--phosphor-hi);
 }
 
-.flow-extract.is-bumped {
+.flow-cell-0.is-bumped {
   animation: bump 0.6s ease-out;
 }
 
@@ -331,6 +338,109 @@ button:focus-visible {
     transform: translate(-50%, -22px);
     opacity: 0;
   }
+}
+
+/* ---------- power allocation (terraforming): one tap per 10% ---------- */
+
+.alloc {
+  margin-top: 6px;
+}
+
+.alloc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.alloc-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 2px;
+  border: 1px solid var(--phosphor-faint);
+  font-size: 0.8em;
+  line-height: 1.05;
+}
+
+.alloc-line[data-state='power-limited'] {
+  border-color: var(--phosphor);
+}
+
+.alloc-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+  padding: 0 2px;
+}
+
+.alloc-target,
+.alloc-reading {
+  color: var(--phosphor-dim);
+}
+
+.alloc-steps {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  width: 100%;
+}
+
+.alloc-step {
+  min-height: 44px;
+  border: 1px solid var(--phosphor-dim);
+  background: transparent;
+  font-size: 1.4em;
+  line-height: 1;
+}
+
+.alloc-step:active {
+  background: var(--phosphor);
+  color: var(--bg);
+  text-shadow: none;
+}
+
+.alloc-step[hidden] {
+  display: none;
+}
+
+.alloc[data-auto='true'] .alloc-steps {
+  grid-template-columns: 1fr;
+  min-height: 44px;
+}
+
+.alloc-share {
+  text-align: center;
+  font-size: 1.5em;
+  color: var(--phosphor-hi);
+  font-variant-numeric: tabular-nums;
+}
+
+.alloc-state {
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+}
+
+.alloc-line[data-state='power-limited'] .alloc-state {
+  color: var(--phosphor-hi);
+  animation: flow-pulse 1.2s steps(2, end) infinite;
+}
+
+.alloc-auto {
+  margin: 4px 0 0;
+  font-size: 0.75em;
+  text-align: center;
+  color: var(--phosphor-dim);
+}
+
+.alloc-auto[hidden] {
+  display: none;
+}
+
+.panel-slot,
+.monitor-slot {
+  display: contents;
 }
 
 /* ---------- operations monitor: automation visibly working ---------- */
@@ -1159,6 +1269,39 @@ button:focus-visible {
     gap: 10px;
     margin-top: 16px;
     font-size: 1em;
+  }
+
+  /* The status column is narrow on desktop: one line per row, steps either side of the share. */
+  .alloc-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .alloc-line {
+    display: grid;
+    grid-template-columns: 1fr 140px;
+    grid-template-areas: 'head steps' 'state reading';
+    align-items: center;
+    column-gap: 8px;
+    padding: 4px 6px;
+  }
+
+  .alloc-head {
+    grid-area: head;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .alloc-steps {
+    grid-area: steps;
+  }
+
+  .alloc-state {
+    grid-area: state;
+  }
+
+  .alloc-reading {
+    grid-area: reading;
+    text-align: right;
   }
 
   .flow-row {

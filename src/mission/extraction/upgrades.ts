@@ -12,7 +12,7 @@ export function availableUpgrades(m: MissionState): UpgradeDef[] {
   return UPGRADES.filter((u) => !m.upgrades.includes(u.id) && isUpgradeUnlocked(m, u)).sort((a, b) => a.cost - b.cost);
 }
 
-export function buyUpgrade(m: MissionState, id: string): MissionState {
+export function buyUpgrade<M extends MissionState>(m: M, id: string): M {
   const u = UPGRADES.find((x) => x.id === id);
   if (!u || m.upgrades.includes(id) || !isUpgradeUnlocked(m, u) || m.credits < u.cost) return m;
   return { ...m, credits: m.credits - u.cost, upgrades: [...m.upgrades, id] };

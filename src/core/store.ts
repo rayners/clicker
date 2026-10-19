@@ -2,7 +2,9 @@ import { buyGenerator, buyRefinery, drill } from '../mission/extraction/economy'
 import { buyUpgrade } from '../mission/extraction/upgrades';
 import { sleepCrew, wakeCrew } from '../mission/crew';
 import { buyContainmentLevel, buyRig, reinforce, vent } from '../mission/organism/containment';
-import { isExtraction, isOrganism, type MissionState, type OrganismMission } from '../mission/state';
+import { isExtraction, isOrganism, isTerraform, type MissionState, type OrganismMission, type TerraformMission } from '../mission/state';
+import { allocate, buyProcessor, buyReactor, buyTerraformUpgrade, surge } from '../mission/terraform/economy';
+import type { Line } from '../data/terraform/systems';
 import { advance, createGame, type GameState, type Settings } from './game';
 import { completeContract, type Ending } from './prestige';
 
@@ -11,6 +13,10 @@ export type Action =
   | { type: 'buyGenerator'; id: string }
   | { type: 'buyRefinery' }
   | { type: 'buyUpgrade'; id: string }
+  | { type: 'surge' }
+  | { type: 'buyReactor'; id: string }
+  | { type: 'buyProcessor'; id: string }
+  | { type: 'allocate'; line: Line; step: 1 | -1 }
   | { type: 'wakeCrew'; id: string }
   | { type: 'sleepCrew'; id: string }
   | { type: 'buyRig' }
@@ -32,6 +38,9 @@ const MISSION_ACTIONS: Partial<Record<Action['type'], (m: MissionState) => Missi
   vent: organism(vent),
 };
 
+const terraform = (game: GameState, f: (m: TerraformMission) => MissionState): GameState =>
+  isTerraform(game.mission) ? { ...game, mission: f(game.mission) } : game;
+
 const extraction = (game: GameState, f: (m: Extract<MissionState, { scenario: 'extraction' }>) => MissionState): GameState =>
   isExtraction(game.mission) ? { ...game, mission: f(game.mission) } : game;
 
@@ -46,7 +55,15 @@ export function reduce(game: GameState, action: Action): GameState {
     case 'buyRefinery':
       return extraction(game, buyRefinery);
     case 'buyUpgrade':
-      return extraction(game, (m) => buyUpgrade(m, action.id));
+      return isTerraform(game.mission) ? terraform(game, (m) => buyTerraformUpgrade(m, action.id)) : extraction(game, (m) => buyUpgrade(m, action.id));
+    case 'surge':
+      return terraform(game, surge);
+    case 'buyReactor':
+      return terraform(game, (m) => buyReactor(m, action.id));
+    case 'buyProcessor':
+      return terraform(game, (m) => buyProcessor(m, action.id));
+    case 'allocate':
+      return terraform(game, (m) => allocate(m, action.line, action.step));
     case 'wakeCrew':
       return { ...game, mission: wakeCrew(game.mission, action.id) };
     case 'sleepCrew':

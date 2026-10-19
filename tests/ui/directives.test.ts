@@ -13,7 +13,7 @@ const first = DIRECTIVES[0]!;
 function setup(mission: Partial<GameState['mission']> = {}) {
   document.body.innerHTML = '<div id="app"></div>';
   const g = createGame(1, 0);
-  store = createStore({ ...g, mission: { ...g.mission, ...mission } });
+  store = createStore({ ...g, mission: { ...g.mission, ...mission } as typeof g.mission });
   mountApp(document.getElementById('app')!, store);
   return userEvent.setup();
 }

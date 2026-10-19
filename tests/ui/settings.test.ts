@@ -6,6 +6,7 @@ import { createGame, type GameState } from '../../src/core/game';
 import { createStore, type Store } from '../../src/core/store';
 import { exportSave, importSave } from '../../src/core/save';
 import { mountApp } from '../../src/ui/app';
+import { ext } from '../helpers';
 
 let store: Store;
 let root: HTMLElement;
@@ -52,7 +53,7 @@ describe('settings dialog', () => {
     const dialog = await open(user);
     await user.click(dialog.getByRole('button', { name: /export/i }));
     const code = (dialog.getByRole('textbox', { name: /save code/i }) as HTMLTextAreaElement).value;
-    expect(importSave(code).mission.ore).toBe(1234);
+    expect(ext(importSave(code).mission).ore).toBe(1234);
   });
 
   it('imports a save code, replacing the current game', async () => {
@@ -65,7 +66,7 @@ describe('settings dialog', () => {
     await user.click(box);
     await user.paste(code);
     await user.click(dialog.getByRole('button', { name: /import/i }));
-    expect(store.getState().mission.ore).toBe(777);
+    expect(ext(store.getState().mission).ore).toBe(777);
   });
 
   it('reports a bad save code without touching the game', async () => {
@@ -74,7 +75,7 @@ describe('settings dialog', () => {
     await user.type(dialog.getByRole('textbox', { name: /save code/i }), 'garbage');
     await user.click(dialog.getByRole('button', { name: /import/i }));
     expect(dialog.getByRole('status').textContent).toMatch(/invalid/i);
-    expect(store.getState().mission.ore).toBe(5);
+    expect(ext(store.getState().mission).ore).toBe(5);
   });
 
   it('hard reset needs a second confirmation', async () => {
@@ -82,8 +83,8 @@ describe('settings dialog', () => {
     const dialog = await open(user);
     const reset = dialog.getByRole('button', { name: /hard reset/i });
     await user.click(reset);
-    expect(store.getState().mission.ore).toBe(50);
+    expect(ext(store.getState().mission).ore).toBe(50);
     await user.click(reset);
-    expect(store.getState().mission.ore).toBe(0);
+    expect(ext(store.getState().mission).ore).toBe(0);
   });
 });

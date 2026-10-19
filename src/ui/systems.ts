@@ -8,7 +8,7 @@ import {
   refineryCapacity,
   refineryCost,
 } from '../mission/extraction/economy';
-import type { MissionState } from '../mission/state';
+import type { ExtractionMission as MissionState } from '../mission/state';
 import { h, setAttr, setText } from './dom';
 
 export function createSystemsPanel(store: Store): { el: HTMLElement; render(m: MissionState): void } {
@@ -40,8 +40,8 @@ export function createSystemsPanel(store: Store): { el: HTMLElement; render(m: M
   );
 
   const el = h(
-    'section',
-    { class: 'panel panel-systems', role: 'tabpanel', id: 'panel-systems', 'aria-labelledby': 'tab-systems' },
+    'div',
+    { class: 'panel-body' },
     h('h2', { class: 'panel-title' }, 'EXTRACTION SYSTEMS'),
     h('ul', { class: 'sys-list' }, refineryRow, ...rows.map((r) => r.el)),
   );

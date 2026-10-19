@@ -66,12 +66,12 @@ export function autoDrillRate(m: MissionState): number {
   return multipliers(m).autoDrill;
 }
 
-export function drill(m: MissionState): MissionState {
+export function drill<M extends MissionState>(m: M): M {
   const power = clickPower(m);
   return { ...m, ore: m.ore + power, lifetimeOre: m.lifetimeOre + power };
 }
 
-export function buyGenerator(m: MissionState, id: string): MissionState {
+export function buyGenerator<M extends MissionState>(m: M, id: string): M {
   const def = GENERATORS.find((g) => g.id === id);
   if (!def) return m;
   const owned = m.generators[id] ?? 0;
@@ -117,7 +117,7 @@ export function refineryCost(m: MissionState): number {
   return REFINERY_BASE_COST * REFINERY_COST_GROWTH ** m.refineryLevel;
 }
 
-export function buyRefinery(m: MissionState): MissionState {
+export function buyRefinery<M extends MissionState>(m: M): M {
   const cost = refineryCost(m);
   if (m.credits < cost) return m;
   return { ...m, credits: m.credits - cost, refineryLevel: m.refineryLevel + 1 };
@@ -129,7 +129,7 @@ export function isGeneratorRevealed(m: MissionState, index: number): boolean {
 }
 
 /** Mines into the hopper, then refines what the refinery can take into credits. */
-export function tickExtraction(m: MissionState, dt: number): MissionState {
+export function tickExtraction<M extends MissionState>(m: M, dt: number): M {
   const mined = oreRate(m) * dt;
   const hopper = m.ore + mined;
   const refined = Math.min(hopper, refineryCapacity(m) * dt);

@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { createGame } from '../../src/core/game';
 import { applyScenario, SCENARIOS } from '../../src/core/debug';
 import { depth } from '../../src/mission/extraction/progress';
+import { progress } from '../../src/mission/terraform/economy';
 import { isSpecialProjectsUnlocked } from '../../src/mission/organism/containment';
 
 const base = () => createGame(1, 0);
@@ -15,7 +16,23 @@ describe('debug scenarios', () => {
   it('act2 lands past the 1,000 m entry point', () => {
     const g = applyScenario(base(), 'act2');
     expect(g.mission.act).toBe(2);
-    expect(depth(g.mission)).toBeGreaterThanOrEqual(1000);
+    expect(depth(g.mission as MissionOf<'extraction', 'organism'>)).toBeGreaterThanOrEqual(1000);
+  });
+
+  it('starts a fresh terraforming contract, keeping the profile', () => {
+    const g = applyScenario(base(), 'terraform');
+    expect(g.mission.scenario).toBe('terraform');
+    expect(g.mission.elapsed).toBe(0);
+    expect(g.profile).toEqual(base().profile);
+  });
+
+  it('jumps a terraforming contract into act 2 with a working station', () => {
+    const g = applyScenario(base(), 'tf-act2');
+    const m = g.mission as MissionOf<'terraform', 'organism'>;
+    expect(m.scenario).toBe('terraform');
+    expect(m.act).toBe(2);
+    expect(progress(m)).toBeGreaterThanOrEqual(1000);
+    expect(Object.values(m.processors).some((n) => n > 0)).toBe(true);
   });
 
   it('act3 opens special projects', () => {

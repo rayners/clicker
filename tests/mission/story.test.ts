@@ -6,6 +6,7 @@ type MissionState = MissionOf<'extraction', 'organism'>;
 import { runBeats, STORY_MIN_GAP, type Beat, type MissionContext } from '../../src/mission/story';
 import { depth } from '../../src/mission/extraction/progress';
 import { HORRORS } from '../../src/mission/registry';
+import { ext } from '../helpers';
 
 const ctx: MissionContext = { cycle: 0, endings: [] };
 const fresh = (patch: Partial<MissionState> = {}): MissionState => ({
@@ -22,7 +23,7 @@ const beat = (id: string, when: Beat['when'], extra: Partial<Beat> = {}): Beat =
 
 describe('story engine', () => {
   it('fires a beat when its condition holds, logging its entries', () => {
-    const m = runBeats(fresh({ lifetimeOre: 10 }), [beat('a', ({ m }) => m.lifetimeOre >= 10)], ctx);
+    const m = runBeats(fresh({ lifetimeOre: 10 }), [beat('a', ({ m }) => ext(m).lifetimeOre >= 10)], ctx);
     expect(m.log.at(-1)!.text).toBe('beat a');
     expect(m.beats.a).toBe(m.elapsed);
   });

@@ -6,6 +6,7 @@ type MissionState = MissionOf<'extraction', 'organism'>;
 import { tickDirectives, directiveProgress, DIRECTIVE_COOLDOWN } from '../../src/mission/directives';
 import { tickMission } from '../../src/mission/tick';
 import { DIRECTIVES } from '../../src/data/extraction/directives';
+import { ext } from '../helpers';
 
 const first = DIRECTIVES[0]!;
 const fresh = (patch: Partial<MissionState> = {}): MissionState => ({
@@ -36,7 +37,7 @@ describe('issuing directives', () => {
 describe('resolving directives', () => {
   it('completes when the goal is met, paying the reward', () => {
     let m = issued();
-    m = { ...m, lifetimeOre: m.lifetimeOre + first.goal.target, credits: 0 };
+    m = { ...ext(m), lifetimeOre: ext(m).lifetimeOre + first.goal.target, credits: 0 };
     m = tickDirectives(m);
     expect(m.directive).toBeNull();
     expect(m.directiveResults[first.id]).toBe('completed');
@@ -54,7 +55,7 @@ describe('resolving directives', () => {
 
   it('waits a cooldown before issuing the next one', () => {
     let m = issued();
-    m = tickDirectives({ ...m, lifetimeOre: 1e12, lifetimeCredits: 1e12, generators: Object.fromEntries(Object.keys(m.generators).map((k) => [k, 1000])) });
+    m = tickDirectives({ ...ext(m), lifetimeOre: 1e12, lifetimeCredits: 1e12, generators: Object.fromEntries(Object.keys(ext(m).generators).map((k) => [k, 1000])) });
     expect(m.directive).toBeNull();
     m = tickDirectives({ ...m, elapsed: m.elapsed + DIRECTIVE_COOLDOWN - 1 });
     expect(m.directive).toBeNull();

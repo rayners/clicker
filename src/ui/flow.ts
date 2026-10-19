@@ -1,34 +1,30 @@
 import { formatNumber } from '../core/format';
-import type { GameState } from '../core/game';
-import { bottleneck, creditRate, oreRate, refineryCapacity } from '../mission/extraction/economy';
+import type { MissionState } from '../mission/state';
 import { h, setAttr, setText } from './dom';
+import type { FlowSpec } from './scenarios/types';
 
 const DELTA_LIFETIME = 1400;
 
-function cell(label: string, ariaLabel: string, unit: string, cls: string) {
-  const value = h('span', { class: 'flow-value', 'aria-label': ariaLabel }, '0');
-  const el = h(
-    'div',
-    { class: `flow-cell ${cls}` },
-    h('span', { class: 'flow-label' }, label),
-    value,
-    h('span', { class: 'flow-unit' }, unit),
-  );
-  return { el, value };
-}
-
 /**
- * The paperclip-style balance at the top of the screen: what is extracted, what the refinery can take,
- * and what actually becomes income. Purchases that move the rate get an immediate call-out.
+ * The paperclip-style balance at the top of the screen: input, conversion and income, with whichever
+ * stage is holding production back highlighted. Changes to the headline rate get an immediate call-out.
  */
-export function createFlow(): { el: HTMLElement; render(game: GameState): void } {
-  const extract = cell('EXTRACT', 'Ore per second', 'ORE/S', 'flow-extract');
-  const refine = cell('REFINE', 'Refinery throughput', 'ORE/S', 'flow-refine');
-  const income = cell('INCOME', 'Income', 'CR/S', 'flow-income');
+export function createFlow(spec: FlowSpec): { el: HTMLElement; render(m: MissionState): void } {
+  const cells = spec.cells.map((c, i) => {
+    const value = h('span', { class: 'flow-value', 'aria-label': c.aria }, '0');
+    const el = h(
+      'div',
+      { class: `flow-cell flow-cell-${i}` },
+      h('span', { class: 'flow-label' }, c.label),
+      value,
+      h('span', { class: 'flow-unit' }, c.unit),
+    );
+    return { el, value };
+  });
   const fill = h('span', { class: 'flow-fill' });
   const meter = h(
     'div',
-    { class: 'flow-meter', role: 'meter', 'aria-label': 'Refinery load', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': 0 },
+    { class: 'flow-meter', role: 'meter', 'aria-label': spec.meterLabel, 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': 0 },
     fill,
   );
   const note = h('p', { class: 'flow-note' });
@@ -36,52 +32,44 @@ export function createFlow(): { el: HTMLElement; render(game: GameState): void }
   const el = h(
     'section',
     { class: 'flow', 'aria-label': 'Production flow' },
-    h('div', { class: 'flow-row' }, extract.el, arrow(), refine.el, arrow(), income.el),
+    h('div', { class: 'flow-row' }, cells[0]!.el, arrow(), cells[1]!.el, arrow(), cells[2]!.el),
     meter,
     note,
   );
+  const head = cells[0]!.el;
 
   let lastRate: number | null = null;
   let lastContract = '';
 
   function callOut(delta: number) {
     const sign = delta > 0 ? '+' : '-';
-    const tag = h('span', { class: `rate-delta${delta < 0 ? ' is-loss' : ''}`, 'aria-hidden': 'true' }, `${sign}${formatNumber(Math.abs(delta))} ORE/S`);
-    extract.el.append(tag);
-    extract.el.classList.remove('is-bumped');
-    void extract.el.offsetWidth; // restart the flash animation
-    extract.el.classList.add('is-bumped');
+    const text = `${sign}${formatNumber(Math.abs(delta))} ${spec.rateUnit}`;
+    const tag = h('span', { class: `rate-delta${delta < 0 ? ' is-loss' : ''}`, 'aria-hidden': 'true' }, text);
+    head.append(tag);
+    head.classList.remove('is-bumped');
+    void head.offsetWidth; // restart the flash animation
+    head.classList.add('is-bumped');
     setTimeout(() => tag.remove(), DELTA_LIFETIME);
   }
 
-  function render(game: GameState) {
-    const m = game.mission;
-    const rate = oreRate(m);
-    const capacity = refineryCapacity(m);
+  function render(m: MissionState) {
+    const r = spec.read(m);
     const contract = `${m.config.shipName}:${m.seed}`;
     // Rates only move on purchases and crew/containment changes, so any difference is worth showing.
-    if (lastRate !== null && contract === lastContract && Math.abs(rate - lastRate) > Math.max(1e-9, lastRate * 1e-6)) {
-      callOut(rate - lastRate);
+    if (lastRate !== null && contract === lastContract && Math.abs(r.rate - lastRate) > Math.max(1e-9, lastRate * 1e-6)) {
+      callOut(r.rate - lastRate);
     }
-    lastRate = rate;
+    lastRate = r.rate;
     lastContract = contract;
 
-    setText(extract.value, formatNumber(rate));
-    setText(refine.value, formatNumber(capacity));
-    setText(income.value, formatNumber(creditRate(m)));
-    const load = Math.round(Math.min(1, rate / capacity) * 100);
+    r.values.forEach((v, i) => setText(cells[i]!.value, formatNumber(v)));
+    cells.forEach((c, i) => c.el.classList.toggle('is-limit', r.highlight === i));
+    const load = Math.round(r.meter);
     setAttr(meter, 'aria-valuenow', String(load));
     fill.style.width = `${load}%`;
-    const limit = bottleneck(m);
-    setAttr(el, 'data-bottleneck', limit);
-    setText(
-      note,
-      limit === 'refinery'
-        ? `REFINERY AT CAPACITY · ${formatNumber(rate - capacity)} ORE/S BACKING UP`
-        : rate === 0
-          ? 'REFINERY IDLE · DRILL OR ACQUIRE EXTRACTION'
-          : `${100 - load}% SPARE CAPACITY · ADD EXTRACTION`,
-    );
+    setAttr(el, 'data-bottleneck', r.limit);
+    setAttr(el, 'data-severe', String(r.severe));
+    setText(note, r.note);
   }
 
   return { el, render };

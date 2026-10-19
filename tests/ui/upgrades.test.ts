@@ -6,13 +6,14 @@ import { createGame, type GameState } from '../../src/core/game';
 import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
 import { GENERATORS } from '../../src/data/extraction/generators';
+import { ext } from '../helpers';
 
 let store: Store;
 
 function setup(mission: Partial<GameState['mission']> = {}) {
   document.body.innerHTML = '<div id="app"></div>';
   const g = createGame(1, 0);
-  store = createStore({ ...g, mission: { ...g.mission, ...mission } });
+  store = createStore({ ...g, mission: { ...g.mission, ...mission } as typeof g.mission });
   mountApp(document.getElementById('app')!, store);
   return userEvent.setup();
 }
@@ -23,7 +24,7 @@ describe('upgrades tab', () => {
   it('is hidden until the first upgrade becomes available', () => {
     setup();
     expect(upgradesTab()).toBeNull();
-    store.replace({ ...store.getState(), mission: { ...store.getState().mission, lifetimeOre: 30 } });
+    store.replace({ ...store.getState(), mission: { ...ext(store.getState().mission), lifetimeOre: 30 } });
     expect(upgradesTab()).not.toBeNull();
   });
 

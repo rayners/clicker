@@ -70,7 +70,7 @@ describe('archive panel', () => {
   it('appears once a file is available and reveals its contents', async () => {
     const user = setup();
     expect(tab(/archive/i)).toBeNull();
-    store.replace({ ...store.getState(), mission: { ...store.getState().mission, act: 2, lifetimeOre: 1e7 } });
+    store.replace({ ...store.getState(), mission: { ...mission(), act: 2, lifetimeOre: 1e7 } });
     await user.click(tab(/archive/i)!);
     expect(screen.getByText('CREW CONTRACT KA-7781')).toBeTruthy();
     expect(screen.queryByText('SPECIAL ORDER 0-77')).toBeNull();

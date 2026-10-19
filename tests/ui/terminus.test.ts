@@ -11,7 +11,7 @@ let store: Store;
 function setup(mission: Partial<GameState['mission']> = {}, profile: Partial<GameState['profile']> = {}) {
   document.body.innerHTML = '<div id="app"></div>';
   const g = createGame(1, 0);
-  store = createStore({ ...g, profile: { ...g.profile, ...profile }, mission: { ...g.mission, ...mission } });
+  store = createStore({ ...g, profile: { ...g.profile, ...profile }, mission: { ...g.mission, ...mission } as typeof g.mission });
   mountApp(document.getElementById('app')!, store);
   return userEvent.setup();
 }

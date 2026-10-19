@@ -14,6 +14,7 @@ import {
   type StorageLike,
 } from '../../src/core/save';
 import { drill } from '../../src/mission/extraction/economy';
+import { ext } from '../helpers';
 
 const NOW = 1_700_000_000_000;
 
@@ -78,7 +79,7 @@ describe('local storage', () => {
     const storage = memoryStorage();
     saveGame(storage, played(), NOW + 500);
     const { game } = loadGame(storage, NOW + 500, 3);
-    expect(game.mission.ore).toBe(2);
+    expect(ext(game.mission).ore).toBe(2);
     expect(game.savedAt).toBe(NOW + 500);
   });
 
@@ -86,7 +87,7 @@ describe('local storage', () => {
     const storage = memoryStorage({ [SAVE_KEY]: '{{garbage' });
     const { game, recoveredFromCorruption } = loadGame(storage, NOW, 3);
     expect(recoveredFromCorruption).toBe(true);
-    expect(game.mission.ore).toBe(0);
+    expect(ext(game.mission).ore).toBe(0);
     expect(storage.data.get(CORRUPT_BACKUP_KEY)).toBe('{{garbage');
   });
 

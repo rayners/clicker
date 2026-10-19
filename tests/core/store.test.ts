@@ -1,26 +1,28 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createGame } from '../../src/core/game';
+import { createGame, type GameState } from '../../src/core/game';
+import { createMission, TERRAFORM_MISSION_CONFIG, type MissionOf } from '../../src/mission/state';
 import { reduce, createStore } from '../../src/core/store';
 import { GENERATORS } from '../../src/data/extraction/generators';
+import { ext } from '../helpers';
 
 const NOW = 1_000;
 
 describe('reduce', () => {
   it('drills on a drill action', () => {
-    expect(reduce(createGame(1, NOW), { type: 'drill' }).mission.ore).toBe(1);
+    expect(ext(reduce(createGame(1, NOW), { type: 'drill' }).mission).ore).toBe(1);
   });
 
   it('buys a generator', () => {
     const g = createGame(1, NOW);
     const rich = { ...g, mission: { ...g.mission, credits: 1000 } };
     const after = reduce(rich, { type: 'buyGenerator', id: GENERATORS[0]!.id });
-    expect(after.mission.generators[GENERATORS[0]!.id]).toBe(1);
+    expect(ext(after.mission).generators[GENERATORS[0]!.id]).toBe(1);
   });
 
   it('upgrades the refinery', () => {
     const g = createGame(1, NOW);
     const rich = { ...g, mission: { ...g.mission, credits: 1e6 } };
-    expect(reduce(rich, { type: 'buyRefinery' }).mission.refineryLevel).toBe(1);
+    expect(ext(reduce(rich, { type: 'buyRefinery' }).mission).refineryLevel).toBe(1);
   });
 
   it('advances time on a tick', () => {
@@ -34,7 +36,7 @@ describe('store', () => {
     const listener = vi.fn();
     store.subscribe(listener);
     store.dispatch({ type: 'drill' });
-    expect(store.getState().mission.ore).toBe(1);
+    expect(ext(store.getState().mission).ore).toBe(1);
     expect(listener).toHaveBeenCalledWith(store.getState());
   });
 
@@ -96,7 +98,34 @@ describe('reduce: settings and reset', () => {
     const after = reduce(played, { type: 'hardReset', seed: 3, now: NOW + 1 });
     expect(after.profile.seniority).toBe(0);
     expect(after.profile.settings.sound).toBe(true);
-    expect(after.mission.ore).toBe(0);
+    expect(ext(after.mission).ore).toBe(0);
     expect(after.mission.seed).toBe(3);
+  });
+});
+
+describe('reduce: terraform actions', () => {
+  const tf = () => {
+    const g = createGame(1, NOW);
+    return { ...g, mission: createMission(TERRAFORM_MISSION_CONFIG, 1) };
+  };
+
+  it('surges, builds and allocates on a terraforming contract', () => {
+    let g: GameState = { ...tf(), mission: { ...tf().mission, credits: 1e6 } };
+    g = reduce(g, { type: 'surge' });
+    g = reduce(g, { type: 'buyReactor', id: 'cells' });
+    g = reduce(g, { type: 'buyProcessor', id: 'cracker' });
+    g = reduce(g, { type: 'allocate', line: 'heat', step: 1 });
+    const m = g.mission as MissionOf<'terraform', 'organism'>;
+    expect(m.processed).toBeGreaterThan(0);
+    expect(m.reactors.cells).toBe(1);
+    expect(m.processors.cracker).toBe(1);
+    expect(m.allocation.heat).toBe(4);
+  });
+
+  it('ignores extraction actions on a terraforming contract, and vice versa', () => {
+    const g = tf();
+    expect(reduce(g, { type: 'drill' })).toBe(g);
+    const e = createGame(1, NOW);
+    expect(reduce(e, { type: 'surge' })).toBe(e);
   });
 });

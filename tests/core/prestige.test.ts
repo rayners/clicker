@@ -19,7 +19,7 @@ const atTerminus = (patch: Partial<GameState['mission']> = {}, profile: Partial<
   return {
     ...g,
     profile: { ...g.profile, ...profile },
-    mission: { ...g.mission, act: 4, flags: ['terminus'], lifetimeOre: 5e10, specimens: 12.5, ...patch },
+    mission: { ...g.mission, act: 4, flags: ['terminus'], lifetimeOre: 5e10, specimens: 12.5, ...patch } as typeof g.mission,
   };
 };
 

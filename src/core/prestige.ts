@@ -1,6 +1,14 @@
 import { CREW } from '../data/crew';
 import { crewStatus } from '../mission/crew';
-import { createMission, DEFAULT_MISSION_CONFIG, isOrganism, type MissionConfig, type MissionState } from '../mission/state';
+import {
+  createMission,
+  DEFAULT_MISSION_CONFIG,
+  isOrganism,
+  TERRAFORM_MISSION_CONFIG,
+  type MissionConfig,
+  type MissionState,
+  type ScenarioId,
+} from '../mission/state';
 import { scenarioOf } from '../mission/registry';
 import type { GameState, Profile } from './game';
 
@@ -27,17 +35,35 @@ const SHIP_NAMES = [
   'MSV Orrery Kell',
 ];
 
-export function shipNameFor(cycle: number): string {
-  const name = SHIP_NAMES[cycle % SHIP_NAMES.length]!;
-  const series = Math.floor(cycle / SHIP_NAMES.length);
+const STATION_NAMES = [
+  'Ostrava-9 Station',
+  'Brennac-4 Station',
+  'Hollis Deep Station',
+  'Varga-11 Station',
+  'Kestrel Basin Station',
+];
+
+function cycleName(names: readonly string[], cycle: number): string {
+  const name = names[cycle % names.length]!;
+  const series = Math.floor(cycle / names.length);
   return series === 0 ? name : `${name} ${series + 1}`;
 }
 
+export function shipNameFor(cycle: number): string {
+  return cycleName(SHIP_NAMES, cycle);
+}
+
+const BASE_CONFIGS: Record<ScenarioId, MissionConfig> = {
+  extraction: DEFAULT_MISSION_CONFIG,
+  terraform: TERRAFORM_MISSION_CONFIG,
+};
+
 /** The next mission is shaped by everything WARDEN carried out of previous ones. */
-export function missionConfigFor(profile: Profile): MissionConfig {
+export function missionConfigFor(profile: Profile, scenario: ScenarioId = 'extraction'): MissionConfig {
+  const names = scenario === 'terraform' ? STATION_NAMES : SHIP_NAMES;
   return {
-    ...(DEFAULT_MISSION_CONFIG as MissionConfig),
-    shipName: shipNameFor(profile.contractsCompleted),
+    ...BASE_CONFIGS[scenario],
+    shipName: cycleName(names, profile.contractsCompleted),
     productionMultiplier: 1 + SENIORITY_PRODUCTION * profile.seniority,
     extraLifeSupport: profile.conscience,
     incidentMultiplier: 1 / (1 + INCIDENT_REDUCTION_PER_CONSCIENCE * profile.conscience),

@@ -1,14 +1,13 @@
 import { formatClock, formatNumber } from '../core/format';
 import type { GameState } from '../core/game';
 import type { Store } from '../core/store';
-import { autoDrillOutput, autoDrillRate, clickPower } from '../mission/extraction/economy';
-import { depth } from '../mission/extraction/progress';
 import { h, setText } from './dom';
 import { createLogView } from './log';
 import { createFlow } from './flow';
 import { createMonitor } from './monitor';
-import { createSystemsPanel } from './systems';
-import { createUpgradesPanel, hasUpgradesToShow } from './upgrades';
+import { createExtractionUi } from './scenarios/extraction';
+import { createTerraformUi } from './scenarios/terraform';
+import type { ScenarioUi, StatSpec } from './scenarios/types';
 import { createCrewPanel } from './crew';
 import { createDirectivesPanel, hasDirectivesToShow } from './directives';
 import { createProjectsPanel } from './projects';
@@ -17,7 +16,7 @@ import { createTerminusPanel } from './terminus';
 import { createSettings } from './settings';
 import { createSound, cueForLog } from './sound';
 import { isSpecialProjectsUnlocked } from '../mission/organism/containment';
-import { isOrganism } from '../mission/state';
+import { isOrganism, type ScenarioId } from '../mission/state';
 import { isCrewUnlocked } from '../mission/crew';
 import { advanceFrame, paintAll, paintSprite, readPalette, spriteCanvas } from './sprites';
 
@@ -42,6 +41,15 @@ function stat(label: string, ariaLabel: string) {
   return { value, el: h('div', { class: 'stat' }, h('dt', { class: 'stat-label' }, label), value) };
 }
 
+/** Everything on screen that belongs to one scenario; only the running scenario's view is shown. */
+function scenarioView(ui: ScenarioUi) {
+  const flow = createFlow(ui.flow);
+  const monitor = createMonitor(ui.monitor);
+  const stats = ui.stats.map((spec: StatSpec) => ({ spec, ...stat(spec.label, spec.aria) }));
+  const status = h('div', { class: 'status-scenario' }, flow.el, ...(ui.controls ? [ui.controls.el] : []), h('dl', { class: 'stats' }, ...stats.map((s) => s.el)));
+  return { ui, flow, monitor, stats, status };
+}
+
 export function mountApp(root: HTMLElement, store: Store): void {
   const sound = createSound();
   const settings = createSettings(store);
@@ -62,29 +70,34 @@ export function mountApp(root: HTMLElement, store: Store): void {
     h('div', { class: 'mast-line' }, h('span', { class: 'mast-ship-wrap' }, spriteCanvas('ship', 'mast-sprite'), shipName), clock),
   );
 
-  const ore = stat('ORE', 'Ore');
-  const credits = stat('CREDITS', 'Credits');
-  const shaft = stat('DEPTH', 'Shaft depth');
+  const views: Record<ScenarioId, ReturnType<typeof scenarioView>> = {
+    extraction: scenarioView(createExtractionUi(store)),
+    terraform: scenarioView(createTerraformUi(store)),
+  };
+  let view = views.extraction;
+  // Slots hold only the running scenario's elements, so nothing hidden lingers in the accessibility tree.
+  const statusSlot = h('div', { class: 'status-slot' });
+  const monitorSlot = h('div', { class: 'monitor-slot' });
+  const systemsSlot = h('div', { class: 'panel-slot' });
+  const upgradesSlot = h('div', { class: 'panel-slot' });
   const contacts = stat('CONTACTS', 'Unknown contacts');
   contacts.el.classList.add('stat-alert');
-  ore.el.querySelector('.stat-label')!.textContent = 'ORE HOPPER';
-  const flow = createFlow();
   const status = h(
     'section',
     { class: 'status', 'aria-label': 'Ship status' },
     h('div', { class: 'status-target' }, spriteCanvas('moonlet', 'status-moon'), h('span', { class: 'status-target-name' })),
-    flow.el,
-    h('dl', { class: 'stats' }, ore.el, credits.el, shaft.el, contacts.el),
+    statusSlot,
+    h('dl', { class: 'stats stats-horror' }, contacts.el),
   );
   const targetName = status.querySelector('.status-target-name')!;
 
   const log = createLogView();
   const drillBit = spriteCanvas('drill', 'drill-sprite');
-  const drill = h('button', { class: 'drill', type: 'button' }, drillBit, h('span', { class: 'drill-label' }, 'EXECUTE DRILL CYCLE'));
-  drill.setAttribute('aria-label', 'Execute drill cycle');
+  const drillLabel = h('span', { class: 'drill-label' });
+  const drill = h('button', { class: 'drill', type: 'button' }, drillBit, drillLabel);
   const drillOnce = () => {
-    const power = clickPower(store.getState().mission);
-    store.dispatch({ type: 'drill' });
+    const power = view.ui.action.perPress(store.getState().mission);
+    store.dispatch(view.ui.action.action);
     sound.play('click');
     spawnTick(drill, `+${formatNumber(power)}`);
     advanceFrame(drillBit);
@@ -101,9 +114,8 @@ export function mountApp(root: HTMLElement, store: Store): void {
   // Outside the panels so it stays reachable on phones whichever tab is open.
   const drillBay = h('div', { class: 'drill-bay' }, drill);
 
-  const monitor = createMonitor();
-  const systems = createSystemsPanel(store);
-  const upgrades = createUpgradesPanel(store);
+  const panelSection = (id: string, ...children: HTMLElement[]) =>
+    h('section', { class: `panel panel-${id}`, role: 'tabpanel', id: `panel-${id}`, 'aria-labelledby': `tab-${id}` }, ...children);
   const crew = createCrewPanel(store);
   const directives = createDirectivesPanel();
   const projects = createProjectsPanel(store);
@@ -114,23 +126,30 @@ export function mountApp(root: HTMLElement, store: Store): void {
       id: 'ops',
       label: 'OPS',
       short: 'OPS',
-      el: h('section', { class: 'panel panel-ops', role: 'tabpanel', id: 'panel-ops', 'aria-labelledby': 'tab-ops' }, monitor.el, log.el),
+      el: panelSection('ops', monitorSlot, log.el),
       render: (g) => {
-        monitor.render(g.mission);
+        view.monitor.render(g.mission);
         const fresh = log.render(g.mission.log, `${g.mission.config.shipName}:${g.mission.seed}`);
         const last = fresh[fresh.length - 1];
         if (last) sound.play(cueForLog(last.kind));
       },
       visible: () => true,
     },
-    { id: 'systems', label: 'SYSTEMS', short: 'SYS', el: systems.el, render: (g) => systems.render(g.mission), visible: () => true },
+    {
+      id: 'systems',
+      label: 'SYSTEMS',
+      short: 'SYS',
+      el: panelSection('systems', systemsSlot),
+      render: (g) => view.ui.systems.render(g.mission),
+      visible: () => true,
+    },
     {
       id: 'upgrades',
       label: 'UPGRADES',
       short: 'UPG',
-      el: upgrades.el,
-      render: (g) => upgrades.render(g.mission),
-      visible: (g) => hasUpgradesToShow(g.mission),
+      el: panelSection('upgrades', upgradesSlot),
+      render: (g) => view.ui.upgrades.render(g.mission),
+      visible: (g) => views[g.mission.scenario].ui.upgrades.hasAny(g.mission),
     },
     { id: 'crew', label: 'CREW', short: 'CREW', el: crew.el, render: (g) => crew.render(g.mission), visible: (g) => isCrewUnlocked(g.mission) },
     {
@@ -204,16 +223,29 @@ export function mountApp(root: HTMLElement, store: Store): void {
   let lastElapsed: number | null = null;
   let autoClock = 0;
 
+  /** Swap every scenario-specific part of the screen when the running scenario changes. */
+  function showScenario(id: ScenarioId) {
+    view = views[id];
+    root.dataset.scenario = id;
+    statusSlot.replaceChildren(view.status);
+    monitorSlot.replaceChildren(view.monitor.el);
+    systemsSlot.replaceChildren(view.ui.systems.el);
+    upgradesSlot.replaceChildren(view.ui.upgrades.el);
+    setText(drillLabel, view.ui.action.label);
+    drill.setAttribute('aria-label', view.ui.action.aria);
+    lastElapsed = null;
+  }
+
   function render(game: GameState) {
     const m = game.mission;
+    if (root.dataset.scenario !== m.scenario) showScenario(m.scenario);
     setText(shipName, m.config.shipName.toUpperCase());
     setText(targetName, m.config.targetBody.toUpperCase());
     setText(clock, `T+${formatClock(m.elapsed)}`);
-    setText(ore.value, formatNumber(m.ore));
-    setText(credits.value, formatNumber(m.credits));
-    flow.render(game);
+    view.flow.render(m);
+    view.ui.controls?.render(m);
+    for (const s of view.stats) setText(s.value, s.spec.read(m));
     autoCycle(m);
-    setText(shaft.value, `${depth(m).toLocaleString('en-US')} M`);
     if (root.dataset.act !== String(m.act)) root.dataset.act = String(m.act);
     const motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
     if (root.dataset.motion !== motion) root.dataset.motion = motion;
@@ -221,6 +253,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     settings.render(game);
     const tracking = m.flags.includes('tracker');
     contacts.el.hidden = !tracking;
+    contacts.el.parentElement!.hidden = !tracking;
     const loose = isOrganism(m) ? m.contacts : 0;
     setText(contacts.value, String(loose));
     const alert = String(loose > 0);
@@ -244,9 +277,9 @@ export function mountApp(root: HTMLElement, store: Store): void {
     });
   }
 
-  /** WARDEN's autocycle visibly presses the drill on its own. */
+  /** WARDEN's automation visibly presses the button on its own. */
   function autoCycle(m: GameState['mission']) {
-    const cycles = autoDrillRate(m);
+    const cycles = view.ui.action.autoRate(m);
     const auto = cycles > 0 ? 'on' : 'off';
     if (drill.dataset.auto !== auto) drill.dataset.auto = auto;
     const dt = lastElapsed === null || m.elapsed < lastElapsed ? 0 : m.elapsed - lastElapsed;
@@ -256,7 +289,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     autoClock += dt;
     if (autoClock < interval) return;
     autoClock = Math.min(autoClock - interval, interval);
-    const perPress = autoDrillOutput(m) * interval;
+    const perPress = view.ui.action.autoYieldPerSecond(m) * interval;
     spawnTick(drill, `+${formatNumber(perPress)}`, 'drill-tick is-auto');
     advanceFrame(drillBit);
     paintSprite(drillBit, palette);

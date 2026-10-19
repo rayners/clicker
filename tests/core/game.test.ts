@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createGame, tickGame, catchUp, advance, OFFLINE_CAP_SECONDS } from '../../src/core/game';
 import { buyGenerator } from '../../src/mission/extraction/economy';
 import { GENERATORS } from '../../src/data/extraction/generators';
+import { ext } from '../helpers';
 
 const NOW = 1_000_000;
 
@@ -38,7 +39,7 @@ describe('offline catch-up', () => {
     const { game, elapsed } = catchUp(withDrones(), NOW + 60_000);
     expect(elapsed).toBe(60);
     expect(game.mission.elapsed).toBeCloseTo(60);
-    expect(game.mission.lifetimeOre).toBeCloseTo(60 * GENERATORS[0]!.baseRate);
+    expect(ext(game.mission).lifetimeOre).toBeCloseTo(60 * GENERATORS[0]!.baseRate);
   });
 
   it('caps the simulated time at eight hours', () => {

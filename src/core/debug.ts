@@ -1,9 +1,12 @@
 import { GENERATORS } from '../data/extraction/generators';
+import { PROCESSORS, REACTORS } from '../data/terraform/systems';
+import { createMission } from '../mission/state';
+import { missionConfigFor } from './prestige';
 import type { MissionOf, MissionState } from '../mission/state';
 import type { GameState } from './game';
 
 /** Developer shortcuts (?debug=act3 etc.) for testing pacing and theming without hours of play. */
-export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus'] as const;
+export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus', 'terraform', 'tf-act2'] as const;
 
 const owned = (upTo: number, count: number) =>
   Object.fromEntries(GENERATORS.map((g, i) => [g.id, i < upTo ? count : 0]));
@@ -46,7 +49,28 @@ const PATCHES: Record<string, Partial<MissionOf<'extraction', 'organism'>>> = {
   },
 };
 
+const lines = (counts: number[]) =>
+  Object.fromEntries(['atmosphere', 'heat', 'water'].flatMap((line) => PROCESSORS.filter((p) => p.line === line).map((p, i) => [p.id, counts[i] ?? 0])));
+
+const TERRAFORM_PATCHES: Record<string, Partial<MissionOf<'terraform', 'organism'>>> = {
+  terraform: {},
+  'tf-act2': {
+    act: 2,
+    processed: 3e6,
+    lifetimeUnits: 4e6,
+    lifetimeCredits: 4e6,
+    credits: 5e4,
+    reactors: Object.fromEntries(REACTORS.map((r, i) => [r.id, i === 0 ? 20 : i === 1 ? 12 : 0])),
+    processors: lines([15, 12]),
+  },
+};
+
 export function applyScenario(game: GameState, name: string): GameState {
+  const terraform = TERRAFORM_PATCHES[name];
+  if (terraform) {
+    const fresh = createMission(missionConfigFor(game.profile, 'terraform'), game.mission.seed);
+    return { ...game, mission: { ...fresh, ...terraform } as MissionState };
+  }
   const patch = PATCHES[name];
   if (!patch) return game;
   const mission = { ...game.mission, ...patch, beats: { ...game.mission.beats, ...patch.beats } } as MissionState;

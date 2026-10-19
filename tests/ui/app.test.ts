@@ -10,6 +10,7 @@ import { appendLog } from '../../src/mission/log';
 import { depth } from '../../src/mission/extraction/progress';
 import { creditRate, generatorRate, oreRate, refineryCapacity } from '../../src/mission/extraction/economy';
 import { formatNumber } from '../../src/core/format';
+import { ext } from '../helpers';
 
 let store: Store;
 let root: HTMLElement;
@@ -86,7 +87,7 @@ describe('systems panel', () => {
   it('upgrades the refinery', async () => {
     const user = setup((g) => ({ ...g, mission: { ...g.mission, credits: 1000 } }));
     await user.click(screen.getByRole('button', { name: /upgrade refinery/i }));
-    expect(store.getState().mission.refineryLevel).toBe(1);
+    expect(ext(store.getState().mission).refineryLevel).toBe(1);
   });
 });
 
@@ -121,7 +122,7 @@ describe('navigation', () => {
 describe('story presentation', () => {
   it('shows shaft depth in the status area', () => {
     setup((g) => ({ ...g, mission: { ...g.mission, lifetimeOre: 1e7 } }));
-    expect(status(/shaft depth/i).textContent).toBe(`${depth(store.getState().mission).toLocaleString('en-US')} M`);
+    expect(status(/shaft depth/i).textContent).toBe(`${depth(ext(store.getState().mission)).toLocaleString('en-US')} M`);
   });
 
   it('marks the current act on the shell so the theme can shift', () => {
@@ -139,7 +140,7 @@ describe('production flow readout (extraction -> refinery -> income)', () => {
 
   it('headlines ore per second, refinery throughput and income', () => {
     setup(withDrones(10));
-    const m = store.getState().mission;
+    const m = ext(store.getState().mission);
     expect(flow().getByLabelText(/ore per second/i).textContent).toBe(formatNumber(oreRate(m)));
     expect(flow().getByLabelText(/refinery throughput/i).textContent).toBe(formatNumber(refineryCapacity(m)));
     expect(flow().getByLabelText(/income/i).textContent).toBe(formatNumber(creditRate(m)));
@@ -183,7 +184,7 @@ describe('operations monitor (automation at a glance)', () => {
     setup((g) => ({ ...g, mission: { ...g.mission, generators: { ...g.mission.generators, drone: 12, auger: 3 } } }));
     const rows = within(monitor()).getAllByRole('listitem');
     expect(rows.map((r) => r.dataset.system)).toEqual(['drone', 'auger']);
-    const m = store.getState().mission;
+    const m = ext(store.getState().mission);
     expect(rows[0]!.textContent).toContain('×12');
     expect(rows[0]!.textContent).toContain(`${formatNumber(12 * generatorRate(m, GENERATORS[0]!))}/S`);
   });
