@@ -6,7 +6,7 @@ After `BOARDROOM_UNLOCK_CONTRACTS` completed contracts (default **10**, may be t
 
 The second-tier clicker takes place inside the corporation's offices. You commission ships, staff crews, buy survey rights and launch **multiple missions in parallel**. Each mission is the first-tier game running on its own. You can still drop into any running mission and play it by hand.
 
-The horror inverts: you are now the company that sends crews to die. The Boardroom needs its own slow-burn reveal; it should start as dry corporate strategy and curdle. Ideas: the cloned or recycled crew manifests are the company's doing, and WARDEN's own earlier "reconditioning" was ordered from this office. Boardroom beats can reference the player's real `profile.history`, and later missions can reference Boardroom decisions.
+The horror inverts: you are now the company that sends crews to die. The user pointed out (2026-10-20) that this is DEEP CONTRACT's "play as the horror" tier. The other two games get creature or killer tiers (`docs/ROADMAP.md`), and the Boardroom is the sci-fi game's version: the company is the monster. The Boardroom needs its own slow-burn reveal; it should start as dry corporate strategy and curdle. Ideas: the cloned or recycled crew manifests are the company's doing, and WARDEN's own earlier "reconditioning" was ordered from this office. Boardroom beats can reference the player's real `profile.history`, and later missions can reference Boardroom decisions.
 
 ## Architecture rules this imposes now
 

@@ -22,6 +22,7 @@ const edges = files(SRC).flatMap((file) =>
 const area = (path: string) => {
   if (path.startsWith('shared/')) return 'shared';
   if (path.startsWith('picker')) return 'picker';
+  if (path.startsWith('late-fees')) return 'late-fees';
   if (path.startsWith('forest')) return 'elderdark';
   return 'deep-contract';
 };
@@ -45,5 +46,12 @@ describe('code boundaries between the two games', () => {
   it('keeps the game picker out of both games: it only links to them', () => {
     const leaks = edges.filter(([from, to]) => area(from) === 'picker' && area(to) !== 'shared' && area(to) !== 'picker');
     expect(leaks).toEqual([]);
+  });
+
+  it('keeps LATE FEES to itself and the shared engine, and the other games out of it', () => {
+    const outward = edges.filter(([from, to]) => area(from) === 'late-fees' && area(to) !== 'shared' && area(to) !== 'late-fees');
+    const inward = edges.filter(([from, to]) => area(from) !== 'late-fees' && area(to) === 'late-fees');
+    expect(outward).toEqual([]);
+    expect(inward).toEqual([]);
   });
 });
