@@ -44,6 +44,12 @@ Requested 2026-10-19. Tracked in `docs/forest/DESIGN.md`. A playable first slice
 
 ## Backlog / ideas
 
+- **Play as the horror, in every game (user, 2026-10-20).** It reverses the roles as an unlockable higher tier, the way LATE FEES unlocks playing the killer.
+  - DEEP CONTRACT: the creature (the organism, a xenomorph homage) or a hunter (a Predator homage).
+  - Elderdark: a dragon, hungry forest spirits, the wood itself.
+  - LATE FEES: the killers (`docs/late-fees/DESIGN.md` §7).
+  - Plan: design these together, so they can share a "horror tier" engine. They come after LATE FEES's first tapes.
+
 - **New missions (approved 2026-10-20):** security detachment, haulage and salvage for DEEP CONTRACT, and the Keep for Elderdark, with a shared held-ground engine. The design and build order are in `docs/MISSIONS.md`.
 
 - **Real-device pass on iPhone Safari**, both in-browser and installed to the home screen (offline, audio unlock, safe areas, storage persistence).
