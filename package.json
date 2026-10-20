@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "simulate": "tsx scripts/simulate.ts",
     "icons": "tsx scripts/make-icons.ts",
-    "simulate:forest": "tsx scripts/simulate-forest.ts"
+    "simulate:forest": "tsx scripts/simulate-forest.ts",
+    "simulate:late": "tsx scripts/simulate-late.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",

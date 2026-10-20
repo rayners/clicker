@@ -122,7 +122,7 @@ export const ZONES: readonly ZoneDef[] = NAMES.map((n, i) => ({
 }));
 
 /** Enrolment per second per point of a zone's staffing need, while it is open. */
-export const FEE_PER_THREAT = 0.75;
+export const FEE_PER_THREAT = 1.2;
 /** A booking rush the first time a zone opens, in seconds of its enrolment. */
 export const BOOKING_SECONDS = 60;
 
