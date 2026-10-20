@@ -1,0 +1,118 @@
+# LATE FEES — design
+
+The third game in the repo, beside DEEP CONTRACT (sci-fi) and CHARTER OF THE ELDERDARK (fantasy). It is a modern-day idle and management game built on homages to the slasher classics. It was requested on 2026-10-20.
+
+*Tagline:* **Every tape comes back. So does everything on it.**
+
+## Decisions (user, 2026-10-20)
+
+- **Role: you run the place.** You are the camp director, the sleep clinic's administrator, or the insurer's claims manager, keeping the business open while people die. **Playing as the horror is an unlockable higher tier**, the counterpart to DEEP CONTRACT's planned Boardroom promotion (section 7).
+- **Structure: one game, three scenarios.** You choose a tape per run. Money, the franchise and prestige are shared.
+- **Look: VHS and video store.** A rental shelf as the menu, tracking lines, a VCR's on-screen display, neon on black, a red REC dot.
+- **Prestige: sequels.** Each run is the next film: *Part II*, *Part III*, *The Final Chapter* (it never is). The horror always comes back stronger. You carry over franchise money and what you learned.
+- **The horror is obvious.** There is no slow burn. The opening kill comes in the first minutes. The story arc is body count, the survivors working it out, and the final confrontation.
+- **Homage, not copies.** Titles are parodies and names are our own.
+
+## 1. The frame: Late Fees Video
+
+The game opens on the shelf of **Late Fees Video**, a strip-mall rental store, around 1988. Each scenario is a tape. Picking one starts a run, with the VCR's on-screen display (PLAY ▶, the tape counter as the run clock, TRACKING) over the game. Finishing a run puts the sequel on the shelf, with a new spine and *PART II* in the title.
+
+## 2. Architecture: venues × killers
+
+As in DEEP CONTRACT (scenario × horror), a run is a **venue** (where you work and what the business is) paired with a **killer** (what hunts there).
+- A killer knows a venue only through **signals** (story progress, how exposed people are) and the venue's **lexicon** (`{victims}`, `{refuge}`, `{place}`).
+- A venue knows a killer only through **pressure** and a **death hook**.
+- The three films are the default pairings. **Crossovers** (the dream stalker at the camp, Death's design at the clinic) unlock through sequels. That is very much in the spirit of the genre, and it keeps us honest about coupling.
+
+Code layout, following Elderdark:
+- `src/late-fees/` is the pure simulation, with the same rules as missions: no DOM, clock or `Math.random()`.
+- `src/late-fees-data/` holds content.
+- `src/late-fees-ui/` is the VHS shell.
+- The page is `late-fees/index.html`, with save key `latefees.save`, its own manifest, and a third door on the picker.
+- The architecture test gains a `late-fees` area that may import only `src/shared/`.
+
+## 3. The three tapes
+
+### FRIDAY THE 12TH: Camp Blackwater
+
+**You:** the director of Camp Blackwater Lake, reopened by new owners twenty years after "the drowning".
+
+- **Income:** enrolment. Campers pay per session, and more campers means more money.
+- **Held ground** (the shared engine). The camp is a run of zones from the front gate out to the far shore: the mess hall, cabins 1–8, the archery range, the boathouse, the lake, the old campsite. A zone is **safe** while it is lit and supervised. Campers only fill safe zones, so held zones cap enrolment.
+- **Counselors** are the force that supervises zones. They are hired and paid wages, and they wander off: the genre's rule.
+- **Generators and floodlights** are the second economy: fuel bought against fuel burned. A dark zone can't be held.
+- **Night falls on a cycle.** At night the killer's pressure climbs. Zones slip into the dark, campers in lost zones die, and every death costs **reputation**, which slows enrolment.
+- **The balance:** more campers pay more but stretch supervision, light costs fuel, and nights get longer each act.
+- **The killer** is **the Drowned Boy**, now a man in a welder's mask, who never runs and is always there.
+- **Click:** BLOW THE WHISTLE. It calls a head count that pulls campers back into safe zones and briefly raises supervision.
+
+### A NIGHTMARE ON SYCAMORE STREET: the Sycamore Street Sleep Clinic
+
+**You:** administrator of a sleep-research clinic with a grant from a pharmaceutical company.
+
+- **Income:** study data. Patients earn money for every hour they sleep, and deep (REM) sleep pays most.
+- **The REM dial:** the share of patients allowed into deep sleep, in one-tap steps. Deep sleep pays more and is where **the Burned Man** walks. A patient who dies in a dream dies in the bed.
+- **Keeping people awake** is the second economy:
+  - **stimulants** (coffee, then pills, then an IV), which keep patients from dreaming;
+  - **exhaustion**, which builds the longer a patient stays awake, until they microsleep, uncontrolled and unmonitored, the most dangerous state of all.
+  - **Dream suppressant** is the rare drug that blocks dreaming safely. It's in short supply, and the grant-holder wants it rationed.
+- **Lucid-dreaming training** lets patients fight back in the dream, which lowers pressure. It's expensive, and it works.
+- **The balance:** sleep against wake against exhaustion. It is the most Paperclips-like tape, with a dial, a stockpile and a decay.
+- **Click:** WAKE THEM UP. It shakes the patients nearest the danger out of REM.
+
+### FINAL DEPARTURE: Providence Mutual
+
+**You:** the claims manager at Providence Mutual Life, the morning after a teenager's premonition pulled forty people off **Flight 213** before it fell.
+
+- **Income:** premiums. You sold every survivor a policy, a bold underwriting decision. More policies bring more premium and more exposure.
+- **Death's design** works down **the list**, in the order the survivors would have died. Each survivor builds **omens** (a loose bolt, a dripping tap, a gust of wind). At full omens, an "accident" happens and you pay out.
+- **Interventions** are the second economy:
+  - **inspectors**, who break chains of omens;
+  - **bodyguards**, who stand watch;
+  - **risk analysts**, who show you who is next.
+- Saving someone **skips** them: the design moves to the next name and comes back around later, angrier (pressure).
+- **The balance:** premiums against payouts against the intervention budget, under fate pressure that rises with every cheat.
+- **Click:** CHECK THE LIST. It reveals the next omen chain and breaks the weakest link.
+
+## 4. Acts (all tapes)
+
+The horror is obvious, so the arc is about escalation, not reveal.
+
+| Act | Pacing | Beat |
+|---|---|---|
+| I · Opening Kill | 0–45m | Business opens. Someone dies in the first minutes. The owners say it's an accident. |
+| II · Body Count | ~45m–2h | Deaths escalate. Town gossip, police who don't believe you, the business still open. |
+| III · The Final Girl | ~2–3h | A survivor works out the rules: the lake, the dreams, the list. The tape's special mechanic unlocks (the final girl's plan). |
+| IV · The Final Confrontation | ~3–4h | The killer comes for everyone. A big, visible fight for the people left. |
+| V · Roll Credits | end | Endings: **Kill it (for now)**, the sequel hook and franchise money; **Sell the story**, the most money with the killer untouched; **Burn it down**, rare, ends the franchise line, and unlocks things. |
+
+Pacing is tested with a bot, the same as the other two games.
+
+## 5. Sequels (prestige)
+
+- Every ending puts the next sequel on the shelf.
+- The franchise carries **Box Office** (a permanent income multiplier) and **Lore** (survivors remember: cheaper defences, earlier warnings).
+- The killer comes back stronger: each sequel adds base pressure.
+- Sequel titles follow the genre's ladder: *Part II*, *Part III*, *The Final Chapter*, *A New Beginning*, *It Lives Again*, *Takes Manhattan*, *In Space*.
+- Crossover tapes unlock after a few sequels.
+
+## 6. Look: VHS and video store
+
+- **Colour:** black ground with neon magenta and cyan, a warm white for text, and red for REC and deaths.
+- **Texture:** scanline and tracking-noise overlays (disabled with reduce motion), and chromatic fringing on titles.
+- **Type:** a VCR on-screen-display mono for the interface, and a neon or slasher display face for tape titles, self-hosted through fontsource like the other games.
+- **Pixel art:** tape spines, a welder's mask, a striped sweater and glove, a plane silhouette.
+- **Phone first:** the shelf is a horizontal row of spines on a phone and a full shelf on desktop. One-tap steps for every dial.
+
+## 7. Later: play as the horror (unlock)
+
+After enough sequels, the franchise "goes in a new direction": you play **the killer**. It is the Boardroom-style higher tier. You haunt several venues at once, each running headlessly as a first-tier run, picking who to stalk and when, building **Infamy**. This is designed for now and not built. As with DEEP CONTRACT's Boardroom, it imposes architecture rules today: runs are self-contained and serializable, and a run never reads the DOM, the clock or globals.
+
+## Build order
+
+1. **The page:** `/late-fees/`, the VHS shell, the tape shelf, save, PWA, the picker's third door and telemetry.
+2. **Venues × killers architecture,** then **Camp Blackwater** with the Drowned Boy on held ground, sequels, and the pacing bot.
+3. **The Sycamore Street Sleep Clinic** with the Burned Man.
+4. **Providence Mutual** with Death's design.
+5. **Crossovers.**
+6. **Play as the horror** (design pass first).
