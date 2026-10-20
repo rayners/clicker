@@ -16,6 +16,8 @@ const APPRAISAL_BASE = 3;
 /** Average seconds for a wounded hand to mend, before the hospice. */
 const MEND_SECONDS = 180;
 const HOSPICE_BONUS = 0.5;
+/** Each armoury level multiplies every hand's strength. */
+const ARMOURY_STRENGTH = 1.5;
 /** Blight per second from the vault, per order of magnitude of relics held. */
 const VAULT_BLIGHT = 0.01;
 const CHAPEL_EASE = 0.02;
@@ -225,7 +227,8 @@ export interface Projection {
 /** Expected outcome of sending this composition into this region. */
 export function project(c: Company, region: RegionDef, comp: Composition): Projection {
   const mod = modifiers(c);
-  const strength = CLASS_IDS.reduce((s, id) => s + comp[id] * def(id).strength * mod.strength[id], 0);
+  const armour = ARMOURY_STRENGTH ** c.buildings.armoury;
+  const strength = CLASS_IDS.reduce((s, id) => s + comp[id] * def(id).strength * mod.strength[id], 0) * armour;
   const ratio = strength / region.danger;
   const effective = Math.max(0.2, ratio);
   return {
@@ -379,10 +382,11 @@ export function toggleStanding(c: Company, region: string): Company {
   return { ...c, standing: [...c.standing, region] };
 }
 
-/** Standing regions send a party each tick while the hall has the hands for one. */
+/** Standing regions send a party each tick while the hall has the hands for one, deepest region first. */
 function muster(c: Company): Company {
+  const deepestFirst = [...c.standing].sort((a, b) => REGIONS.findIndex((r) => r.id === b) - REGIONS.findIndex((r) => r.id === a));
   let next = c;
-  for (const region of c.standing) next = dispatch(next, region);
+  for (const region of deepestFirst) next = dispatch(next, region);
   return next;
 }
 

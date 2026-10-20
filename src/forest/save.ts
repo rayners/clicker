@@ -17,6 +17,11 @@ export const forestSaves = createSaveSystem<ForestGame>({
     },
     // v3: Quartermaster standing regions, and a count of the dead.
     3: (save) => ({ ...save, company: { standing: [], lifetimeDead: 0, ...(save.company as Record<string, unknown>) } }),
+    // v4: the armoury.
+    4: (save) => {
+      const company = save.company as Record<string, unknown>;
+      return { ...save, company: { ...company, buildings: { armoury: 0, ...(company.buildings as Record<string, number>) } } };
+    },
   },
   label: 'ELDERDARK',
   required: ['profile', 'company'],

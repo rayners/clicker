@@ -1,4 +1,4 @@
-export type BuildingId = 'appraisal' | 'hospice' | 'chapel';
+export type BuildingId = 'appraisal' | 'armoury' | 'hospice' | 'chapel';
 
 export interface BuildingDef {
   id: BuildingId;
@@ -16,6 +16,13 @@ export const BUILDINGS: readonly BuildingDef[] = [
     description: 'A back room where Collegium buyers weigh and price what the parties bring. Each level doubles throughput.',
     baseCost: 40,
     costGrowth: 2.2,
+  },
+  {
+    id: 'armoury',
+    name: 'ARMOURY',
+    description: 'Mail, crossbows, boar-spears and the smiths to mend them. Every hand fights half again as hard at each level.',
+    baseCost: 300,
+    costGrowth: 2,
   },
   {
     id: 'hospice',

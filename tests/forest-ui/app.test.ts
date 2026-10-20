@@ -7,7 +7,7 @@ import { createForestStore, type ForestStore } from '../../src/forest/store';
 import { mountForest } from '../../src/forest-ui/app';
 import type { Company } from '../../src/forest/state';
 import { CLASSES } from '../../src/forest-data/classes';
-import { hireCost, project } from '../../src/forest/company';
+import { chartingPerTrip, hireCost, project } from '../../src/forest/company';
 import { REGIONS } from '../../src/forest-data/regions';
 
 let store: ForestStore;
@@ -147,7 +147,8 @@ describe('the map (what leads deeper)', () => {
   it('says on each region card how far a trip there charts the way on', async () => {
     const user = setup({ hired: crew({ blade: 2, scout: 1 }) });
     await user.click(tab(/expeditions/i));
-    expect(within(screen.getByRole('article', { name: /the eaves/i })).getByText(/CHARTS \+0\.18 LEAGUES TOWARD BRIAR HOLLOWS/)).toBeTruthy();
+    const per = chartingPerTrip(company(), eaves, company().orders.eaves!).toFixed(2);
+    expect(within(screen.getByRole('article', { name: /the eaves/i })).getByText(new RegExp(`CHARTS \\+${per} LEAGUES TOWARD BRIAR HOLLOWS`))).toBeTruthy();
   });
 
   it('says when a region has nothing left to teach about the way on', async () => {

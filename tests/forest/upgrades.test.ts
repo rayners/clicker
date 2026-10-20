@@ -147,3 +147,19 @@ describe('the Quartermaster (standing orders that send themselves)', () => {
     expect(dispatch(c, eaves.id).parties).toHaveLength(1);
   });
 });
+
+describe('Quartermaster priorities', () => {
+  it('sends the deepest standing order first, so the frontier is never starved by older regions', () => {
+    const hollows = REGIONS[1]!;
+    let c = fresh({
+      silver: 1e9,
+      charted: 99,
+      upgrades: ['quartermaster', 'quartermasters-clerk'],
+      hired: { blade: 4, mender: 0, scout: 1, mystic: 0 },
+      orders: { ...fresh().orders, [eaves.id]: { blade: 4, mender: 0, scout: 1, mystic: 0 }, [hollows.id]: { blade: 4, mender: 0, scout: 1, mystic: 0 } },
+    });
+    c = toggleStanding(toggleStanding(c, eaves.id), hollows.id);
+    const next = tickCompany(c, 1);
+    expect(next.parties.map((p) => p.region)).toEqual([hollows.id]);
+  });
+});

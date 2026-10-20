@@ -325,3 +325,11 @@ describe('rates for the flow readout', () => {
     expect(netRate(c)).toBeCloseTo(incomeRate(c) - wages(c));
   });
 });
+
+describe('the armoury (strength scales by equipment, not headcount)', () => {
+  it('makes every hand fight harder at each level', () => {
+    const comp = { blade: 3, mender: 1, scout: 1, mystic: 0 };
+    const armed = fresh({ buildings: { ...fresh().buildings, armoury: 2 } });
+    expect(project(armed, eaves, comp).strength).toBeCloseTo(project(fresh(), eaves, comp).strength * 1.5 ** 2);
+  });
+});

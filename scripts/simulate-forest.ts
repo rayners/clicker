@@ -1,0 +1,16 @@
+import { simulateForest } from '../src/forest/bot';
+import { formatDuration, formatNumber } from '../src/shared/format';
+import { REGIONS } from '../src/forest-data/regions';
+
+const hours = Number(process.argv[2] ?? 6);
+for (const seed of [1, 7, 42]) {
+  const started = performance.now();
+  const run = simulateForest({ seed, maxSeconds: hours * 3600 });
+  const c = run.final.company;
+  const at = (s?: number) => (s === undefined ? 'never' : formatDuration(s));
+  const regions = REGIONS.map((r) => `${r.id} ${at(run.openedAt[r.id])}`).join(' | ');
+  const hands = Object.values(c.hired).reduce((a, b) => a + b, 0);
+  console.log(
+    `seed ${seed}: act2 ${at(run.actAt[2])} | ${regions}\n   charted ${c.charted.toFixed(1)} hands ${hands} dead ${c.lifetimeDead} blight ${Math.round(c.blight)} silver ${formatNumber(c.silver)} relics ${formatNumber(c.lifetimeRelics)} upgrades ${c.upgrades.length} | ${Math.round(performance.now() - started)}ms`,
+  );
+}
