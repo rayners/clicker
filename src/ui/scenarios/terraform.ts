@@ -1,4 +1,4 @@
-import { formatNumber } from '../../core/format';
+import { formatNumber } from '../../shared/format';
 import type { Store } from '../../core/store';
 import { PROCESSORS, REACTORS } from '../../data/terraform/systems';
 import { TERRAFORM_UPGRADES } from '../../data/terraform/upgrades';
@@ -66,6 +66,7 @@ export function createTerraformUi(store: Store): ScenarioUi {
         { label: 'PROCESS', aria: 'Processing rate', unit: 'U/S' },
         { label: 'INCOME', aria: 'Income', unit: 'CR/S' },
       ],
+      identity: (m) => `${m.config.shipName}:${m.seed}`,
       meterLabel: 'Spec match',
       rateUnit: 'U/S',
       read: (mission) => {

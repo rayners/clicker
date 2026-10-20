@@ -2,7 +2,7 @@ import { createMission, DEFAULT_MISSION_CONFIG, type MissionOf, type MissionStat
 import { tickMission } from '../mission/tick';
 import { appendLog } from '../mission/log';
 import { scenarioOf } from '../mission/registry';
-import { formatDuration, formatNumber } from './format';
+import { formatDuration, formatNumber } from '../shared/format';
 
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
 const CATCH_UP_STEP_SECONDS = 1;

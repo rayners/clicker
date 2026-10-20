@@ -1,5 +1,5 @@
 import { CREW } from '../data/crew';
-import { randomInt } from '../core/rng';
+import { randomInt } from '../shared/rng';
 import { appendLog } from './log';
 import type { MissionCore } from './state';
 

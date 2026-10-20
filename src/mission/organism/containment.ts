@@ -1,4 +1,4 @@
-import { nextRandom } from '../../core/rng';
+import { nextRandom } from '../../shared/rng';
 import { CREW } from '../../data/crew';
 import { crewStatus } from '../crew';
 import { appendLog, type LogKind } from '../log';

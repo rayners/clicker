@@ -1,6 +1,6 @@
-import { formatClock } from '../core/format';
+import { formatClock } from '../shared/format';
 import { LOG_LIMIT, type LogEntry } from '../mission/log';
-import { h } from './dom';
+import { h } from '../shared/ui/dom';
 
 export function createLogView(): { el: HTMLOListElement; render(entries: LogEntry[], contract: string): LogEntry[] } {
   const el = h('ol', { class: 'log', role: 'log', 'aria-live': 'polite', 'aria-label': 'Comms log' });

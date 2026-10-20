@@ -1,8 +1,8 @@
-import { formatDuration, formatNumber } from '../core/format';
+import { formatDuration, formatNumber } from '../shared/format';
 import { directiveDef, directiveProgress } from '../mission/directives';
 import type { MissionState } from '../mission/state';
 import { scenarioOf } from '../mission/registry';
-import { h, setAttr, setText } from './dom';
+import { h, setAttr, setText } from '../shared/ui/dom';
 
 const BAR_CELLS = 20;
 

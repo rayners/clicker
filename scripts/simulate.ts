@@ -1,5 +1,5 @@
 import { simulateRun } from '../src/sim/bot';
-import { formatDuration } from '../src/core/format';
+import { formatDuration } from '../src/shared/format';
 import { scenarioOf } from '../src/mission/registry';
 import { isOrganism, type ScenarioId } from '../src/mission/state';
 

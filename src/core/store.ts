@@ -6,6 +6,7 @@ import { isExtraction, isOrganism, isTerraform, type MissionState, type Organism
 import { allocate, buyProcessor, buyReactor, buyTerraformUpgrade, surge } from '../mission/terraform/economy';
 import type { Line } from '../data/terraform/systems';
 import { advance, newGame, type GameState, type Settings } from './game';
+import { createReducerStore, type Listener as SharedListener, type Store as SharedStore } from '../shared/store';
 import { chooseAssignment, completeContract, type Ending } from './prestige';
 import type { ScenarioId } from '../mission/state';
 
@@ -93,32 +94,9 @@ export function reduce(game: GameState, action: Action): GameState {
   }
 }
 
-export type Listener = (state: GameState) => void;
-
-export interface Store {
-  getState(): GameState;
-  dispatch(action: Action): void;
-  subscribe(listener: Listener): () => void;
-  replace(state: GameState): void;
-}
+export type Listener = SharedListener<GameState>;
+export type Store = SharedStore<GameState, Action>;
 
 export function createStore(initial: GameState): Store {
-  let state = initial;
-  const listeners = new Set<Listener>();
-  const notify = () => listeners.forEach((l) => l(state));
-  return {
-    getState: () => state,
-    dispatch(action) {
-      state = reduce(state, action);
-      notify();
-    },
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-    replace(next) {
-      state = next;
-      notify();
-    },
-  };
+  return createReducerStore(initial, reduce);
 }

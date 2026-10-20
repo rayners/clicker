@@ -2,7 +2,7 @@ import type { GameState } from '../core/game';
 import { availableAssignments, missionConfigFor } from '../core/prestige';
 import type { Store } from '../core/store';
 import type { ScenarioId } from '../mission/state';
-import { h, setText } from './dom';
+import { h, setText } from '../shared/ui/dom';
 
 const BRIEFS: Record<ScenarioId, { title: string; name: string; brief: string }> = {
   extraction: {

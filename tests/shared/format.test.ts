@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatNumber, formatDuration, formatClock } from '../../src/core/format';
+import { formatNumber, formatDuration, formatClock } from '../../src/shared/format';
 
 describe('formatNumber', () => {
   it('shows small whole numbers as-is', () => {

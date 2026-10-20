@@ -1,5 +1,5 @@
 import { SPRITES } from '../data/sprites';
-import { h } from './dom';
+import { h } from '../shared/ui/dom';
 import { corruptFrame, framePixels } from './pixels';
 
 const PALETTE_VARS: Record<string, string> = {

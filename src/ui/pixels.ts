@@ -1,4 +1,4 @@
-import { nextRandom } from '../core/rng';
+import { nextRandom } from '../shared/rng';
 import { PALETTE_KEYS } from '../data/sprites';
 
 export interface Pixel {

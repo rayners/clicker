@@ -1,4 +1,4 @@
-import { formatNumber } from '../../core/format';
+import { formatNumber } from '../../shared/format';
 import type { Store } from '../../core/store';
 import { GENERATORS } from '../../data/extraction/generators';
 import { UPGRADES } from '../../data/extraction/upgrades';
@@ -54,6 +54,7 @@ export function createExtractionUi(store: Store): ScenarioUi {
         { label: 'REFINE', aria: 'Refinery throughput', unit: 'ORE/S' },
         { label: 'INCOME', aria: 'Income', unit: 'CR/S' },
       ],
+      identity: (m) => `${m.config.shipName}:${m.seed}`,
       meterLabel: 'Refinery load',
       rateUnit: 'ORE/S',
       read: (mission) => {

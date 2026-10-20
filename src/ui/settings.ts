@@ -1,7 +1,7 @@
 import type { GameState } from '../core/game';
 import { exportSave, importSave } from '../core/save';
 import type { Store } from '../core/store';
-import { h, setText } from './dom';
+import { h, setText } from '../shared/ui/dom';
 
 const CONFIRM_TIMEOUT_MS = 5000;
 

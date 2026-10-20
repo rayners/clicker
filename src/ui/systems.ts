@@ -1,4 +1,4 @@
-import { formatNumber } from '../core/format';
+import { formatNumber } from '../shared/format';
 import type { Store } from '../core/store';
 import { GENERATORS } from '../data/extraction/generators';
 import {
@@ -9,7 +9,7 @@ import {
   refineryCost,
 } from '../mission/extraction/economy';
 import type { ExtractionMission as MissionState } from '../mission/state';
-import { h, setAttr, setText } from './dom';
+import { h, setAttr, setText } from '../shared/ui/dom';
 
 export function createSystemsPanel(store: Store): { el: HTMLElement; render(m: MissionState): void } {
   const rows = GENERATORS.map((def, index) => {

@@ -1,7 +1,37 @@
-import { formatNumber } from '../core/format';
-import type { MissionState } from '../mission/state';
+import { formatNumber } from '../format';
 import { h, setAttr, setText } from './dom';
-import type { FlowSpec } from './scenarios/types';
+
+export interface FlowCell {
+  label: string;
+  /** Accessible name of the value. */
+  aria: string;
+  unit: string;
+}
+
+export interface FlowReading {
+  values: [number, number, number];
+  /** 0-100 for the meter under the cells. */
+  meter: number;
+  /** What is holding production back; exposed as data-bottleneck for styling and tests. */
+  limit: string;
+  /** Which cell to highlight as the constraint, if any. */
+  highlight: number | null;
+  /** Inverted highlight: the constraint is saturated. */
+  severe: boolean;
+  note: string;
+  /** The headline rate whose changes get a call-out. */
+  rate: number;
+}
+
+export interface FlowSpec<S> {
+  cells: [FlowCell, FlowCell, FlowCell];
+  meterLabel: string;
+  rateUnit: string;
+  read(state: S): FlowReading;
+  /** Changes when a new run starts, so the first reading of a new run isn't called out as a change. */
+  identity(state: S): string;
+}
+
 
 const DELTA_LIFETIME = 1400;
 
@@ -9,7 +39,7 @@ const DELTA_LIFETIME = 1400;
  * The paperclip-style balance at the top of the screen: input, conversion and income, with whichever
  * stage is holding production back highlighted. Changes to the headline rate get an immediate call-out.
  */
-export function createFlow(spec: FlowSpec): { el: HTMLElement; render(m: MissionState): void } {
+export function createFlow<S>(spec: FlowSpec<S>): { el: HTMLElement; render(state: S): void } {
   const cells = spec.cells.map((c, i) => {
     const value = h('span', { class: 'flow-value', 'aria-label': c.aria }, '0');
     const el = h(
@@ -52,9 +82,9 @@ export function createFlow(spec: FlowSpec): { el: HTMLElement; render(m: Mission
     setTimeout(() => tag.remove(), DELTA_LIFETIME);
   }
 
-  function render(m: MissionState) {
-    const r = spec.read(m);
-    const contract = `${m.config.shipName}:${m.seed}`;
+  function render(state: S) {
+    const r = spec.read(state);
+    const contract = spec.identity(state);
     // Rates only move on purchases and crew/containment changes, so any difference is worth showing.
     if (lastRate !== null && contract === lastContract && Math.abs(r.rate - lastRate) > Math.max(1e-9, lastRate * 1e-6)) {
       callOut(r.rate - lastRate);

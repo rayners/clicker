@@ -1,45 +1,13 @@
 import type { GameState } from '../../core/game';
 import type { Action } from '../../core/store';
 import type { MissionState } from '../../mission/state';
+import type { FlowSpec as SharedFlowSpec } from '../../shared/ui/flow';
+import type { MonitorRow as SharedMonitorRow } from '../../shared/ui/monitor';
 
-export interface FlowCell {
-  label: string;
-  /** Accessible name of the value. */
-  aria: string;
-  unit: string;
-}
-
-export interface FlowReading {
-  values: [number, number, number];
-  /** 0-100 for the meter under the cells. */
-  meter: number;
-  /** What is holding production back; exposed as data-bottleneck for styling and tests. */
-  limit: string;
-  /** Which cell to highlight as the constraint, if any. */
-  highlight: number | null;
-  /** Inverted highlight: the constraint is saturated. */
-  severe: boolean;
-  note: string;
-  /** The headline rate whose changes get a call-out. */
-  rate: number;
-}
-
-export interface FlowSpec {
-  cells: [FlowCell, FlowCell, FlowCell];
-  meterLabel: string;
-  rateUnit: string;
-  read(m: MissionState): FlowReading;
-}
-
-export interface MonitorRow {
-  id: string;
-  label: string;
-  /** Seconds per visual work cycle. */
-  period: number;
-  running(m: MissionState): boolean;
-  count(m: MissionState): string;
-  output(m: MissionState): string;
-}
+/** Flow readout and monitor shapes are shared engine types, specialised to a mission here. */
+export type FlowSpec = SharedFlowSpec<MissionState>;
+export type MonitorRow = SharedMonitorRow<MissionState>;
+export type { FlowCell, FlowReading } from '../../shared/ui/flow';
 
 export interface StatSpec {
   label: string;

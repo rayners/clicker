@@ -1,10 +1,10 @@
-import { formatClock, formatNumber } from '../core/format';
+import { formatClock, formatNumber } from '../shared/format';
 import type { GameState } from '../core/game';
 import type { Store } from '../core/store';
-import { h, setText } from './dom';
+import { h, setText } from '../shared/ui/dom';
 import { createLogView } from './log';
-import { createFlow } from './flow';
-import { createMonitor } from './monitor';
+import { createFlow } from '../shared/ui/flow';
+import { createMonitor } from '../shared/ui/monitor';
 import { createExtractionUi } from './scenarios/extraction';
 import { createTerraformUi } from './scenarios/terraform';
 import type { ScenarioUi, StatSpec } from './scenarios/types';

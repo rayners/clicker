@@ -2,7 +2,7 @@ import type { Store } from '../core/store';
 import { LINES, type Line } from '../data/terraform/systems';
 import { isAutoBalanced, linePower, lineStates, planetReadings, power, spec, type LineState } from '../mission/terraform/economy';
 import type { TerraformMission } from '../mission/state';
-import { h, setText } from './dom';
+import { h, setText } from '../shared/ui/dom';
 
 const STATE_TEXT: Record<LineState, string> = {
   'power-limited': 'POWER-LIMITED',

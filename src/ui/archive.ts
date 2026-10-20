@@ -1,8 +1,8 @@
-import { formatDuration, formatNumber } from '../core/format';
+import { formatDuration, formatNumber } from '../shared/format';
 import type { GameState } from '../core/game';
 import { BOARDROOM_UNLOCK_CONTRACTS } from '../core/prestige';
 import { unlockedFiles } from '../mission/archive';
-import { h, setText } from './dom';
+import { h, setText } from '../shared/ui/dom';
 
 const ENDING_LABELS: Record<string, string> = { deliver: 'DELIVERED', scuttle: 'SCUTTLED', broadcast: 'BROADCAST' };
 

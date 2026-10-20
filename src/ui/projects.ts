@@ -1,4 +1,4 @@
-import { formatNumber } from '../core/format';
+import { formatNumber } from '../shared/format';
 import type { Store } from '../core/store';
 import {
   containmentLevelCost,
@@ -11,7 +11,7 @@ import {
 } from '../mission/organism/containment';
 import { awakeCount } from '../mission/crew';
 import type { OrganismMission as MissionState } from '../mission/state';
-import { h, setAttr, setText } from './dom';
+import { h, setAttr, setText } from '../shared/ui/dom';
 import { createTracker } from './tracker';
 
 function row(name: string, desc: string, value: HTMLElement, foot: HTMLElement, button: HTMLButtonElement) {

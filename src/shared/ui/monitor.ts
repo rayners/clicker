@@ -1,16 +1,26 @@
-import type { MissionState } from '../mission/state';
 import { h, setText } from './dom';
-import type { MonitorRow } from './scenarios/types';
+
+export interface MonitorRow<S> {
+  id: string;
+  label: string;
+  /** Seconds per visual work cycle. */
+  period: number;
+  running(state: S): boolean;
+  count(state: S): string;
+  output(state: S): string;
+}
+
 
 /** Every automated system currently working, each with a looping work-cycle bar. */
-export function createMonitor(rows: readonly MonitorRow[]): { el: HTMLElement; render(m: MissionState): void } {
+export function createMonitor<S>(rows: readonly MonitorRow<S>[]): { el: HTMLElement; render(state: S): void } {
   const list = h('ul', { class: 'mon-list' });
   const idle = h('p', { class: 'mon-idle' }, 'NO AUTOMATED SYSTEMS ONLINE · ACQUIRE IN SYSTEMS');
   const el = h('section', { class: 'monitor', 'aria-label': 'Operations monitor' }, list, idle);
   const items = new Map<string, { li: HTMLLIElement; count: HTMLElement; out: HTMLElement }>();
   let shown = '';
 
-  function render(m: MissionState) {
+  function render(state: S) {
+    const m = state;
     const running = rows.filter((r) => r.running(m));
     const key = running.map((r) => r.id).join(',');
     if (key !== shown) {

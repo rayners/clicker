@@ -1,7 +1,7 @@
 import type { GameState } from '../core/game';
 import { availableEndings, endingRewards, type Ending } from '../core/prestige';
 import type { Store } from '../core/store';
-import { h, setAttr, setText } from './dom';
+import { h, setAttr, setText } from '../shared/ui/dom';
 import { horrorOf, scenarioOf } from '../mission/registry';
 import { interpolate } from '../mission/lexicon';
 
