@@ -34,6 +34,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,woff,woff2,webmanifest}'],
+        // We register sw.js by hand, so nothing would send SKIP_WAITING: a new build activates by itself instead.
+        skipWaiting: true,
+        clientsClaim: true,
         // The forest has its own page; never answer its navigations with DEEP CONTRACT's.
         navigateFallbackDenylist: [/\/forest\//],
       },
