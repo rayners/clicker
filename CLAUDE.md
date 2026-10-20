@@ -1,6 +1,9 @@
-# DEEP CONTRACT — working notes for Claude
+# DEEP CONTRACT and CHARTER OF THE ELDERDARK — working notes for Claude
 
-Retro-futurist idle clicker (Alien-flavoured, original IP) with a slow-burn horror turn. Vite + TypeScript, no UI framework.
+Two games in one repo, sharing an engine (`src/shared/`). Vite + TypeScript, no UI framework.
+- **DEEP CONTRACT** (`/`, `src/main.ts`): retro-futurist idle clicker (Alien-flavoured, original IP) with a slow-burn horror turn.
+- **CHARTER OF THE ELDERDARK** (`/forest/`, `src/forest-main.ts`): dark-fantasy company management in a corrupting forest (Symbaroum-flavoured, original IP). Design and status are in `docs/forest/DESIGN.md`. Code lives in `src/forest/` (pure simulation, same rules as missions), `src/forest-data/` and `src/forest-ui/` (ledger UI, `ledger.css`). It has its own save key (`elderdark.save`).
+- **Boundaries** (`tests/architecture.test.ts`): `src/shared/` imports nothing from either game, and neither game imports the other.
 
 Read before changing things:
 - `docs/DESIGN.md`: premise, economy, the five acts and their pacing targets, prestige, UI/art direction.
@@ -24,7 +27,7 @@ Read before changing things:
 - `npm run simulate [extraction|terraform]`: bot playthrough timings per act, for both scenarios by default.
 - `npm run dev -- --host`: test on a phone over the LAN. Debug jumps: `?debug=act2|act3|act4|terminus|terraform|tf-act2` (`src/core/debug.ts`).
 - If the dev server suddenly serves unstyled pages after a CSS edit, its watcher caught the file mid-write: `touch src/styles/*.css`. Prefer the Edit tool over scripts that truncate and rewrite CSS.
-- `npm run build`: typecheck plus static build with service worker. `npm run icons` regenerates PWA icons from sprites.
+- `npm run build`: typecheck plus static build (both pages) with service worker. `npm run icons` regenerates PWA icons from sprites.
 
 ## Code map and conventions
 

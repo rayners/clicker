@@ -23,6 +23,10 @@ import {
   wages,
   COST_GROWTH,
   FORAGE_YIELD,
+  RELIC_PRICE,
+  gatherRate,
+  incomeRate,
+  netRate,
   PENANCE_AMOUNT,
 } from '../../src/forest/company';
 
@@ -258,5 +262,27 @@ describe('self-containment', () => {
   it('is plain JSON so it can be saved', () => {
     const c = run(dispatch({ ...fresh({ silver: 1e6, hired: hands({ blade: 5 }) }), orders: { ...fresh().orders, [eaves.id]: { blade: 3, mender: 0, scout: 0, mystic: 0 } } }, eaves.id), 10);
     expect(JSON.parse(JSON.stringify(c))).toEqual(c);
+  });
+});
+
+describe('rates for the flow readout', () => {
+  const inField = () => {
+    const c = fresh({ silver: 1e6, hired: hands({ blade: 6, scout: 2 }), orders: { ...fresh().orders, [eaves.id]: { blade: 3, mender: 0, scout: 1, mystic: 0 } } });
+    return dispatch(dispatch(c, eaves.id), eaves.id);
+  };
+
+  it('estimates relics gathered per second from the parties in the field', () => {
+    const c = inField();
+    const p = project(c, eaves, c.orders[eaves.id]!);
+    expect(gatherRate(c)).toBeCloseTo((2 * p.haul) / p.duration);
+    expect(gatherRate(fresh())).toBe(0);
+  });
+
+  it('earns at most what appraisal can take, counting the vault as selling down over a minute, and nets wages out', () => {
+    const c = { ...inField(), relics: 30 };
+    expect(incomeRate(c)).toBeCloseTo(Math.min(c.relics / 60 + gatherRate(c), appraisalRate(c)) * RELIC_PRICE);
+    // A full vault keeps the appraisers busy.
+    expect(incomeRate({ ...c, relics: 1e6 })).toBeCloseTo(appraisalRate(c) * RELIC_PRICE);
+    expect(netRate(c)).toBeCloseTo(incomeRate(c) - wages(c));
   });
 });

@@ -131,3 +131,21 @@ The pacing targets mirror DEEP CONTRACT (about 1h / 2.5h / 3h / 4.5h) and are en
 5. Captains (named veterans with corruption), Acts II–IV, turned hands, the archive.
 6. Endings, charter renewal, Renown and Grace, a pacing bot and tuning.
 7. PWA for the second app, iPhone e2e, and a real-device pass.
+
+## Status (2026-10-19)
+
+| Step | Status |
+|---|---|
+| 1. Shared engine extraction and a multi-page build | done: `src/shared/` (format, rng, save system, store, log, pixels, flow, monitor, log view, sprite kit, dom). DEEP CONTRACT binds them. `tests/architecture.test.ts` enforces the boundaries. |
+| 2. Company simulation | done: `src/forest/company.ts` |
+| 3. Ledger UI | done: `src/forest-ui/`, at `/forest/` |
+| 4. Upgrades, Quartermaster automation, Act I ledger entries | next |
+| 5. Captains, Acts II–IV, turned hands, archive | |
+| 6. Endings, renewal, pacing bot and tuning | |
+| 7. PWA for the second app, CFG (settings, export/import, reset), real-device pass | e2e on desktop and iPhone emulation done; PWA and CFG still to do |
+
+As-built notes:
+- **Units:** one relic sells for one thaler. Wages are about 0.05–0.1 thalers per second per hand.
+- **Calendar:** a game day is 24 minutes (one "bell" per minute).
+- **Displayed income** counts the vault as selling down over a minute, so COFFERS shows a steady figure rather than a momentary one.
+- **Numbers** are first guesses, and the Eaves yield has been raised once by hand. They need the pacing bot (step 6) before they can be trusted.

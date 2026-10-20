@@ -4,6 +4,12 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   base: './',
+  build: {
+    rollupOptions: {
+      // Two games, one repo: DEEP CONTRACT at the root, CHARTER OF THE ELDERDARK under /forest/.
+      input: { main: 'index.html', forest: 'forest/index.html' },
+    },
+  },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',

@@ -257,3 +257,26 @@ export function tickCompany(c: Company, dt: number): Company {
   next = payWages(next, dt);
   return settleBlight(next, dt);
 }
+
+// ---------- rates (for the flow readout and the bot) ----------
+
+/** Expected relics per second from the parties now in the field. */
+export function gatherRate(c: Company): number {
+  return c.parties.reduce((s, party) => {
+    const region = REGIONS.find((r) => r.id === party.region)!;
+    const p = project(c, region, party.comp);
+    return s + p.haul / p.duration;
+  }, 0);
+}
+
+/** Seconds over which the vault's stock is counted as selling down, for a steady (not momentary) income figure. */
+const VAULT_HORIZON = 60;
+
+/** Silver per second from appraisal: limited by the buyers, fed by the field and the vault. */
+export function incomeRate(c: Company): number {
+  return Math.min(c.relics / VAULT_HORIZON + gatherRate(c), appraisalRate(c)) * RELIC_PRICE;
+}
+
+export function netRate(c: Company): number {
+  return incomeRate(c) - wages(c);
+}

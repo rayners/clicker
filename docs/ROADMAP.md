@@ -28,6 +28,10 @@ Feedback: not much feeling of progression; ore/s should be the primary stat but 
 | Contract assignment screen (new game, renewal, CFG reassignment) | done |
 | Directive tab highlight, top progress strip, tired-crew indicator (second round of feedback) | done |
 
+## Sister game: CHARTER OF THE ELDERDARK
+
+Requested 2026-10-19. Tracked in `docs/forest/DESIGN.md`. A playable first slice is built (company simulation and ledger UI at `/forest/`).
+
 ## Deviations from the original plan (deliberate)
 
 - **Folder layout:** mission logic lives in `src/mission/` (not `src/systems/`) to keep a mission self-contained for the Boardroom. Story beats are in `src/data/story.ts` (one file, grouped by act), not one file per act.

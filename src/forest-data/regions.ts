@@ -23,7 +23,7 @@ export const REGIONS: readonly RegionDef[] = [
     description: 'The first mile of trees. Wolves, deadfall, and the bones of last season\'s foragers.',
     danger: 8,
     duration: 30,
-    relics: 6,
+    relics: 15,
     harm: 0.12,
     blight: 0.02,
     opensAt: 0,
