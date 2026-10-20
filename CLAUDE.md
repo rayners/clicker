@@ -1,9 +1,10 @@
 # DEEP CONTRACT and CHARTER OF THE ELDERDARK — working notes for Claude
 
-Two games in one repo, sharing an engine (`src/shared/`). Vite + TypeScript, no UI framework.
-- **DEEP CONTRACT** (`/`, `src/main.ts`): retro-futurist idle clicker (Alien-flavoured, original IP) with a slow-burn horror turn.
+Two games in one repo, sharing an engine (`src/shared/`). Vite + TypeScript, no UI framework. The root page (`index.html`, `src/picker/`) is a game picker that only links to the games and imports nothing but `src/shared/`.
+- **DEEP CONTRACT** (`/contract/`, `contract/index.html`, `src/main.ts`): retro-futurist idle clicker (Alien-flavoured, original IP) with a slow-burn horror turn.
 - **CHARTER OF THE ELDERDARK** (`/forest/`, `src/forest-main.ts`): dark-fantasy company management in a corrupting forest (Symbaroum-flavoured, original IP). Design and status are in `docs/forest/DESIGN.md`. Code lives in `src/forest/` (pure simulation, same rules as missions), `src/forest-data/` and `src/forest-ui/` (ledger UI, `ledger.css`). It has its own save key (`elderdark.save`).
-- **Boundaries** (`tests/architecture.test.ts`): `src/shared/` imports nothing from either game, and neither game imports the other.
+- **Boundaries** (`tests/architecture.test.ts`): `src/shared/` imports nothing from either game, neither game imports the other, and the picker imports only shared code.
+- **One service worker** at the site root serves all three pages; each page registers it, and each game ships its own manifest from `public/contract/` or `public/forest/` so it installs as its own app.
 
 Read before changing things:
 - `docs/DESIGN.md`: premise, economy, the five acts and their pacing targets, prestige, UI/art direction.
@@ -26,9 +27,9 @@ Read before changing things:
 - `npm test`: vitest (unit, jsdom UI, data invariants, pacing). `npx tsc --noEmit` for types.
 - `npm run test:e2e`: Playwright on desktop Chromium plus iPhone 13 emulation (Chromium by default; `E2E_WEBKIT=1` for real WebKit once `sudo npx playwright install-deps webkit` has been run).
 - `npm run simulate [extraction|terraform]`: bot playthrough timings per act, for both scenarios by default.
-- `npm run dev -- --host`: test on a phone over the LAN. Debug jumps: `?debug=act2|act3|act4|terminus|terraform|tf-act2` (`src/core/debug.ts`).
+- `npm run dev -- --host`: test on a phone over the LAN. Debug jumps: `/contract/?debug=act2|act3|act4|terminus|terraform|tf-act2` (`src/core/debug.ts`).
 - If the dev server suddenly serves unstyled pages after a CSS edit, its watcher caught the file mid-write: `touch src/styles/*.css`. Prefer the Edit tool over scripts that truncate and rewrite CSS.
-- `npm run build`: typecheck plus static build (both pages) with service worker. `npm run icons` regenerates PWA icons from sprites.
+- `npm run build`: typecheck plus static build (all three pages) with service worker. `npm run icons` regenerates PWA icons from sprites.
 
 ## Code map and conventions
 

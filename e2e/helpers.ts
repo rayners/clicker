@@ -6,7 +6,7 @@ export async function acceptContract(page: Page, kind: 'extraction' | 'terraform
 }
 
 export async function freshGame(page: Page, kind: 'extraction' | 'terraforming' = 'extraction') {
-  await page.goto('/');
+  await page.goto('/contract/');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await acceptContract(page, kind);

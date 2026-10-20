@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { encodePng, renderIcon, renderSpriteIcon } from './png';
 import { FOREST_SPRITES } from '../src/forest-data/sprites';
 
-mkdirSync('public/icons', { recursive: true });
+mkdirSync('public/contract/icons', { recursive: true });
 for (const [file, size] of [
   ['icon-192.png', 192],
   ['icon-512.png', 512],
@@ -10,8 +10,8 @@ for (const [file, size] of [
   ['favicon-32.png', 32],
 ] as const) {
   const { width, height, rgba } = renderIcon('moonlet', size);
-  writeFileSync(`public/icons/${file}`, encodePng(width, height, rgba));
-  console.log(`wrote public/icons/${file}`);
+  writeFileSync(`public/contract/icons/${file}`, encodePng(width, height, rgba));
+  console.log(`wrote public/contract/icons/${file}`);
 }
 
 // CHARTER OF THE ELDERDARK: a gilt key on candlelit umber.

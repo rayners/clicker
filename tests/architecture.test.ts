@@ -21,6 +21,7 @@ const edges = files(SRC).flatMap((file) =>
 
 const area = (path: string) => {
   if (path.startsWith('shared/')) return 'shared';
+  if (path.startsWith('picker')) return 'picker';
   if (path.startsWith('forest')) return 'elderdark';
   return 'deep-contract';
 };
@@ -38,6 +39,11 @@ describe('code boundaries between the two games', () => {
 
   it('keeps Elderdark from importing DEEP CONTRACT', () => {
     const leaks = edges.filter(([from, to]) => area(from) === 'elderdark' && area(to) === 'deep-contract');
+    expect(leaks).toEqual([]);
+  });
+
+  it('keeps the game picker out of both games: it only links to them', () => {
+    const leaks = edges.filter(([from, to]) => area(from) === 'picker' && area(to) !== 'shared' && area(to) !== 'picker');
     expect(leaks).toEqual([]);
   });
 });

@@ -39,7 +39,7 @@ Requested 2026-10-19. Tracked in `docs/forest/DESIGN.md`. A playable first slice
 - **Crew have no supplies or morale.** Fatigue plus thaw cost provide the tension instead.
 - **Crew roster does not change between contracts.** Instead, the identical manifest is a horror beat.
 - **Light-lag** is narrative flavour on corporate messages (and its absence is the Act III tell), not a mechanic. There is no "comms relay" upgrade.
-- **Debug mode** is URL scenario jumps only (`?debug=act2|act3|act4|terminus`).
+- **Debug mode** is URL scenario jumps only (`/contract/?debug=act2|act3|act4|terminus`).
 - **iPhone e2e** runs on Chromium with iPhone 13 emulation, because the host lacks WebKit system libraries (`sudo npx playwright install-deps webkit`, then `E2E_WEBKIT=1`).
 
 ## Backlog / ideas

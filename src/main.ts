@@ -50,7 +50,8 @@ window.addEventListener('pagehide', save);
 
 void navigator.storage?.persist?.();
 
-// The service worker is shared with the forest page; only built pages have one.
+// One service worker serves every page from the site root; register it from here too, so the game works offline
+// even if the picker has never been opened. Only built pages have one.
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  navigator.serviceWorker.register(new URL('./sw.js', location.href)).catch(() => undefined);
+  navigator.serviceWorker.register(new URL('../sw.js', location.href), { scope: new URL('../', location.href).pathname }).catch(() => undefined);
 }

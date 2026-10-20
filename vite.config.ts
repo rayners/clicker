@@ -6,8 +6,8 @@ export default defineConfig({
   base: './',
   build: {
     rollupOptions: {
-      // Two games, one repo: DEEP CONTRACT at the root, CHARTER OF THE ELDERDARK under /forest/.
-      input: { main: 'index.html', forest: 'forest/index.html' },
+      // The picker at the root, DEEP CONTRACT under /contract/, CHARTER OF THE ELDERDARK under /forest/.
+      input: { picker: 'index.html', contract: 'contract/index.html', forest: 'forest/index.html' },
     },
   },
   plugins: [
@@ -15,30 +15,15 @@ export default defineConfig({
       registerType: 'autoUpdate',
       // Each game's entry registers the shared service worker itself (see src/main.ts, src/forest-main.ts).
       injectRegister: false,
-      includeAssets: ['icons/apple-touch-icon.png', 'icons/favicon-32.png'],
-      manifest: {
-        name: 'DEEP CONTRACT',
-        short_name: 'DEEP CONTRACT',
-        description: 'Kessler-Amari Combine extraction operations terminal.',
-        theme_color: '#020804',
-        background_color: '#020804',
-        display: 'standalone',
-        orientation: 'any',
-        start_url: './',
-        scope: './',
-        icons: [
-          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
-        ],
-      },
+      // Each game ships its own manifest from public/ (contract/, forest/), so it installs as its own app.
+      manifest: false,
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,woff,woff2,webmanifest}'],
         // We register sw.js by hand, so nothing would send SKIP_WAITING: a new build activates by itself instead.
         skipWaiting: true,
         clientsClaim: true,
-        // The forest has its own page; never answer its navigations with DEEP CONTRACT's.
-        navigateFallbackDenylist: [/\/forest\//],
+        // Each game has its own page; never answer its navigations with the picker.
+        navigateFallbackDenylist: [/\/contract\//, /\/forest\//],
       },
     }),
   ],
