@@ -2,7 +2,7 @@ import { formatDuration, formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
 import { CLASSES, CLASS_IDS } from '../forest-data/classes';
 import { REGIONS } from '../forest-data/regions';
-import { available, isRegionOpen, project } from '../forest/company';
+import { available, chartingPerTrip, isRegionOpen, project } from '../forest/company';
 import type { Company } from '../forest/state';
 import type { ForestStore } from '../forest/store';
 
@@ -53,10 +53,18 @@ export function createExpeditions(store: ForestStore): { el: HTMLElement; render
       const p = project(c, card.region, order);
       setText(card.odds, `${formatNumber(p.strength)} / ${formatNumber(p.danger)}`);
       card.el.dataset.odds = p.ratio >= 1 ? 'good' : p.ratio >= 0.6 ? 'risky' : 'grim';
+      const index = REGIONS.indexOf(card.region);
+      const onward = REGIONS[index + 1];
+      const charting = !onward
+        ? ''
+        : c.charted >= onward.opensAt
+          ? ' WAY ONWARD ALREADY CHARTED.'
+          : ` CHARTS +${chartingPerTrip(card.region, order).toFixed(2)} LEAGUES TOWARD ${onward.name}.`;
       setText(
         card.forecast,
-        `EXPECT ~${formatNumber(p.haul)} RELICS IN ${formatDuration(p.duration)}. EACH HAND: ${pct(p.woundRisk)} WOUNDED, ${pct(p.woundRisk * p.deathRisk)} DEAD. BLIGHT +${p.blightPerHand.toFixed(2)} EACH.`,
+        `EXPECT ~${formatNumber(p.haul)} RELICS IN ${formatDuration(p.duration)}. EACH HAND: ${pct(p.woundRisk)} WOUNDED, ${pct(p.woundRisk * p.deathRisk)} DEAD. BLIGHT +${p.blightPerHand.toFixed(2)} EACH.${charting}`,
       );
+      card.el.dataset.frontier = String(charting.includes('CHARTS'));
       const short = CLASS_IDS.filter((id) => available(c, id) < order[id]);
       card.send.disabled = short.length > 0 || CLASS_IDS.every((id) => order[id] === 0);
       setText(card.send, short.length > 0 ? `NOT ENOUGH ${short.map((id) => CLASSES.find((k) => k.id === id)!.plural).join(', ')}` : 'SEND THE PARTY');

@@ -36,6 +36,8 @@ export interface Company {
   orders: Record<string, Composition>;
   parties: Party[];
   nextPartyId: number;
+  /** Leagues of the wood charted by returning parties: how deep the company dares go. */
+  charted: number;
   /** Company-wide corruption, 0-100. */
   blight: number;
   buildings: Record<BuildingId, number>;
@@ -70,6 +72,7 @@ export function createCompany(seed: number): Company {
     orders: Object.fromEntries(REGIONS.map((r) => [r.id, { ...DEFAULT_ORDER }])),
     parties: [],
     nextPartyId: 1,
+    charted: 0,
     blight: 0,
     buildings: Object.fromEntries(BUILDINGS.map((b) => [b.id, 0])) as Record<BuildingId, number>,
     upgrades: [],

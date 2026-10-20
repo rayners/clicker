@@ -85,3 +85,14 @@ describe('Elderdark saves', () => {
     expect(forestSaves.loadGame(broken, NOW, 2).recoveredFromCorruption).toBe(true);
   });
 });
+
+describe('Elderdark save migrations', () => {
+  it('v2: carries a v1 delve (derived from relics) over as leagues charted, so no region closes again', () => {
+    const v1 = JSON.parse(forestSaves.serialize(createForestGame(1, NOW)));
+    v1.version = 1;
+    delete v1.company.charted;
+    v1.company.lifetimeRelics = 1e4;
+    const upgraded = forestSaves.deserialize(JSON.stringify(v1));
+    expect(upgraded.company.charted).toBe(Math.floor(0.5 * Math.log10(1 + 1e4) ** 1.6));
+  });
+});

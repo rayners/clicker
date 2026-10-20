@@ -14,6 +14,7 @@ import { createBoard } from './board';
 import { createExpeditions } from './expeditions';
 import { createHall } from './hall';
 import { createRoster } from './roster';
+import { createMapStrip } from './map';
 
 const PER_MINUTE = 60;
 const BLIGHT_WARNING = 50;
@@ -73,9 +74,12 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
   const vault = stat('VAULT', 'Vault relics');
   const ready = stat('READY', 'Hands ready');
   const depth = stat('DELVE', 'Delve');
+  // select() is declared below; the strip only calls it on a tap.
+  const map = createMapStrip(() => select('expeditions'));
   const standing = h(
     'section',
     { class: 'status', 'aria-label': 'Company standing' },
+    map.el,
     flow.el,
     h('dl', { class: 'stats' }, silver.el, vault.el, ready.el, depth.el),
   );
@@ -151,7 +155,8 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
     setText(silver.value, formatNumber(c.silver));
     setText(vault.value, formatNumber(c.relics));
     setText(ready.value, String(CLASS_IDS.reduce((s, id) => s + available(c, id), 0)));
-    setText(depth.value, `${delve(c)} ${delve(c) === 1 ? "LEAGUE" : "LEAGUES"}`);
+    setText(depth.value, `${delve(c).toFixed(1)} LEAGUES`);
+    map.render(c);
     root.dataset.motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
     for (const p of panels) {
       try {

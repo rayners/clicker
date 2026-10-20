@@ -780,3 +780,48 @@ button:focus-visible {
   animation: none !important;
   transition: none !important;
 }
+
+/* ---------- the map strip: what leads deeper ---------- */
+
+.map-strip {
+  display: grid;
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--faint);
+  background: var(--paper);
+  text-align: left;
+  line-height: 1.15;
+}
+
+.map-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.74em;
+  letter-spacing: 0.1em;
+}
+
+.map-count {
+  color: var(--gilt);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.map-bar {
+  color: var(--gilt);
+  letter-spacing: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.map-hint {
+  font-size: 0.66em;
+  font-style: italic;
+  color: var(--ink-dim);
+}
+
+.region-card[data-frontier='true'] {
+  border-left: 3px solid var(--gilt);
+  padding-left: 8px;
+}

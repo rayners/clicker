@@ -10,6 +10,7 @@ import {
   buildingCost,
   buyBuilding,
   delve,
+  frontier,
   dispatch,
   forage,
   healRate,
@@ -249,12 +250,50 @@ describe('buildings', () => {
   });
 });
 
-describe('the delve (progress)', () => {
-  it('deepens as relics are recovered, opening further regions', () => {
+describe('charting the way deeper (the delve)', () => {
+  const party = (region: string, comp: Partial<Company['hired']>, patch: Partial<Company> = {}) => {
+    const order = { blade: 0, mender: 0, scout: 0, mystic: 0, ...comp };
+    const c = fresh({ silver: 1e6, hired: hands({ blade: 20, scout: 10, mender: 5 }), orders: { ...fresh().orders, [region]: order }, ...patch });
+    return dispatch(c, region);
+  };
+
+  it('starts uncharted, with only the Eaves open', () => {
     expect(delve(fresh())).toBe(0);
-    const deep = fresh({ lifetimeRelics: 1e7 });
-    expect(delve(deep)).toBeGreaterThan(delve(fresh({ lifetimeRelics: 1e3 })));
-    expect(isRegionOpen(deep, REGIONS[1]!)).toBe(true);
+    expect(isRegionOpen(fresh(), REGIONS[1]!)).toBe(false);
+  });
+
+  it('is advanced by parties coming back from the wood, not by relics in the vault', () => {
+    expect(delve(fresh({ lifetimeRelics: 1e12, relics: 1e12 }))).toBe(0);
+    const back = run(party(eaves.id, { blade: 6, scout: 1 }), 200);
+    expect(delve(back)).toBeGreaterThan(0);
+    expect(back.log.some((e) => /charted/i.test(e.text))).toBe(true);
+  });
+
+  it('charts faster with scouts along', () => {
+    const plain = run(party(eaves.id, { blade: 6 }), 200);
+    const scouted = run(party(eaves.id, { blade: 6, scout: 3 }), 200);
+    expect(delve(scouted)).toBeGreaterThan(delve(plain));
+  });
+
+  it('only charts as far as the next region: to go deeper, work the frontier', () => {
+    const hollows = REGIONS[1]!;
+    const nearly = fresh({ charted: hollows.opensAt - 0.01 });
+    const back = run(dispatch({ ...nearly, silver: 1e6, hired: hands({ blade: 20, scout: 10 }), orders: { ...nearly.orders, [eaves.id]: { blade: 6, mender: 0, scout: 3, mystic: 0 } } }, eaves.id), 200);
+    expect(delve(back)).toBe(hollows.opensAt);
+    // Already at the Hollows threshold, the Eaves teach nothing more.
+    const again = run(dispatch({ ...back, parties: [] }, eaves.id), 200);
+    expect(delve(again)).toBe(hollows.opensAt);
+  });
+
+  it('opens the next region once the way to it is charted', () => {
+    expect(isRegionOpen(fresh({ charted: REGIONS[1]!.opensAt }), REGIONS[1]!)).toBe(true);
+  });
+
+  it('reports how far the frontier is charted toward the next region', () => {
+    const f = frontier(fresh({ charted: 1 }));
+    expect(f.region.id).toBe(eaves.id);
+    expect(f.next?.id).toBe(REGIONS[1]!.id);
+    expect(f.progress).toBeCloseTo(1 / REGIONS[1]!.opensAt);
   });
 });
 

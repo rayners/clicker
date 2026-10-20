@@ -128,3 +128,31 @@ describe('the hall', () => {
     expect(company().blight).toBe(20);
   });
 });
+
+describe('the map (what leads deeper)', () => {
+  it('shows how far the way to the next region is charted, always on screen', () => {
+    setup({ charted: 1 });
+    const map = within(screen.getByRole('button', { name: /the map/i }));
+    expect(map.getByText(/BRIAR HOLLOWS/)).toBeTruthy();
+    expect(map.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('50');
+    expect(map.getByText(/1\.0 \/ 2 LEAGUES/)).toBeTruthy();
+  });
+
+  it('opens the expeditions panel when tapped', async () => {
+    const user = setup({ charted: 1 });
+    await user.click(screen.getByRole('button', { name: /the map/i }));
+    expect(tab(/expeditions/i).getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('says on each region card how far a trip there charts the way on', async () => {
+    const user = setup({ hired: crew({ blade: 2, scout: 1 }) });
+    await user.click(tab(/expeditions/i));
+    expect(within(screen.getByRole('article', { name: /the eaves/i })).getByText(/CHARTS \+0\.18 LEAGUES TOWARD BRIAR HOLLOWS/)).toBeTruthy();
+  });
+
+  it('says when a region has nothing left to teach about the way on', async () => {
+    const user = setup({ charted: 2 });
+    await user.click(tab(/expeditions/i));
+    expect(within(screen.getByRole('article', { name: /the eaves/i })).getByText(/WAY ONWARD ALREADY CHARTED/)).toBeTruthy();
+  });
+});

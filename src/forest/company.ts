@@ -25,9 +25,8 @@ const DESERT_SECONDS = 5;
 const MAX_BLIGHT = 100;
 const HAUL_CAP = 1.5;
 const HAUL_VARIANCE = 0.25;
-// Delve, in leagues: fitted so the Hollows open around a thousand relics recovered.
-const DELVE_SCALE = 0.5;
-const DELVE_EXPONENT = 1.6;
+/** Each scout along adds this share to the leagues a trip charts. */
+const SCOUT_CHARTING = 0.5;
 
 const def = (id: ClassId) => CLASSES.find((k) => k.id === id)!;
 const size = (comp: Composition) => CLASS_IDS.reduce((s, id) => s + comp[id], 0);
@@ -45,12 +44,44 @@ function roller(c: Company) {
   };
 }
 
+/** Leagues charted into the wood. */
 export function delve(c: Company): number {
-  return Math.floor(DELVE_SCALE * Math.log10(1 + c.lifetimeRelics) ** DELVE_EXPONENT);
+  return c.charted;
 }
 
 export function isRegionOpen(c: Company, region: RegionDef): boolean {
   return delve(c) >= region.opensAt;
+}
+
+/** The deepest open region, the one beyond it, and how much of the way there is charted (0..1). */
+export function frontier(c: Company): { region: RegionDef; next: RegionDef | null; progress: number } {
+  const index = REGIONS.reduce((deepest, r, i) => (isRegionOpen(c, r) ? i : deepest), 0);
+  const region = REGIONS[index]!;
+  const next = REGIONS[index + 1] ?? null;
+  const progress = next ? Math.min(1, (c.charted - region.opensAt) / (next.opensAt - region.opensAt)) : 1;
+  return { region, next, progress };
+}
+
+/** Leagues a returning party charts, before the cap at the next region. */
+export function chartingPerTrip(region: RegionDef, comp: Composition): number {
+  return region.chart * (1 + SCOUT_CHARTING * comp.scout);
+}
+
+/** A region only teaches the way as far as the region after it. */
+function chart(c: Company, region: RegionDef, comp: Composition, survivors: number): Company {
+  const index = REGIONS.indexOf(region);
+  const next = REGIONS[index + 1];
+  if (!next || c.charted >= next.opensAt || survivors === 0) return c;
+  const gained = chartingPerTrip(region, comp) * (survivors / size(comp));
+  const charted = Math.min(next.opensAt, c.charted + gained);
+  const reached = charted >= next.opensAt;
+  return log(
+    { ...c, charted },
+    reached ? 'town' : 'ledger',
+    reached
+      ? `THE WAY TO ${next.name} IS CHARTED. THE HANDS WILL GO THERE NOW.`
+      : `THE WAY TOWARD ${next.name} CHARTED: ${charted.toFixed(1)} OF ${next.opensAt} LEAGUES.`,
+  );
 }
 
 export function forage(c: Company): Company {
@@ -181,7 +212,7 @@ function resolve(c: Company, party: Party): Company {
     .filter(Boolean)
     .join(', ');
   next = log(next, 'ledger', `PARTY ${party.id} RETURNS FROM ${region.name}: ${formatNumber(haul)} RELICS.${losses ? ` ${losses}.` : ' ALL HANDS ACCOUNTED FOR.'}`);
-  return next;
+  return chart(next, region, party.comp, size(party.comp) - size(dead));
 }
 
 // ---------- healing, appraisal, blight, buildings ----------

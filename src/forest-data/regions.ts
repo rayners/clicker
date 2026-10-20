@@ -12,7 +12,9 @@ export interface RegionDef {
   harm: number;
   /** Blight each hand brings back from a trip. */
   blight: number;
-  /** Delve (leagues) at which the company dares go there. */
+  /** Leagues charted toward the next region per trip, before scouts. */
+  chart: number;
+  /** Delve (leagues charted) at which the company dares go there. */
   opensAt: number;
 }
 
@@ -26,6 +28,7 @@ export const REGIONS: readonly RegionDef[] = [
     relics: 15,
     harm: 0.12,
     blight: 0.02,
+    chart: 0.12,
     opensAt: 0,
   },
   {
@@ -37,6 +40,7 @@ export const REGIONS: readonly RegionDef[] = [
     relics: 60,
     harm: 0.15,
     blight: 0.05,
+    chart: 0.1,
     opensAt: 2,
   },
   {
@@ -48,6 +52,7 @@ export const REGIONS: readonly RegionDef[] = [
     relics: 700,
     harm: 0.18,
     blight: 0.1,
+    chart: 0.1,
     opensAt: 5,
   },
   {
@@ -59,6 +64,7 @@ export const REGIONS: readonly RegionDef[] = [
     relics: 9_000,
     harm: 0.2,
     blight: 0.18,
+    chart: 0.09,
     opensAt: 9,
   },
   {
@@ -70,6 +76,7 @@ export const REGIONS: readonly RegionDef[] = [
     relics: 120_000,
     harm: 0.22,
     blight: 0.3,
+    chart: 0.08,
     opensAt: 14,
   },
   {
@@ -81,6 +88,7 @@ export const REGIONS: readonly RegionDef[] = [
     relics: 1_800_000,
     harm: 0.25,
     blight: 0.5,
+    chart: 0,
     opensAt: 20,
   },
 ];
