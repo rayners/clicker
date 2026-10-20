@@ -51,3 +51,26 @@ describe('the Elderdark story', () => {
     expect(Object.keys(next.beats).length).toBeGreaterThan(0);
   });
 });
+
+describe('later acts', () => {
+  it('can reach every Act II-IV entry by playing a charter through to its reckoning', () => {
+    let c = fresh({
+      silver: 1e9,
+      relics: 1_000,
+      lifetimeRelics: 1e9,
+      lifetimeDead: 10,
+      blight: 30,
+      charted: REGIONS[2]!.opensAt,
+    });
+    const step = (patch: Partial<Company>, times = 40) => {
+      for (let i = 0; i < times; i++) c = runForestStory({ ...c, ...patch, elapsed: c.elapsed + FOREST_STORY_GAP + 61 });
+    };
+    step({});
+    step({ charted: 99, keyFragments: 1 });
+    step({ keyFragments: 3 });
+    step({ keyFragments: 7 }, 60);
+    const later = FOREST_STORY.filter((b) => (b.act ?? 1) >= 2);
+    expect(later.filter((b) => c.beats[b.id] === undefined).map((b) => b.id)).toEqual([]);
+    expect(c.flags).toContain('terminus');
+  });
+});

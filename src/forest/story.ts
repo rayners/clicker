@@ -91,12 +91,54 @@ const ACT_1: ForestBeat[] = [
   },
 ];
 
+const inAct = (c: Company, act: number) => c.act >= act;
+const thornmaze = REGIONS[3]!;
+const undercity = REGIONS[4]!;
+
+/** Act II: marks. Everything here could still be explained away, and the town is eager to. */
 const ACT_2: ForestBeat[] = [
   {
     id: 'marks',
     act: 2,
     when: ({ c }) => sinceBeat(c, 'act-2') >= 60,
     entries: [{ kind: 'hand', text: 'Grey veins under the skin of a veteran\'s wrist, like roots under snow. She keeps her sleeves down now.' }],
+  },
+  {
+    id: 'vault-hum',
+    act: 2,
+    when: ({ c }) => inAct(c, 2) && c.relics >= 500,
+    entries: [{ kind: 'ledger', text: 'THE NIGHT WATCH REPORTS A SOUND FROM THE VAULT: A LOW NOTE, LIKE A FINGER ON THE RIM OF A GLASS. IT STOPS WHEN THE DOOR OPENS.' }],
+  },
+  {
+    id: 'unsorted',
+    act: 2,
+    when: ({ c }) => sinceBeat(c, 'marks') >= 120,
+    entries: [
+      { kind: 'town', text: 'The Collegium buyer asks that anything from the barrows bearing a key-mark be set aside, unsorted, unwashed, and not discussed with the hands.' },
+    ],
+  },
+  {
+    id: 'returned',
+    act: 2,
+    when: ({ c }) => inAct(c, 2) && c.lifetimeDead >= 5 && sinceBeat(c, 'unsorted') >= 90,
+    entries: [
+      { kind: 'ledger', text: 'A SCOUT REPORTED DEAD AT THE BARROWS WALKED IN AT DUSK, ASKED FOR HIS WAGES, AND WAS PAID.' },
+      { kind: 'ledger', text: 'HE HAS NOT SLEPT SINCE. NEITHER HAS ANYONE WHO SHARES HIS BARRACK.' },
+    ],
+  },
+  {
+    id: 'synod-questions',
+    act: 2,
+    when: ({ c }) => inAct(c, 2) && c.blight >= 25,
+    entries: [{ kind: 'town', text: 'A Synod inquisitor has begun taking her meals at the alehouse. She is very interested in the company\'s wage rolls.' }],
+  },
+  {
+    id: 'thornmaze-antlers',
+    act: 2,
+    when: ({ c }) => c.charted >= thornmaze.opensAt,
+    entries: [
+      { kind: 'ledger', text: 'ANTLERS NAILED TO EVERY TREE AT THE THORNMAZE\'S EDGE. THE WOLD-KIN\'S BORDER. THE HANDS GO PAST THEM ANYWAY. THE FACTOR SENDS THEM.' },
+    ],
   },
 ];
 
@@ -111,6 +153,41 @@ const ACT_3: ForestBeat[] = [
       { kind: 'ledger', text: 'THE FACTOR NOTES THAT THE NAME WAS CHOSEN BEFORE THE FIND. THE FACTOR DOES NOT REMEMBER CHOOSING IT.' },
     ],
     effects: [{ kind: 'setAct', act: 3 }],
+  },
+];
+
+/** Act III: the Key, and what the company is for. */
+const ACT_3_MORE: ForestBeat[] = [
+  {
+    id: 'collegium-delight',
+    act: 3,
+    when: ({ c }) => sinceBeat(c, 'act-3') >= 60,
+    entries: [
+      { kind: 'town', text: 'The Collegium buyer weeps when she sees the fragment. She offers a sum that would buy Thistlegate twice over. She calls it "the beginning of the lock".' },
+    ],
+  },
+  {
+    id: 'old-ledgers',
+    act: 3,
+    when: ({ c }) => sinceBeat(c, 'collegium-delight') >= 120,
+    entries: [
+      { kind: 'ledger', text: 'IN THE STRONGROOM, BENEATH THE CHARTER CHEST: OLDER LEDGERS. THE SAME COMPANY. THE SAME HALL. THE SAME FACTOR\'S HAND, DOWN TO THE CROSSED SEVENS.' },
+      { kind: 'ledger', text: 'THE OLDEST IS DATED BEFORE AUREST CROSSED THE MOUNTAINS.' },
+    ],
+  },
+  {
+    id: 'homeland',
+    act: 3,
+    when: ({ c }) => sinceBeat(c, 'old-ledgers') >= 120,
+    entries: [
+      { kind: 'hand', text: 'An old blade, drunk: "The homeland went grey the same way. Grey veins first. Then the trees came up through the floors. Then the Key turned."' },
+    ],
+  },
+  {
+    id: 'undercity-hours',
+    act: 3,
+    when: ({ c }) => inAct(c, 3) && c.charted >= undercity.opensAt + 1,
+    entries: [{ kind: 'omen', text: 'PARTIES IN THE UNDERCITY HEAR A BELL BELOW THEM, STRIKING HOURS THAT DO NOT EXIST.' }],
   },
 ];
 
@@ -132,6 +209,36 @@ const ACT_4: ForestBeat[] = [
     ],
   },
   {
+    id: 'palisade',
+    act: 4,
+    when: ({ c }) => sinceBeat(c, 'act-4') >= 60,
+    entries: [
+      { kind: 'omen', text: 'SOMETHING CAME TO THE PALISADE IN THE NIGHT WEARING A COMPANY CLOAK. IT KNEW THE WATCHWORD. IT KNEW THE FACTOR\'S NAME.' },
+    ],
+  },
+  {
+    id: 'wold-warning',
+    act: 4,
+    when: ({ c }) => sinceBeat(c, 'palisade') >= 120,
+    entries: [
+      { kind: 'town', text: 'A Wold-kin stood at the gate at dawn, unarmed, and spoke one sentence in the old tongue. The Synod translated it: "Bring it back, or we come for it."' },
+    ],
+  },
+  {
+    id: 'audit',
+    act: 4,
+    when: ({ c }) => sinceBeat(c, 'wold-warning') >= 180,
+    entries: [
+      { kind: 'town', text: 'The inquisitor audits the roster. She burns three hands at noon. The company is fined for the cost of the wood.' },
+    ],
+  },
+  {
+    id: 'ledger-writes',
+    act: 4,
+    when: ({ c }) => sinceBeat(c, 'audit') >= 180,
+    entries: [{ kind: 'omen', text: 'THE LEDGER WRITES TODAY\'S ENTRY BEFORE THE FACTOR DOES. IT IS ACCURATE. IT ENDS MID-SENTENCE.' }],
+  },
+  {
     id: 'terminus',
     act: 4,
     urgent: true,
@@ -141,7 +248,7 @@ const ACT_4: ForestBeat[] = [
   },
 ];
 
-export const FOREST_STORY: readonly ForestBeat[] = [...CHARTERS, ...ACT_1, ...ACT_2, ...ACT_3, ...ACT_4];
+export const FOREST_STORY: readonly ForestBeat[] = [...CHARTERS, ...ACT_1, ...ACT_2, ...ACT_3, ...ACT_3_MORE, ...ACT_4];
 
 export function runForestStory(c: Company): Company {
   return runBeats<EntryKind, Company, Args>(c, FOREST_STORY, { c }, { minGap: FOREST_STORY_GAP });
