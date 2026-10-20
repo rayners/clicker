@@ -1229,6 +1229,12 @@ button:focus-visible {
   accent-color: var(--phosphor);
 }
 
+.cfg-note {
+  margin: 0 var(--gutter) 6px;
+  font-size: 0.85em;
+  color: var(--phosphor-dim);
+}
+
 .cfg-code {
   display: block;
   width: calc(100% - 2 * var(--gutter));

@@ -7,6 +7,9 @@ import { loadGame, saveGame } from './core/save';
 import { createStore } from './core/store';
 import { mountApp } from './ui/app';
 import { applyScenario } from './core/debug';
+import { contractEvents, contractProperties } from './core/telemetry';
+import { startAnalytics } from './shared/posthog';
+import { createOptOut, telemetryAllowed } from './shared/telemetry';
 
 const TICK_MS = 100;
 const AUTOSAVE_MS = 10_000;
@@ -19,6 +22,15 @@ const initial = catchUp(loaded.game, Date.now()).game;
 const store = createStore(debug ? applyScenario(initial, debug) : initial);
 
 mountApp(document.getElementById('app')!, store);
+
+const optOut = createOptOut(storage);
+startAnalytics({
+  store,
+  diff: contractEvents,
+  context: contractProperties,
+  optOut,
+  allowed: telemetryAllowed({ prod: import.meta.env.PROD, hostname: location.hostname, search: location.search, optedOut: !optOut.sharing() }),
+});
 
 // Wall-clock dt (not performance.now) so time spent with the phone asleep still counts.
 let last = Date.now();

@@ -1,0 +1,43 @@
+# Telemetry
+
+Anonymous play analytics and error reports go to PostHog (US cloud, free tier). The point is to check the pacing targets
+with real players and to catch errors on devices we don't test on.
+
+## Rules
+
+- **Published site only.** `telemetryAllowed` (`src/shared/telemetry.ts`) refuses dev builds, localhost and LAN hosts,
+  and any `?debug=` URL.
+- **Opt-out.** The "SHARE ANONYMOUS PLAY DATA" box in either game's settings is one switch per device
+  (localStorage `clicker.telemetry`). It is checked when each event is sent, so turning it off takes effect immediately.
+- **Anonymous.** No cookies (PostHog persists a random id in localStorage), no person profiles, no autocapture, no
+  pageview autocapture, no session replay, no remote scripts (`disable_external_dependency_loading`), no feature flags.
+- **Out of the simulation.** Events are derived by diffing successive store states (`src/core/telemetry.ts`,
+  `src/forest/telemetry.ts`, both pure). Nothing under `src/mission/` or the forest simulation calls PostHog.
+- **Never in the way.** The SDK is a lazily loaded chunk; events buffer (bounded) until it arrives; sink failures are
+  swallowed; offline means events are simply lost.
+
+## Events
+
+Every event carries the game's context: `game` (`deep-contract` | `elderdark`), `act`, and `scenario`/`horror`/`cycle`
+(DEEP CONTRACT) or `charter` (Elderdark). `minutes` is in-game time on the current contract or charter.
+
+| Game | Event | Properties |
+|---|---|---|
+| both | `game_opened` | (context only) |
+| both | `$exception` | uncaught errors and unhandled rejections |
+| DEEP CONTRACT | `contract_started` | scenario, horror, reason (`start` / `renewal` / `reassign`) |
+| DEEP CONTRACT | `act_reached` | act, minutes |
+| DEEP CONTRACT | `contract_abandoned` | scenario, horror, act, minutes (reassignment) |
+| DEEP CONTRACT | `contract_completed` | ending, scenario, minutes, crewSurvived |
+| Elderdark | `region_opened` | region, minutes |
+| Elderdark | `act_reached` | act, minutes |
+| Elderdark | `key_fragment_found` | fragments, minutes |
+| Elderdark | `charter_completed` | ending, minutes, relics, dead |
+
+Useful PostHog insights: a funnel `act_reached` (act = 2, 3, 4) → `contract_completed`, broken down by scenario; the
+median `minutes` on `act_reached` per act against the targets in `docs/DESIGN.md`.
+
+## Not done yet
+
+- Source maps for readable stack traces (needs a PostHog personal API key as a GitHub secret and an upload step).
+- A build/release id on events.

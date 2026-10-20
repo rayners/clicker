@@ -7,6 +7,7 @@ import { createStore, type Store } from '../../src/core/store';
 import { exportSave, importSave } from '../../src/core/save';
 import { mountApp } from '../../src/ui/app';
 import { ext } from '../helpers';
+import { createOptOut } from '../../src/shared/telemetry';
 
 let store: Store;
 let root: HTMLElement;
@@ -46,6 +47,18 @@ describe('settings dialog', () => {
     await user.click(dialog.getByRole('checkbox', { name: /reduce motion/i }));
     expect(store.getState().profile.settings.reducedMotion).toBe(true);
     expect(root.dataset.motion).toBe('reduced');
+  });
+
+  it('shares anonymous play data by default, and lets the player opt out and back in', async () => {
+    localStorage.clear();
+    const user = setup();
+    const dialog = await open(user);
+    const share = dialog.getByRole('checkbox', { name: /share anonymous play data/i }) as HTMLInputElement;
+    expect(share.checked).toBe(true);
+    await user.click(share);
+    expect(createOptOut(localStorage).sharing()).toBe(false);
+    await user.click(share);
+    expect(createOptOut(localStorage).sharing()).toBe(true);
   });
 
   it('exports the save as a code that can be imported elsewhere', async () => {

@@ -38,6 +38,7 @@ describe('the PostHog sink', () => {
       api_host: POSTHOG_HOST,
       persistence: 'localStorage',
       autocapture: false,
+      capture_pageview: false,
       disable_session_recording: true,
       disable_external_dependency_loading: true,
       person_profiles: 'identified_only',
@@ -97,13 +98,27 @@ describe('starting analytics for a game', () => {
     expect(posthog.captureException).toHaveBeenCalledWith('nope', expect.anything());
   });
 
+  it('reports the game being opened, through the same opt-out gate as everything else', async () => {
+    setup(true);
+    await flush();
+    expect(posthog.capture).toHaveBeenCalledWith('game_opened', { level: 0 });
+  });
+
+  it('drops anything still waiting to be sent if the player opts out before it goes', async () => {
+    const { store, optOut } = setup(true);
+    store.dispatch(1);
+    optOut.setSharing(false);
+    await flush();
+    expect(posthog.capture).not.toHaveBeenCalled();
+  });
+
   it('stops sending the moment the player opts out', async () => {
     const { store, optOut } = setup(true);
     await flush();
     optOut.setSharing(false);
     store.dispatch(1);
     window.dispatchEvent(new ErrorEvent('error', { error: new Error('x') }));
-    expect(posthog.capture).not.toHaveBeenCalled();
+    expect(posthog.capture).not.toHaveBeenCalledWith('level_up', expect.anything());
     expect(posthog.captureException).not.toHaveBeenCalled();
   });
 });

@@ -2,6 +2,7 @@ import type { GameState } from '../core/game';
 import { exportSave, importSave } from '../core/save';
 import type { Store } from '../core/store';
 import { h, setText } from '../shared/ui/dom';
+import { createOptOut } from '../shared/telemetry';
 
 const CONFIRM_TIMEOUT_MS = 5000;
 
@@ -10,6 +11,7 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
 
   const sound = h('input', { type: 'checkbox', id: 'cfg-sound' });
   const motion = h('input', { type: 'checkbox', id: 'cfg-motion' });
+  const share = h('input', { type: 'checkbox', id: 'cfg-share' });
   const code = h('textarea', { class: 'cfg-code', id: 'cfg-code', rows: 4, spellcheck: 'false', 'aria-label': 'Save code' });
   const status = h('p', { class: 'cfg-status', role: 'status' });
   const exportButton = h('button', { class: 'buy', type: 'button' }, 'EXPORT');
@@ -29,6 +31,8 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
       h('div', { class: 'cfg-head' }, h('h2', { class: 'panel-title', id: 'cfg-title' }, 'SYSTEM CONFIGURATION'), close),
       h('label', { class: 'cfg-toggle', for: 'cfg-sound' }, sound, ' SOUND'),
       h('label', { class: 'cfg-toggle', for: 'cfg-motion' }, motion, ' REDUCE MOTION'),
+      h('label', { class: 'cfg-toggle', for: 'cfg-share' }, share, ' SHARE ANONYMOUS PLAY DATA'),
+      h('p', { class: 'cfg-note' }, 'MILESTONES AND ERRORS ONLY. NO COOKIES, NO PERSONAL DATA.'),
       h('h3', { class: 'panel-subtitle' }, 'SAVE DATA (STORED ON THIS DEVICE ONLY)'),
       code,
       h('div', { class: 'cfg-row' }, exportButton, copyButton, downloadButton, importButton),
@@ -56,6 +60,9 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
     if (e.key === 'Escape') show(false);
   });
 
+  const optOut = createOptOut(window.localStorage);
+  share.checked = optOut.sharing();
+  share.addEventListener('change', () => optOut.setSharing(share.checked));
   sound.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'sound', value: sound.checked }));
   motion.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'reducedMotion', value: motion.checked }));
 

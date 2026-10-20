@@ -102,6 +102,14 @@ describe('turning state changes into events', () => {
     expect(errors).toHaveLength(1);
   });
 
+  it('sends one-off events alongside the ones derived from state', () => {
+    const { sink, events } = recordingSink();
+    const t = createTelemetry({ diff: levelUps });
+    t.track({ name: 'opened' });
+    t.attach(sink);
+    expect(events).toEqual([{ name: 'opened' }]);
+  });
+
   it('keeps only a bounded number of events while waiting', () => {
     const { sink, events } = recordingSink();
     const t = createTelemetry({ diff: levelUps });

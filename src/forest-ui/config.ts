@@ -1,4 +1,5 @@
 import { h, setText } from '../shared/ui/dom';
+import { createOptOut } from '../shared/telemetry';
 import { forestSaves } from '../forest/save';
 import type { ForestGame } from '../forest/game';
 import type { ForestStore } from '../forest/store';
@@ -9,6 +10,7 @@ const CONFIRM_TIMEOUT_MS = 5000;
 export function createConfig(store: ForestStore): { button: HTMLButtonElement; dialog: HTMLElement; render(game: ForestGame): void } {
   const button = h('button', { class: 'cfg-open', type: 'button', 'aria-label': 'Configuration' }, '⚙');
   const motion = h('input', { type: 'checkbox', id: 'ed-motion' });
+  const share = h('input', { type: 'checkbox', id: 'ed-share' });
   const code = h('textarea', { class: 'cfg-code', rows: 4, spellcheck: 'false', 'aria-label': 'Save code' });
   const status = h('p', { class: 'cfg-status', role: 'status' });
   const exportButton = h('button', { class: 'buy', type: 'button' }, 'EXPORT');
@@ -24,6 +26,8 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
       { class: 'cfg-box' },
       h('div', { class: 'cfg-head' }, h('h2', { class: 'panel-title', id: 'ed-cfg-title' }, 'Configuration'), close),
       h('label', { class: 'cfg-toggle', for: 'ed-motion' }, motion, ' REDUCE MOTION'),
+      h('label', { class: 'cfg-toggle', for: 'ed-share' }, share, ' SHARE ANONYMOUS PLAY DATA'),
+      h('p', { class: 'cfg-note' }, 'MILESTONES AND ERRORS ONLY. NO COOKIES, NO PERSONAL DATA.'),
       h('h3', { class: 'panel-subtitle' }, 'THE SAVE BOOK (KEPT ON THIS DEVICE ONLY)'),
       code,
       h('div', { class: 'cfg-row' }, exportButton, copyButton, importButton),
@@ -43,6 +47,9 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
   dialog.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') show(false);
   });
+  const optOut = createOptOut(window.localStorage);
+  share.checked = optOut.sharing();
+  share.addEventListener('change', () => optOut.setSharing(share.checked));
   motion.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'reducedMotion', value: motion.checked }));
   exportButton.addEventListener('click', () => {
     code.value = forestSaves.exportSave(store.getState());

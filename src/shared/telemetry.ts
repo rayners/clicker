@@ -73,6 +73,9 @@ export function createTelemetry<S>(options: { diff: (prev: S, next: S) => Teleme
       }
       previous = state;
     },
+    track(event: TelemetryEvent): void {
+      send({ kind: 'event', event });
+    },
     error(error: unknown): void {
       send({ kind: 'error', error });
     },

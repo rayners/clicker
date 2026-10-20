@@ -6,6 +6,9 @@ import { catchUp } from './forest/game';
 import { forestSaves } from './forest/save';
 import { createForestStore } from './forest/store';
 import { mountForest } from './forest-ui/app';
+import { charterEvents, charterProperties } from './forest/telemetry';
+import { startAnalytics } from './shared/posthog';
+import { createOptOut, telemetryAllowed } from './shared/telemetry';
 
 const TICK_MS = 100;
 const AUTOSAVE_MS = 10_000;
@@ -16,6 +19,15 @@ const loaded = forestSaves.loadGame(storage, Date.now(), seed);
 const store = createForestStore(catchUp(loaded.game, Date.now()));
 
 mountForest(document.getElementById('app')!, store);
+
+const optOut = createOptOut(storage);
+startAnalytics({
+  store,
+  diff: charterEvents,
+  context: charterProperties,
+  optOut,
+  allowed: telemetryAllowed({ prod: import.meta.env.PROD, hostname: location.hostname, search: location.search, optedOut: !optOut.sharing() }),
+});
 
 // Wall-clock dt so time with the phone asleep still counts.
 let last = Date.now();

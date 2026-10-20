@@ -10,12 +10,13 @@ Read before changing things:
 - `docs/BOARDROOM.md`: the planned second-tier layer and the architecture rules it imposes **now**.
 - `docs/TERRAFORM.md`: the terraforming scenario and the **scenario × horror** architecture (built).
 - `docs/ROADMAP.md`: what's built, deliberate deviations from the original plan, and the backlog.
+- `docs/TELEMETRY.md`: anonymous PostHog analytics (published site only, opt-out, events derived from state diffs). Add an event there when a new milestone matters for pacing.
 
 ## Non-negotiable requirements
 
 1. **Strict TDD.** Every feature starts as failing tests whose names state the functional goal in plain language. Watch them fail, write the minimum code to pass, refactor while green. Commit at each green. No production code without a test driving it.
 2. **Phone and desktop are equally first-class.** The primary real device is an iPhone (Safari). Mobile-first CSS; desktop three-column layout at ≥900px. Tap targets ≥44px, inputs ≥16px font, `100dvh`, safe-area insets, `touch-action: manipulation`, no hover-only affordances, drill uses `pointerdown`.
-3. **No backend.** All state lives in the browser (`localStorage`); the build is a static, offline-capable PWA. Moving between devices = export/import save code.
+3. **No backend.** All state lives in the browser (`localStorage`); the build is a static, offline-capable PWA. Moving between devices = export/import save code. The only outbound traffic is optional, fire-and-forget telemetry; the game must never depend on it.
 4. **Missions stay self-contained** (for the future Boardroom). Nothing under `src/mission/` may touch the DOM, globals, `Date.now()` or `Math.random()`. Time comes in as `dt`, randomness from the seeded RNG stored in mission state (`m.rng`), and wider-game knowledge only via `MissionContext`.
 6. **Horrors are not coupled to scenarios** (user requirement). A horror (`src/mission/organism/`) knows a scenario only through `StorySignals`, the scenario's lexicon (`{placeholders}` in its text) and `HorrorHooks`. A scenario knows the horror only through `horrorProductionMultiplier`. The one sanctioned exception is a horror's `pairings[scenarioId]` file (e.g. `src/data/organism/nursery.ts`). `tests/mission/kinds.test.ts` enforces this (stub scenario, quiet horror, lexicon coverage).
 5. **Horror must not be obvious until ~2 hours of progress.** Act I content is upbeat corporate; Act II tells must each have a mundane explanation. Pacing is enforced by `tests/sim/pacing.test.ts`. If you change economy numbers, run `npm run simulate` and keep those tests green.

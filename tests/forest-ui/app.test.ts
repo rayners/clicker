@@ -9,6 +9,7 @@ import type { Company } from '../../src/forest/state';
 import { CLASSES } from '../../src/forest-data/classes';
 import { chartingPerTrip, hireCost, project } from '../../src/forest/company';
 import { REGIONS } from '../../src/forest-data/regions';
+import { createOptOut } from '../../src/shared/telemetry';
 
 let store: ForestStore;
 
@@ -244,5 +245,18 @@ describe('the reckoning', () => {
     expect(store.getState().profile.chartersCompleted).toBe(1);
     expect(company().charter.number).toBe(2);
     expect(screen.queryByRole('tab', { name: /reckoning/i })).toBeNull();
+  });
+});
+
+describe('configuration', () => {
+  it('shares anonymous play data by default, and lets the player opt out', async () => {
+    localStorage.clear();
+    const user = setup();
+    await user.click(screen.getByRole('button', { name: /^configuration$/i }));
+    const dialog = within(screen.getByRole('dialog', { name: /configuration/i }));
+    const share = dialog.getByRole('checkbox', { name: /share anonymous play data/i }) as HTMLInputElement;
+    expect(share.checked).toBe(true);
+    await user.click(share);
+    expect(createOptOut(localStorage).sharing()).toBe(false);
   });
 });

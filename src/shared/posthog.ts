@@ -14,7 +14,12 @@ export async function createPostHogSink(context: () => TelemetryProps): Promise<
     persistence: 'localStorage',
     person_profiles: 'identified_only',
     autocapture: false,
+    // Sent as game_opened instead, so it passes the opt-out check like every other event.
+    capture_pageview: false,
     capture_pageleave: false,
+    capture_performance: false,
+    capture_heatmaps: false,
+    capture_dead_clicks: false,
     disable_session_recording: true,
     disable_surveys: true,
     // Everything ships in the bundle, so nothing is fetched from PostHog's CDN (and the PWA works offline).
@@ -50,7 +55,16 @@ export function startAnalytics<S>(options: {
   };
   window.addEventListener('error', onError);
   window.addEventListener('unhandledrejection', onRejection);
-  createPostHogSink(() => options.context(store.getState())).then(telemetry.attach, () => undefined);
+  telemetry.track({ name: 'game_opened' });
+  // Checked again at send time: anything buffered while PostHog loaded is dropped if the player opted out meanwhile.
+  createPostHogSink(() => options.context(store.getState())).then(
+    (sink) =>
+      telemetry.attach({
+        capture: (event) => optOut.sharing() && sink.capture(event),
+        captureError: (error) => optOut.sharing() && sink.captureError(error),
+      }),
+    () => undefined,
+  );
   return () => {
     unsubscribe();
     window.removeEventListener('error', onError);
