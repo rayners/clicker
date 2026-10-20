@@ -1,5 +1,20 @@
-import { nextRandom } from '../shared/rng';
-import { PALETTE_KEYS } from '../data/sprites';
+import { nextRandom } from './rng';
+
+/**
+ * Palette-indexed pixel art. Keys map to theme colours at draw time, so sprites re-tint with the theme.
+ *   .  transparent   a  faint   b  dim   c  main   d  bright   e  accent
+ */
+export const PALETTE_KEYS = ['.', 'a', 'b', 'c', 'd', 'e'] as const;
+
+export interface Sprite {
+  width: number;
+  height: number;
+  frames: string[][];
+}
+
+export function sprite(...frames: string[][]): Sprite {
+  return { width: frames[0]![0]!.length, height: frames[0]!.length, frames };
+}
 
 export interface Pixel {
   x: number;

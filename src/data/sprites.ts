@@ -1,19 +1,6 @@
-/**
- * Palette-indexed pixel art. Keys map to theme colours at draw time, so every sprite
- * re-tints automatically when the terminal palette shifts between acts.
- *   .  transparent   a  faint   b  dim   c  phosphor   d  bright   e  white/corp
- */
-export const PALETTE_KEYS = ['.', 'a', 'b', 'c', 'd', 'e'] as const;
+import { PALETTE_KEYS, sprite, type Sprite } from '../shared/pixels';
 
-export interface Sprite {
-  width: number;
-  height: number;
-  frames: string[][];
-}
-
-function sprite(...frames: string[][]): Sprite {
-  return { width: frames[0]![0]!.length, height: frames[0]!.length, frames };
-}
+export { PALETTE_KEYS, type Sprite };
 
 const ship = sprite([
   '................................',
