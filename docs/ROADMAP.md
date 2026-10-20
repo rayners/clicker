@@ -44,6 +44,8 @@ Requested 2026-10-19. Tracked in `docs/forest/DESIGN.md`. A playable first slice
 
 ## Backlog / ideas
 
+- **New missions (approved 2026-10-20):** security detachment, haulage and salvage for DEEP CONTRACT, and the Keep for Elderdark, with a shared held-ground engine. The design and build order are in `docs/MISSIONS.md`.
+
 - **Real-device pass on iPhone Safari**, both in-browser and installed to the home screen (offline, audio unlock, safe areas, storage persistence).
 - Debug extras from the plan: a time-scale multiplier, grant resources, a story flag viewer.
 - Run WebKit e2e once host dependencies are installed.

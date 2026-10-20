@@ -1,6 +1,6 @@
 # DEEP CONTRACT and CHARTER OF THE ELDERDARK — working notes for Claude
 
-Two games in one repo, sharing an engine (`src/shared/`). Vite + TypeScript, no UI framework. The root page (`index.html`, `src/picker/`) is a game picker that only links to the games and imports nothing but `src/shared/`.
+Two games in one repo, sharing an engine (`src/shared/`). Vite + TypeScript, no UI framework. DEEP CONTRACT is an intentional homage to the *Alien* films (names stay our own). The root page (`index.html`, `src/picker/`) is a game picker that only links to the games and imports nothing but `src/shared/`.
 - **DEEP CONTRACT** (`/contract/`, `contract/index.html`, `src/main.ts`): retro-futurist idle clicker (Alien-flavoured, original IP) with a slow-burn horror turn.
 - **CHARTER OF THE ELDERDARK** (`/forest/`, `src/forest-main.ts`): dark-fantasy company management in a corrupting forest (Symbaroum-flavoured, original IP). Design and status are in `docs/forest/DESIGN.md`. Code lives in `src/forest/` (pure simulation, same rules as missions), `src/forest-data/` and `src/forest-ui/` (ledger UI, `ledger.css`). It has its own save key (`elderdark.save`).
 - **Boundaries** (`tests/architecture.test.ts`): `src/shared/` imports nothing from either game, neither game imports the other, and the picker imports only shared code.
@@ -11,6 +11,7 @@ Read before changing things:
 - `docs/BOARDROOM.md`: the planned second-tier layer and the architecture rules it imposes **now**.
 - `docs/TERRAFORM.md`: the terraforming scenario and the **scenario × horror** architecture (built).
 - `docs/ROADMAP.md`: what's built, deliberate deviations from the original plan, and the backlog.
+- `docs/MISSIONS.md`: the approved new missions (security detachment, haulage, salvage, the Keep), the shared held-ground engine, and the build order.
 - `docs/TELEMETRY.md`: anonymous PostHog analytics (published site only, opt-out, events derived from state diffs). Add an event there when a new milestone matters for pacing.
 
 ## Non-negotiable requirements

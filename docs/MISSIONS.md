@@ -1,0 +1,134 @@
+# New missions (design, 2026-10-20)
+
+Four new missions, approved by the user on 2026-10-20:
+
+- **Elderdark:** the Keep.
+- **DEEP CONTRACT:** security detachment (marines), haulage (space truckers), salvage.
+
+Two decisions shape them:
+
+- DEEP CONTRACT is an intentional homage to the *Alien* films. Marines, a towed refinery, a beacon and a sealed crate are all fair game, but names stay our own.
+- Clearing ground is shared between the games. Marines taking a colony room by room and a company taking a castle floor by floor both run on the same engine.
+
+Every mission must give the player a different **balancing problem** (the user's favourite part, "the paperclip game in a good way") and a visible cause and effect for every purchase. Missions are not reskins.
+
+## 1. The shared engine: held ground (`src/shared/ground.ts`)
+
+Pure functions, no game imports. A **site** is an ordered list of **sections**: rooms, decks, buildings or floors. Each section has a definition and a state.
+
+```ts
+interface SectionDef {
+  id: string;
+  name: string;
+  /** Force needed to take it, and the force needed (in garrison) to keep it. */
+  threat: number;
+  /** Control lost per second while it is held by less than its threat in garrison. */
+  reclaim: number;
+}
+
+interface SectionState {
+  /** 0 = lost, 1 = secured. */
+  control: number;
+  /** Force stationed here (troopers, hands, sentry guns). */
+  garrison: number;
+}
+```
+
+- **Taking ground.** `assault(state, def, force, seconds)` raises control at a rate set by force over threat, and returns the attackers' exposure (the game turns that into wounds, deaths or ammunition spent). Elderdark applies it per expedition when a party returns; DEEP CONTRACT applies it continuously each tick.
+- **Order.** Sections are ordered. The **frontier** is the first section not yet secured, and you can only assault the frontier. That is the room-by-room or floor-by-floor feel.
+- **Holding ground.** `tickGround(states, defs, dt, pressure)`: a secured section stays secured only while its garrison covers its threat. Otherwise control drains at `reclaim × pressure`. A section that falls below a threshold is **lost**, and the frontier moves back to it.
+- **Pressure** is the hook horrors use, so it is where the dread lives. `pressure = 1` is mundane: looters, rats, floodwater, the cold. A horror raises it. In DEEP CONTRACT it comes from a new `HorrorDef.pressure(m)`, read through `horrorPressure(m)` the same way `horrorProductionMultiplier` works. In Elderdark it comes from blight and the waking wood. No horror code knows what a section is.
+- **Reporting.** `held(states)`, `frontier(states)`, and `upkeep(states)` (total garrison). The UI shows the site as a strip of sections: secured, contested, lost, or the frontier.
+
+The core trade-off is identical in both games and is the point of sharing it: **every body holding ground is a body not taking more**. Push too far without garrisons and the rear rots away behind you.
+
+## 2. DEEP CONTRACT: security detachment (`scenario: 'security'`)
+
+**Premise.** The USCSS-style transport *Bellwether Ascent* carries a Combine Security Division detachment to the colony at **Calder's Landing** on LV-1201. The colony has "experienced a communications outage". WARDEN runs the ship, the cryo bay and the tactical uplink. The Combine pays a retainer for every colony sector restored to company control.
+
+**Economy**
+- **Income:** credits per secured sector per second (the colony back on the books), plus recovery bonuses for clearing each building the first time.
+- **Troopers**, thawed from cryo:
+  - **riflemen**, the force;
+  - **smartgunners**, high force and heavy ammunition use;
+  - **medics**, who cut casualties and fatigue;
+  - **techs**, who weld doors (raising a section's hold) and run sentries.
+  - The seven named crew stay as the officer cadre and keep their scenario boosts.
+- **Ammunition** is the second economy. A fabricator makes it, and assaults and sentry guns burn it. Ammunition made against ammunition burned is the Paperclips-style dial; run dry and assaults stall and sentries go silent.
+- **Automation:** **sentry guns** are garrison that never sleeps but eats ammunition. Then the **APC** (an assault force that doesn't tire) and the **dropship** (faster reinforcement, sorties).
+- **Readiness:** troopers on the line tire, and rotating them back to cryo costs time. The medic's `fatigueRelief` applies, as it does in every scenario.
+
+**Site.** The colony is a ladder of about 14 sections:
+1. landing pad;
+2. operations block;
+3. hydroponics, then the mess, then the dormitories;
+4. medlab;
+5. the motor pool;
+6. the processing annexe;
+7. sub-levels, down to the atmosphere processor at the bottom.
+
+**Signals.** `progress` is sectors secured, scaled to the shared story scale. `deepAccess` means the sub-levels are reachable.
+
+**Story**
+- **Act I** is pest control and paperwork. Looters, structural damage, and feral livestock from the hydroponics farm. The Combine adds cheerful memos about "property recovery".
+- **Act II tells**, each with a mundane excuse:
+  - meals left on the mess tables;
+  - barricades welded shut *from the inside*;
+  - the colony's tracking bracelets all reporting from one place;
+  - a child's drawing taped to a hatch.
+- With the **organism** horror, pressure climbs in the sub-levels first, and the motion tracker finally earns its place. With the **quiet** horror, the colony simply froze, and pressure stays mundane.
+
+**Stakes** at the terminus: the troopers still alive, and any colonists recovered.
+
+## 3. Elderdark: the Keep
+
+**Premise.** **Morrowgate Keep** is a drowned castle at the heart of the wood. A charter can be written for the Keep instead of the forest. Thistlegate, the hands, wages, the hospice, the chapel, blight, turning and the Ashen Key all carry over.
+
+**Site split (prerequisite).** Elderdark needs the same split DEEP CONTRACT made for terraforming: a `SiteDef` (forest or keep) that owns progression, plus company-wide systems that work on either site. The forest keeps regions and leagues charted. The Keep uses held ground. Renewing a charter offers a choice of site, as DEEP CONTRACT's contract assignment does. The Keep is available from the start for now, so it can be tried.
+
+**Economy**
+- **Floors replace leagues.** Parties assault the frontier floor on expedition. A floor is held only while hands are **garrisoned** there, and garrisoned hands draw wages and blight but never travel.
+- **Lamp oil** is the second economy. It is bought in town, and every floor deeper costs more per trip. A party whose oil runs out mid-delve takes heavy losses. The dial is oil bought against oil burned, and depth against cost.
+- **Relics** come from floors as they are cleared, and as a trickle from held floors (the castle's stores, its tombs).
+- **Sappers** are a new hand for this site only. They clear traps and flooded stairs, which lowers a floor's threat on the first assault.
+
+**Horror.** The Keep's old lord is still in residence. Blight raises pressure on held floors, and a floor garrisoned too long starts keeping its garrison. The hands turn faster there than in the forest. The Key fragments lie in the undercroft.
+
+## 4. DEEP CONTRACT: haulage (`scenario: 'haulage'`)
+
+**Premise.** The commercial tug *Halvorsen Gale* tows a refinery train home along a chain of stations. It is the most purely "slow burn" mission: nobody is here to fight anything.
+
+**Economy**
+- **Income:** deliveries at each station, with bonuses for beating the delivery window.
+- **The burn dial:** thrust setting against fuel against cargo strain. Burning hot makes windows but drinks fuel and shakes cargo, and damaged cargo pays less. Fuel is bought at stations. Adding **tow cars** means more cargo and more pay, but more mass and slower acceleration.
+- **Crew** sleep in rotating cryo shifts, and watches tire people faster here than in any other mission.
+- **Automation:** an autopilot that holds the burn at a target, then drone loaders at stations, then a navigation computer that plans the windows.
+
+**Signals.** `progress` is legs completed. `deepAccess` means the company has ordered a detour to answer a beacon, which is mandatory under the contract.
+
+**Story**
+- **Act I:** union grumbling and the share schedule.
+- **Act II tells:**
+  - a sealed container the Combine insists on;
+  - the manifest's mass drifting by a few kilograms each leg;
+  - frost on the inside of one car.
+- With the organism horror, the cargo is the specimen.
+
+## 5. DEEP CONTRACT: salvage (`scenario: 'salvage'`), later
+
+Strip a derelict hull section by section, using held ground again: sections are compartments. Cutting faster gains more salvage per second but risks **breaches**, a pressure-loss event that seals a compartment. This one is built last because it overlaps most with extraction and security.
+
+## Build order
+
+1. **Held ground** in `src/shared/ground.ts`, test-first, with no game attached.
+2. **Security detachment**, built on held ground. DEEP CONTRACT already supports scenarios, so this proves the engine with the least refactoring. It adds the `HorrorDef.pressure` hook.
+3. **Elderdark site split, then the Keep**, which reuses held ground in the other game.
+4. **Haulage.**
+5. **Salvage.**
+
+Each mission ships with:
+- its own pacing bot run inside `npm run simulate`, with the same act targets: Act II 45–60m, Act III 2–2.5h, Act IV around 3h, terminus 4–5h;
+- telemetry events added where a milestone matters (`sector_secured` and `floor_secured` at least);
+- a debug jump;
+- a contract or charter choice;
+- a save migration.
