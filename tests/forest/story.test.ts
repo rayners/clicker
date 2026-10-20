@@ -30,7 +30,8 @@ describe('the Elderdark story', () => {
         parties: [],
       }),
     );
-    const act1 = FOREST_STORY.filter((b) => (b.act ?? 1) === 1);
+    // Later-charter beats (cycle-*) can't fire on a first charter.
+    const act1 = FOREST_STORY.filter((b) => (b.act ?? 1) === 1 && !b.id.startsWith('cycle-'));
     expect(act1.filter((b) => c.beats[b.id] === undefined).map((b) => b.id)).toEqual([]);
   });
 

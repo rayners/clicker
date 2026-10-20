@@ -17,6 +17,9 @@ const APPRAISAL_BASE = 3;
 /** Average seconds for a wounded hand to mend, before the hospice. */
 const MEND_SECONDS = 180;
 const HOSPICE_BONUS = 0.5;
+const RENOWN_HAUL = 0.25;
+const GRACE_BLIGHT = 0.2;
+const GRACE_HEALING = 0.25;
 /** Each armoury level multiplies every hand's strength. */
 const ARMOURY_STRENGTH = 1.5;
 /** Blight per second from the vault, per order of magnitude of relics held. */
@@ -105,6 +108,9 @@ function modifiers(c: Company): Modifiers {
     standingRegions: 0,
   };
   for (const u of FOREST_UPGRADES) if (c.upgrades.includes(u.id)) applyEffect(m, u.effect);
+  // What earlier charters earned: Renown fills the packs, Grace keeps the dark off.
+  m.haul *= 1 + RENOWN_HAUL * c.charter.renown;
+  m.blight /= 1 + GRACE_BLIGHT * c.charter.grace;
   return m;
 }
 const size = (comp: Composition) => CLASS_IDS.reduce((s, id) => s + comp[id], 0);
@@ -323,7 +329,7 @@ function resolve(c: Company, party: Party): Company {
 
 /** Fraction of each class's wounded who mend per second. */
 export function healRate(c: Company): number {
-  return (1 + HOSPICE_BONUS * c.buildings.hospice) / MEND_SECONDS;
+  return ((1 + HOSPICE_BONUS * c.buildings.hospice) * (1 + GRACE_HEALING * c.charter.grace)) / MEND_SECONDS;
 }
 
 function mend(c: Company, dt: number): Company {

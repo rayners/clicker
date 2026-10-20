@@ -213,3 +213,36 @@ describe('configuration', () => {
     expect(company().silver).toBe(4242);
   });
 });
+
+describe('the darkness on screen', () => {
+  it('counts fragments of the Key and turned hands once there are any', () => {
+    setup();
+    const standing = within(screen.getByRole('region', { name: /company standing/i }));
+    expect(standing.getByLabelText(/key fragments/i).closest('.stat')!.hasAttribute('hidden')).toBe(true);
+    setup({ keyFragments: 2, turned: 3 });
+    const later = within(screen.getByRole('region', { name: /company standing/i }));
+    expect(later.getByLabelText(/key fragments/i).textContent).toBe('2 / 7');
+    expect(later.getByLabelText(/turned/i).textContent).toBe('3');
+  });
+});
+
+describe('the reckoning', () => {
+  it('has no tab until the charter comes due', () => {
+    setup();
+    expect(screen.queryByRole('tab', { name: /reckoning/i })).toBeNull();
+  });
+
+  it('offers the endings, and closes the charter on a confirming second tap', async () => {
+    const user = setup({ flags: ['terminus'], keyFragments: 4, elapsed: 9_000 });
+    await user.click(tab(/reckoning/i));
+    expect(screen.getByRole('region', { name: /return the key/i })).toBeTruthy();
+    const sell = screen.getByRole('region', { name: /sell the key/i });
+    const go = within(sell).getByRole('button', { name: /sell the key/i });
+    await user.click(go);
+    expect(store.getState().profile.chartersCompleted).toBe(0);
+    await user.click(within(sell).getByRole('button', { name: /confirm/i }));
+    expect(store.getState().profile.chartersCompleted).toBe(1);
+    expect(company().charter.number).toBe(2);
+    expect(screen.queryByRole('tab', { name: /reckoning/i })).toBeNull();
+  });
+});

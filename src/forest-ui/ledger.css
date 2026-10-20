@@ -979,3 +979,41 @@ button:focus-visible {
   border-color: var(--rubric);
   color: var(--rubric);
 }
+
+/* ---------- the darkness, and the reckoning ---------- */
+
+.stat-dark .stat-value {
+  color: var(--rubric);
+}
+
+.reckon-intro {
+  font-style: italic;
+  color: var(--ink-dim);
+}
+
+.reckon-card {
+  border: 3px double var(--faint);
+  padding: 10px 12px;
+  margin: 10px 0;
+}
+
+.reckon-card.is-pending {
+  border-color: var(--rubric);
+}
+
+.reckon-title {
+  margin: 0 0 4px;
+  font-weight: normal;
+  letter-spacing: 0.08em;
+}
+
+.reckon-reward {
+  margin: 0 0 8px;
+  font-size: 0.8em;
+  color: var(--gilt);
+}
+
+.reckon-go {
+  width: 100%;
+  white-space: normal;
+}

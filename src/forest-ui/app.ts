@@ -16,6 +16,8 @@ import { createHall } from './hall';
 import { createRoster } from './roster';
 import { createMapStrip } from './map';
 import { createConfig } from './config';
+import { createReckoning } from './reckoning';
+import { KEY_FRAGMENTS } from '../forest/company';
 import { availableUpgrades } from '../forest/company';
 
 const PER_MINUTE = 60;
@@ -32,7 +34,9 @@ interface Panel {
   id: string;
   label: string;
   el: HTMLElement;
-  render(c: Company): void;
+  render(c: Company, game: ForestGame): void;
+  /** Tabs appear only when their panel has something to show. */
+  visible?(c: Company): boolean;
   /** Lights the tab when something there wants attention. */
   attention?(c: Company): boolean;
 }
@@ -79,6 +83,10 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
   const vault = stat('VAULT', 'Vault relics');
   const ready = stat('READY', 'Hands ready');
   const depth = stat('DELVE', 'Delve');
+  const keys = stat('THE KEY', 'Key fragments');
+  const lost = stat('TURNED', 'Turned');
+  keys.el.classList.add('stat-dark');
+  lost.el.classList.add('stat-dark');
   // select() is declared below; the strip only calls it on a tap.
   const map = createMapStrip(() => select('expeditions'));
   const standing = h(
@@ -86,7 +94,7 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
     { class: 'status', 'aria-label': 'Company standing' },
     map.el,
     flow.el,
-    h('dl', { class: 'stats' }, silver.el, vault.el, ready.el, depth.el),
+    h('dl', { class: 'stats' }, silver.el, vault.el, ready.el, depth.el, keys.el, lost.el),
   );
 
   const log = createLogView<EntryKind>({ label: 'Company ledger', stamp: formatDay });
@@ -94,6 +102,7 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
   const expeditions = createExpeditions(store);
   const rosterPanel = createRoster(store);
   const hall = createHall(store);
+  const reckoning = createReckoning(store);
   const section = (id: string, ...children: HTMLElement[]) =>
     h('section', { class: `panel panel-${id}`, role: 'tabpanel', id: `panel-${id}`, 'aria-labelledby': `tab-${id}` }, ...children);
   const panels: Panel[] = [
@@ -114,6 +123,14 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
       el: section('hall', hall.el),
       render: (c) => hall.render(c),
       attention: (c) => availableUpgrades(c).some((u) => u.cost <= c.silver),
+    },
+    {
+      id: 'reckoning',
+      label: 'RECKONING',
+      el: section('reckoning', reckoning.el),
+      render: (_c, game) => reckoning.render(game),
+      visible: (c) => c.flags.includes('terminus'),
+      attention: () => true,
     },
   ];
 
@@ -167,6 +184,10 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
     setText(vault.value, formatNumber(c.relics));
     setText(ready.value, String(CLASS_IDS.reduce((s, id) => s + available(c, id), 0)));
     setText(depth.value, `${delve(c).toFixed(1)} LEAGUES`);
+    keys.el.hidden = c.keyFragments === 0;
+    setText(keys.value, `${c.keyFragments} / ${KEY_FRAGMENTS}`);
+    lost.el.hidden = c.turned === 0;
+    setText(lost.value, String(c.turned));
     map.render(c);
     root.dataset.motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
     config.render(game);
@@ -177,9 +198,15 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
         else delete tabs[i]!.dataset.attention;
       }
     });
-    for (const p of panels) {
+    for (const [i, p] of panels.entries()) {
+      const shown = p.visible?.(c) ?? true;
+      tabs[i]!.hidden = !shown;
+      if (!shown) {
+        if (root.dataset.tab === p.id) select('ledger');
+        continue;
+      }
       try {
-        p.render(c);
+        p.render(c, game);
       } catch (error) {
         console.error(`panel ${p.id} failed to render`, error);
       }

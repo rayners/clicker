@@ -15,6 +15,27 @@ const barrows = REGIONS[2]!;
  * Act I: the company finds its feet. Dark from the start (the wood kills, the town profits),
  * but the deeper wrongness (omens, other hands in the ledger) waits for Act II.
  */
+/** Later charters: the Factor has kept this book before. */
+const CHARTERS: ForestBeat[] = [
+  {
+    id: 'cycle-margin',
+    when: ({ c }) => c.charter.number > 1 && c.lifetimeRelics >= 20,
+    entries: [
+      { kind: 'ledger', text: 'A NOTE IN THE MARGIN OF THE FIRST PAGE: "DO NOT SELL THE KEY." THE HAND IS THE FACTOR\'S OWN. THE FACTOR DOES NOT REMEMBER WRITING IT.' },
+    ],
+  },
+  {
+    id: 'cycle-renown',
+    when: ({ c }) => c.charter.renown > 0 && c.lifetimeRelics >= 60,
+    entries: [{ kind: 'town', text: 'The Collegium sends its compliments, and an advance. It looks forward to working with the company again. Again.' }],
+  },
+  {
+    id: 'cycle-grace',
+    when: ({ c }) => c.charter.grace > 0 && c.lifetimeRelics >= 60,
+    entries: [{ kind: 'town', text: 'An antler has been left on the hall\'s doorstep. The wolves no longer come to the palisade.' }],
+  },
+];
+
 const ACT_1: ForestBeat[] = [
   {
     id: 'first-hand',
@@ -120,7 +141,7 @@ const ACT_4: ForestBeat[] = [
   },
 ];
 
-export const FOREST_STORY: readonly ForestBeat[] = [...ACT_1, ...ACT_2, ...ACT_3, ...ACT_4];
+export const FOREST_STORY: readonly ForestBeat[] = [...CHARTERS, ...ACT_1, ...ACT_2, ...ACT_3, ...ACT_4];
 
 export function runForestStory(c: Company): Company {
   return runBeats<EntryKind, Company, Args>(c, FOREST_STORY, { c }, { minGap: FOREST_STORY_GAP });

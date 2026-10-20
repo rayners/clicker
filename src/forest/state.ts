@@ -16,8 +16,19 @@ export interface Party {
   returnsAt: number;
 }
 
+/** What a charter starts with from the ones before it. */
+export interface CharterTerms {
+  /** 1 for the first charter. */
+  number: number;
+  renown: number;
+  grace: number;
+}
+
+export const FIRST_CHARTER: CharterTerms = { number: 1, renown: 0, grace: 0 };
+
 /** One charter of the Company of the Ashen Key. Pure JSON; no DOM, clock or Math.random(). */
 export interface Company {
+  charter: CharterTerms;
   seed: number;
   rng: number;
   elapsed: number;
@@ -66,8 +77,9 @@ export const emptyComposition = (): Composition => Object.fromEntries(CLASS_IDS.
 
 const DEFAULT_ORDER: Composition = { blade: 2, mender: 0, scout: 1, mystic: 0 };
 
-export function createCompany(seed: number): Company {
+export function createCompany(seed: number, charter: CharterTerms = FIRST_CHARTER): Company {
   const blank: Company = {
+    charter: { ...charter },
     seed,
     rng: seed,
     elapsed: 0,
