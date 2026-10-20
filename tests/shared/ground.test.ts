@@ -9,6 +9,7 @@ import {
   tickGround,
   upkeep,
   ASSAULT_SECONDS,
+  LOST_BELOW,
   type SectionDef,
 } from '../../src/shared/ground';
 
@@ -34,7 +35,7 @@ describe('held ground: taking it', () => {
   it('starts with every section lost and the frontier at the first', () => {
     const g = createGround(DEFS);
     expect(g).toHaveLength(3);
-    expect(g.every((s) => s.control === 0 && s.garrison === 0)).toBe(true);
+    expect(g.every((s) => s.control === 0 && s.garrison === 0 && !s.secured)).toBe(true);
     expect(frontier(g)).toBe(0);
     expect(held(g)).toBe(0);
   });
@@ -83,9 +84,25 @@ describe('held ground: keeping it', () => {
   const taken = () => push(undefined, 1000, ASSAULT_SECONDS * 2).states;
 
   it('slips back when nobody holds it, and the frontier falls back to it', () => {
-    const later = tickGround(taken(), DEFS, 60, 1);
+    const later = tickGround(taken(), DEFS, 90, 1);
     expect(later[0]!.control).toBeLessThan(1);
     expect(frontier(later)).toBe(0);
+  });
+
+  it('stays held while contested, and is lost only once control falls below the line', () => {
+    const slipping = tickGround(taken(), DEFS, 10, 1);
+    expect(slipping[0]!.control).toBeLessThan(1);
+    expect(isSecured(slipping[0]!)).toBe(true);
+    expect(frontier(slipping)).toBe(frontier(taken()));
+    const gone = tickGround(taken(), DEFS, (1 - LOST_BELOW) / DEFS[0]!.reclaim + 1, 1);
+    expect(isSecured(gone[0]!)).toBe(false);
+    expect(frontier(gone)).toBe(0);
+  });
+
+  it('wins contested ground back when the garrison covers it again', () => {
+    const slipping = tickGround(taken(), DEFS, 20, 1);
+    const recovered = tickGround(setGarrison(slipping, 0, 10), DEFS, 200, 1);
+    expect(recovered[0]!.control).toBe(1);
   });
 
   it('stays secured while the garrison covers its threat', () => {
@@ -106,6 +123,11 @@ describe('held ground: keeping it', () => {
     const calm = tickGround(taken(), DEFS, 30, 1)[0]!.control;
     const pressed = tickGround(taken(), DEFS, 30, 3)[0]!.control;
     expect(pressed).toBeLessThan(calm);
+  });
+
+  it('leaves the frontier to the assault: a half-taken section does not slip back on its own', () => {
+    const half = push(undefined, 10, ASSAULT_SECONDS / 2).states;
+    expect(tickGround(half, DEFS, 600, 5)[0]!.control).toBeCloseTo(half[0]!.control);
   });
 
   it('never drops below lost', () => {

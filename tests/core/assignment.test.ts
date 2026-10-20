@@ -24,7 +24,7 @@ describe('choosing a contract assignment', () => {
 
   it('offers terraforming from the start for now (unlock threshold is zero)', () => {
     expect(TERRAFORM_UNLOCK_CONTRACTS).toBe(0);
-    expect(availableAssignments(createGame(1, NOW).profile)).toEqual(['extraction', 'terraform']);
+    expect(availableAssignments(createGame(1, NOW).profile)).toEqual(expect.arrayContaining(['extraction', 'terraform']));
   });
 
   it('refuses an assignment that is not available', () => {

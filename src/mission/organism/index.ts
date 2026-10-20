@@ -4,7 +4,7 @@ import { ORGANISM_ENDINGS } from '../../data/organism/endings';
 import { NURSERY_BEATS } from '../../data/organism/nursery';
 import type { HorrorDef } from '../kinds';
 import type { MissionState, OrganismMission } from '../state';
-import { breach, fundingMultiplier, tickContainment } from './containment';
+import { breach, fundingMultiplier, organismPressure, tickContainment } from './containment';
 import type { OrganismFields } from './state';
 
 const o = (m: MissionState) => m as OrganismMission;
@@ -28,5 +28,6 @@ export const ORGANISM: HorrorDef = {
   archive: ORGANISM_ARCHIVE,
   endings: ORGANISM_ENDINGS,
   productionMultiplier: (m) => fundingMultiplier(o(m)),
+  pressure: (m) => organismPressure(o(m)),
   applyEffect: (m, action) => (action === 'breach' ? breach(o(m)) : m),
 };

@@ -4,6 +4,8 @@ import { createGame, newGame } from '../../src/core/game';
 import { applyScenario, SCENARIOS } from '../../src/core/debug';
 import { depth } from '../../src/mission/extraction/progress';
 import { progress } from '../../src/mission/terraform/economy';
+import { progress as securityProgress } from '../../src/mission/security/economy';
+import { held } from '../../src/shared/ground';
 import { isSpecialProjectsUnlocked } from '../../src/mission/organism/containment';
 
 const base = () => createGame(1, 0);
@@ -33,6 +35,21 @@ describe('debug scenarios', () => {
     expect(m.act).toBe(2);
     expect(progress(m)).toBeGreaterThanOrEqual(1000);
     expect(Object.values(m.processors).some((n) => n > 0)).toBe(true);
+  });
+
+  it('starts a fresh security contract', () => {
+    const g = applyScenario(base(), 'security');
+    expect(g.mission.scenario).toBe('security');
+    expect(g.mission.elapsed).toBe(0);
+  });
+
+  it('jumps a security contract into act 2 with ground held and a detachment on it', () => {
+    const m = applyScenario(base(), 'sec-act2').mission as MissionOf<'security', 'organism'>;
+    expect(m.scenario).toBe('security');
+    expect(m.act).toBe(2);
+    expect(securityProgress(m)).toBeGreaterThanOrEqual(1000);
+    expect(held(m.ground)).toBeGreaterThan(4);
+    expect(Object.values(m.troopers).some((n) => n > 0)).toBe(true);
   });
 
   it('act3 opens special projects', () => {

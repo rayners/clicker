@@ -15,6 +15,11 @@ const BRIEFS: Record<ScenarioId, { title: string; name: string; brief: string }>
     name: 'terraforming',
     brief: 'Make a dead world habitable before four thousand colonists arrive. Split station power to keep processing on corporate spec.',
   },
+  security: {
+    title: 'COLONY SECURITY',
+    name: 'security',
+    brief: 'A colony has gone quiet. Take it back sector by sector with a Combine Security detachment, and hold what you take.',
+  },
 };
 
 /** Where WARDEN chooses its next contract: on a new game, after a terminus, or on request from CFG. */

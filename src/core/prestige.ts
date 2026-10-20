@@ -5,6 +5,7 @@ import {
   DEFAULT_MISSION_CONFIG,
   isOrganism,
   TERRAFORM_MISSION_CONFIG,
+  SECURITY_MISSION_CONFIG,
   type MissionConfig,
   type MissionState,
   type ScenarioId,
@@ -21,6 +22,8 @@ export interface Reward {
 export const BOARDROOM_UNLOCK_CONTRACTS = 10;
 /** Completed contracts before terraforming is offered. Zero while it is being play-tested; meant to rise. */
 export const TERRAFORM_UNLOCK_CONTRACTS = 0;
+/** Completed contracts before security contracts are offered. Zero while play-tested. */
+export const SECURITY_UNLOCK_CONTRACTS = 0;
 const BROADCAST_MIN_CYCLE = 3;
 const BROADCAST_MIN_CONSCIENCE = 3;
 const SPECIMENS_PER_SENIORITY = 5;
@@ -35,6 +38,14 @@ const SHIP_NAMES = [
   'MSV Sable Meridian',
   'MSV Tamsin Drift',
   'MSV Orrery Kell',
+];
+
+const TRANSPORT_NAMES = [
+  'CSV Bellwether Ascent',
+  'CSV Garrick Hale',
+  'CSV Steadfast Lumen',
+  'CSV Iron Psalter',
+  'CSV Marrow Vigil',
 ];
 
 const STATION_NAMES = [
@@ -58,11 +69,18 @@ export function shipNameFor(cycle: number): string {
 const BASE_CONFIGS: Record<ScenarioId, MissionConfig> = {
   extraction: DEFAULT_MISSION_CONFIG,
   terraform: TERRAFORM_MISSION_CONFIG,
+  security: SECURITY_MISSION_CONFIG,
+};
+
+const NAMES: Record<ScenarioId, readonly string[]> = {
+  extraction: SHIP_NAMES,
+  terraform: STATION_NAMES,
+  security: TRANSPORT_NAMES,
 };
 
 /** The next mission is shaped by everything WARDEN carried out of previous ones. */
 export function missionConfigFor(profile: Profile, scenario: ScenarioId = 'extraction'): MissionConfig {
-  const names = scenario === 'terraform' ? STATION_NAMES : SHIP_NAMES;
+  const names = NAMES[scenario];
   return {
     ...BASE_CONFIGS[scenario],
     shipName: cycleName(names, profile.contractsCompleted),
@@ -73,7 +91,12 @@ export function missionConfigFor(profile: Profile, scenario: ScenarioId = 'extra
 }
 
 export function availableAssignments(profile: Profile): ScenarioId[] {
-  return profile.contractsCompleted >= TERRAFORM_UNLOCK_CONTRACTS ? ['extraction', 'terraform'] : ['extraction'];
+  const unlocks: [ScenarioId, number][] = [
+    ['extraction', 0],
+    ['terraform', TERRAFORM_UNLOCK_CONTRACTS],
+    ['security', SECURITY_UNLOCK_CONTRACTS],
+  ];
+  return unlocks.filter(([, needed]) => profile.contractsCompleted >= needed).map(([id]) => id);
 }
 
 /** Starts the chosen contract. Whatever was running is abandoned without reward. */

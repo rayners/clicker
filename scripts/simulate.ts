@@ -4,7 +4,7 @@ import { scenarioOf } from '../src/mission/registry';
 import { isOrganism, type ScenarioId } from '../src/mission/state';
 
 const seeds = [1, 7, 42];
-const scenarios: ScenarioId[] = process.argv[2] ? [process.argv[2] as ScenarioId] : ['extraction', 'terraform'];
+const scenarios: ScenarioId[] = process.argv[2] ? [process.argv[2] as ScenarioId] : ['extraction', 'terraform', 'security'];
 for (const scenario of scenarios) {
   for (const seed of seeds) {
     const started = performance.now();

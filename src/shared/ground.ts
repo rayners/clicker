@@ -17,16 +17,20 @@ export interface SectionState {
   control: number;
   /** Force stationed here. */
   garrison: number;
+  /** Taken (control reached 1) and not since lost; contested while control is below 1. */
+  secured: boolean;
 }
 
 /** Seconds to secure a section with force exactly matching its threat. */
 export const ASSAULT_SECONDS = 60;
 /** Overwhelming force stops helping beyond this multiple of the threat. */
 const MAX_FORCE_RATIO = 4;
+/** A secured section slipping below this much control is lost, and the frontier falls back to it. */
+export const LOST_BELOW = 0.5;
 
-export const createGround = (defs: readonly SectionDef[]): SectionState[] => defs.map(() => ({ control: 0, garrison: 0 }));
+export const createGround = (defs: readonly SectionDef[]): SectionState[] => defs.map(() => ({ control: 0, garrison: 0, secured: false }));
 
-export const isSecured = (s: SectionState): boolean => s.control >= 1;
+export const isSecured = (s: SectionState): boolean => s.secured;
 
 /** Index of the first section not yet secured; the number of sections once all are. */
 export function frontier(states: SectionState[]): number {
@@ -51,7 +55,7 @@ export function assault(
   const ratio = Math.min(MAX_FORCE_RATIO, force / def.threat);
   const section = states[i]!;
   const control = Math.min(1, section.control + (ratio * seconds) / ASSAULT_SECONDS);
-  const next = states.map((s, j) => (j === i ? { ...s, control } : s));
+  const next = states.map((s, j) => (j === i ? { ...s, control, secured: control >= 1 } : s));
   return { states: next, exposure: seconds / ratio };
 }
 
@@ -62,13 +66,23 @@ export function setGarrison(states: SectionState[], index: number, garrison: num
   return states.map((x, j) => (j === index ? { ...x, garrison: Math.max(0, garrison) } : x));
 }
 
-/** Unguarded ground slips back, in proportion to how short its garrison falls, faster under pressure. */
+/**
+ * Unguarded ground slips back, in proportion to how short its garrison falls, faster under pressure. Fully
+ * garrisoned contested ground is won back at the same pace. Secured ground slipping below the line is lost.
+ * The frontier itself is left to the assault.
+ */
 export function tickGround(states: SectionState[], defs: readonly SectionDef[], dt: number, pressure: number): SectionState[] {
+  const line = frontier(states);
   return states.map((s, i) => {
     const def = defs[i]!;
-    if (s.control <= 0) return s;
+    // The frontier is the line of contact: the assault decides it, not the slow drift.
+    if (s.control <= 0 || i === line) return s;
     const shortfall = Math.max(0, 1 - s.garrison / def.threat);
-    if (shortfall === 0) return s;
-    return { ...s, control: Math.max(0, s.control - def.reclaim * pressure * shortfall * dt) };
+    if (shortfall === 0) {
+      if (!s.secured || s.control >= 1) return s;
+      return { ...s, control: Math.min(1, s.control + def.reclaim * dt) };
+    }
+    const control = Math.max(0, s.control - def.reclaim * pressure * shortfall * dt);
+    return { ...s, control, secured: s.secured && control >= LOST_BELOW };
   });
 }

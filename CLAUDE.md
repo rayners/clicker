@@ -20,7 +20,7 @@ Read before changing things:
 2. **Phone and desktop are equally first-class.** The primary real device is an iPhone (Safari). Mobile-first CSS; desktop three-column layout at ≥900px. Tap targets ≥44px, inputs ≥16px font, `100dvh`, safe-area insets, `touch-action: manipulation`, no hover-only affordances, drill uses `pointerdown`.
 3. **No backend.** All state lives in the browser (`localStorage`); the build is a static, offline-capable PWA. Moving between devices = export/import save code. The only outbound traffic is optional, fire-and-forget telemetry; the game must never depend on it.
 4. **Missions stay self-contained** (for the future Boardroom). Nothing under `src/mission/` may touch the DOM, globals, `Date.now()` or `Math.random()`. Time comes in as `dt`, randomness from the seeded RNG stored in mission state (`m.rng`), and wider-game knowledge only via `MissionContext`.
-6. **Horrors are not coupled to scenarios** (user requirement). A horror (`src/mission/organism/`) knows a scenario only through `StorySignals`, the scenario's lexicon (`{placeholders}` in its text) and `HorrorHooks`. A scenario knows the horror only through `horrorProductionMultiplier`. The one sanctioned exception is a horror's `pairings[scenarioId]` file (e.g. `src/data/organism/nursery.ts`). `tests/mission/kinds.test.ts` enforces this (stub scenario, quiet horror, lexicon coverage).
+6. **Horrors are not coupled to scenarios** (user requirement). A horror (`src/mission/organism/`) knows a scenario only through `StorySignals`, the scenario's lexicon (`{placeholders}` in its text) and `HorrorHooks`. A scenario knows the horror only through `horrorProductionMultiplier` and `horrorPressure` (how hard it pushes back on held ground). The one sanctioned exception is a horror's `pairings[scenarioId]` file (e.g. `src/data/organism/nursery.ts`). `tests/mission/kinds.test.ts` enforces this (stub scenario, quiet horror, lexicon coverage).
 5. **Horror must not be obvious until ~2 hours of progress.** Act I content is upbeat corporate; Act II tells must each have a mundane explanation. Pacing is enforced by `tests/sim/pacing.test.ts`. If you change economy numbers, run `npm run simulate` and keep those tests green.
 
 ## Commands
@@ -28,7 +28,7 @@ Read before changing things:
 - `npm test`: vitest (unit, jsdom UI, data invariants, pacing). `npx tsc --noEmit` for types.
 - `npm run test:e2e`: Playwright on desktop Chromium plus iPhone 13 emulation (Chromium by default; `E2E_WEBKIT=1` for real WebKit once `sudo npx playwright install-deps webkit` has been run).
 - `npm run simulate [extraction|terraform]`: bot playthrough timings per act, for both scenarios by default.
-- `npm run dev -- --host`: test on a phone over the LAN. Debug jumps: `/contract/?debug=act2|act3|act4|terminus|terraform|tf-act2` (`src/core/debug.ts`).
+- `npm run dev -- --host`: test on a phone over the LAN. Debug jumps: `/contract/?debug=act2|act3|act4|terminus|terraform|tf-act2|security|sec-act2` (`src/core/debug.ts`).
 - If the dev server suddenly serves unstyled pages after a CSS edit, its watcher caught the file mid-write: `touch src/styles/*.css`. Prefer the Edit tool over scripts that truncate and rewrite CSS.
 - `npm run build`: typecheck plus static build (all three pages) with service worker. `npm run icons` regenerates PWA icons from sprites.
 
@@ -36,7 +36,7 @@ Read before changing things:
 
 - `src/mission/`: pure, immutable `(state, …) => state` functions.
   - Core, shared by every contract: `state.ts` (`MissionCore`, discriminated `MissionState`, `composeMission`/`createMission`), crew, the directive engine (goals are named metrics the scenario answers), the story engine, log, lexicon, `kinds.ts` (`ScenarioDef`/`HorrorDef`), `registry.ts`, `tick.ts` (`tickWith` composes scenario → crew → horror → directives → story).
-  - Scenarios: `extraction/` (ore, generators, refinery, depth) and `terraform/` (reactors, three processing lines, ±10% power allocation, spec match, colonist waves).
+  - Scenarios: `extraction/` (ore, generators, refinery, depth), `terraform/` (reactors, three processing lines, ±10% power allocation, spec match, colonist waves) and `security/` (troopers, ammunition fabricators, assault/line split, sentry guns, colony sectors on the shared held-ground engine `src/shared/ground.ts`).
   - Horrors: `organism/` (specimens, containment, infestation) and `quiet/` (none; proves the decoupling).
   - Typing: scenario code takes `ExtractionMission`/`TerraformMission`, horror code `OrganismMission`; state transitions are generic `<M extends …>(m: M): M`. Tests read fields off a broad `MissionState` with `tests/helpers.ts` (`ext`, `tf`).
 - `src/core/`: `GameState = { version, savedAt, profile, mission, boardroom? }`, the store/reducer, offline catch-up (`advance`/`catchUp`, 8h cap), saves (versioned migrations in `save.ts`; **bump `GAME_VERSION` and add a migration for any saved-shape change**), prestige, debug scenarios.

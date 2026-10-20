@@ -2,7 +2,25 @@ import { buyGenerator, buyRefinery, drill } from '../mission/extraction/economy'
 import { buyUpgrade } from '../mission/extraction/upgrades';
 import { sleepCrew, wakeCrew } from '../mission/crew';
 import { buyContainmentLevel, buyRig, reinforce, vent } from '../mission/organism/containment';
-import { isExtraction, isOrganism, isTerraform, type MissionState, type OrganismMission, type TerraformMission } from '../mission/state';
+import {
+  isExtraction,
+  isOrganism,
+  isSecurity,
+  isTerraform,
+  type MissionState,
+  type OrganismMission,
+  type SecurityMission,
+  type TerraformMission,
+} from '../mission/state';
+import {
+  buyFabricator,
+  buySecurityUpgrade,
+  buySentry,
+  buyTrooper,
+  fireSupport,
+  shiftSplit,
+  toggleTacticalNet,
+} from '../mission/security/economy';
 import { allocate, buyProcessor, buyReactor, buyTerraformUpgrade, surge, thawWave, toggleBalancer } from '../mission/terraform/economy';
 import type { Line } from '../data/terraform/systems';
 import { advance, newGame, type GameState, type Settings } from './game';
@@ -21,6 +39,12 @@ export type Action =
   | { type: 'allocate'; line: Line; step: 1 | -1 }
   | { type: 'thawWave' }
   | { type: 'toggleBalancer' }
+  | { type: 'fireSupport' }
+  | { type: 'buyTrooper'; id: string }
+  | { type: 'buyFabricator'; id: string }
+  | { type: 'buySentry' }
+  | { type: 'shiftSplit'; step: 1 | -1 }
+  | { type: 'toggleTacticalNet' }
   | { type: 'wakeCrew'; id: string }
   | { type: 'sleepCrew'; id: string }
   | { type: 'buyRig' }
@@ -48,6 +72,9 @@ const MISSION_ACTIONS: Partial<Record<Action['type'], (m: MissionState) => Missi
 const terraform = (game: GameState, f: (m: TerraformMission) => MissionState): GameState =>
   isTerraform(game.mission) ? { ...game, mission: f(game.mission) } : game;
 
+const security = (game: GameState, f: (m: SecurityMission) => MissionState): GameState =>
+  isSecurity(game.mission) ? { ...game, mission: f(game.mission) } : game;
+
 const extraction = (game: GameState, f: (m: Extract<MissionState, { scenario: 'extraction' }>) => MissionState): GameState =>
   isExtraction(game.mission) ? { ...game, mission: f(game.mission) } : game;
 
@@ -62,7 +89,9 @@ export function reduce(game: GameState, action: Action): GameState {
     case 'buyRefinery':
       return extraction(game, buyRefinery);
     case 'buyUpgrade':
-      return isTerraform(game.mission) ? terraform(game, (m) => buyTerraformUpgrade(m, action.id)) : extraction(game, (m) => buyUpgrade(m, action.id));
+      if (isTerraform(game.mission)) return terraform(game, (m) => buyTerraformUpgrade(m, action.id));
+      if (isSecurity(game.mission)) return security(game, (m) => buySecurityUpgrade(m, action.id));
+      return extraction(game, (m) => buyUpgrade(m, action.id));
     case 'surge':
       return terraform(game, surge);
     case 'buyReactor':
@@ -75,6 +104,18 @@ export function reduce(game: GameState, action: Action): GameState {
       return terraform(game, thawWave);
     case 'toggleBalancer':
       return terraform(game, toggleBalancer);
+    case 'fireSupport':
+      return security(game, fireSupport);
+    case 'buyTrooper':
+      return security(game, (m) => buyTrooper(m, action.id));
+    case 'buyFabricator':
+      return security(game, (m) => buyFabricator(m, action.id));
+    case 'buySentry':
+      return security(game, buySentry);
+    case 'shiftSplit':
+      return security(game, (m) => shiftSplit(m, action.step));
+    case 'toggleTacticalNet':
+      return security(game, toggleTacticalNet);
     case 'wakeCrew':
       return { ...game, mission: wakeCrew(game.mission, action.id) };
     case 'sleepCrew':

@@ -4,11 +4,12 @@ import type { ActiveDirective, DirectiveResult } from './directives';
 import type { HorrorDef, ScenarioDef } from './kinds';
 import type { ExtractionFields } from './extraction/state';
 import type { TerraformFields } from './terraform/state';
+import type { SecurityFields } from './security/state';
 import type { OrganismFields } from './organism/state';
 import type { QuietFields } from './quiet/state';
 import { HORRORS, SCENARIOS } from './registry';
 
-export type ScenarioId = 'extraction' | 'terraform';
+export type ScenarioId = 'extraction' | 'terraform' | 'security';
 export type HorrorId = 'organism' | 'quiet';
 
 /** Everything that varies between missions. Plain data so the future Boardroom layer can author it. */
@@ -45,6 +46,14 @@ export const TERRAFORM_MISSION_CONFIG = {
   targetBody: 'KA-T-88 "Merrow"',
 } satisfies MissionConfig;
 
+/** A security contract: a Combine Security detachment retaking the colony at Calder's Landing. */
+export const SECURITY_MISSION_CONFIG = {
+  ...DEFAULT_MISSION_CONFIG,
+  scenario: 'security',
+  shipName: 'CSV Bellwether Ascent',
+  targetBody: 'LV-1201 "Calder\'s Landing"',
+} satisfies MissionConfig;
+
 /** State every mission has, whatever its scenario or horror. */
 export interface MissionCore {
   config: MissionConfig;
@@ -71,7 +80,7 @@ export interface MissionCore {
   nextLogId: number;
 }
 
-export type ScenarioFields = ExtractionFields | TerraformFields;
+export type ScenarioFields = ExtractionFields | TerraformFields | SecurityFields;
 export type HorrorFields = OrganismFields | QuietFields;
 
 /** A single mission, fully self-contained and JSON-serializable. */
@@ -82,6 +91,7 @@ export type MissionOf<S extends ScenarioId, H extends HorrorId> = MissionCore &
   Extract<HorrorFields, { horror: H }>;
 export type ExtractionMission = MissionCore & ExtractionFields & HorrorFields;
 export type TerraformMission = MissionCore & TerraformFields & HorrorFields;
+export type SecurityMission = MissionCore & SecurityFields & HorrorFields;
 export type OrganismMission = MissionCore & ScenarioFields & OrganismFields;
 
 export function isExtraction(m: MissionState): m is ExtractionMission {
@@ -90,6 +100,10 @@ export function isExtraction(m: MissionState): m is ExtractionMission {
 
 export function isTerraform(m: MissionState): m is TerraformMission {
   return m.scenario === 'terraform';
+}
+
+export function isSecurity(m: MissionState): m is SecurityMission {
+  return m.scenario === 'security';
 }
 
 export function isOrganism(m: MissionState): m is OrganismMission {

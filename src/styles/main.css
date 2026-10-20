@@ -1634,3 +1634,160 @@ button:focus-visible {
 .term-stakes[hidden] {
   display: none;
 }
+
+/* ---------- the force split and the colony sectors (security) ---------- */
+
+.split {
+  margin-top: 6px;
+  padding: 4px 6px;
+  border: 1px solid var(--phosphor-faint);
+  font-size: 0.8em;
+}
+
+.split[data-stretched='true'] {
+  border-color: var(--danger);
+}
+
+.split-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 1.4fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+}
+
+.split-side {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.split-side-line {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.split-figure {
+  color: var(--phosphor-hi);
+  font-variant-numeric: tabular-nums;
+}
+
+.split[data-stretched='true'] .split-side-line .split-figure {
+  color: var(--danger);
+  animation: flow-pulse 1s steps(2, end) infinite;
+}
+
+.split-share {
+  text-align: center;
+  font-size: 1.5em;
+  color: var(--phosphor-hi);
+  font-variant-numeric: tabular-nums;
+}
+
+.split[data-auto='true'] .alloc-steps {
+  grid-template-columns: 1fr;
+  min-height: 44px;
+}
+
+.site {
+  margin-top: 6px;
+  font-size: 0.78em;
+}
+
+.site-list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-row {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 6px;
+  border: 1px solid var(--phosphor-faint);
+  line-height: 1.15;
+  overflow: hidden;
+}
+
+.site-row[data-deep='true'] {
+  border-style: dashed;
+}
+
+.site-name {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.site-state {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  color: var(--phosphor-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.site-bar {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.site-fill {
+  display: block;
+  height: 100%;
+  background: var(--phosphor-faint);
+}
+
+.site-row[data-state='lost'] {
+  color: var(--phosphor-dim);
+  opacity: 0.6;
+}
+
+.site-row[data-state='frontier'] {
+  border-color: var(--phosphor);
+  box-shadow: 0 0 8px var(--glow);
+}
+
+.site-row[data-state='frontier'] .site-state {
+  color: var(--phosphor-hi);
+}
+
+.site-row[data-state='contested'] {
+  border-color: var(--danger);
+}
+
+.site-row[data-state='contested'] .site-state {
+  color: var(--danger);
+  animation: flow-pulse 1.2s steps(2, end) infinite;
+}
+
+@media (min-width: 900px) {
+  .site-list {
+    max-height: 40dvh;
+    overflow-y: auto;
+  }
+
+  /* The status column is narrow on desktop: figures side by side, the steps underneath. */
+  .split-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 'assault line' 'steps steps';
+  }
+
+  .split-row > .split-side:first-child {
+    grid-area: assault;
+  }
+
+  .split-row > .split-side-line {
+    grid-area: line;
+  }
+
+  .split-row > .alloc-steps {
+    grid-area: steps;
+  }
+}

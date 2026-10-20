@@ -52,6 +52,15 @@ describe('DEEP CONTRACT play events', () => {
     expect(names(asking, reduce(asking, { type: 'cancelReassignment' }))).toEqual([]);
   });
 
+  it('reports each colony sector secured for the first time on a security contract', () => {
+    const g = reduce(newGame(1, 0), { type: 'chooseAssignment', scenario: 'security', seed: 1 });
+    const before = withMission(g, { elapsed: 600 } as never);
+    const after = withMission(before, { deepest: 1 } as never);
+    expect(contractEvents(before, after)).toEqual([
+      { name: 'sector_secured', props: { sector: 'pad', sectors: 1, minutes: 10, horror: 'organism', cycle: 0 } },
+    ]);
+  });
+
   it('describes the player for every event: game, contract and how far along', () => {
     const g = withMission(game(), { act: 3 });
     expect(contractProperties(g)).toEqual({ game: 'deep-contract', scenario: 'extraction', horror: 'organism', act: 3, cycle: 0 });

@@ -62,6 +62,8 @@ export interface HorrorDef {
   endings: Readonly<Record<string, { title: string; text: string }>>;
   /** Multiplies the scenario's output (e.g. Special Projects funding). */
   productionMultiplier(m: MissionState): number;
+  /** How hard the horror pushes back on ground a scenario holds (1 = mundane). Scenarios without ground ignore it. */
+  pressure?(m: MissionState): number;
   /** Story effects only this horror understands (e.g. a forced breach). */
   applyEffect(m: MissionState, action: string): MissionState;
 }

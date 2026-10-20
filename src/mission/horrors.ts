@@ -9,3 +9,8 @@ export const HORRORS: Readonly<Record<HorrorId, HorrorDef>> = { organism: ORGANI
 export function horrorProductionMultiplier(m: MissionState): number {
   return HORRORS[m.horror].productionMultiplier(m);
 }
+
+/** How hard the mission's horror pushes back on held ground (1 = mundane). Scenarios call this instead of knowing any horror. */
+export function horrorPressure(m: MissionState): number {
+  return HORRORS[m.horror].pressure?.(m) ?? 1;
+}

@@ -23,6 +23,8 @@ export const BREACH_RESET_INTEGRITY = 60;
 const INCIDENT_CHANCE = 0.0008;
 const VENT_BASE_COST = 2e6;
 const VENT_COST_GROWTH = 2;
+const LOOSE_PRESSURE = 1;
+const CONTACT_PRESSURE = 0.5;
 const VENT_CONTACT_SURVIVAL = 0.4;
 const VENT_CREW_LOSS = 0.3;
 
@@ -62,6 +64,11 @@ export function reinforce<M extends MissionState>(m: M): M {
   const cost = reinforceCost(m);
   if (m.integrity >= 100 || m.credits < cost) return m;
   return { ...m, credits: m.credits - cost, integrity: Math.min(100, m.integrity + REINFORCE_AMOUNT) };
+}
+
+/** Something loose takes ground back: once it is out (act 4), and more for every contact still aboard. */
+export function organismPressure(m: MissionState): number {
+  return 1 + (m.act >= 4 ? LOOSE_PRESSURE : 0) + m.contacts * CONTACT_PRESSURE;
 }
 
 export function strainRate(m: MissionState): number {

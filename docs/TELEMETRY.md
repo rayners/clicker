@@ -29,6 +29,7 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark`), 
 | DEEP CONTRACT | `act_reached` | act, minutes |
 | DEEP CONTRACT | `contract_abandoned` | scenario, horror, act, minutes (reassignment) |
 | DEEP CONTRACT | `contract_completed` | ending, scenario, minutes, crewSurvived |
+| DEEP CONTRACT | `sector_secured` | sector, sectors (how many reached), minutes (security contracts) |
 | Elderdark | `region_opened` | region, minutes |
 | Elderdark | `act_reached` | act, minutes |
 | Elderdark | `key_fragment_found` | fragments, minutes |

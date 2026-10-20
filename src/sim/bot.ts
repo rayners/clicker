@@ -25,6 +25,23 @@ import {
   canThaw,
 } from '../mission/terraform/economy';
 
+import { FABRICATORS, TROOPERS } from '../data/security/systems';
+import {
+  ammoDemand,
+  ammoSupply,
+  availableSecurityUpgrades,
+  fabricatorCost,
+  holdForce,
+  isFabricatorRevealed,
+  isTacticalNetActive,
+  isTrooperRevealed,
+  sentryCost,
+  trooperCost,
+  trooperForce,
+} from '../mission/security/economy';
+import { held as heldCount } from '../shared/ground';
+import { SECTIONS } from '../data/security/systems';
+
 export interface SimOptions {
   seed: number;
   scenario?: ScenarioId;
@@ -36,6 +53,8 @@ export interface SimOptions {
   activeSeconds?: number;
   /** Seconds between the bot's purchase decisions. */
   decisionInterval?: number;
+  /** Called every ten minutes of simulated time (tuning scripts). */
+  trace?(game: GameState, t: number): void;
 }
 
 export interface SimResult {
@@ -158,11 +177,57 @@ function decideTerraform(game: GameState): Action | null {
   return null;
 }
 
+type Sec = MissionOf<'security', 'organism'>;
+const MIN_ASSAULT_SHARE = 3;
+
+/** Hold what is secured, push with the rest, keep the fabricators ahead of the guns. */
+function decideSecurity(game: GameState): Action | null {
+  const m = game.mission as Sec;
+  const upgrade = availableSecurityUpgrades(m).find((u) => u.cost <= m.credits);
+  if (upgrade) return { type: 'buyUpgrade', id: upgrade.id };
+  const projects = decideProjects(game);
+  if (projects) return projects;
+
+  if (!isTacticalNetActive(m)) {
+    const need = m.ground.reduce((s, sec, i) => (sec.secured ? s + SECTIONS[i]!.threat : s), 0);
+    const hold = holdForce(m);
+    // Never give up the assault entirely: an overstretched line is fixed by buying force, not by stalling.
+    if (hold < need && m.assaultShare > MIN_ASSAULT_SHARE) return { type: 'shiftSplit', step: -1 };
+    if (hold > need * 1.5 && m.assaultShare < 10) return { type: 'shiftSplit', step: 1 };
+  }
+  if (ammoDemand(m) > ammoSupply(m) * 0.95) {
+    let best: { id: string; value: number } | null = null;
+    FABRICATORS.forEach((f, i) => {
+      if (!isFabricatorRevealed(m, i)) return;
+      const cost = fabricatorCost(f, m.fabricators[f.id] ?? 0);
+      if (cost > m.credits) return;
+      const value = f.rate / cost;
+      if (!best || value > best.value) best = { id: f.id, value };
+    });
+    const pick = best as { id: string; value: number } | null;
+    if (pick) return { type: 'buyFabricator', id: pick.id };
+    if (ammoDemand(m) > ammoSupply(m) * 1.5) return null;
+  }
+  if (heldCount(m.ground) > m.sentries + 2 && sentryCost(m) < m.credits * 0.3) return { type: 'buySentry' };
+  let best: { id: string; value: number } | null = null;
+  TROOPERS.forEach((t, i) => {
+    if (!isTrooperRevealed(m, i)) return;
+    const cost = trooperCost(t, m.troopers[t.id] ?? 0);
+    if (cost > m.credits) return;
+    const value = trooperForce(m, t) / cost;
+    if (!best || value > best.value) best = { id: t.id, value };
+  });
+  const pick = best as { id: string; value: number } | null;
+  return pick ? { type: 'buyTrooper', id: pick.id } : null;
+}
+
 /** A sensible, greedy player. Not optimal: idle-ish after the first stretch, checks in periodically. */
 function decide(game: GameState): Action | null {
   const shared = decideShared(game);
   if (shared) return shared;
-  return game.mission.scenario === 'terraform' ? decideTerraform(game) : decideExtraction(game);
+  if (game.mission.scenario === 'terraform') return decideTerraform(game);
+  if (game.mission.scenario === 'security') return decideSecurity(game);
+  return decideExtraction(game);
 }
 
 export function simulateRun(options: SimOptions): SimResult {
@@ -171,7 +236,8 @@ export function simulateRun(options: SimOptions): SimResult {
   let game: GameState = createGame(seed, 0);
   const profile = seniority > 0 ? { ...createProfile(), seniority, contractsCompleted: 1, endingsSeen: ['deliver'] } : game.profile;
   game = { ...game, profile, mission: createMission(missionConfigFor(profile, scenario), seed) };
-  const press: Action = scenario === 'terraform' ? { type: 'surge' } : { type: 'drill' };
+  const PRESS: Record<ScenarioId, Action> = { extraction: { type: 'drill' }, terraform: { type: 'surge' }, security: { type: 'fireSupport' } };
+  const press = PRESS[scenario];
   const actAt: Record<number, number> = { 1: 0 };
   let terminusAt: number | undefined;
 
@@ -189,6 +255,7 @@ export function simulateRun(options: SimOptions): SimResult {
       }
     }
     game = tickGame(game, 1);
+    if (options.trace && t % 600 === 0) options.trace(game, t);
     const act = game.mission.act;
     if (actAt[act] === undefined) actAt[act] = t;
     if (terminusAt === undefined && game.mission.flags.includes('terminus')) {

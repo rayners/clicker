@@ -1,5 +1,7 @@
 import type { TelemetryEvent, TelemetryProps } from '../shared/telemetry';
 import type { GameState } from './game';
+import { SECTIONS } from '../data/security/systems';
+import { isSecurity } from '../mission/state';
 
 const minutes = (seconds: number) => Math.round(seconds / 60);
 
@@ -27,8 +29,15 @@ export function contractEvents(prev: GameState, next: GameState): TelemetryEvent
       events.push({ name: 'contract_abandoned', props: { scenario: old.scenario, horror: old.horror, act: old.act, minutes: minutes(old.elapsed), cycle } });
     }
     events.push({ name: 'contract_started', props: { scenario: m.scenario, horror: m.horror, reason: prev.assigning, cycle } });
-  } else if (m.seed === prev.mission.seed && m.act > prev.mission.act) {
-    events.push({ name: 'act_reached', props: { act: m.act, scenario: m.scenario, horror: m.horror, minutes: minutes(m.elapsed), cycle } });
+  } else if (m.seed === prev.mission.seed) {
+    if (m.act > prev.mission.act) {
+      events.push({ name: 'act_reached', props: { act: m.act, scenario: m.scenario, horror: m.horror, minutes: minutes(m.elapsed), cycle } });
+    }
+    const was = prev.mission;
+    if (isSecurity(m) && isSecurity(was) && m.deepest > was.deepest) {
+      const sector = SECTIONS[m.deepest - 1]!.id;
+      events.push({ name: 'sector_secured', props: { sector, sectors: m.deepest, minutes: minutes(m.elapsed), horror: m.horror, cycle } });
+    }
   }
   return events;
 }

@@ -118,6 +118,20 @@ The core trade-off is identical in both games and is the point of sharing it: **
 
 Strip a derelict hull section by section, using held ground again: sections are compartments. Cutting faster gains more salvage per second but risks **breaches**, a pressure-loss event that seals a compartment. This one is built last because it overlaps most with extraction and security.
 
+## As built (2026-10-20)
+
+**1. Held ground: done** (`src/shared/ground.ts`, `tests/shared/ground.test.ts`). It differs from the sketch in two ways, both found by the pacing bot:
+- **Contested sectors.** A secured section has a `secured` flag. It stays held, and keeps paying, while it slips; it is lost only when control falls below `LOST_BELOW` (0.5). A full garrison wins contested ground back. Without this, an unguarded sector stopped paying the instant it dipped below 100%.
+- **The frontier is left to the assault.** The section under assault does not also drift back. Otherwise drift and assault cancelled out exactly, and the marines stalled at the sub-levels.
+
+**2. Security detachment: done.**
+- **Code:** `src/mission/security/`, `src/data/security/`, `src/ui/scenarios/security.ts`, `src/ui/split.ts` (the assault/line split), `src/ui/site.ts` (the sector column).
+- **Debug jumps:** `?debug=security` and `?debug=sec-act2`.
+- **Pacing (bot):** Act II 59m, Act III 2h31m, Act IV 2h56m, terminus 4h11m.
+- **Sentry guns are holding force,** not whole sectors. Each adds a fixed garrison that burns ammunition, and three requisitions multiply it. The first version gave each gun a whole sector, most dangerous first, and the bot took the colony in 90 minutes.
+- **The economy mirrors terraforming's,** to keep pacing predictable. Troopers use the processor ladder and fabricators the reactor ladder. Threat triples per sector, and the retainer is 0.75 credits per second per point of threat held. WARDEN's tactical net (auto-split) is the load balancer's counterpart, and it can be overruled the same way.
+- **The organism horror** raises `pressure` through the new `HorrorDef.pressure` hook: +1 once loose (act 4), and +0.5 per contact.
+
 ## Build order
 
 1. **Held ground** in `src/shared/ground.ts`, test-first, with no game attached.
