@@ -1,5 +1,6 @@
 import { deflateSync } from 'node:zlib';
 import { SPRITES } from '../src/data/sprites';
+import type { Sprite } from '../src/shared/pixels';
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
   let c = n;
@@ -53,16 +54,25 @@ const PALETTE: Record<string, number[]> = {
 
 /** Draw a sprite centred on an opaque square, scaled by whole pixels so it stays crisp. */
 export function renderIcon(spriteName: string, size: number): { width: number; height: number; rgba: Uint8Array } {
-  const sprite = SPRITES[spriteName]!;
+  return renderSpriteIcon(SPRITES[spriteName]!, PALETTE, BACKGROUND, size);
+}
+
+/** Draws a palette-indexed sprite, scaled up with hard pixels, centred on an opaque square. */
+export function renderSpriteIcon(
+  sprite: Sprite,
+  palette: Record<string, number[]>,
+  background: number[],
+  size: number,
+): { width: number; height: number; rgba: Uint8Array } {
   const frame = sprite.frames[0]!;
   const scale = Math.floor((size * 0.7) / Math.max(sprite.width, sprite.height));
   const offsetX = Math.floor((size - sprite.width * scale) / 2);
   const offsetY = Math.floor((size - sprite.height * scale) / 2);
   const rgba = new Uint8Array(size * size * 4);
-  for (let i = 0; i < size * size; i++) rgba.set([...BACKGROUND, 255], i * 4);
+  for (let i = 0; i < size * size; i++) rgba.set([...background, 255], i * 4);
   frame.forEach((row, y) => {
     for (let x = 0; x < row.length; x++) {
-      const colour = PALETTE[row[x]!];
+      const colour = palette[row[x]!];
       if (!colour) continue;
       for (let dy = 0; dy < scale; dy++) {
         for (let dx = 0; dx < scale; dx++) {

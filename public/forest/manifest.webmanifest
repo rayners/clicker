@@ -1,0 +1,16 @@
+{
+  "name": "Charter of the Elderdark",
+  "short_name": "Elderdark",
+  "description": "The ledger of the Company of the Ashen Key, kept at Thistlegate on the edge of the Elderdark.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#120d08",
+  "theme_color": "#120d08",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -13,7 +13,8 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      // Each game's entry registers the shared service worker itself (see src/main.ts, src/forest-main.ts).
+      injectRegister: false,
       includeAssets: ['icons/apple-touch-icon.png', 'icons/favicon-32.png'],
       manifest: {
         name: 'DEEP CONTRACT',
@@ -32,7 +33,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,woff,woff2}'],
+        globPatterns: ['**/*.{js,css,html,png,woff,woff2,webmanifest}'],
+        // The forest has its own page; never answer its navigations with DEEP CONTRACT's.
+        navigateFallbackDenylist: [/\/forest\//],
       },
     }),
   ],

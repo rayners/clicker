@@ -136,16 +136,46 @@ The pacing targets mirror DEEP CONTRACT (about 1h / 2.5h / 3h / 4.5h) and are en
 
 | Step | Status |
 |---|---|
-| 1. Shared engine extraction and a multi-page build | done: `src/shared/` (format, rng, save system, store, log, pixels, flow, monitor, log view, sprite kit, dom). DEEP CONTRACT binds them. `tests/architecture.test.ts` enforces the boundaries. |
-| 2. Company simulation | done: `src/forest/company.ts` |
-| 3. Ledger UI | done: `src/forest-ui/`, at `/forest/` |
-| 4. Upgrades, Quartermaster automation, Act I ledger entries | next |
-| 5. Captains, Acts II–IV, turned hands, archive | |
-| 6. Endings, renewal, pacing bot and tuning | |
-| 7. PWA for the second app, CFG (settings, export/import, reset), real-device pass | e2e on desktop and iPhone emulation done; PWA and CFG still to do |
+| 1. Shared engine and multi-page build | done: `src/shared/` (format, rng, save system, store, log, story engine, lexicon, pixels, flow, monitor, log view, sprite kit, dom). `tests/architecture.test.ts` enforces the boundaries. |
+| 2. Company simulation | done |
+| 3. Ledger UI | done |
+| 4. Requisitions, Quartermaster, Act I | done |
+| 5. Acts II–IV, turning, the Ashen Key | done. **Captains** (named veterans) are not built yet; see below. |
+| 6. Reckoning, charter renewal, pacing bot | done (`npm run simulate:forest`, `tests/forest/pacing.test.ts`) |
+| 7. PWA, CFG, e2e | done: own manifest and icons (`npm run icons`), the shared service worker registered from both pages (verified offline), CFG with export/import/new charter, e2e on desktop and iPhone emulation. A real-device pass by the user is still to do. |
 
-As-built notes:
-- **Units:** one relic sells for one thaler. Wages are about 0.05–0.1 thalers per second per hand.
-- **Calendar:** a game day is 24 minutes (one "bell" per minute).
-- **Displayed income** counts the vault as selling down over a minute, so COFFERS shows a steady figure rather than a momentary one.
-- **Numbers** are first guesses, and the Eaves yield has been raised once by hand. They need the pacing bot (step 6) before they can be trusted.
+### As built (where it differs from the plan above)
+
+- **The delve is charted, not derived.**
+  - Parties returning from a region chart the way toward the next region, and only that far, so the frontier has to be worked.
+  - Scouts chart faster; dead hands chart nothing.
+  - An always-visible **map strip** shows progress toward the next region (user feedback: "not quite seeing what leads to deeper delves").
+- **The Armoury:** strength scales by equipment (×1.5 per level, costing ×2 per level), not by headcount. Hire costs grow 15% per hand while danger grows about 5× per region, so headcount alone stalled every bot run at the Barrows.
+- **Quartermaster:** standing regions send a party each tick while rested hands allow, **deepest first**. Otherwise older regions starve the frontier.
+- **Blight with teeth:**
+  - Above 40%, rested hands *turn*: they leave the roster, and each turned hand makes every region 3% more dangerous.
+  - The chapel eases only 0.006% per second per level, and deep regions carry heavy Blight, so penance and Mystics matter.
+- **The Ashen Key:**
+  - Fragments come only from the Undercity (20% per returning party) and the Heartwood (35%).
+  - Holding fragments raises Blight.
+  - The first fragment opens Act III. Three open Act IV: the wood wakes and danger rises 1% a minute.
+  - The Terminus comes at seven fragments, or 75 minutes after the wood wakes.
+- **Endings:** sell (Renown, +25% haul each), return (Grace: Blight ÷(1+0.2g) and healing ×(1+0.25g)), and burn (both; needs 3 charters and Grace 3).
+- **Pacing (bot, 3 seeds):**
+  - Hollows ~6m.
+  - Barrows / Act II ~55m.
+  - Thornmaze ~1h25m.
+  - Undercity ~2h20m–2h58m.
+  - Act III ~2h37m–3h11m.
+  - Act IV ~3h–3h36m.
+  - Terminus ~3h40m–4h15m.
+  - The Heartwood is usually not reached before the reckoning; it's optional, a place for later charters.
+- **Units and timing:** one relic sells for one thaler, and a game day is 24 minutes.
+
+### Next / backlog
+
+- **Captains:** named veterans who lead parties, carry their own corruption, and can turn (the crew analogue).
+- **Archive:** readable documents: the charter, the Synod writ, old ledger pages, the Collegium's letters.
+- **Sound:** quill scratch, a bell, the vault's note.
+- **Mechanical teeth for Act IV beats:** the audit burning hands, assaults on the palisade.
+- **A real-device pass** on iPhone Safari, in the browser and installed.

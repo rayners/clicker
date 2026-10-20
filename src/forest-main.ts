@@ -33,3 +33,9 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('pagehide', save);
 void navigator.storage?.persist?.();
+
+// One service worker serves both games from the site root; register it from here too, so the forest works offline
+// even if DEEP CONTRACT's page has never been opened. Only built pages have one.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register(new URL('../sw.js', location.href), { scope: new URL('../', location.href).pathname }).catch(() => undefined);
+}

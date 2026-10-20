@@ -37,3 +37,8 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('pagehide', save);
 
 void navigator.storage?.persist?.();
+
+// The service worker is shared with the forest page; only built pages have one.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register(new URL('./sw.js', location.href)).catch(() => undefined);
+}

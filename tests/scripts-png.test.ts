@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { inflateSync } from 'node:zlib';
-import { encodePng, renderIcon } from '../scripts/png';
+import { encodePng, renderIcon, renderSpriteIcon } from '../scripts/png';
+import { FOREST_SPRITES } from '../src/forest-data/sprites';
 
 describe('icon PNG encoder', () => {
   it('writes a PNG signature and a header with the right size', () => {
@@ -28,5 +29,14 @@ describe('icon PNG encoder', () => {
     expect(rgba[3]).toBe(255);
     const center = (32 * 64 + 32) * 4;
     expect(rgba[center + 1]).toBeGreaterThan(rgba[center]!); // phosphor green
+  });
+});
+
+describe('icons for the second game', () => {
+  it('renders any sprite in its own palette on its own background', () => {
+    const { rgba } = renderSpriteIcon(FOREST_SPRITES.key!, { d: [201, 162, 74], e: [184, 67, 47] }, [18, 13, 8], 64);
+    expect([...rgba.subarray(0, 3)]).toEqual([18, 13, 8]);
+    const gilt = [...rgba].some((_, i) => i % 4 === 0 && rgba[i] === 201 && rgba[i + 1] === 162);
+    expect(gilt).toBe(true);
   });
 });
