@@ -27,6 +27,8 @@ export interface Company {
   relics: number;
   lifetimeRelics: number;
   hired: Composition;
+  /** Hands lost to the wood over the charter. */
+  lifetimeDead: number;
   wounded: Composition;
   /** Fractional healing carried between ticks, per class. */
   mending: Composition;
@@ -36,6 +38,8 @@ export interface Company {
   orders: Record<string, Composition>;
   parties: Party[];
   nextPartyId: number;
+  /** Regions whose standing orders the Quartermaster sends without being told. */
+  standing: string[];
   /** Leagues of the wood charted by returning parties: how deep the company dares go. */
   charted: number;
   /** Company-wide corruption, 0-100. */
@@ -66,12 +70,14 @@ export function createCompany(seed: number): Company {
     relics: 0,
     lifetimeRelics: 0,
     hired: emptyComposition(),
+    lifetimeDead: 0,
     wounded: emptyComposition(),
     mending: emptyComposition(),
     arrears: 0,
     orders: Object.fromEntries(REGIONS.map((r) => [r.id, { ...DEFAULT_ORDER }])),
     parties: [],
     nextPartyId: 1,
+    standing: [],
     charted: 0,
     blight: 0,
     buildings: Object.fromEntries(BUILDINGS.map((b) => [b.id, 0])) as Record<BuildingId, number>,

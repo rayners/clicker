@@ -15,6 +15,8 @@ export const forestSaves = createSaveSystem<ForestGame>({
       const relics = Number(company.lifetimeRelics ?? 0);
       return { ...save, company: { charted: Math.floor(0.5 * Math.log10(1 + relics) ** 1.6), ...company } };
     },
+    // v3: Quartermaster standing regions, and a count of the dead.
+    3: (save) => ({ ...save, company: { standing: [], lifetimeDead: 0, ...(save.company as Record<string, unknown>) } }),
   },
   label: 'ELDERDARK',
   required: ['profile', 'company'],

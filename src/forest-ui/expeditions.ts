@@ -2,7 +2,7 @@ import { formatDuration, formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
 import { CLASSES, CLASS_IDS } from '../forest-data/classes';
 import { REGIONS } from '../forest-data/regions';
-import { available, chartingPerTrip, isRegionOpen, project } from '../forest/company';
+import { available, chartingPerTrip, isRegionOpen, maxStandingRegions, project } from '../forest/company';
 import type { Company } from '../forest/state';
 import type { ForestStore } from '../forest/store';
 
@@ -25,6 +25,8 @@ export function createExpeditions(store: ForestStore): { el: HTMLElement; render
     const forecast = h('p', { class: 'forecast' });
     const send = h('button', { class: 'buy send', type: 'button', 'aria-label': `Send a party to ${lower}` }, 'SEND THE PARTY');
     send.addEventListener('click', () => store.dispatch({ type: 'dispatch', region: region.id }));
+    const standing = h('button', { class: 'standing', type: 'button', 'aria-label': `${lower} order sends itself`, 'aria-pressed': 'false' });
+    standing.addEventListener('click', () => store.dispatch({ type: 'toggleStanding', region: region.id }));
     const el = h(
       'article',
       { class: 'sys-row region-card', 'aria-label': region.name, 'data-region': region.id },
@@ -32,9 +34,9 @@ export function createExpeditions(store: ForestStore): { el: HTMLElement; render
       h('p', { class: 'sys-desc' }, region.description),
       h('div', { class: 'order' }, ...counts.map((x) => x.el)),
       forecast,
-      send,
+      h('div', { class: 'card-actions' }, send, standing),
     );
-    return { region, el, counts, odds, forecast, send };
+    return { region, el, counts, odds, forecast, send, standing };
   });
   const sealed = h('p', { class: 'sealed' });
   const el = h('div', { class: 'panel-body' }, h('h2', { class: 'panel-title' }, 'Standing Orders'), ...cards.map((c) => c.el), sealed);
@@ -59,7 +61,7 @@ export function createExpeditions(store: ForestStore): { el: HTMLElement; render
         ? ''
         : c.charted >= onward.opensAt
           ? ' WAY ONWARD ALREADY CHARTED.'
-          : ` CHARTS +${chartingPerTrip(card.region, order).toFixed(2)} LEAGUES TOWARD ${onward.name}.`;
+          : ` CHARTS +${chartingPerTrip(c, card.region, order).toFixed(2)} LEAGUES TOWARD ${onward.name}.`;
       setText(
         card.forecast,
         `EXPECT ~${formatNumber(p.haul)} RELICS IN ${formatDuration(p.duration)}. EACH HAND: ${pct(p.woundRisk)} WOUNDED, ${pct(p.woundRisk * p.deathRisk)} DEAD. BLIGHT +${p.blightPerHand.toFixed(2)} EACH.${charting}`,
@@ -69,6 +71,13 @@ export function createExpeditions(store: ForestStore): { el: HTMLElement; render
       card.send.disabled = short.length > 0 || CLASS_IDS.every((id) => order[id] === 0);
       setText(card.send, short.length > 0 ? `NOT ENOUGH ${short.map((id) => CLASSES.find((k) => k.id === id)!.plural).join(', ')}` : 'SEND THE PARTY');
       setAttr(card.send, 'aria-label', `Send a party to ${card.region.name.toLowerCase()}`);
+      const allowed = maxStandingRegions(c);
+      const on = c.standing.includes(card.region.id);
+      card.standing.hidden = allowed === 0;
+      setAttr(card.standing, 'aria-pressed', String(on));
+      setText(card.standing, on ? 'SENDS ITSELF ✓' : `QUARTERMASTER (${c.standing.length}/${allowed})`);
+      card.standing.disabled = !on && c.standing.length >= allowed;
+      card.el.dataset.standing = String(on);
     }
     sealed.hidden = nextSealed === null;
     setText(sealed, nextSealed ?? '');

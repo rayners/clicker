@@ -1,7 +1,8 @@
 import { formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
 import { BUILDINGS } from '../forest-data/buildings';
-import { buildingCost, PENANCE_AMOUNT, penanceCost } from '../forest/company';
+import { availableUpgrades, buildingCost, PENANCE_AMOUNT, penanceCost } from '../forest/company';
+import { FOREST_UPGRADES } from '../forest-data/upgrades';
 import type { Company } from '../forest/state';
 import type { ForestStore } from '../forest/store';
 
@@ -20,6 +21,9 @@ export function createHall(store: ForestStore): { el: HTMLElement; render(c: Com
     );
     return { b, el, level, button };
   });
+  const offered = h('ul', { class: 'sys-list' });
+  const installed = h('p', { class: 'installed' });
+  const offers = new Map<string, { li: HTMLLIElement; button: HTMLButtonElement }>();
   const penanceButton = h('button', { class: 'buy penance', type: 'button' });
   penanceButton.addEventListener('click', () => store.dispatch({ type: 'penance' }));
   const blight = h('span', { class: 'sys-owned' });
@@ -28,6 +32,9 @@ export function createHall(store: ForestStore): { el: HTMLElement; render(c: Com
     { class: 'panel-body' },
     h('h2', { class: 'panel-title' }, 'The Hall at Thistlegate'),
     h('ul', { class: 'sys-list' }, ...rows.map((r) => r.el)),
+    h('h3', { class: 'panel-subtitle' }, 'REQUISITIONS'),
+    offered,
+    installed,
     h('h3', { class: 'panel-subtitle' }, 'The Lantern Synod'),
     h(
       'div',
@@ -46,6 +53,38 @@ export function createHall(store: ForestStore): { el: HTMLElement; render(c: Com
       setAttr(r.button, 'aria-label', `Build ${r.b.name.toLowerCase()} for ${formatNumber(cost)} thalers`);
       r.button.disabled = c.silver < cost;
     }
+    const list = availableUpgrades(c);
+    const ids = new Set(list.map((u) => u.id));
+    for (const [id, offer] of offers) {
+      if (!ids.has(id)) {
+        offer.li.remove();
+        offers.delete(id);
+      }
+    }
+    list.forEach((u, index) => {
+      let offer = offers.get(u.id);
+      if (!offer) {
+        const button = h(
+          'button',
+          { class: 'buy', type: 'button', 'aria-label': `Requisition ${u.name.toLowerCase()} for ${formatNumber(u.cost)} thalers` },
+          `REQUISITION · ${formatNumber(u.cost)} ₮`,
+        );
+        button.addEventListener('click', () => store.dispatch({ type: 'buyUpgrade', id: u.id }));
+        const li = h(
+          'li',
+          { class: 'sys-row' },
+          h('div', { class: 'sys-head' }, h('span', { class: 'sys-name' }, u.name)),
+          h('p', { class: 'sys-desc' }, u.description),
+          h('div', { class: 'sys-foot' }, h('span'), button),
+        );
+        offer = { li, button };
+        offers.set(u.id, offer);
+      }
+      if (offered.children[index] !== offer.li) offered.insertBefore(offer.li, offered.children[index] ?? null);
+      offer.button.disabled = c.silver < u.cost;
+    });
+    const owned = FOREST_UPGRADES.filter((u) => c.upgrades.includes(u.id)).map((u) => u.name);
+    setText(installed, owned.length > 0 ? `IN HAND: ${owned.join(' · ')}` : '');
     const cost = penanceCost(c);
     setText(blight, `BLIGHT ${Math.round(c.blight)}%`);
     setText(penanceButton, `PAY · ${formatNumber(cost)} ₮`);

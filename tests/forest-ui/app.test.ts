@@ -156,3 +156,59 @@ describe('the map (what leads deeper)', () => {
     expect(within(screen.getByRole('article', { name: /the eaves/i })).getByText(/WAY ONWARD ALREADY CHARTED/)).toBeTruthy();
   });
 });
+
+describe('requisitions', () => {
+  it('lists unlocked requisitions in the hall and buys them', async () => {
+    const user = setup({ silver: 1e6, lifetimeRelics: 300 });
+    await user.click(tab(/hall/i));
+    await user.click(screen.getByRole('button', { name: /requisition the quartermaster/i }));
+    expect(company().upgrades).toContain('quartermaster');
+  });
+
+  it('marks the hall tab when a requisition is affordable', () => {
+    setup({ silver: 1e6, lifetimeRelics: 300 });
+    expect(tab(/hall/i).dataset.attention).toBe('active');
+  });
+});
+
+describe('standing orders that send themselves', () => {
+  it('offers the toggle only once the Quartermaster is hired', async () => {
+    const user = setup();
+    await user.click(tab(/expeditions/i));
+    expect(screen.queryByRole('button', { name: /sends itself/i })).toBeNull();
+  });
+
+  it('toggles a region to send itself, and shows it on the card', async () => {
+    const user = setup({ upgrades: ['quartermaster'] });
+    await user.click(tab(/expeditions/i));
+    const toggle = screen.getByRole('button', { name: /the eaves order sends itself/i });
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+    await user.click(toggle);
+    expect(company().standing).toEqual(['eaves']);
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+  });
+});
+
+describe('configuration', () => {
+  it('exports a save code, and a hard reset needs a second tap', async () => {
+    const user = setup({ silver: 777 });
+    await user.click(screen.getByRole('button', { name: /configuration/i }));
+    const dialog = within(screen.getByRole('dialog', { name: /configuration/i }));
+    await user.click(dialog.getByRole('button', { name: /export/i }));
+    expect((dialog.getByRole('textbox', { name: /save code/i }) as HTMLTextAreaElement).value.length).toBeGreaterThan(50);
+    await user.click(dialog.getByRole('button', { name: /start a new charter/i }));
+    expect(company().silver).toBe(777);
+    await user.click(dialog.getByRole('button', { name: /confirm/i }));
+    expect(company().silver).not.toBe(777);
+  });
+
+  it('imports a save code', async () => {
+    const user = setup({ silver: 5 });
+    const code = (await import('../../src/forest/save')).forestSaves.exportSave({ ...store.getState(), company: { ...company(), silver: 4242 } });
+    await user.click(screen.getByRole('button', { name: /configuration/i }));
+    const dialog = within(screen.getByRole('dialog', { name: /configuration/i }));
+    await user.type(dialog.getByRole('textbox', { name: /save code/i }), code);
+    await user.click(dialog.getByRole('button', { name: /import/i }));
+    expect(company().silver).toBe(4242);
+  });
+});

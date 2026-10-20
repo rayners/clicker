@@ -1,9 +1,11 @@
 import { CLASSES, CLASS_IDS, type ClassId } from '../forest-data/classes';
 import { REGIONS, type RegionDef } from '../forest-data/regions';
 import { BUILDINGS, type BuildingId } from '../forest-data/buildings';
+import { FOREST_UPGRADES, type ForestEffect, type ForestUpgrade } from '../forest-data/upgrades';
 import { nextRandom } from '../shared/rng';
 import { formatNumber } from '../shared/format';
 import { appendLog } from '../shared/log';
+import { runForestStory } from './story';
 import { emptyComposition, type Company, type Composition, type EntryKind, type Party } from './state';
 
 export const COST_GROWTH = 1.15;
@@ -29,6 +31,66 @@ const HAUL_VARIANCE = 0.25;
 const SCOUT_CHARTING = 0.5;
 
 const def = (id: ClassId) => CLASSES.find((k) => k.id === id)!;
+
+interface Modifiers {
+  strength: Composition;
+  haul: number;
+  wounds: number;
+  blight: number;
+  wages: number;
+  charting: number;
+  forage: number;
+  autoForage: number;
+  standingRegions: number;
+}
+
+function applyEffect(m: Modifiers, e: ForestEffect): void {
+  switch (e.kind) {
+    case 'classStrength':
+      m.strength[e.id] *= e.value;
+      break;
+    case 'haulMultiplier':
+      m.haul *= e.value;
+      break;
+    case 'woundMultiplier':
+      m.wounds *= e.value;
+      break;
+    case 'blightMultiplier':
+      m.blight *= e.value;
+      break;
+    case 'wageMultiplier':
+      m.wages *= e.value;
+      break;
+    case 'chartMultiplier':
+      m.charting *= e.value;
+      break;
+    case 'forageMultiplier':
+      m.forage *= e.value;
+      break;
+    case 'autoForage':
+      m.autoForage += e.value;
+      break;
+    case 'quartermaster':
+      m.standingRegions += e.value;
+      break;
+  }
+}
+
+function modifiers(c: Company): Modifiers {
+  const m: Modifiers = {
+    strength: Object.fromEntries(CLASS_IDS.map((id) => [id, 1])) as Composition,
+    haul: 1,
+    wounds: 1,
+    blight: 1,
+    wages: 1,
+    charting: 1,
+    forage: 1,
+    autoForage: 0,
+    standingRegions: 0,
+  };
+  for (const u of FOREST_UPGRADES) if (c.upgrades.includes(u.id)) applyEffect(m, u.effect);
+  return m;
+}
 const size = (comp: Composition) => CLASS_IDS.reduce((s, id) => s + comp[id], 0);
 const log = (c: Company, kind: EntryKind, text: string) => appendLog<EntryKind, Company>(c, kind, text);
 
@@ -63,8 +125,8 @@ export function frontier(c: Company): { region: RegionDef; next: RegionDef | nul
 }
 
 /** Leagues a returning party charts, before the cap at the next region. */
-export function chartingPerTrip(region: RegionDef, comp: Composition): number {
-  return region.chart * (1 + SCOUT_CHARTING * comp.scout);
+export function chartingPerTrip(c: Company, region: RegionDef, comp: Composition): number {
+  return region.chart * (1 + SCOUT_CHARTING * comp.scout) * modifiers(c).charting;
 }
 
 /** A region only teaches the way as far as the region after it. */
@@ -72,7 +134,7 @@ function chart(c: Company, region: RegionDef, comp: Composition, survivors: numb
   const index = REGIONS.indexOf(region);
   const next = REGIONS[index + 1];
   if (!next || c.charted >= next.opensAt || survivors === 0) return c;
-  const gained = chartingPerTrip(region, comp) * (survivors / size(comp));
+  const gained = chartingPerTrip(c, region, comp) * (survivors / size(comp));
   const charted = Math.min(next.opensAt, c.charted + gained);
   const reached = charted >= next.opensAt;
   return log(
@@ -84,8 +146,17 @@ function chart(c: Company, region: RegionDef, comp: Composition, survivors: numb
   );
 }
 
+function gather(c: Company, relics: number): Company {
+  return { ...c, relics: c.relics + relics, lifetimeRelics: c.lifetimeRelics + relics };
+}
+
 export function forage(c: Company): Company {
-  return { ...c, relics: c.relics + FORAGE_YIELD, lifetimeRelics: c.lifetimeRelics + FORAGE_YIELD };
+  return gather(c, FORAGE_YIELD * modifiers(c).forage);
+}
+
+/** Forages per second done by gleaners. */
+export function autoForageRate(c: Company): number {
+  return modifiers(c).autoForage;
 }
 
 // ---------- recruiting and wages ----------
@@ -101,7 +172,7 @@ export function hire(c: Company, id: ClassId): Company {
 }
 
 export function wages(c: Company): number {
-  return CLASS_IDS.reduce((s, id) => s + c.hired[id] * def(id).wage, 0);
+  return CLASS_IDS.reduce((s, id) => s + c.hired[id] * def(id).wage, 0) * modifiers(c).wages;
 }
 
 function inField(c: Company, id: ClassId): number {
@@ -152,19 +223,20 @@ export interface Projection {
 }
 
 /** Expected outcome of sending this composition into this region. */
-export function project(_c: Company, region: RegionDef, comp: Composition): Projection {
-  const strength = CLASS_IDS.reduce((s, id) => s + comp[id] * def(id).strength, 0);
+export function project(c: Company, region: RegionDef, comp: Composition): Projection {
+  const mod = modifiers(c);
+  const strength = CLASS_IDS.reduce((s, id) => s + comp[id] * def(id).strength * mod.strength[id], 0);
   const ratio = strength / region.danger;
   const effective = Math.max(0.2, ratio);
   return {
     strength,
     danger: region.danger,
     ratio,
-    haul: region.relics * Math.min(HAUL_CAP, ratio) * (1 + 0.15 * comp.scout + 0.2 * comp.mystic),
+    haul: region.relics * Math.min(HAUL_CAP, ratio) * (1 + 0.15 * comp.scout + 0.2 * comp.mystic) * mod.haul,
     duration: region.duration * Math.max(0.5, 1 - 0.08 * comp.scout),
-    woundRisk: Math.min(0.9, region.harm / effective ** 1.5 / (1 + 0.6 * comp.mender)),
+    woundRisk: Math.min(0.9, (region.harm / effective ** 1.5 / (1 + 0.6 * comp.mender)) * mod.wounds),
     deathRisk: Math.min(0.8, Math.max(0.02, 0.35 * (1 - ratio) + 0.05)) / (1 + 0.3 * comp.mender),
-    blightPerHand: region.blight / (1 + 0.35 * comp.mystic),
+    blightPerHand: (region.blight / (1 + 0.35 * comp.mystic)) * mod.blight,
   };
 }
 
@@ -205,6 +277,7 @@ function resolve(c: Company, party: Party): Company {
     relics: c.relics + haul,
     lifetimeRelics: c.lifetimeRelics + haul,
     hired: Object.fromEntries(CLASS_IDS.map((id) => [id, c.hired[id] - dead[id]])) as Composition,
+    lifetimeDead: c.lifetimeDead + size(dead),
     wounded: Object.fromEntries(CLASS_IDS.map((id) => [id, c.wounded[id] + wounded[id]])) as Composition,
     blight: Math.min(MAX_BLIGHT, c.blight + blight),
   };
@@ -278,15 +351,53 @@ export function buyBuilding(c: Company, id: BuildingId): Company {
   return { ...c, silver: c.silver - cost, buildings: { ...c.buildings, [id]: c.buildings[id] + 1 } };
 }
 
+// ---------- requisitions and the Quartermaster ----------
+
+export function isUpgradeUnlocked(c: Company, u: ForestUpgrade): boolean {
+  return c.lifetimeRelics >= (u.unlock.relics ?? 0) && delve(c) >= (u.unlock.delve ?? 0);
+}
+
+export function availableUpgrades(c: Company): ForestUpgrade[] {
+  return FOREST_UPGRADES.filter((u) => !c.upgrades.includes(u.id) && isUpgradeUnlocked(c, u)).sort((a, b) => a.cost - b.cost);
+}
+
+export function buyUpgrade(c: Company, id: string): Company {
+  const u = FOREST_UPGRADES.find((x) => x.id === id);
+  if (!u || c.upgrades.includes(id) || !isUpgradeUnlocked(c, u) || c.silver < u.cost) return c;
+  return { ...c, silver: c.silver - u.cost, upgrades: [...c.upgrades, id] };
+}
+
+/** How many regions' standing orders may send themselves. */
+export function maxStandingRegions(c: Company): number {
+  return modifiers(c).standingRegions;
+}
+
+export function toggleStanding(c: Company, region: string): Company {
+  if (c.standing.includes(region)) return { ...c, standing: c.standing.filter((r) => r !== region) };
+  const def = REGIONS.find((r) => r.id === region);
+  if (!def || !isRegionOpen(c, def) || c.standing.length >= maxStandingRegions(c)) return c;
+  return { ...c, standing: [...c.standing, region] };
+}
+
+/** Standing regions send a party each tick while the hall has the hands for one. */
+function muster(c: Company): Company {
+  let next = c;
+  for (const region of c.standing) next = dispatch(next, region);
+  return next;
+}
+
 // ---------- the tick ----------
 
 export function tickCompany(c: Company, dt: number): Company {
   let next: Company = { ...c, elapsed: c.elapsed + dt };
   for (const party of next.parties.filter((p) => p.returnsAt <= next.elapsed)) next = resolve(next, party);
+  const gleaned = autoForageRate(next) * FORAGE_YIELD * modifiers(next).forage * dt;
+  if (gleaned > 0) next = gather(next, gleaned);
+  next = muster(next);
   next = mend(next, dt);
   next = appraise(next, dt);
   next = payWages(next, dt);
-  return settleBlight(next, dt);
+  return runForestStory(settleBlight(next, dt));
 }
 
 // ---------- rates (for the flow readout and the bot) ----------

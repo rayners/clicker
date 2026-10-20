@@ -825,3 +825,157 @@ button:focus-visible {
   border-left: 3px solid var(--gilt);
   padding-left: 8px;
 }
+
+/* ---------- requisitions, standing orders, tab markers ---------- */
+
+.installed {
+  margin: 6px 0 0;
+  font-size: 0.75em;
+  font-style: italic;
+  color: var(--ink-dim);
+}
+
+.card-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+
+.send {
+  white-space: normal;
+}
+
+.standing {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px dashed var(--ink-dim);
+  background: transparent;
+  font-size: 0.78em;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.standing[aria-pressed='true'] {
+  border-style: solid;
+  border-color: var(--gilt);
+  color: var(--gilt);
+}
+
+.region-card[data-standing='true'] .sys-name::after {
+  content: ' · STANDING';
+  font-size: 0.7em;
+  color: var(--gilt);
+}
+
+.tab[data-attention] {
+  position: relative;
+  color: var(--ink);
+}
+
+.tab[data-attention]::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gilt);
+  box-shadow: 0 0 6px rgba(201, 162, 74, 0.8);
+}
+
+/* ---------- configuration ---------- */
+
+.mast-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mast-line {
+  align-items: center;
+}
+
+.cfg-open {
+  min-width: 36px;
+  min-height: 36px;
+  margin: -6px -8px -6px 0;
+  border: 0;
+  background: transparent;
+  font-size: 1.2em;
+  color: var(--ink-dim);
+}
+
+.cfg {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(8, 5, 2, 0.82);
+}
+
+.cfg-box {
+  width: min(520px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 0 14px 14px;
+  border: 3px double var(--gilt);
+  background: var(--paper);
+}
+
+.cfg-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cfg-close {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  font-size: 1.2em;
+}
+
+.cfg-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  letter-spacing: 0.1em;
+}
+
+.cfg-toggle input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--gilt);
+}
+
+.cfg-code {
+  width: 100%;
+  font: 16px var(--font-hand);
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--faint);
+}
+
+.cfg-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.cfg-status {
+  min-height: 1.3em;
+  font-size: 0.8em;
+  font-style: italic;
+  color: var(--gilt);
+}
+
+.cfg-danger {
+  border-color: var(--rubric);
+  color: var(--rubric);
+}

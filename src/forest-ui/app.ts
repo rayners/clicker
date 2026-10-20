@@ -15,6 +15,8 @@ import { createExpeditions } from './expeditions';
 import { createHall } from './hall';
 import { createRoster } from './roster';
 import { createMapStrip } from './map';
+import { createConfig } from './config';
+import { availableUpgrades } from '../forest/company';
 
 const PER_MINUTE = 60;
 const BLIGHT_WARNING = 50;
@@ -31,6 +33,8 @@ interface Panel {
   label: string;
   el: HTMLElement;
   render(c: Company): void;
+  /** Lights the tab when something there wants attention. */
+  attention?(c: Company): boolean;
 }
 
 function stat(label: string, aria: string) {
@@ -39,12 +43,13 @@ function stat(label: string, aria: string) {
 }
 
 export function mountForest(root: HTMLElement, store: ForestStore): void {
+  const config = createConfig(store);
   const dayStamp = h('span', { class: 'mast-day' });
   const masthead = h(
     'header',
     { class: 'masthead' },
     h('div', { class: 'mast-brand' }, h('span', { class: 'brand-name' }, 'The Company of the Ashen Key')),
-    h('div', { class: 'mast-line' }, h('span', { class: 'mast-place' }, 'LEDGER · THISTLEGATE'), dayStamp),
+    h('div', { class: 'mast-line' }, h('span', { class: 'mast-place' }, 'LEDGER · THISTLEGATE'), h('span', { class: 'mast-right' }, dayStamp, config.button)),
     // Repeated at native pixel scale (alternate copies mirrored) rather than stretched.
     h('div', { class: 'mast-trees', 'aria-hidden': 'true' }, ...Array.from({ length: TREE_COPIES }, () => kit.spriteCanvas('treeline', 'mast-tree'))),
   );
@@ -103,7 +108,13 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
     },
     { id: 'expeditions', label: 'EXPEDITIONS', el: section('expeditions', expeditions.el), render: (c) => expeditions.render(c) },
     { id: 'roster', label: 'ROSTER', el: section('roster', rosterPanel.el), render: (c) => rosterPanel.render(c) },
-    { id: 'hall', label: 'HALL', el: section('hall', hall.el), render: (c) => hall.render(c) },
+    {
+      id: 'hall',
+      label: 'HALL',
+      el: section('hall', hall.el),
+      render: (c) => hall.render(c),
+      attention: (c) => availableUpgrades(c).some((u) => u.cost <= c.silver),
+    },
   ];
 
   const tabs = panels.map((p) => {
@@ -143,7 +154,7 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
   });
 
   root.classList.add('ledger-shell');
-  root.replaceChildren(masthead, standing, ...panels.map((p) => p.el), h('div', { class: 'forage-bay' }, forage), tabbar);
+  root.replaceChildren(masthead, standing, ...panels.map((p) => p.el), h('div', { class: 'forage-bay' }, forage), tabbar, config.dialog);
   select('ledger');
   const palette = kit.readPalette(root);
   kit.paintAll(root);
@@ -158,6 +169,14 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
     setText(depth.value, `${delve(c).toFixed(1)} LEAGUES`);
     map.render(c);
     root.dataset.motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
+    config.render(game);
+    panels.forEach((p, i) => {
+      const lit = p.attention?.(c) ?? false;
+      if ((tabs[i]!.dataset.attention === 'active') !== lit) {
+        if (lit) tabs[i]!.dataset.attention = 'active';
+        else delete tabs[i]!.dataset.attention;
+      }
+    });
     for (const p of panels) {
       try {
         p.render(c);
