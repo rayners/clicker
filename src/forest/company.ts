@@ -6,6 +6,7 @@ import { nextRandom } from '../shared/rng';
 import { formatNumber } from '../shared/format';
 import { appendLog } from '../shared/log';
 import { runForestStory } from './story';
+import { sinceBeat } from '../shared/story';
 import { emptyComposition, type Company, type Composition, type EntryKind, type Party } from './state';
 
 export const COST_GROWTH = 1.15;
@@ -20,7 +21,20 @@ const HOSPICE_BONUS = 0.5;
 const ARMOURY_STRENGTH = 1.5;
 /** Blight per second from the vault, per order of magnitude of relics held. */
 const VAULT_BLIGHT = 0.01;
-const CHAPEL_EASE = 0.02;
+const CHAPEL_EASE = 0.006;
+/** Above this blight, hands start to turn. */
+export const TURN_THRESHOLD = 40;
+/** Chance per hand per second of turning, at full blight. */
+const TURN_RATE = 1 / 600;
+/** Each turned hand makes every region this much more dangerous. */
+const TURNED_DANGER = 0.03;
+/** Once the wood wakes (Act IV), danger rises by this share per minute. */
+const WAKING_DANGER = 0.01;
+export const KEY_FRAGMENTS = 7;
+/** Chance a returning party brings back a fragment, by region. */
+const FRAGMENT_CHANCE: Record<string, number> = { undercity: 0.2, heartwood: 0.35 };
+/** Blight per second for every fragment held. */
+const KEY_BLIGHT = 0.02;
 export const PENANCE_AMOUNT = 10;
 const PENANCE_BASE = 25;
 const PENANCE_SHARE = 0.05;
@@ -225,15 +239,23 @@ export interface Projection {
 }
 
 /** Expected outcome of sending this composition into this region. */
+/** How much more dangerous the wood is than its maps say: turned hands, and a waking forest. */
+export function dangerMultiplier(c: Company): number {
+  const awake = sinceBeat(c, 'act-4');
+  const waking = awake > 0 ? WAKING_DANGER * (awake / 60) : 0;
+  return (1 + TURNED_DANGER * c.turned) * (1 + waking);
+}
+
 export function project(c: Company, region: RegionDef, comp: Composition): Projection {
   const mod = modifiers(c);
+  const danger = region.danger * dangerMultiplier(c);
   const armour = ARMOURY_STRENGTH ** c.buildings.armoury;
   const strength = CLASS_IDS.reduce((s, id) => s + comp[id] * def(id).strength * mod.strength[id], 0) * armour;
-  const ratio = strength / region.danger;
+  const ratio = strength / danger;
   const effective = Math.max(0.2, ratio);
   return {
     strength,
-    danger: region.danger,
+    danger,
     ratio,
     haul: region.relics * Math.min(HAUL_CAP, ratio) * (1 + 0.15 * comp.scout + 0.2 * comp.mystic) * mod.haul,
     duration: region.duration * Math.max(0.5, 1 - 0.08 * comp.scout),
@@ -272,6 +294,8 @@ function resolve(c: Company, party: Party): Company {
     }
   }
   const haul = Math.max(0, p.haul * (1 + HAUL_VARIANCE * (2 * r.roll() - 1)));
+  const survivors = size(party.comp) - size(dead);
+  const fragment = survivors > 0 && c.keyFragments < KEY_FRAGMENTS && r.roll() < (FRAGMENT_CHANCE[region.id] ?? 0);
   const blight = p.blightPerHand * size(party.comp);
   let next: Company = {
     ...c,
@@ -283,12 +307,16 @@ function resolve(c: Company, party: Party): Company {
     lifetimeDead: c.lifetimeDead + size(dead),
     wounded: Object.fromEntries(CLASS_IDS.map((id) => [id, c.wounded[id] + wounded[id]])) as Composition,
     blight: Math.min(MAX_BLIGHT, c.blight + blight),
+    keyFragments: c.keyFragments + (fragment ? 1 : 0),
   };
   const losses = [size(wounded) > 0 ? `${size(wounded)} WOUNDED` : '', size(dead) > 0 ? `${size(dead)} DEAD` : '']
     .filter(Boolean)
     .join(', ');
   next = log(next, 'ledger', `PARTY ${party.id} RETURNS FROM ${region.name}: ${formatNumber(haul)} RELICS.${losses ? ` ${losses}.` : ' ALL HANDS ACCOUNTED FOR.'}`);
-  return chart(next, region, party.comp, size(party.comp) - size(dead));
+  if (fragment) {
+    next = log(next, 'omen', `AMONG THE HAUL: A FRAGMENT OF A KEY, ASH-GREY AND WARM. THE COMPANY HOLDS ${next.keyFragments} OF ${KEY_FRAGMENTS}.`);
+  }
+  return chart(next, region, party.comp, survivors);
 }
 
 // ---------- healing, appraisal, blight, buildings ----------
@@ -327,7 +355,7 @@ function appraise(c: Company, dt: number): Company {
 }
 
 function settleBlight(c: Company, dt: number): Company {
-  const rising = VAULT_BLIGHT * Math.log10(1 + c.relics);
+  const rising = VAULT_BLIGHT * Math.log10(1 + c.relics) + KEY_BLIGHT * c.keyFragments;
   const easing = CHAPEL_EASE * c.buildings.chapel;
   const blight = Math.min(MAX_BLIGHT, Math.max(0, c.blight + (rising - easing) * dt));
   return blight === c.blight ? c : { ...c, blight };
@@ -390,6 +418,26 @@ function muster(c: Company): Company {
   return next;
 }
 
+/** Above the threshold, rested hands in the hall walk into the wood at night. */
+function turn(c: Company, dt: number): Company {
+  if (c.blight <= TURN_THRESHOLD) return c.turning === 0 ? c : { ...c, turning: 0 };
+  const rate = TURN_RATE * ((c.blight - TURN_THRESHOLD) / (MAX_BLIGHT - TURN_THRESHOLD));
+  const idle = CLASS_IDS.reduce((s, id) => s + available(c, id), 0);
+  let next: Company = { ...c, turning: c.turning + idle * rate * dt };
+  const r = roller(next);
+  while (next.turning >= 1) {
+    const pool = CLASS_IDS.flatMap((id) => Array<ClassId>(available(next, id)).fill(id));
+    if (pool.length === 0) {
+      next = { ...next, turning: 0 };
+      break;
+    }
+    const id = pool[Math.floor(r.roll() * pool.length)]!;
+    next = { ...next, turning: next.turning - 1, turned: next.turned + 1, hired: { ...next.hired, [id]: next.hired[id] - 1 } };
+    next = log(next, 'omen', `A ${def(id).name} WALKED INTO THE WOOD AT NIGHT. THE GATE WAS BARRED FROM INSIDE. THE LEDGER COUNTS ${next.turned} TURNED.`);
+  }
+  return { ...next, rng: r.state() };
+}
+
 // ---------- the tick ----------
 
 export function tickCompany(c: Company, dt: number): Company {
@@ -401,7 +449,7 @@ export function tickCompany(c: Company, dt: number): Company {
   next = mend(next, dt);
   next = appraise(next, dt);
   next = payWages(next, dt);
-  return runForestStory(settleBlight(next, dt));
+  return runForestStory(turn(settleBlight(next, dt), dt));
 }
 
 // ---------- rates (for the flow readout and the bot) ----------

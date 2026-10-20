@@ -44,6 +44,12 @@ export interface Company {
   charted: number;
   /** Company-wide corruption, 0-100. */
   blight: number;
+  /** Hands the wood has taken: they are out there now, and the wood is more dangerous for it. */
+  turned: number;
+  /** Fractional turning carried between ticks. */
+  turning: number;
+  /** Fragments of the Ashen Key recovered from the deep wood. */
+  keyFragments: number;
   buildings: Record<BuildingId, number>;
   upgrades: string[];
   act: number;
@@ -80,6 +86,9 @@ export function createCompany(seed: number): Company {
     standing: [],
     charted: 0,
     blight: 0,
+    turned: 0,
+    turning: 0,
+    keyFragments: 0,
     buildings: Object.fromEntries(BUILDINGS.map((b) => [b.id, 0])) as Record<BuildingId, number>,
     upgrades: [],
     act: 1,

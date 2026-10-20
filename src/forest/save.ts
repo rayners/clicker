@@ -22,6 +22,8 @@ export const forestSaves = createSaveSystem<ForestGame>({
       const company = save.company as Record<string, unknown>;
       return { ...save, company: { ...company, buildings: { armoury: 0, ...(company.buildings as Record<string, number>) } } };
     },
+    // v5: turned hands and fragments of the Key.
+    5: (save) => ({ ...save, company: { turned: 0, turning: 0, keyFragments: 0, ...(save.company as Record<string, unknown>) } }),
   },
   label: 'ELDERDARK',
   required: ['profile', 'company'],

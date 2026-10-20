@@ -79,7 +79,48 @@ const ACT_2: ForestBeat[] = [
   },
 ];
 
-export const FOREST_STORY: readonly ForestBeat[] = [...ACT_1, ...ACT_2];
+const ACT_3: ForestBeat[] = [
+  {
+    id: 'act-3',
+    act: 3,
+    urgent: true,
+    when: ({ c }) => c.keyFragments >= 1,
+    entries: [
+      { kind: 'ledger', text: 'THE COMPANY OF THE ASHEN KEY HOLDS A PIECE OF AN ASHEN KEY.' },
+      { kind: 'ledger', text: 'THE FACTOR NOTES THAT THE NAME WAS CHOSEN BEFORE THE FIND. THE FACTOR DOES NOT REMEMBER CHOOSING IT.' },
+    ],
+    effects: [{ kind: 'setAct', act: 3 }],
+  },
+];
+
+/** However the reckoning comes, it comes this long after the wood wakes. */
+const TERMINUS_AFTER_WAKING = 75 * 60;
+
+const ACT_4: ForestBeat[] = [
+  {
+    id: 'act-4',
+    act: 4,
+    urgent: true,
+    when: ({ c }) => c.act >= 3 && c.keyFragments >= 3,
+    entries: [
+      { kind: 'omen', text: 'THE WOOD IS AWAKE. THE TREES AT THE EAVES STAND A HUNDRED PACES NEARER THE PALISADE THAN THEY DID LAST NIGHT.' },
+    ],
+    effects: [
+      { kind: 'setAct', act: 4 },
+      { kind: 'setFlag', flag: 'awake' },
+    ],
+  },
+  {
+    id: 'terminus',
+    act: 4,
+    urgent: true,
+    when: ({ c }) => c.act >= 4 && (c.keyFragments >= 7 || sinceBeat(c, 'act-4') >= TERMINUS_AFTER_WAKING),
+    entries: [{ kind: 'ledger', text: 'THE CHARTER IS COMING DUE. WHAT THE COMPANY DOES WITH THE KEY IS THE FACTOR\'S TO DECIDE. SEE THE RECKONING.' }],
+    effects: [{ kind: 'setFlag', flag: 'terminus' }],
+  },
+];
+
+export const FOREST_STORY: readonly ForestBeat[] = [...ACT_1, ...ACT_2, ...ACT_3, ...ACT_4];
 
 export function runForestStory(c: Company): Company {
   return runBeats<EntryKind, Company, Args>(c, FOREST_STORY, { c }, { minGap: FOREST_STORY_GAP });

@@ -23,8 +23,18 @@ describe('first charter pacing', () => {
     expect(hours(run.openedAt.undercity)).toBeLessThan(3);
   });
 
-  it('reaches the Heartwood at roughly 3.5-5 hours', () => {
-    expect(hours(run.openedAt.heartwood)).toBeGreaterThan(3.5);
-    expect(hours(run.openedAt.heartwood)).toBeLessThan(5);
+  it('finds the first fragment of the Key (Act III) at roughly 2-3.25 hours', () => {
+    expect(hours(run.actAt[3])).toBeGreaterThan(2);
+    expect(hours(run.actAt[3])).toBeLessThan(3.25);
+  });
+
+  it('wakes the wood (Act IV) after Act III, within 4 hours', () => {
+    expect(hours(run.actAt[4])).toBeGreaterThan(hours(run.actAt[3]));
+    expect(hours(run.actAt[4])).toBeLessThan(4);
+  });
+
+  it('brings the charter to its reckoning at roughly 3.75-5.5 hours', () => {
+    expect(hours(run.terminusAt)).toBeGreaterThan(3.75);
+    expect(hours(run.terminusAt)).toBeLessThan(5.5);
   });
 });

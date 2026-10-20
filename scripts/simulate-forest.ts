@@ -11,6 +11,6 @@ for (const seed of [1, 7, 42]) {
   const regions = REGIONS.map((r) => `${r.id} ${at(run.openedAt[r.id])}`).join(' | ');
   const hands = Object.values(c.hired).reduce((a, b) => a + b, 0);
   console.log(
-    `seed ${seed}: act2 ${at(run.actAt[2])} | ${regions}\n   charted ${c.charted.toFixed(1)} hands ${hands} dead ${c.lifetimeDead} blight ${Math.round(c.blight)} silver ${formatNumber(c.silver)} relics ${formatNumber(c.lifetimeRelics)} upgrades ${c.upgrades.length} | ${Math.round(performance.now() - started)}ms`,
+    `seed ${seed}: act2 ${at(run.actAt[2])} act3 ${at(run.actAt[3])} act4 ${at(run.actAt[4])} terminus ${at(run.terminusAt)} | ${regions}\n   charted ${c.charted.toFixed(1)} hands ${hands} dead ${c.lifetimeDead} turned ${c.turned} keys ${c.keyFragments} blight ${Math.round(c.blight)} silver ${formatNumber(c.silver)} relics ${formatNumber(c.lifetimeRelics)} upgrades ${c.upgrades.length} | ${Math.round(performance.now() - started)}ms`,
   );
 }

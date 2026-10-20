@@ -32,6 +32,7 @@ export interface ForestSimResult {
   actAt: Record<number, number>;
   /** Seconds at which each region first opened. */
   openedAt: Record<string, number>;
+  terminusAt?: number;
   final: ForestGame;
 }
 
@@ -95,7 +96,8 @@ function decide(game: ForestGame): ForestAction | null {
   }
 
   // Hire toward a few frontier parties, within what income can carry.
-  const affordableWages = Math.max(incomeRate(c), 0.5) * WAGE_SHARE;
+  // Income can carry the wages, or the strongbox can carry them for ten minutes while parties get going.
+  const affordableWages = Math.max(incomeRate(c) * WAGE_SHARE, 0.4, c.silver / 600);
   for (const id of CLASS_IDS) {
     const needed = want[id] * PARTIES_PER_REGION;
     if (c.hired[id] < needed && wages(c) + CLASSES.find((k) => k.id === id)!.wage <= affordableWages && c.silver >= hireCost(c, id)) {
@@ -132,6 +134,7 @@ export function simulateForest(options: ForestSimOptions): ForestSimResult {
   let game = createForestGame(seed, 0);
   const actAt: Record<number, number> = { 1: 0 };
   const openedAt: Record<string, number> = { [REGIONS[0]!.id]: 0 };
+  let terminusAt: number | undefined;
   for (let t = 1; t <= maxSeconds; t++) {
     const taps = t <= activeSeconds ? activeTaps : t % 10 === 0 ? 1 : 0;
     for (let i = 0; i < taps; i++) game = reduce(game, { type: 'forage' });
@@ -148,6 +151,10 @@ export function simulateForest(options: ForestSimOptions): ForestSimResult {
     const c = game.company;
     if (actAt[c.act] === undefined) actAt[c.act] = t;
     for (const r of REGIONS) if (openedAt[r.id] === undefined && isRegionOpen(c, r)) openedAt[r.id] = t;
+    if (terminusAt === undefined && c.flags.includes('terminus')) {
+      terminusAt = t;
+      break;
+    }
   }
-  return { actAt, openedAt, final: game };
+  return { actAt, openedAt, terminusAt, final: game };
 }
