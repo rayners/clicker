@@ -3,7 +3,7 @@ import { availableEndings, endingRewards, type Ending } from '../core/prestige';
 import type { Store } from '../core/store';
 import { h, setAttr, setText } from '../shared/ui/dom';
 import { horrorOf, scenarioOf } from '../mission/registry';
-import { interpolate } from '../mission/lexicon';
+import { interpolate } from '../shared/lexicon';
 
 const ENDINGS: Record<Ending, { rewardText: (s: number, c: number) => string }> = {
   deliver: { rewardText: (s) => `+${s} SENIORITY // PERMANENT OUTPUT BONUS` },

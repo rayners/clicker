@@ -1,4 +1,4 @@
-import type { Lexicon } from '../../mission/lexicon';
+import type { Lexicon } from '../../shared/lexicon';
 
 /** How a terraforming contract names things, for horror text written once for every scenario. */
 export const TERRAFORM_LEXICON: Lexicon = {

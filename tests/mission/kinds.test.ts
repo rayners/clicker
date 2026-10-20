@@ -3,7 +3,7 @@ import { composeMission, createMission, DEFAULT_MISSION_CONFIG, type MissionConf
 import { tickMission, tickWith } from '../../src/mission/tick';
 import { SCENARIOS, HORRORS, scenarioOf } from '../../src/mission/registry';
 import type { ScenarioDef } from '../../src/mission/kinds';
-import { placeholders } from '../../src/mission/lexicon';
+import { placeholders } from '../../src/shared/lexicon';
 
 const horrorTexts = (h: (typeof HORRORS)[keyof typeof HORRORS]) => [
   ...h.beats.flatMap((b) => b.entries.map((e) => e.text)),

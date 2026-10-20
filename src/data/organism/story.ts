@@ -200,7 +200,7 @@ const ACT_4: Beat[] = [
     when: ({ m, signals }) =>
       inAct(m, 3) && o(m).breaches === 0 && o(m).specimens >= 1 && (o(m).specimens >= 20 || signals.progress >= 6_500),
     entries: [{ kind: 'anomaly', text: 'CONTAINMENT FIELD ... FIELD ... F I E L D' }],
-    effects: [{ kind: 'horror', action: 'breach' }],
+    effects: [{ kind: 'action', action: 'breach' }],
   },
   {
     id: 'a4-entry',

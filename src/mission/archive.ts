@@ -1,5 +1,5 @@
 import type { ArchiveFile } from './kinds';
-import { interpolate } from './lexicon';
+import { interpolate } from '../shared/lexicon';
 import { horrorOf, scenarioOf } from './registry';
 import type { MissionState } from './state';
 

@@ -94,7 +94,7 @@ describe('shaft depth', () => {
 
 describe('story effects that change the world', () => {
   it('can force a containment breach', () => {
-    const m = runBeats(fresh({ specimens: 10 }), [beat('a', () => true, { effects: [{ kind: 'horror', action: 'breach' }] })], ctx, {
+    const m = runBeats(fresh({ specimens: 10 }), [beat('a', () => true, { effects: [{ kind: 'action', action: 'breach' }] })], ctx, {
       signals: { progress: 0, deepAccess: false },
       lexicon: {},
       applyHorrorEffect: HORRORS.organism.applyEffect,
