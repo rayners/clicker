@@ -108,6 +108,24 @@ Pacing is tested with a bot, the same as the other two games.
 
 After enough sequels, the franchise "goes in a new direction": you play **the killer**. It is the Boardroom-style higher tier. You haunt several venues at once, each running headlessly as a first-tier run, picking who to stalk and when, building **Infamy**. This is designed for now and not built. As with DEEP CONTRACT's Boardroom, it imposes architecture rules today: runs are self-contained and serializable, and a run never reads the DOM, the clock or globals.
 
+## As built (2026-10-20)
+
+**Steps 1 and 2 are done.**
+- **The page:** `/late-fees/` is a VHS shell with an on-screen display (tape counter, a REC light at night), the horror shelf, the setup menu, the PWA manifest and icon, the picker's third door, and telemetry (`film_started`, `act_reached`, `zone_opened`, `film_completed`).
+- **Camp Blackwater with the Drowned Boy.**
+  - Built on the shared held-ground engine, with the same proven economy shape as DEEP CONTRACT's security detachment: counselors are the force, lights are the brake, prep against watch is the split, watchtowers are the sentries, and the head counselor is the auto-split. Night falls every nine minutes, for three minutes.
+  - Losing a zone kills its campers and costs reputation, which scales takings.
+  - The killer takes a counselor about every two minutes of night, faster in acts 3 and 4.
+- **The film's arc** (`src/late-fees/story.ts`) is shared by every killer:
+  - the opening kill on the first night;
+  - the body count at progress 1,000;
+  - the final girl at 3,200 with the far shore open;
+  - the confrontation 25 minutes later;
+  - the credits 75 minutes after that.
+- **Pacing (bot):** act 2 at 59m, the final girl at 2h27m, the confrontation at 2h52m, credits at 4h07m (`npm run simulate:late`, `tests/late-fees/pacing.test.ts`).
+- **Sequels:** Box Office (+25% takings each), Lore (takes back some of the killer's sequel strength), and pressure +15% per part. *Burn it down* unlocks after three films.
+- **Out of stock** on the shelf for now: *A Nightmare on Sycamore Street* and *Final Departure*.
+
 ## Build order
 
 1. **The page:** `/late-fees/`, the VHS shell, the tape shelf, save, PWA, the picker's third door and telemetry.

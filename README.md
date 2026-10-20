@@ -1,11 +1,13 @@
-# DEEP CONTRACT & CHARTER OF THE ELDERDARK
+# DEEP CONTRACT, CHARTER OF THE ELDERDARK & LATE FEES
 
-Two idle games that run entirely in the browser. **Play: https://rayners.github.io/clicker/**
+Three idle games that run entirely in the browser. **Play: https://rayners.github.io/clicker/**
 
 - **DEEP CONTRACT** (`/contract/`): a retro-futurist idle clicker. You are WARDEN, the operations intelligence of a
   Kessler-Amari Combine ore hauler orbiting a remote moonlet. It is a cheerful corporate mining game, until it isn't.
 - **CHARTER OF THE ELDERDARK** (`/forest/`): dark-fantasy company management. Keep the ledger of a treasure-hunting
   company on the edge of a corrupting forest, and count who comes back.
+- **LATE FEES** (`/late-fees/`): slasher homages on a 1988 video store shelf. Run Camp Blackwater while the body
+  count climbs; every film gets a sequel.
 
 State lives in `localStorage`; the site is a static, installable, offline-capable PWA (each game installs as its own
 app). Pushes to `main` are tested and deployed to GitHub Pages.
@@ -19,6 +21,7 @@ app). Pushes to `main` are tested and deployed to GitHub Pages.
 | `npm run test:e2e` | Playwright journeys on desktop Chromium and iPhone 13 emulation. Set `E2E_WEBKIT=1` to use real WebKit (needs `sudo npx playwright install-deps webkit`). |
 | `npm run simulate` | Headless bot playthrough; prints when each act and the terminus are reached. |
 | `npm run simulate:forest` | The same for Elderdark. |
+| `npm run simulate:late` | The same for LATE FEES. |
 | `npm run build` | Typecheck + static build to `dist/` (with service worker). |
 | `npm run icons` | Regenerate PWA icons from the pixel sprites. |
 
@@ -29,6 +32,7 @@ Debug jumps: `/contract/?debug=act2`, `act3`, `act4`, `terminus`, `terraform`, `
 - `index.html`, `src/picker/`: the front page that picks a game.
 - `src/shared/`: engine code both games use (saves, store, story engine, sprites, telemetry).
 - `src/forest/`, `src/forest-data/`, `src/forest-ui/`: Elderdark (simulation, content, ledger UI).
+- `src/late-fees/`, `src/late-fees-data/`, `src/late-fees-ui/`: LATE FEES (venues × killers, content, VHS UI).
 - `src/mission/`: one self-contained, JSON-serializable mission (economy, crew, directives, containment, story engine). No DOM, globals or wall-clock time, so a future "Boardroom" layer can run many in parallel.
 - `src/core/`: game state (profile vs mission), loop/offline catch-up, saves + migrations, prestige, store.
 - `src/data/`: content tables (generators, upgrades, crew, directives, story beats, archive files, sprites).
@@ -40,6 +44,7 @@ Debug jumps: `/contract/?debug=act2`, `act3`, `act4`, `terminus`, `terraform`, `
 - [`docs/DESIGN.md`](docs/DESIGN.md): premise, systems, acts and pacing, prestige, UI direction.
 - [`docs/BOARDROOM.md`](docs/BOARDROOM.md): the planned second-tier layer and the architecture rules it imposes.
 - [`docs/forest/DESIGN.md`](docs/forest/DESIGN.md): Elderdark's design and status.
+- [`docs/late-fees/DESIGN.md`](docs/late-fees/DESIGN.md): LATE FEES's design and status.
 - [`docs/TERRAFORM.md`](docs/TERRAFORM.md): the terraforming scenario and the scenario × horror architecture.
 - [`docs/TELEMETRY.md`](docs/TELEMETRY.md): anonymous analytics and what is sent.
 - [`docs/ROADMAP.md`](docs/ROADMAP.md): status, deviations from the plan, backlog, balance notes.

@@ -18,7 +18,7 @@ with real players and to catch errors on devices we don't test on.
 
 ## Events
 
-Every event carries the game's context: `game` (`deep-contract` | `elderdark`), `act`, and `scenario`/`horror`/`cycle`
+Every event carries the game's context: `game` (`deep-contract` | `elderdark` | `late-fees`), `act`, and `scenario`/`horror`/`cycle`
 (DEEP CONTRACT) or `charter` (Elderdark). `minutes` is in-game time on the current contract or charter.
 
 | Game | Event | Properties |
@@ -34,6 +34,10 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark`), 
 | Elderdark | `act_reached` | act, minutes |
 | Elderdark | `key_fragment_found` | fragments, minutes |
 | Elderdark | `charter_completed` | ending, minutes, relics, dead |
+| LATE FEES | `film_started` | venue, killer, part |
+| LATE FEES | `act_reached` | act, venue, killer, part, minutes |
+| LATE FEES | `zone_opened` | zone, zones, minutes, part |
+| LATE FEES | `film_completed` | ending, venue, bodyCount, minutes, part |
 
 Useful PostHog insights: a funnel `act_reached` (act = 2, 3, 4) → `contract_completed`, broken down by scenario; the
 median `minutes` on `act_reached` per act against the targets in `docs/DESIGN.md`.

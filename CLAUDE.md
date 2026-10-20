@@ -1,17 +1,18 @@
-# DEEP CONTRACT and CHARTER OF THE ELDERDARK — working notes for Claude
+# DEEP CONTRACT, CHARTER OF THE ELDERDARK and LATE FEES — working notes for Claude
 
-Two games in one repo, sharing an engine (`src/shared/`). Vite + TypeScript, no UI framework. DEEP CONTRACT is an intentional homage to the *Alien* films (names stay our own). The root page (`index.html`, `src/picker/`) is a game picker that only links to the games and imports nothing but `src/shared/`.
+Three games in one repo, sharing an engine (`src/shared/`). Vite + TypeScript, no UI framework. DEEP CONTRACT is an intentional homage to the *Alien* films (names stay our own). The root page (`index.html`, `src/picker/`) is a game picker that only links to the games and imports nothing but `src/shared/`.
 - **DEEP CONTRACT** (`/contract/`, `contract/index.html`, `src/main.ts`): retro-futurist idle clicker (Alien-flavoured, original IP) with a slow-burn horror turn.
 - **CHARTER OF THE ELDERDARK** (`/forest/`, `src/forest-main.ts`): dark-fantasy company management in a corrupting forest (Symbaroum-flavoured, original IP). Design and status are in `docs/forest/DESIGN.md`. Code lives in `src/forest/` (pure simulation, same rules as missions), `src/forest-data/` and `src/forest-ui/` (ledger UI, `ledger.css`). It has its own save key (`elderdark.save`).
-- **Boundaries** (`tests/architecture.test.ts`): `src/shared/` imports nothing from either game, neither game imports the other, and the picker imports only shared code.
-- **One service worker** at the site root serves all three pages; each page registers it, and each game ships its own manifest from `public/contract/` or `public/forest/` so it installs as its own app.
+- **LATE FEES** (`/late-fees/`, `src/late-fees-main.ts`): modern-day slasher homages on a video store shelf (VHS look). Venues × killers, the counterpart of scenario × horror: `src/late-fees/` (pure simulation; venue `camp/`, killer `drowned/`, the shared film arc in `story.ts`, sequels in `sequels.ts`), `src/late-fees-data/`, `src/late-fees-ui/` (`vhs.css`). Its save key is `latefees.save`. Design and status are in `docs/late-fees/DESIGN.md`.
+- **Boundaries** (`tests/architecture.test.ts`): `src/shared/` imports nothing from either game, no game imports another (LATE FEES included), and the picker imports only shared code.
+- **One service worker** at the site root serves every page; each page registers it, and each game ships its own manifest from `public/contract/`, `public/forest/` or `public/late-fees/` so it installs as its own app.
 
 Read before changing things:
 - `docs/DESIGN.md`: premise, economy, the five acts and their pacing targets, prestige, UI/art direction.
 - `docs/BOARDROOM.md`: the planned second-tier layer and the architecture rules it imposes **now**.
 - `docs/TERRAFORM.md`: the terraforming scenario and the **scenario × horror** architecture (built).
 - `docs/ROADMAP.md`: what's built, deliberate deviations from the original plan, and the backlog.
-- `docs/late-fees/DESIGN.md`: the third game, LATE FEES (modern-day slasher homages, VHS look, venues × killers, sequels). Design approved, not built yet.
+- `docs/late-fees/DESIGN.md`: the third game, LATE FEES (modern-day slasher homages, VHS look, venues × killers, sequels). Camp Blackwater is built; the clinic and the insurer are designed.
 - `docs/MISSIONS.md`: the approved new missions (security detachment, haulage, salvage, the Keep), the shared held-ground engine, and the build order.
 - `docs/TELEMETRY.md`: anonymous PostHog analytics (published site only, opt-out, events derived from state diffs). Add an event there when a new milestone matters for pacing.
 
@@ -31,7 +32,8 @@ Read before changing things:
 - `npm run simulate [extraction|terraform]`: bot playthrough timings per act, for both scenarios by default.
 - `npm run dev -- --host`: test on a phone over the LAN. Debug jumps: `/contract/?debug=act2|act3|act4|terminus|terraform|tf-act2|security|sec-act2` (`src/core/debug.ts`).
 - If the dev server suddenly serves unstyled pages after a CSS edit, its watcher caught the file mid-write: `touch src/styles/*.css`. Prefer the Edit tool over scripts that truncate and rewrite CSS.
-- `npm run build`: typecheck plus static build (all three pages) with service worker. `npm run icons` regenerates PWA icons from sprites.
+- `npm run simulate:late`: the same for LATE FEES (Camp Blackwater).
+- `npm run build`: typecheck plus static build (all four pages) with service worker. `npm run icons` regenerates PWA icons from sprites.
 
 ## Code map and conventions
 

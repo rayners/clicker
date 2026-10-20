@@ -1,7 +1,7 @@
 import { h } from '../shared/ui/dom';
 
 export interface GameDoor {
-  id: 'contract' | 'elderdark';
+  id: 'contract' | 'elderdark' | 'latefees';
   href: string;
   /** The game's localStorage save key (kept in step with the games by a test; the picker never imports them). */
   saveKey: string;
@@ -39,6 +39,18 @@ export const GAMES: GameDoor[] = [
     begin: 'Begin the charter',
     resume: 'Resume the charter',
   },
+  {
+    id: 'latefees',
+    href: './late-fees/',
+    saveKey: 'latefees.save',
+    icon: './late-fees/icons/icon-192.png',
+    overline: 'LATE FEES VIDEO · HORROR SECTION',
+    title: 'LATE FEES',
+    blurb: 'Run the summer camp at Blackwater Lake. Keep the gates open, the lights on and the bunks full while the body count climbs. Every film gets a sequel.',
+    motto: 'Be kind. Rewind.',
+    begin: 'PRESS PLAY',
+    resume: 'RESUME TAPE',
+  },
 ];
 
 function hasSave(storage: Storage, key: string): boolean {
@@ -73,7 +85,7 @@ export function mountPicker(root: HTMLElement, storage: Storage): void {
       { class: 'picker' },
       h('h1', { class: 'visually-hidden' }, 'Choose a game'),
       ...doors,
-      h('p', { class: 'picker-foot' }, 'Both games run in your browser and save on this device. Add one to your home screen to play offline.'),
+      h('p', { class: 'picker-foot' }, 'All three run in your browser and save on this device. Add one to your home screen to play offline.'),
     ),
   );
 }

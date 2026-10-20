@@ -1,0 +1,16 @@
+{
+  "name": "Late Fees",
+  "short_name": "Late Fees",
+  "description": "Late Fees Video, horror section. Every tape comes back. So does everything on it.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#07050c",
+  "theme_color": "#07050c",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

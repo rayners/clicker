@@ -3,6 +3,7 @@ import '@fontsource/michroma';
 import '@fontsource/im-fell-english';
 import '@fontsource/im-fell-english/400-italic.css';
 import '@fontsource/unifrakturmaguntia';
+import '@fontsource/monoton';
 import './picker/picker.css';
 import { mountPicker } from './picker/picker';
 

@@ -6,8 +6,8 @@ export default defineConfig({
   base: './',
   build: {
     rollupOptions: {
-      // The picker at the root, DEEP CONTRACT under /contract/, CHARTER OF THE ELDERDARK under /forest/.
-      input: { picker: 'index.html', contract: 'contract/index.html', forest: 'forest/index.html' },
+      // The picker at the root; DEEP CONTRACT, CHARTER OF THE ELDERDARK and LATE FEES each under their own path.
+      input: { picker: 'index.html', contract: 'contract/index.html', forest: 'forest/index.html', lateFees: 'late-fees/index.html' },
     },
   },
   plugins: [
@@ -15,7 +15,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       // Each game's entry registers the shared service worker itself (see src/main.ts, src/forest-main.ts).
       injectRegister: false,
-      // Each game ships its own manifest from public/ (contract/, forest/), so it installs as its own app.
+      // Each game ships its own manifest from public/ (contract/, forest/, late-fees/), so it installs as its own app.
       manifest: false,
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,woff,woff2,webmanifest}'],
@@ -23,7 +23,7 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         // Each game has its own page; never answer its navigations with the picker.
-        navigateFallbackDenylist: [/\/contract\//, /\/forest\//],
+        navigateFallbackDenylist: [/\/contract\//, /\/forest\//, /\/late-fees\//],
       },
     }),
   ],

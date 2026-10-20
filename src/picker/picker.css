@@ -1,4 +1,4 @@
-/* The front page: two doors, each drawn in its own game's hand, meeting on a slanted seam. */
+/* The front page: three doors, each drawn in its own game's hand, meeting on slanted seams. */
 
 :root {
   --bg: #0b0a07;
@@ -19,6 +19,13 @@
   --gilt: #c9a24a;
   --font-hand: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
   --font-black: 'UnifrakturMaguntia', 'IM Fell English', serif;
+
+  --vhs-bg: #07050c;
+  --vhs-ink: #f4efff;
+  --vhs-dim: #9a8fb8;
+  --neon: #ff2bd6;
+  --cyan: #2bf0ff;
+  --font-neon: 'Monoton', 'VT323', sans-serif;
 
   color-scheme: dark;
 }
@@ -209,7 +216,10 @@ body {
 .door-elderdark {
   margin-top: calc(-1 * var(--slant));
   padding-top: calc(28px + var(--slant));
-  padding-bottom: calc(28px + env(safe-area-inset-bottom) + 3.5rem);
+  padding-bottom: calc(28px + var(--slant) + 2rem);
+  /* Above the video store, so its slanted foot shows the store beneath. */
+  z-index: 1;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 calc(100% - var(--slant)));
   color: var(--ink);
   font-family: var(--font-hand);
   font-size: 1.1rem;
@@ -304,7 +314,100 @@ body {
   position: relative;
 }
 
-/* ---------- desktop: side by side, the seam a diagonal ---------- */
+/* ---------- LATE FEES: the video store ---------- */
+
+.door-latefees {
+  margin-top: calc(-1 * var(--slant));
+  padding-top: calc(28px + var(--slant));
+  padding-bottom: calc(28px + env(safe-area-inset-bottom) + 2.5rem);
+  color: var(--vhs-ink);
+  font-family: var(--font-term);
+  font-size: 1.2rem;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(255, 43, 214, 0.16), transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(43, 240, 255, 0.1), transparent 55%),
+    var(--vhs-bg);
+}
+
+/* Scanlines, and a tracking band that drifts down the screen. */
+.door-latefees::before,
+.door-latefees::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.door-latefees::before {
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 3px);
+  z-index: 2;
+}
+
+.door-latefees::after {
+  left: 0;
+  right: 0;
+  top: -15%;
+  height: 12%;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.07), transparent);
+  animation: tracking 8s linear infinite;
+  z-index: 2;
+}
+
+@keyframes tracking {
+  to {
+    transform: translateY(1100%);
+  }
+}
+
+.door-latefees .door-overline {
+  font-size: 0.85em;
+  letter-spacing: 0.2em;
+  color: var(--cyan);
+}
+
+.door-latefees .door-icon {
+  filter: drop-shadow(0 0 10px rgba(255, 43, 214, 0.6));
+}
+
+.door-latefees .door-title {
+  font-family: var(--font-neon);
+  font-size: clamp(2rem, 9vw, 3rem);
+  color: var(--neon);
+  text-shadow:
+    0 0 6px rgba(255, 43, 214, 0.9),
+    0 0 24px rgba(255, 43, 214, 0.5);
+}
+
+.door-latefees .door-blurb {
+  color: var(--vhs-ink);
+}
+
+.door-latefees .door-motto {
+  font-size: 0.85em;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--vhs-dim);
+}
+
+.door-latefees .door-cta {
+  border: 1px solid var(--cyan);
+  letter-spacing: 0.14em;
+  color: var(--cyan);
+  text-shadow: 0 0 6px rgba(43, 240, 255, 0.6);
+}
+
+.door-latefees .door-cta::before {
+  content: '▶ ';
+}
+
+.door-latefees:hover .door-cta,
+.door-latefees:focus-visible .door-cta {
+  background: var(--cyan);
+  color: var(--vhs-bg);
+  text-shadow: none;
+}
+
+/* ---------- desktop: side by side, the seams diagonals ---------- */
 
 @media (min-width: 900px) {
   :root {
@@ -327,7 +430,14 @@ body {
   .door-elderdark {
     margin-top: 0;
     margin-left: calc(-1 * var(--slant));
-    padding: 40px 40px calc(40px + 3.5rem) calc(40px + var(--slant));
+    padding: 40px calc(40px + var(--slant)) calc(40px + 3.5rem) calc(40px + var(--slant));
+    clip-path: polygon(0 0, calc(100% - var(--slant)) 0, 100% 100%, 0 100%);
+  }
+
+  .door-latefees {
+    margin-top: 0;
+    margin-left: calc(-1 * var(--slant));
+    padding: 40px 40px calc(40px + 2.5rem) calc(40px + var(--slant));
   }
 
   /* The door you lean toward opens wider; the other dims. Purely decorative: the whole door is the link. */
@@ -346,7 +456,8 @@ body {
     transition: none;
   }
 
-  .door-contract .door-cta::after {
+  .door-contract .door-cta::after,
+  .door-latefees::after {
     animation: none;
   }
 }
