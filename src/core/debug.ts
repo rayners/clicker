@@ -69,10 +69,10 @@ export function applyScenario(game: GameState, name: string): GameState {
   const terraform = TERRAFORM_PATCHES[name];
   if (terraform) {
     const fresh = createMission(missionConfigFor(game.profile, 'terraform'), game.mission.seed);
-    return { ...game, mission: { ...fresh, ...terraform } as MissionState };
+    return { ...game, assigning: false, mission: { ...fresh, ...terraform } as MissionState };
   }
   const patch = PATCHES[name];
   if (!patch) return game;
   const mission = { ...game.mission, ...patch, beats: { ...game.mission.beats, ...patch.beats } } as MissionState;
-  return { ...game, mission };
+  return { ...game, assigning: false, mission };
 }

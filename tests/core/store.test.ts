@@ -129,3 +129,14 @@ describe('reduce: terraform actions', () => {
     expect(reduce(e, { type: 'surge' })).toBe(e);
   });
 });
+
+describe('reduce: the colony', () => {
+  it('thaws a ready wave and toggles the load balancer on a terraforming contract', () => {
+    const g = createGame(1, NOW);
+    const base = createMission(TERRAFORM_MISSION_CONFIG, 1);
+    const ready: GameState = { ...g, mission: { ...base, processed: 1e9, climate: { atmosphere: 101.3, heat: 288, water: 60 }, upgrades: ['tf-load-balancer'] } };
+    const thawed = reduce(ready, { type: 'thawWave' });
+    expect((thawed.mission as MissionOf<'terraform', 'organism'>).wavesThawed).toBe(1);
+    expect((reduce(ready, { type: 'toggleBalancer' }).mission as MissionOf<'terraform', 'organism'>).balancerOff).toBe(true);
+  });
+});

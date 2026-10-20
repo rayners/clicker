@@ -13,6 +13,7 @@ import {
   importSave,
   type StorageLike,
 } from '../../src/core/save';
+import { createMission, TERRAFORM_MISSION_CONFIG, type MissionOf } from '../../src/mission/state';
 import { drill } from '../../src/mission/extraction/economy';
 import { ext } from '../helpers';
 
@@ -170,5 +171,22 @@ describe('real migrations', () => {
       crewSurvived: 2,
       duration: 9000,
     });
+  });
+
+  it('upgrades a version 4 terraforming save: a dead-world climate and an empty colony', () => {
+    const g = createGame(1, NOW);
+    const tf = { ...g, mission: createMission(TERRAFORM_MISSION_CONFIG, 1) };
+    const v4 = JSON.parse(serialize(tf));
+    v4.version = 4;
+    for (const k of ['climate', 'colonists', 'wavesThawed', 'colonistsLost', 'sickness', 'balancerOff']) delete v4.mission[k];
+    const m = deserialize(JSON.stringify(v4)).mission as MissionOf<'terraform', 'organism'>;
+    expect(m.climate).toEqual({ atmosphere: 0, heat: 61, water: 0 });
+    expect([m.colonists, m.wavesThawed, m.colonistsLost, m.sickness, m.balancerOff]).toEqual([0, 0, 0, 0, false]);
+  });
+
+  it('leaves extraction saves alone at version 5', () => {
+    const v4 = JSON.parse(serialize(played()));
+    v4.version = 4;
+    expect('climate' in deserialize(JSON.stringify(v4)).mission).toBe(false);
   });
 });

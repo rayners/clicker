@@ -1543,3 +1543,88 @@ button:focus-visible {
     text-shadow: none;
   }
 }
+
+/* ---------- the colony (terraforming) ---------- */
+
+.colony {
+  margin-top: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--phosphor-faint);
+  font-size: 0.8em;
+}
+
+.colony-head {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.colony-label {
+  color: var(--phosphor-dim);
+}
+
+.colony-hab {
+  color: var(--phosphor-hi);
+}
+
+.colony[data-health='dying'] {
+  border-color: var(--danger);
+}
+
+.colony[data-health='dying'] .colony-hab {
+  color: var(--danger);
+  animation: flow-pulse 1s steps(2, end) infinite;
+}
+
+.colony-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 3px;
+}
+
+.colony-thaw {
+  flex: none;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--phosphor);
+  background: transparent;
+  letter-spacing: 0.08em;
+}
+
+.colony-thaw:not(:disabled) {
+  box-shadow: 0 0 10px var(--glow);
+}
+
+.colony-thaw[hidden] {
+  display: none;
+}
+
+.colony-note {
+  color: var(--phosphor-dim);
+}
+
+.alloc-handover {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  margin-top: 4px;
+  border: 1px dashed var(--phosphor-dim);
+  background: transparent;
+  font-size: 0.8em;
+  letter-spacing: 0.08em;
+}
+
+.alloc-handover[hidden] {
+  display: none;
+}
+
+.term-stakes {
+  color: var(--phosphor-hi);
+  border-left: 3px solid var(--danger);
+  padding-left: 8px;
+}
+
+.term-stakes[hidden] {
+  display: none;
+}

@@ -53,7 +53,7 @@ export interface GameState {
   boardroom?: unknown;
 }
 
-export const GAME_VERSION = 4;
+export const GAME_VERSION = 5;
 
 export function createProfile(): Profile {
   return {

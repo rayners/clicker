@@ -22,6 +22,7 @@ import {
   processorRate,
   reactorCost,
   spec,
+  canThaw,
 } from '../mission/terraform/economy';
 
 export interface SimOptions {
@@ -119,6 +120,7 @@ function bestAllocationStep(m: Terra): Action | null {
 
 function decideTerraform(game: GameState): Action | null {
   const m = game.mission as Terra;
+  if (canThaw(m)) return { type: 'thawWave' };
   const upgrade = availableTerraformUpgrades(m).find((u) => u.cost <= m.credits);
   if (upgrade) return { type: 'buyUpgrade', id: upgrade.id };
   const projects = decideProjects(game);

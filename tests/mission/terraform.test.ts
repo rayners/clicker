@@ -9,7 +9,7 @@ import {
   buyProcessor,
   buyReactor,
   buyTerraformUpgrade,
-  colonistWaves,
+  wavesReady,
   incomeRate,
   isProcessorRevealed,
   lineStates,
@@ -181,10 +181,9 @@ describe('progress and the corporate spec', () => {
     expect(spec(fresh())).toEqual(SPEC_REVISIONS[0]!.targets);
   });
 
-  it('thaws colonist waves at milestones, each adding to income', () => {
-    expect(colonistWaves(fresh())).toBe(0);
-    const later = fresh({ processed: 1e9 });
-    expect(colonistWaves(later)).toBeGreaterThan(0);
+  it('certifies colonist waves ready at milestones (thawing them is the player\'s call: see colony tests)', () => {
+    expect(wavesReady(fresh())).toBe(0);
+    expect(wavesReady(fresh({ processed: 1e9 }))).toBeGreaterThan(0);
   });
 
   it('reports deep access once the deepest water processor is running', () => {
@@ -243,12 +242,9 @@ describe('isolation', () => {
 });
 
 describe('planet readings', () => {
-  it('start at the dead world and approach the final envelope as each line accumulates', () => {
-    const dead = planetReadings(fresh());
-    expect(dead).toEqual({ atmosphere: 0, heat: 61, water: 0 });
-    const done = planetReadings(fresh({ lineTotals: { atmosphere: 1e12, heat: 1e12, water: 1e12 } }));
-    expect(done.atmosphere).toBeCloseTo(101.3);
-    expect(done.heat).toBeCloseTo(304);
-    expect(done.water).toBeCloseTo(96);
+  it('are the live climate (pressure, temperature, hydrosphere)', () => {
+    expect(planetReadings(fresh())).toEqual({ atmosphere: 0, heat: 61, water: 0 });
+    const m = fresh({ climate: { atmosphere: 50, heat: 250, water: 30 } });
+    expect(planetReadings(m)).toEqual(m.climate);
   });
 });

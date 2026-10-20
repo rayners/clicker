@@ -6,7 +6,6 @@ import {
   autoSurgeRate,
   availableTerraformUpgrades,
   capacity,
-  colonistWaves,
   incomeRate,
   power,
   processorRate,
@@ -17,6 +16,8 @@ import {
 } from '../../mission/terraform/economy';
 import type { MissionState, TerraformMission } from '../../mission/state';
 import { createAllocation } from '../allocation';
+import { createColony } from '../colony';
+import { h } from '../../shared/ui/dom';
 import { createTerraformSystemsPanel } from '../terraform-systems';
 import { createUpgradesPanel } from '../upgrades';
 import type { MonitorRow, ScenarioUi } from './types';
@@ -59,6 +60,7 @@ export function createTerraformUi(store: Store): ScenarioUi {
   const systems = createTerraformSystemsPanel(store);
   const upgrades = createUpgradesPanel<TerraformMission>(store, { all: TERRAFORM_UPGRADES, available: availableTerraformUpgrades });
   const allocation = createAllocation(store);
+  const colony = createColony(store);
   return {
     flow: {
       cells: [
@@ -91,7 +93,7 @@ export function createTerraformUi(store: Store): ScenarioUi {
     monitor: MONITOR,
     stats: [
       { label: 'CREDITS', aria: 'Credits', read: (m) => formatNumber(m.credits) },
-      { label: 'COLONY', aria: 'Colony waves thawed', read: (m) => `${colonistWaves(t(m))} WAVES` },
+      { label: 'COLONISTS', aria: 'Colonists alive', read: (m) => formatNumber(t(m).colonists) },
       { label: 'SPEC', aria: 'Spec revision', read: (m) => `REV ${specRevision(t(m))}` },
     ],
     action: {
@@ -104,6 +106,12 @@ export function createTerraformUi(store: Store): ScenarioUi {
     },
     systems: { el: systems.el, render: (m) => systems.render(t(m)) },
     upgrades: { el: upgrades.el, render: (m) => upgrades.render(t(m)), hasAny: (m) => upgrades.hasAny(t(m)) },
-    controls: { el: allocation.el, render: (m) => allocation.render(t(m)) },
+    controls: {
+      el: h('div', { class: 'tf-controls' }, allocation.el, colony.el),
+      render: (m) => {
+        allocation.render(t(m));
+        colony.render(t(m));
+      },
+    },
   };
 }

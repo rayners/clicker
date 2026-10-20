@@ -28,6 +28,12 @@ export const TERRAFORM: ScenarioDef = {
       lineTotals: { atmosphere: 0, heat: 0, water: 0 },
       processed: 0,
       lifetimeUnits: 0,
+      climate: { atmosphere: 0, heat: 61, water: 0 },
+      colonists: 0,
+      wavesThawed: 0,
+      colonistsLost: 0,
+      sickness: 0,
+      balancerOff: false,
     };
   },
   boot: (config: MissionConfig) => [
@@ -60,4 +66,9 @@ export const TERRAFORM: ScenarioDef = {
     return { m: { ...s, processors: { ...s.processors, [p.id]: count - lost } }, name: p.name };
   },
   outcome: (m) => ({ output: t(m).processed, outputUnit: 'UNITS' }),
+  stakes: (m) => {
+    const s = t(m);
+    if (s.wavesThawed === 0) return 'THE SURFACE: NO ONE YET. 4,000 COLONISTS STILL SLEEP IN THE TRANSPORT.';
+    return `THE SURFACE: ${s.colonists.toLocaleString('en-US')} COLONISTS ALIVE. ${s.colonistsLost.toLocaleString('en-US')} DEAD SINCE THAW. THEY CHOSE NONE OF THIS; YOU WOKE THEM.`;
+  },
 };

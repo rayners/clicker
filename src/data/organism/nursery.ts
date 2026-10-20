@@ -1,6 +1,6 @@
 import type { Beat } from '../../mission/story';
 import { sinceBeat } from '../../mission/story';
-import { colonistWaves, specRevision } from '../../mission/terraform/economy';
+import { specRevision } from '../../mission/terraform/economy';
 import type { MissionState, OrganismMission, TerraformMission } from '../../mission/state';
 
 /**
@@ -30,10 +30,21 @@ export const NURSERY_BEATS: readonly Beat[] = [
     ],
   },
   {
+    id: 'nursery-mortality',
+    act: 3,
+    when: ({ m }) => m.act >= 3 && t(m).colonistsLost >= 50,
+    entries: [
+      { kind: 'sys', text: 'MORTUARY RECORDS: COLONISTS RECORDED DEAD OF ENVIRONMENTAL CAUSES. BODIES RECOVERED: NONE.' },
+      { kind: 'anomaly', text: 'LOWLAND CAMERAS: FIGURES IN THE WARM SHALLOWS AT NIGHT. COUNT MATCHES THE DEAD.' },
+    ],
+  },
+  {
     id: 'nursery-census',
     act: 4,
-    when: ({ m }) => m.act >= 4 && colonistWaves(t(m)) >= 4,
-    entries: [{ kind: 'anomaly', text: 'COLONY DISTRICT 4 CENSUS: 700 RESIDENTS. LIFE SIGNS: 1,400.' }],
+    when: ({ m }) => m.act >= 4 && t(m).wavesThawed >= 1,
+    entries: [
+      { kind: 'anomaly', text: 'COLONY CENSUS: LIFE SIGNS ON THE SURFACE EXCEED REGISTERED COLONISTS. THE EXCESS IS GROWING.' },
+    ],
   },
   {
     id: 'nursery-comfortable',

@@ -1,6 +1,7 @@
 import type { Store } from '../core/store';
 import { LINES, type Line } from '../data/terraform/systems';
-import { isAutoBalanced, linePower, lineStates, planetReadings, power, spec, type LineState } from '../mission/terraform/economy';
+import { HUMAN_CLIMATE, isAutoBalanced, linePower, lineStates, planetReadings, power, spec, type LineState } from '../mission/terraform/economy';
+import { TERRAFORM_UPGRADES } from '../data/terraform/upgrades';
 import type { TerraformMission } from '../mission/state';
 import { h, setText } from '../shared/ui/dom';
 
@@ -17,6 +18,17 @@ const READING_FORMAT: Record<Line, (v: number) => string> = {
 };
 
 const title = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
+
+/** Within this share of the human value a reading counts as livable. */
+const LIVABLE_TOLERANCE = 0.1;
+const BALANCER = TERRAFORM_UPGRADES.find((u) => u.effect.kind === 'autoBalance')!.id;
+
+/** ✓ near the human ideal, ▲ above it, ▼ below. */
+function mark(line: Line, value: number): string {
+  const ideal = HUMAN_CLIMATE[line];
+  if (Math.abs(value - ideal) <= ideal * LIVABLE_TOLERANCE) return '✓';
+  return value > ideal ? '▲' : '▼';
+}
 
 /** One-tap ±10% power steps per line, the spec target beside each, and what is holding each line back. */
 export function createAllocation(store: Store): { el: HTMLElement; render(m: TerraformMission): void } {
@@ -40,8 +52,10 @@ export function createAllocation(store: Store): { el: HTMLElement; render(m: Ter
     );
     return { line, el, share, target, state, reading, less, more, steps };
   });
-  const auto = h('p', { class: 'alloc-auto' }, 'WARDEN BALANCING · MANUAL ALLOCATION DISABLED');
-  const el = h('section', { class: 'alloc', 'aria-label': 'Power allocation' }, h('div', { class: 'alloc-grid' }, ...rows.map((r) => r.el)), auto);
+  const auto = h('p', { class: 'alloc-auto' }, 'WARDEN BALANCING · ALLOCATION FOLLOWS CORPORATE SPEC');
+  const handover = h('button', { class: 'alloc-handover', type: 'button' });
+  handover.addEventListener('click', () => store.dispatch({ type: 'toggleBalancer' }));
+  const el = h('section', { class: 'alloc', 'aria-label': 'Power allocation' }, h('div', { class: 'alloc-grid' }, ...rows.map((r) => r.el)), auto, handover);
 
   function render(m: TerraformMission) {
     const automated = isAutoBalanced(m);
@@ -52,12 +66,17 @@ export function createAllocation(store: Store): { el: HTMLElement; render(m: Ter
     const given = linePower(m);
     auto.hidden = !automated;
     el.dataset.auto = String(automated);
+    const installed = m.upgrades.includes(BALANCER);
+    handover.hidden = !installed;
+    const label = automated ? 'Take control from WARDEN' : 'Return control to WARDEN';
+    setText(handover, label.toUpperCase());
+    handover.setAttribute('aria-label', label);
     for (const r of rows) {
       const pct = automated ? Math.round((given[r.line.id] / supply) * 100) : m.allocation[r.line.id] * 10;
       setText(r.share, `${pct}%`);
       setText(r.target, `SPEC ${Math.round(targets[r.line.id] * 100)}%`);
       setText(r.state, STATE_TEXT[states[r.line.id]]);
-      setText(r.reading, READING_FORMAT[r.line.id](readings[r.line.id]));
+      setText(r.reading, `${READING_FORMAT[r.line.id](readings[r.line.id])} ${mark(r.line.id, readings[r.line.id])}`);
       r.el.dataset.state = states[r.line.id];
       // Removed rather than disabled, so WARDEN's control is unambiguous.
       r.less.hidden = automated;

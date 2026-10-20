@@ -124,5 +124,19 @@ export const SPEC_REVISIONS: readonly SpecRevision[] = [
   { at: 3_600, targets: { atmosphere: 0.1, heat: 0.4, water: 0.5 }, memo: 'Final envelope issued by Special Projects. Supersedes all prior specifications. Do not distribute.' },
 ];
 
-/** Story-scale progress at which each colonist wave is certified and thawed. */
+/** Story-scale progress at which each colonist wave is certified ready to thaw. */
 export const COLONIST_WAVES: readonly number[] = [800, 1_600, 2_600, 3_800, 5_200, 7_000];
+/** Colonists in each wave. */
+export const WAVE_SIZES: readonly number[] = [400, 600, 700, 700, 800, 800];
+/** Habitability (0-1) each wave needs before WARDEN will open the pods. */
+export const WAVE_HABITABILITY: readonly number[] = [0.45, 0.55, 0.6, 0.65, 0.7, 0.75];
+
+/** What the ledger says as each wave is thawed. */
+export const WAVE_THAW_LINES: readonly string[] = [
+  'COLONY WAVE 1 THAWED: 400 COLONISTS ON THE SURFACE. FIRST CHILD BORN ON MERROW EXPECTED WITHIN THE YEAR.',
+  'COLONY WAVE 2 THAWED: 600 COLONISTS. SCHOOL DISTRICT ESTABLISHED. ATTENDANCE: EXCELLENT.',
+  'COLONY WAVE 3 THAWED: 700 COLONISTS. THEY SAY THE AIR TASTES SWEET.',
+  'COLONY WAVE 4 THAWED: 700 COLONISTS. HOUSING ALLOCATED IN THE LOWLAND DISTRICTS, NEAR THE WARM WATER.',
+  'COLONY WAVE 5 THAWED: 800 COLONISTS. NO COMPLAINTS LOGGED. NO COMPLAINTS LOGGED. NO COMPLAINTS LOGGED.',
+  'COLONY WAVE 6 THAWED: 800 COLONISTS. BERTHS NOW EMPTY. SPECIAL PROJECTS CONFIRMS RECEIPT.',
+];

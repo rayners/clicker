@@ -109,6 +109,9 @@ describe('the nursery (organism x terraform pairing)', () => {
       flags: ['specimens', 'tracker'],
       beats: { 'a3-entry': 0, 'a4-entry': 0 },
       contacts: 3,
+      wavesThawed: 2,
+      colonists: 900,
+      colonistsLost: 100,
       processors: Object.fromEntries(PROCESSORS.map((p) => [p.id, 1])),
     };
     for (let i = 0; i < 80; i++) m = runStory({ ...m, elapsed: m.elapsed + STORY_MIN_GAP + 61 });

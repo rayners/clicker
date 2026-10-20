@@ -3,7 +3,7 @@ import { buyUpgrade } from '../mission/extraction/upgrades';
 import { sleepCrew, wakeCrew } from '../mission/crew';
 import { buyContainmentLevel, buyRig, reinforce, vent } from '../mission/organism/containment';
 import { isExtraction, isOrganism, isTerraform, type MissionState, type OrganismMission, type TerraformMission } from '../mission/state';
-import { allocate, buyProcessor, buyReactor, buyTerraformUpgrade, surge } from '../mission/terraform/economy';
+import { allocate, buyProcessor, buyReactor, buyTerraformUpgrade, surge, thawWave, toggleBalancer } from '../mission/terraform/economy';
 import type { Line } from '../data/terraform/systems';
 import { advance, newGame, type GameState, type Settings } from './game';
 import { createReducerStore, type Listener as SharedListener, type Store as SharedStore } from '../shared/store';
@@ -19,6 +19,8 @@ export type Action =
   | { type: 'buyReactor'; id: string }
   | { type: 'buyProcessor'; id: string }
   | { type: 'allocate'; line: Line; step: 1 | -1 }
+  | { type: 'thawWave' }
+  | { type: 'toggleBalancer' }
   | { type: 'wakeCrew'; id: string }
   | { type: 'sleepCrew'; id: string }
   | { type: 'buyRig' }
@@ -69,6 +71,10 @@ export function reduce(game: GameState, action: Action): GameState {
       return terraform(game, (m) => buyProcessor(m, action.id));
     case 'allocate':
       return terraform(game, (m) => allocate(m, action.line, action.step));
+    case 'thawWave':
+      return terraform(game, thawWave);
+    case 'toggleBalancer':
+      return terraform(game, toggleBalancer);
     case 'wakeCrew':
       return { ...game, mission: wakeCrew(game.mission, action.id) };
     case 'sleepCrew':

@@ -40,6 +40,8 @@ export interface ScenarioDef {
   loseEquipment(m: MissionState, roll: () => number): { m: MissionState; name: string } | null;
   /** The headline output for the contract record and absence summaries. */
   outcome(m: MissionState): { output: number; outputUnit: string };
+  /** Who or what is at stake when the terminus choice is made, if the scenario has anyone to name. */
+  stakes?(m: MissionState): string;
 }
 
 /** Everything a horror may ask of whichever scenario it is running in. */

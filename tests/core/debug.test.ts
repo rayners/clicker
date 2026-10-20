@@ -1,6 +1,6 @@
 import type { MissionOf } from '../../src/mission/state';
 import { describe, it, expect } from 'vitest';
-import { createGame } from '../../src/core/game';
+import { createGame, newGame } from '../../src/core/game';
 import { applyScenario, SCENARIOS } from '../../src/core/debug';
 import { depth } from '../../src/mission/extraction/progress';
 import { progress } from '../../src/mission/terraform/economy';
@@ -55,5 +55,11 @@ describe('debug scenarios', () => {
   it('ignores unknown scenarios', () => {
     const g = base();
     expect(applyScenario(g, 'nope')).toBe(g);
+  });
+});
+
+describe('debug jumps on a brand-new game', () => {
+  it('skip the assignment screen: a jump means "play this now"', () => {
+    for (const name of ['act2', 'tf-act2']) expect(applyScenario(newGame(1, 0), name).assigning).toBe(false);
   });
 });

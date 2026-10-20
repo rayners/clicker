@@ -51,6 +51,23 @@ const MIGRATIONS: Record<number, Migration> = {
   },
   // v4: games can be waiting for the player to choose the next contract.
   4: (save) => ({ assigning: false, ...save }),
+  // v5: terraforming has a climate and a colony.
+  5: (save) => {
+    const mission = save.mission as Record<string, unknown>;
+    if (mission.scenario !== 'terraform') return save;
+    return {
+      ...save,
+      mission: {
+        climate: { atmosphere: 0, heat: 61, water: 0 },
+        colonists: 0,
+        wavesThawed: 0,
+        colonistsLost: 0,
+        sickness: 0,
+        balancerOff: false,
+        ...mission,
+      },
+    };
+  },
 };
 
 const saves = createSaveSystem<GameState>({

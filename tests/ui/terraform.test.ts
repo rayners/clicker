@@ -140,3 +140,50 @@ describe('terraform terminus', () => {
     expect(screen.queryByText(/\{[a-zA-Z]+\}/)).toBeNull();
   });
 });
+
+describe('the colony on screen', () => {
+  const colony = () => within(screen.getByRole('region', { name: /colony/i }));
+  const human = { atmosphere: 101.3, heat: 288, water: 60 };
+
+  it('shows habitability, colonists alive and lost', () => {
+    setup({ processed: 1e9, climate: human, colonists: 400, wavesThawed: 1, colonistsLost: 12 });
+    expect(colony().getByLabelText(/habitability/i).textContent).toBe('100%');
+    expect(colony().getByText(/400 ALIVE/)).toBeTruthy();
+    expect(colony().getByText(/12 LOST/)).toBeTruthy();
+  });
+
+  it('thaws a ready wave on the player\'s say-so', async () => {
+    const user = setup({ processed: 1e9, climate: human });
+    await user.click(colony().getByRole('button', { name: /thaw wave 1/i }));
+    expect(mission().wavesThawed).toBe(1);
+    expect(mission().colonists).toBe(400);
+  });
+
+  it('says what a ready wave is waiting for when the planet is not livable enough', () => {
+    setup({ processed: 1e9, climate: { atmosphere: 20, heat: 120, water: 5 } });
+    const thaw = colony().getByRole('button', { name: /thaw wave 1/i }) as HTMLButtonElement;
+    expect(thaw.disabled).toBe(true);
+    expect(colony().getByText(/NEEDS 45%/)).toBeTruthy();
+  });
+
+  it('marks each reading against the human ideal', () => {
+    setup({ climate: { atmosphere: 101.3, heat: 330, water: 60 } });
+    expect(allocation().getByText(/330 K ▲/)).toBeTruthy();
+  });
+
+  it("lets the player take the allocation back from WARDEN's load balancer", async () => {
+    const balancer = TERRAFORM_UPGRADES.find((u) => u.effect.kind === 'autoBalance')!;
+    const user = setup({ upgrades: [balancer.id] });
+    await user.click(allocation().getByRole('button', { name: /take control/i }));
+    expect(mission().balancerOff).toBe(true);
+    expect(allocation().getByRole('button', { name: /more power to heat/i })).toBeTruthy();
+    await user.click(allocation().getByRole('button', { name: /return control to warden/i }));
+    expect(mission().balancerOff).toBe(false);
+  });
+
+  it('names who is on the surface at the terminus', async () => {
+    const user = setup({ act: 4, flags: ['specimens', 'tracker', 'terminus'], wavesThawed: 2, colonists: 640, colonistsLost: 360 });
+    await user.click(screen.getByRole('tab', { name: /terminus/i }));
+    expect(screen.getByText(/640 COLONISTS ALIVE/)).toBeTruthy();
+  });
+});

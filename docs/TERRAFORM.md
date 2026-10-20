@@ -114,3 +114,22 @@ The horror is not shown or chosen; it is a surprise. `organism` is the only opti
 - **Endings** belong to the horror (`src/data/organism/endings.ts`) and are worded through the lexicon: CERTIFY THE COLONY / STERILISE MERROW on terraform, DELIVER THE CARGO / SCUTTLE THE SHIP on extraction.
 - **Assignment:** saves are v4. `GameState.assigning` is `false | 'start' | 'renewal' | 'reassign'`, and only `'reassign'` (from CFG) can be cancelled. Nothing ticks while it is set.
 - **Pacing:** the terraform bot (`npm run simulate terraform`) hits Act II at 1h08m, Act III at 2h29m, Act IV at 2h52m and the terminus at 4h07m. Extraction is unchanged (52m / 2h25m / 3h04m / 4h19m). Both are enforced in `tests/sim/pacing.test.ts`.
+
+## The colony (added 2026-10-19, after the user asked what colonists actually did)
+
+Before this change, colonists were only a passive +25% income per wave. The user chose two changes: thawing as a player decision gated by a livable planet (option 1), and the horror reaching the colonists (option 3).
+
+- **Climate** (`m.climate`: kPa, K, %) drifts toward a target with a time constant of about 2 minutes.
+  - The target is `dead world + (human ideal − dead world) × development × (line share ÷ human share)`, where development is `√(progress / 2500)`, capped at 1.
+  - With nothing running, the mix counts as human.
+  - The human ideal is 101.3 kPa, 288 K and 60% water.
+- **Habitability** is the worst reading's closeness to that ideal (0–1).
+- **Waves** are certified *ready* at progress milestones. Thawing is the player's action: `THAW WAVE n`, enabled only at that wave's habitability bar (45% → 75%). WARDEN never thaws anyone.
+- **Colonists** add +25% income per thawed wave, scaled by productivity (zero at 30% habitability, full at 60%). Below 40% they die, at a rate proportional to the shortfall, and the ledger reports mortality "within corporate specification".
+- **The tension:**
+  - The late spec revisions demand heat and water shares no human can live with, so following spec for income starves the colony.
+  - WARDEN's load balancer follows spec, and the player can **take control from WARDEN** and give it back.
+  - In a bot run that follows spec, the colony grows through two waves, then habitability collapses to about 25% and roughly 700 die.
+- **Horror (organism pairing, narrative only):** the dead leave no bodies, figures stand in the warm shallows matching the count, and the census finds more life signs than colonists.
+- **Terminus:** a scenario may name what is at stake (`ScenarioDef.stakes`). Terraform's version reads "THE SURFACE: N COLONISTS ALIVE. M DEAD SINCE THAW. THEY CHOSE NONE OF THIS; YOU WOKE THEM."
+- **Saves:** existing terraform saves get a dead-world climate and no colonists. New contracts get them from `createMission`; older saves get them from the v5 migration in `src/core/save.ts`.

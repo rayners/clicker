@@ -65,7 +65,7 @@ describe('choosing a contract assignment', () => {
   });
 
   it('keeps the assignment state in saves (v4)', () => {
-    expect(GAME_VERSION).toBe(4);
+    expect(GAME_VERSION).toBeGreaterThanOrEqual(4);
     const g = newGame(1, NOW);
     expect(deserialize(serialize(g)).assigning).toBe('start');
     const v3 = JSON.parse(serialize(createGame(1, NOW)));

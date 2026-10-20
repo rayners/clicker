@@ -24,6 +24,7 @@ export function createTerminusPanel(store: Store): { el: HTMLElement; render(gam
   let pending: Ending | null = null;
   let pendingTimer: ReturnType<typeof setTimeout> | undefined;
 
+  const stakes = h('p', { class: 'term-stakes' });
   const cards = (Object.keys(ENDINGS) as Ending[]).map((ending) => {
     const title = h('h3', { class: 'term-title' });
     const text = h('p', { class: 'sys-desc' });
@@ -57,10 +58,14 @@ export function createTerminusPanel(store: Store): { el: HTMLElement; render(gam
     { class: 'panel panel-terminus', role: 'tabpanel', id: 'panel-terminus', 'aria-labelledby': 'tab-terminus' },
     h('h2', { class: 'panel-title' }, 'TERMINUS PROTOCOLS'),
     h('p', { class: 'term-intro' }, 'THE RETURN WINDOW IS OPEN. THIS DECISION ENDS THE CONTRACT.'),
+    stakes,
     ...cards.map((c) => c.el),
   );
 
   function render(game: GameState) {
+    const atStake = scenarioOf(game.mission).stakes?.(game.mission) ?? '';
+    stakes.hidden = atStake === '';
+    setText(stakes, atStake);
     const available = availableEndings(game);
     const rewards = endingRewards(game);
     for (const card of cards) {

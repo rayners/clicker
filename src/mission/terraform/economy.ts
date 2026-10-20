@@ -1,4 +1,19 @@
-import { COLONIST_WAVES, LINES, PROCESSORS, REACTORS, SPEC_REVISIONS, type Line, type ProcessorDef, type ReactorDef } from '../../data/terraform/systems';
+import {
+  COLONIST_WAVES,
+  LINES,
+  PROCESSORS,
+  REACTORS,
+  SPEC_REVISIONS,
+  WAVE_HABITABILITY,
+  WAVE_SIZES,
+  WAVE_THAW_LINES,
+  type Line,
+  type ProcessorDef,
+  type ReactorDef,
+} from '../../data/terraform/systems';
+import { appendLog } from '../log';
+
+export { WAVE_HABITABILITY, WAVE_SIZES };
 import { TERRAFORM_UPGRADES, type TerraformEffect } from '../../data/terraform/upgrades';
 import { TERRAFORM_CREW_BOOSTS } from '../../data/terraform/crew-boosts';
 import { isCrewEffective } from '../crew';
@@ -13,7 +28,24 @@ export const BASE_POWER = 1;
 const CREDITS_PER_UNIT = 1;
 const BASE_SURGE = 1;
 const ALLOCATION_STEPS = 10;
+/** Income bonus per thawed wave, at full productivity. */
 const WAVE_BONUS = 0.25;
+/** Habitability below which colonists start dying, and at which they become productive at all. */
+const SICKNESS_BELOW = 0.4;
+const PRODUCTIVE_FROM = 0.3;
+const PRODUCTIVE_FULL = 0.6;
+/** Share of colonists lost per second per point of habitability under the sickness line. */
+const SICKNESS_RATE = 0.001;
+const MORTALITY_REPORT_EVERY = 100;
+/** Story-scale progress at which the climate can reach the human ideal. */
+const FULL_DEVELOPMENT = 2_500;
+/** Seconds for the climate to close most of the gap to where the processing mix is pushing it. */
+const CLIMATE_SECONDS = 120;
+const DEAD_WORLD: Record<Line, number> = { atmosphere: 0, heat: 61, water: 0 };
+/** What the brochure promised: the human envelope, on which habitability is judged. */
+export const HUMAN_CLIMATE: Record<Line, number> = { atmosphere: 101.3, heat: 288, water: 60 };
+const CLIMATE_CEILING: Record<Line, number> = { atmosphere: 160, heat: 340, water: 100 };
+const HUMAN_SHARE = SPEC_REVISIONS[0]!.targets;
 // Same curve as extraction's shaft depth, so the shared story scale lines up (tuned by the pacing bot).
 const PROGRESS_SCALE = 0.0432;
 const PROGRESS_EXPONENT = 5.48;
@@ -148,7 +180,13 @@ export function spec(m: MissionState): PerLine {
 }
 
 export function isAutoBalanced(m: MissionState): boolean {
-  return multipliers(m).autoBalance;
+  return multipliers(m).autoBalance && !m.balancerOff;
+}
+
+/** Take the allocation back from WARDEN, or hand it over again. Only once the balancer is installed. */
+export function toggleBalancer<M extends MissionState>(m: M): M {
+  if (!multipliers(m).autoBalance) return m;
+  return { ...m, balancerOff: !m.balancerOff };
 }
 
 /**
@@ -198,13 +236,73 @@ export function specMatch(m: MissionState): number {
   return LINES.reduce((s, l) => s + Math.min(t[l.id] / sum, w[l.id]), 0);
 }
 
-export function colonistWaves(m: MissionState): number {
+/** Waves certified ready to thaw by progress (thawed or not). */
+export function wavesReady(m: MissionState): number {
   const p = progress(m);
   return COLONIST_WAVES.filter((at) => p >= at).length;
 }
 
-function colonistMultiplier(m: MissionState): number {
-  return 1 + WAVE_BONUS * colonistWaves(m);
+// ---------- climate and the colony ----------
+
+/** Where the climate is heading: how developed the planet is, shaped by the processing mix against the human mix. */
+export function climateTarget(m: MissionState): PerLine {
+  const t = throughput(m);
+  const sum = total(t);
+  const development = Math.min(1, Math.sqrt(progress(m) / FULL_DEVELOPMENT));
+  return perLine((line) => {
+    // With nothing running (surges only), the mix is the brochure's.
+    const ratio = sum > 0 ? t[line] / sum / HUMAN_SHARE[line] : 1;
+    const value = DEAD_WORLD[line] + (HUMAN_CLIMATE[line] - DEAD_WORLD[line]) * development * ratio;
+    return Math.max(DEAD_WORLD[line], Math.min(CLIMATE_CEILING[line], value));
+  });
+}
+
+/** 0..1: the worst reading's closeness to the human envelope. */
+export function habitability(m: MissionState): number {
+  return Math.min(
+    ...LINES.map((l) => {
+      const span = HUMAN_CLIMATE[l.id] - DEAD_WORLD[l.id];
+      return Math.max(0, 1 - Math.abs(m.climate[l.id] - HUMAN_CLIMATE[l.id]) / span);
+    }),
+  );
+}
+
+export function canThaw(m: MissionState): boolean {
+  const next = m.wavesThawed;
+  return next < wavesReady(m) && habitability(m) >= (WAVE_HABITABILITY[next] ?? Infinity);
+}
+
+/** Open the next wave's pods. The player decides; WARDEN never does. */
+export function thawWave<M extends MissionState>(m: M): M {
+  if (!canThaw(m)) return m;
+  const wave = m.wavesThawed;
+  return appendLog({ ...m, wavesThawed: wave + 1, colonists: m.colonists + WAVE_SIZES[wave]! }, 'corp', WAVE_THAW_LINES[wave]!);
+}
+
+/** Colonists work in proportion to how livable the planet is. */
+export function colonyIncomeMultiplier(m: MissionState): number {
+  const productivity = Math.max(0, Math.min(1, (habitability(m) - PRODUCTIVE_FROM) / (PRODUCTIVE_FULL - PRODUCTIVE_FROM)));
+  return 1 + WAVE_BONUS * m.wavesThawed * productivity;
+}
+
+function driftClimate<M extends MissionState>(m: M, dt: number): M {
+  const target = climateTarget(m);
+  const k = Math.min(1, dt / CLIMATE_SECONDS);
+  return { ...m, climate: perLine((line) => m.climate[line] + (target[line] - m.climate[line]) * k) };
+}
+
+function sicken<M extends MissionState>(m: M, dt: number): M {
+  const h = habitability(m);
+  if (m.colonists === 0 || h >= SICKNESS_BELOW) return m.sickness === 0 ? m : { ...m, sickness: 0 };
+  const sickness = m.sickness + m.colonists * (SICKNESS_BELOW - h) * SICKNESS_RATE * dt;
+  const dead = Math.min(m.colonists, Math.floor(sickness));
+  if (dead === 0) return { ...m, sickness };
+  const lost = m.colonistsLost + dead;
+  const next = { ...m, sickness: sickness - dead, colonists: m.colonists - dead, colonistsLost: lost };
+  const reported = Math.floor(m.colonistsLost / MORTALITY_REPORT_EVERY) < Math.floor(lost / MORTALITY_REPORT_EVERY) || m.colonistsLost === 0;
+  return reported
+    ? appendLog(next, 'sys', `COLONY MORTALITY: ${lost} DEAD SINCE THAW. CAUSE: ENVIRONMENTAL. CLIMATE WITHIN CORPORATE SPECIFICATION.`)
+    : next;
 }
 
 /** On-spec units per second from the processing lines. */
@@ -213,7 +311,7 @@ function balancedRate(m: MissionState): number {
 }
 
 export function incomeRate(m: MissionState): number {
-  return (balancedRate(m) + autoSurgeRate(m) * surgePower(m)) * CREDITS_PER_UNIT * colonistMultiplier(m);
+  return (balancedRate(m) + autoSurgeRate(m) * surgePower(m)) * CREDITS_PER_UNIT * colonyIncomeMultiplier(m);
 }
 
 export function surgePower(m: MissionState): number {
@@ -229,7 +327,7 @@ function process<M extends MissionState>(m: M, units: number, dt: number): M {
   const w = spec(m);
   const t = throughput(m);
   const lineRate = balancedRate(m);
-  const credits = (lineRate * dt + units) * CREDITS_PER_UNIT * colonistMultiplier(m);
+  const credits = (lineRate * dt + units) * CREDITS_PER_UNIT * colonyIncomeMultiplier(m);
   return {
     ...m,
     credits: m.credits + credits,
@@ -245,7 +343,7 @@ export function surge<M extends MissionState>(m: M): M {
 }
 
 export function tickTerraform<M extends MissionState>(m: M, dt: number): M {
-  return process(m, autoSurgeRate(m) * surgePower(m) * dt, dt);
+  return sicken(driftClimate(process(m, autoSurgeRate(m) * surgePower(m) * dt, dt), dt), dt);
 }
 
 /**
@@ -292,19 +390,7 @@ export function buyTerraformUpgrade<M extends MissionState>(m: M, id: string): M
   return { ...m, credits: m.credits - u.cost, upgrades: [...m.upgrades, id] };
 }
 
-/** Cumulative line output at which a reading reaches its final value. */
-const READING_FULL = 1e10;
-const READING_RANGES: Record<Line, [number, number]> = {
-  atmosphere: [0, 101.3], // surface pressure, kPa
-  heat: [61, 304], // mean temperature, K
-  water: [0, 96], // hydrosphere / humidity, %
-};
-
-/** Diegetic readings for each line: pressure (kPa), mean temperature (K), hydrosphere (%). */
+/** Diegetic readings: pressure (kPa), mean temperature (K), hydrosphere (%). */
 export function planetReadings(m: MissionState): PerLine {
-  return perLine((line) => {
-    const [from, to] = READING_RANGES[line];
-    const f = Math.min(1, Math.log10(1 + m.lineTotals[line]) / Math.log10(READING_FULL));
-    return from + (to - from) * f;
-  });
+  return m.climate;
 }

@@ -1,8 +1,8 @@
 import type { Beat } from '../../mission/story';
 import { isCrewUnlocked } from '../../mission/crew';
-import { colonistWaves, progress, specRevision } from '../../mission/terraform/economy';
+import { progress, specRevision, wavesReady } from '../../mission/terraform/economy';
 import type { MissionState, TerraformMission } from '../../mission/state';
-import { COLONIST_WAVES, SPEC_REVISIONS } from './systems';
+import { COLONIST_WAVES, SPEC_REVISIONS, WAVE_HABITABILITY } from './systems';
 
 const t = (m: MissionState) => m as TerraformMission;
 const ownsAny = (m: MissionState, ids: string[]) => ids.some((id) => (t(m).processors[id] ?? 0) > 0 || (t(m).reactors[id] ?? 0) > 0);
@@ -20,20 +20,17 @@ const REVISIONS: Beat[] = SPEC_REVISIONS.slice(1).map((rev, i) => ({
   entries: [{ kind: 'corp', text: `HABITABILITY SPEC REV ${i + 2} [TX ${REVISION_LAG[i + 1]} AGO]: ${rev.memo} REBALANCE POWER ALLOCATION.` }],
 }));
 
-const WAVE_LINES = [
-  'COLONY WAVE 1 CERTIFIED: 400 COLONISTS THAWED. FIRST CHILD BORN ON MERROW EXPECTED WITHIN THE YEAR.',
-  'COLONY WAVE 2 CERTIFIED: 600 COLONISTS THAWED. SCHOOL DISTRICT ESTABLISHED. ATTENDANCE: EXCELLENT.',
-  'COLONY WAVE 3 CERTIFIED: 700 COLONISTS THAWED. COLONISTS REPORT THE AIR "TASTES SWEET".',
-  'COLONY WAVE 4 CERTIFIED: 700 COLONISTS THAWED. HOUSING ALLOCATED IN THE LOWLAND DISTRICTS, NEAR THE WARM WATER.',
-  'COLONY WAVE 5 CERTIFIED: 800 COLONISTS THAWED. NO COMPLAINTS LOGGED. NO COMPLAINTS LOGGED. NO COMPLAINTS LOGGED.',
-  'COLONY WAVE 6 CERTIFIED: 800 COLONISTS THAWED. BERTHS NOW EMPTY. SPECIAL PROJECTS CONFIRMS RECEIPT.',
-];
-
-const WAVES: Beat[] = WAVE_LINES.map((text, i) => ({
+/** Each wave is certified ready by progress. Thawing it is the player's decision (see thawWave). */
+const WAVES: Beat[] = COLONIST_WAVES.map((at, i) => ({
   id: `tf-wave-${i + 1}`,
-  act: actAt(COLONIST_WAVES[i]!),
-  when: ({ m }) => colonistWaves(t(m)) >= i + 1,
-  entries: [{ kind: i < 4 ? 'corp' : 'sys', text }],
+  act: actAt(at),
+  when: ({ m }) => wavesReady(t(m)) >= i + 1,
+  entries: [
+    {
+      kind: 'corp',
+      text: `COLONY WAVE ${i + 1} CERTIFIED READY TO THAW [TX 5Y AGO]. PODS OPEN AT ${Math.round(WAVE_HABITABILITY[i]! * 100)}% HABITABILITY. THE DECISION RESTS WITH STATION OPERATIONS.`,
+    },
+  ],
 }));
 
 /** Act 1 for a terraforming contract: a colonial brochure come to life. */

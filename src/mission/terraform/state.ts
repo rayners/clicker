@@ -13,4 +13,14 @@ export interface TerraformFields {
   processed: number;
   /** Cumulative raw processing, on spec or not: unlocks upgrades. */
   lifetimeUnits: number;
+  /** Surface pressure (kPa), mean temperature (K) and hydrosphere (%): drifts toward what the processing mix makes. */
+  climate: Record<Line, number>;
+  /** Colonists thawed and alive on the surface. */
+  colonists: number;
+  wavesThawed: number;
+  colonistsLost: number;
+  /** Fractional deaths carried between ticks. */
+  sickness: number;
+  /** The player has taken the allocation back from WARDEN's load balancer. */
+  balancerOff: boolean;
 }
