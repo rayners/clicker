@@ -47,7 +47,7 @@ Requested 2026-10-19. Tracked in `docs/forest/DESIGN.md`. A playable first slice
 In order. Each item has its design written down first, so nothing lives only in a conversation.
 
 1. **(Done 2026-10-21.) LATE FEES: the Candy Corn Day tape.** A Grayhaven State Hospital venue and the killer Patient 10-30, with their crossovers, sequels and Killer's Cut entry. Design: `docs/late-fees/DESIGN.md` §3.
-2. **A fourth game: the deep-water monster game** (working title FATHOM). Sharks, squid and octopus on the coast; deeper water and bigger things; then kaiju from a breach in the trench, and mechs to fight them. Design: `docs/kaiju/DESIGN.md`.
+2. **(Simulation built 2026-10-21; the screen is next.) A fourth game: the deep-water monster game** (working title FATHOM). Sharks, squid and octopus on the coast; deeper water and bigger things; then kaiju from a breach in the trench, and mechs to fight them. Design: `docs/kaiju/DESIGN.md`.
 3. **DEEP CONTRACT: salvage**, the last of the four approved missions (`docs/MISSIONS.md` §5).
 
 ## Backlog / ideas

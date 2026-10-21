@@ -82,6 +82,16 @@ Play **the kaiju**, using the shared hunt engine (`src/shared/hunt.ts`). Several
 6. **The shell:** the sonar look, the page, its manifest and the picker door. This waits for the name.
 7. **Pacing bot, telemetry and dashboard tiles, e2e.**
 
+## Status
+
+- **Built (simulation, 2026-10-21):** steps 1–5 and the pacing bot.
+  - **Code:** `src/fathom/` (`shallows`, `shelf`, `open-water`, `trench`, `breach`, `story`, `season`, `game`, `store`, `save`, `bot`) and `src/fathom-data/`.
+  - **Pacing (bot, seed 7):** act 2 at 1h04, the source at 2h11, the first landfall at about 2h51, the season's end at about 4h06.
+  - **Opening depths (story scale):** the Shelf at 100 m, Open Water at 500 m, the Trench at 2,000 m. Act 2 is at 1,000 m. Act 3 is at 3,200 m, once the station sits at notch 8 (the source).
+  - **Zones feed each other:** escaped specimens add pressure on the beach until they swim off.
+  - **Deviation:** walls and Bulwarks hold the coast like garrisons, and spare force retakes fallen cities. Pilots are a count (two per Bulwark) for now; the link rating is still to come.
+- **Next:** step 6, the screen. The page is held at `/fathom/` and kept off the picker until the name is chosen.
+
 ## Open questions (for the user, before building)
 
 1. **The name.** Candidates: FATHOM, DEEP WATER, BREACHWATER, CRUSH DEPTH.
