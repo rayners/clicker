@@ -16,3 +16,16 @@ test('haulage: push the tug to the first station on its thrusters and get paid',
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   }
 });
+
+test('overland: the short contract is offered first, and the rig rolls on the engine alone', async ({ page }) => {
+  await page.goto('/contract/');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  const cards = page.getByRole('dialog', { name: /contract assignment/i }).getByRole('button', { name: /accept .* contract/i });
+  await expect(cards.first()).toHaveAccessibleName(/overland/i);
+  await cards.first().click();
+  const gun = page.getByRole('button', { name: /gun the engine/i });
+  for (let i = 0; i < 30; i++) await gun.click();
+  await expect(page.getByLabel('Legs delivered')).toHaveText('1');
+  await expect(page.getByRole('region', { name: /route/i })).toContainText('CAUSEWAY DEPOT');
+});

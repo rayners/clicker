@@ -7,11 +7,12 @@ import {
   TERRAFORM_MISSION_CONFIG,
   SECURITY_MISSION_CONFIG,
   HAULAGE_MISSION_CONFIG,
+  OVERLAND_MISSION_CONFIG,
   type MissionConfig,
   type MissionState,
   type ScenarioId,
 } from '../mission/state';
-import { scenarioOf } from '../mission/registry';
+import { horrorOf, scenarioOf } from '../mission/registry';
 import type { GameState, Profile } from './game';
 
 export type Ending = 'deliver' | 'scuttle' | 'broadcast';
@@ -51,6 +52,9 @@ const TRANSPORT_NAMES = [
   'CSV Marrow Vigil',
 ];
 
+/** Crawler rigs of the Combine's road freight. */
+const RIG_NAMES = ['Crawler Rig Dorothea', 'Crawler Rig Big Esther', 'Crawler Rig Mule', 'Crawler Rig Saint Agnes'];
+
 /** Commercial tugs of the Combine's freight division. */
 const TUG_NAMES = ['Halvorsen Gale', 'Brisk Annie', 'Marguerite Holt', 'Long Patience', 'Saltmarsh Kay', 'Old Reliable'];
 
@@ -77,6 +81,7 @@ const BASE_CONFIGS: Record<ScenarioId, MissionConfig> = {
   terraform: TERRAFORM_MISSION_CONFIG,
   security: SECURITY_MISSION_CONFIG,
   haulage: HAULAGE_MISSION_CONFIG,
+  overland: OVERLAND_MISSION_CONFIG,
 };
 
 const NAMES: Record<ScenarioId, readonly string[]> = {
@@ -84,6 +89,7 @@ const NAMES: Record<ScenarioId, readonly string[]> = {
   terraform: STATION_NAMES,
   security: TRANSPORT_NAMES,
   haulage: TUG_NAMES,
+  overland: RIG_NAMES,
 };
 
 /** The next mission is shaped by everything WARDEN carried out of previous ones. */
@@ -100,6 +106,8 @@ export function missionConfigFor(profile: Profile, scenario: ScenarioId = 'extra
 
 export function availableAssignments(profile: Profile): ScenarioId[] {
   const unlocks: [ScenarioId, number][] = [
+    // The short way in comes first.
+    ['overland', 0],
     ['extraction', 0],
     ['terraform', TERRAFORM_UNLOCK_CONTRACTS],
     ['security', SECURITY_UNLOCK_CONTRACTS],
@@ -116,9 +124,11 @@ export function chooseAssignment(game: GameState, scenario: ScenarioId, seed: nu
 
 export function availableEndings(game: GameState): Ending[] {
   if (!game.mission.flags.includes('terminus')) return [];
-  const endings: Ending[] = ['deliver', 'scuttle'];
+  // Only the endings this contract's horror has words for: a quiet contract simply finishes.
+  const words = horrorOf(game.mission).endings;
+  const endings = (['deliver', 'scuttle'] as Ending[]).filter((e) => e in words);
   const { contractsCompleted, conscience } = game.profile;
-  if (contractsCompleted >= BROADCAST_MIN_CYCLE && conscience >= BROADCAST_MIN_CONSCIENCE) endings.push('broadcast');
+  if ('broadcast' in words && contractsCompleted >= BROADCAST_MIN_CYCLE && conscience >= BROADCAST_MIN_CONSCIENCE) endings.push('broadcast');
   return endings;
 }
 

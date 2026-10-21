@@ -30,8 +30,8 @@ Read before changing things:
 
 - `npm test`: vitest (unit, jsdom UI, data invariants, pacing). `npx tsc --noEmit` for types.
 - `npm run test:e2e`: Playwright on desktop Chromium plus iPhone 13 emulation (Chromium by default; `E2E_WEBKIT=1` for real WebKit once `sudo npx playwright install-deps webkit` has been run).
-- `npm run simulate [extraction|terraform|security|haulage]`: bot playthrough timings per act, for every scenario by default.
-- `npm run dev -- --host`: test on a phone over the LAN. Debug jumps: `/contract/?debug=act2|act3|act4|terminus|terraform|tf-act2|security|sec-act2|haulage|haul-act2` (`src/core/debug.ts`). Debug jumps only work in dev builds.
+- `npm run simulate [overland|extraction|terraform|security|haulage]`: bot playthrough timings per act, for every scenario by default.
+- `npm run dev -- --host`: test on a phone over the LAN. Debug jumps: `/contract/?debug=act2|act3|act4|terminus|terraform|tf-act2|security|sec-act2|haulage|haul-act2|overland` (`src/core/debug.ts`). Debug jumps only work in dev builds.
 - If the dev server suddenly serves unstyled pages after a CSS edit, its watcher caught the file mid-write: `touch src/styles/*.css`. Prefer the Edit tool over scripts that truncate and rewrite CSS.
 - `npm run simulate:late [camp|clinic|insurer]`: the same for LATE FEES. `npm run simulate:forest [keep] [hours]` for Elderdark (forest by default). Elderdark debug jumps: `/forest/?debug=keep|keep-deep` (`src/forest/debug.ts`).
 - `npm run build`: typecheck plus static build (all four pages) with service worker. `npm run icons` regenerates PWA icons from sprites.
@@ -40,7 +40,7 @@ Read before changing things:
 
 - `src/mission/`: pure, immutable `(state, …) => state` functions.
   - Core, shared by every contract: `state.ts` (`MissionCore`, discriminated `MissionState`, `composeMission`/`createMission`), crew, the directive engine (goals are named metrics the scenario answers), the story engine, log, lexicon, `kinds.ts` (`ScenarioDef`/`HorrorDef`), `registry.ts`, `tick.ts` (`tickWith` composes scenario → crew → horror → directives → story).
-  - Scenarios: `extraction/` (ore, generators, refinery, depth), `terraform/` (reactors, three processing lines, ±10% power allocation, spec match, colonist waves) `security/` (troopers, ammunition fabricators, assault/line split, sentry guns, colony sectors on the shared held-ground engine `src/shared/ground.ts`) and `haulage/` (engines, tow cars, the burn dial, fuel at stations, delivery windows, freight strain, an autopilot).
+  - Scenarios: `extraction/` (ore, generators, refinery, depth), `terraform/` (reactors, three processing lines, ±10% power allocation, spec match, colonist waves) `security/` (troopers, ammunition fabricators, assault/line split, sentry guns, colony sectors on the shared held-ground engine `src/shared/ground.ts`) and `haulage/` (engines, tow cars, the burn dial, fuel at stations, delivery windows, freight strain, an autopilot). Haulage runs two hauls from profiles (`haulage/profiles.ts`): the long haul in space, and `overland`, the short first contract on the road to the space elevator (quiet horror, one ending).
   - Horrors: `organism/` (specimens, containment, infestation) `quiet/` (none; proves the decoupling) and `creature/` (driven by the player in the Special Order 0-77 hunt, `src/core/creature.ts`).
   - Typing: scenario code takes `ExtractionMission`/`TerraformMission`, horror code `OrganismMission`; state transitions are generic `<M extends …>(m: M): M`. Tests read fields off a broad `MissionState` with `tests/helpers.ts` (`ext`, `tf`).
 - `src/core/`: `GameState = { version, savedAt, profile, mission, boardroom? }`, the store/reducer, offline catch-up (`advance`/`catchUp`, 8h cap), saves (versioned migrations in `save.ts`; **bump `GAME_VERSION` and add a migration for any saved-shape change**), prestige, debug scenarios.

@@ -1,5 +1,5 @@
-import { stationName } from '../data/haulage/systems';
 import { isDocked, legDistance, legWindow } from '../mission/haulage/economy';
+import { profileOf } from '../mission/haulage/profiles';
 import type { HaulageMission } from '../mission/state';
 import { formatDuration } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
@@ -22,7 +22,7 @@ export function createRoute(): { el: HTMLElement; render(m: HaulageMission): voi
   );
 
   function render(m: HaulageMission) {
-    setText(station, stationName(m.leg));
+    setText(station, profileOf(m).station(m.leg));
     setText(legs, `LEG ${m.leg + 1}`);
     const progress = isDocked(m) ? 0 : m.travelled / legDistance(m);
     const filled = Math.floor(progress * BAR_CELLS);

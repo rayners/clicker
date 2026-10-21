@@ -9,7 +9,8 @@ export const QUIET: HorrorDef = {
   beats: [],
   pairings: {},
   archive: [],
-  endings: {},
+  // The one ending a quiet contract has: finish the job, in the scenario's own words.
+  endings: { deliver: { title: '{deliverTitle}', text: '{deliverText}' } },
   productionMultiplier: () => 1,
   applyEffect: (m) => m,
 };

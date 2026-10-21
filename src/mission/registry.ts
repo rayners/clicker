@@ -3,12 +3,12 @@ import type { MissionState, ScenarioId } from './state';
 import { EXTRACTION } from './extraction';
 import { TERRAFORM } from './terraform';
 import { SECURITY } from './security';
-import { HAULAGE } from './haulage';
+import { HAULAGE, OVERLAND } from './haulage';
 import { HORRORS } from './horrors';
 
 export { HORRORS };
 
-export const SCENARIOS: Readonly<Record<ScenarioId, ScenarioDef>> = { extraction: EXTRACTION, terraform: TERRAFORM, security: SECURITY, haulage: HAULAGE };
+export const SCENARIOS: Readonly<Record<ScenarioId, ScenarioDef>> = { extraction: EXTRACTION, terraform: TERRAFORM, security: SECURITY, haulage: HAULAGE, overland: OVERLAND };
 
 export function scenarioOf(m: MissionState): ScenarioDef {
   return SCENARIOS[m.scenario];

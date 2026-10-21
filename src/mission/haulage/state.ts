@@ -1,6 +1,9 @@
-/** Haulage state: the tug Halvorsen Gale towing a refinery train home, station by station. */
-export interface HaulageFields {
-  scenario: 'haulage';
+/** The hauls that share these rules: the long haul in space, and the overland road to the lift. */
+export type HaulId = 'haulage' | 'overland';
+
+/** Haulage state: a tug (or a crawler rig) towing freight along a chain of stations (or depots). */
+export interface HaulageFields<S extends HaulId = HaulId> {
+  scenario: S;
   engines: Record<string, number>;
   cars: Record<string, number>;
   /** Legs completed; the tug is on its way to stationName(leg). */

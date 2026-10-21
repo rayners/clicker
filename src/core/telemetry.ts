@@ -2,7 +2,7 @@ import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../sha
 import type { GameState } from './game';
 import { SECTIONS } from '../data/security/systems';
 import { isHaulage, isSecurity } from '../mission/state';
-import { stationName } from '../data/haulage/systems';
+import { profileOf } from '../mission/haulage/profiles';
 
 const minutes = (seconds: number) => Math.round(seconds / 60);
 
@@ -47,7 +47,7 @@ export function contractEvents(prev: GameState, next: GameState): TelemetryEvent
     }
     if (isHaulage(m) && isHaulage(was) && m.leg > was.leg) {
       const onTime = m.onTime > was.onTime;
-      events.push({ name: 'leg_completed', props: { station: stationName(m.leg - 1), legs: m.leg, onTime, minutes: minutes(m.elapsed), horror: m.horror, cycle } });
+      events.push({ name: 'leg_completed', props: { station: profileOf(m).station(m.leg - 1), legs: m.leg, onTime, minutes: minutes(m.elapsed), horror: m.horror, cycle } });
     }
     events.push(...progressEvents(was, m, m.elapsed));
   }

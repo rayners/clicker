@@ -11,7 +11,7 @@ import type { QuietFields } from './quiet/state';
 import type { CreatureFields } from './creature/state';
 import { HORRORS, SCENARIOS } from './registry';
 
-export type ScenarioId = 'extraction' | 'terraform' | 'security' | 'haulage';
+export type ScenarioId = 'extraction' | 'terraform' | 'security' | 'haulage' | 'overland';
 export type HorrorId = 'organism' | 'quiet' | 'creature';
 
 /** Everything that varies between missions. Plain data so the future Boardroom layer can author it. */
@@ -64,6 +64,15 @@ export const HAULAGE_MISSION_CONFIG = {
   targetBody: 'The Long Haul: Tethys Minor to Kessler Station',
 } satisfies MissionConfig;
 
+/** The overland haul: a crawler rig on the road from the mine to the space elevator. Short, and nothing goes wrong. */
+export const OVERLAND_MISSION_CONFIG = {
+  ...DEFAULT_MISSION_CONFIG,
+  scenario: 'overland',
+  horror: 'quiet',
+  shipName: 'Crawler Rig Dorothea',
+  targetBody: 'The Lift Road: Pit 4 to Port Kessler Lift',
+} satisfies MissionConfig;
+
 /** State every mission has, whatever its scenario or horror. */
 export interface MissionCore {
   config: MissionConfig;
@@ -90,7 +99,7 @@ export interface MissionCore {
   nextLogId: number;
 }
 
-export type ScenarioFields = ExtractionFields | TerraformFields | SecurityFields | HaulageFields;
+export type ScenarioFields = ExtractionFields | TerraformFields | SecurityFields | HaulageFields<'haulage'> | HaulageFields<'overland'>;
 export type HorrorFields = OrganismFields | QuietFields | CreatureFields;
 
 /** A single mission, fully self-contained and JSON-serializable. */
@@ -118,8 +127,9 @@ export function isSecurity(m: MissionState): m is SecurityMission {
   return m.scenario === 'security';
 }
 
+/** Either haul: the long haul in space or the overland road. */
 export function isHaulage(m: MissionState): m is HaulageMission {
-  return m.scenario === 'haulage';
+  return m.scenario === 'haulage' || m.scenario === 'overland';
 }
 
 export function isOrganism(m: MissionState): m is OrganismMission {

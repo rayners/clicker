@@ -169,6 +169,13 @@ Strip a derelict hull section by section, using held ground again: sections are 
 - **Saves:** there is no saved-shape change for existing contracts, so no migration.
 - **Pacing (bot, seed 7):** Act II 55m, Act III 2h43, Act IV 2h52, terminus 4h07. An 8-hour catch-up takes about 0.3 s.
 
+**4b. The overland haul: done** (2026-10-21, user's idea: "land is a good lower/quicker level").
+- **What it is:** a short contract (an hour or so) and the first one offered. A crawler rig hauls trailers along the lift road, from the mine through ten depots to Port Kessler Lift. Reaching the lift opens the terminus, and the one ending is the promotion to the long haul (+1 seniority).
+- **How:** it runs on the haulage rules. `src/mission/haulage/profiles.ts` holds each haul's fleet, route, pay and fuel (`SPACE_HAUL`, `LAND_HAUL`), and `haulScenario` builds both scenario definitions. Overland data lives in `src/data/overland/`, and on-screen words in `src/ui/haul-words.ts` (throttle, gun the engine, fuel truck, hitch).
+- **No horror:** it runs under the quiet horror, which now has one ending (deliver) worded by the scenario's lexicon. `availableEndings` offers only the endings a contract's horror has words for, so every other contract is unchanged.
+- **Debug jump:** `?debug=overland`.
+- **Pacing (bot):** terminus at 1h14, never leaving act 1.
+
 ## Build order
 
 1. **Held ground** in `src/shared/ground.ts`, test-first, with no game attached.

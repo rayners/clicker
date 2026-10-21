@@ -1,17 +1,16 @@
 import type { Store } from '../core/store';
-import { HAULAGE_UPGRADES } from '../data/haulage/upgrades';
 import { effectiveBurn, fuelForLeg, fuelPrice, isAutopilotActive, isDocked, safeBurn } from '../mission/haulage/economy';
 import type { HaulageMission } from '../mission/state';
 import { formatNumber } from '../shared/format';
 import { h, setText } from '../shared/ui/dom';
-
-const AUTOPILOT = HAULAGE_UPGRADES.find((u) => u.effect.kind === 'autopilot')!.id;
+import { profileOf } from '../mission/haulage/profiles';
+import type { HaulWords } from './haul-words';
 
 /** The burn dial and the tanks: one notch per tap, fuel only at a station, and WARDEN's autopilot. */
-export function createHelm(store: Store): { el: HTMLElement; render(m: HaulageMission): void } {
-  const burn = h('span', { class: 'split-share', 'aria-label': 'Burn' }, '5');
-  const gentler = h('button', { class: 'alloc-step', type: 'button', 'aria-label': 'Burn gentler' }, '−');
-  const hotter = h('button', { class: 'alloc-step', type: 'button', 'aria-label': 'Burn hotter' }, '+');
+export function createHelm(store: Store, words: HaulWords): { el: HTMLElement; render(m: HaulageMission): void } {
+  const burn = h('span', { class: 'split-share', 'aria-label': words.dial.charAt(0) + words.dial.slice(1).toLowerCase() }, '5');
+  const gentler = h('button', { class: 'alloc-step', type: 'button', 'aria-label': words.gentler }, '−');
+  const hotter = h('button', { class: 'alloc-step', type: 'button', 'aria-label': words.hotter }, '+');
   gentler.addEventListener('click', () => store.dispatch({ type: 'shiftBurn', step: -1 }));
   hotter.addEventListener('click', () => store.dispatch({ type: 'shiftBurn', step: 1 }));
   const line = h('span', { class: 'split-figure' });
@@ -27,7 +26,7 @@ export function createHelm(store: Store): { el: HTMLElement; render(m: HaulageMi
     h(
       'div',
       { class: 'split-row' },
-      h('div', { class: 'split-side' }, h('span', { class: 'alloc-name' }, 'BURN'), line),
+      h('div', { class: 'split-side' }, h('span', { class: 'alloc-name' }, words.dial), line),
       h('div', { class: 'alloc-steps' }, gentler, burn, hotter),
       h('div', { class: 'split-side split-side-line' }, h('span', { class: 'alloc-name' }, 'FUEL'), fuel),
     ),
@@ -49,12 +48,13 @@ export function createHelm(store: Store): { el: HTMLElement; render(m: HaulageMi
     const docked = isDocked(m);
     const cost = Math.max(0, need - m.fuel) * fuelPrice(m);
     refuel.disabled = cost <= 0 || m.credits <= 0;
-    setText(refuel, docked ? `REFUEL FOR THE NEXT LEG ${formatNumber(cost)} CR` : `CALL A FUEL TENDER (×3 PRICE) ${formatNumber(cost)} CR`);
-    refuel.setAttribute('aria-label', docked ? 'Refuel for the next leg' : 'Call a fuel tender to refuel under way');
+    setText(refuel, docked ? `REFUEL FOR THE NEXT LEG ${formatNumber(cost)} CR` : `${words.tender} ${formatNumber(cost)} CR`);
+    refuel.setAttribute('aria-label', docked ? 'Refuel for the next leg' : words.tenderAria);
     auto.hidden = !automated;
     gentler.hidden = automated;
     hotter.hidden = automated;
-    handover.hidden = !m.upgrades.includes(AUTOPILOT);
+    const autopilot = profileOf(m).upgrades.find((u) => u.effect.kind === 'autopilot');
+    handover.hidden = !autopilot || !m.upgrades.includes(autopilot.id);
     const label = automated ? 'Take control from WARDEN' : 'Return control to WARDEN';
     setText(handover, label.toUpperCase());
     handover.setAttribute('aria-label', label);

@@ -77,6 +77,12 @@ describe('DEEP CONTRACT play events', () => {
     ]);
   });
 
+  it('names the depot on the overland road', () => {
+    const g = reduce(newGame(1, 0), { type: 'chooseAssignment', scenario: 'overland', seed: 1 });
+    const after = withMission(g, { leg: 1, onTime: 0 } as never);
+    expect(contractEvents(g, after)[0]).toMatchObject({ name: 'leg_completed', props: { station: 'PIT 4 LOADOUT', onTime: false } });
+  });
+
   it('reports Special Order 0-77 accepted, and each time a WARDEN vents its decks on the creature', () => {
     const g = game();
     const hunting = startCreature(g, 5);

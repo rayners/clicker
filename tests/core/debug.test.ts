@@ -69,6 +69,12 @@ describe('debug scenarios', () => {
     expect(m.fuel).toBeGreaterThan(0);
   });
 
+  it('starts a fresh overland haul', () => {
+    const g = applyScenario(base(), 'overland');
+    expect(g.mission.scenario).toBe('overland');
+    expect(g.mission.horror).toBe('quiet');
+  });
+
   it('act3 opens special projects', () => {
     const g = applyScenario(base(), 'act3');
     expect(g.mission.act).toBe(3);

@@ -5,6 +5,11 @@ import type { ScenarioId } from '../mission/state';
 import { h, setText } from '../shared/ui/dom';
 
 const BRIEFS: Record<ScenarioId, { title: string; name: string; brief: string }> = {
+  overland: {
+    title: 'OVERLAND HAUL · SHORT CONTRACT',
+    name: 'overland',
+    brief: 'The short way in, an hour or so. Drive a crawler rig and its trailers from the mine to the space elevator, depot by depot. Throttle against fuel, delivery windows, and a promotion at the end.',
+  },
   extraction: {
     title: 'MINERAL EXTRACTION',
     name: 'extraction',

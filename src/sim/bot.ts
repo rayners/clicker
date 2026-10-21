@@ -9,7 +9,7 @@ import { generatorCost, generatorRate, oreRate, refineryCapacity, refineryCost }
 import { availableUpgrades } from '../mission/extraction/upgrades';
 import { crewStatus, isCrewUnlocked, maxAwake, awakeCount } from '../mission/crew';
 import { containmentLevelCost, isSpecialProjectsUnlocked, reinforceCost, rigCost, ventCost } from '../mission/organism/containment';
-import { createMission, type MissionOf, type MissionState, type ScenarioId } from '../mission/state';
+import { createMission, type HaulageMission, type MissionOf, type MissionState, type ScenarioId } from '../mission/state';
 import { LINES, PROCESSORS, REACTORS } from '../data/terraform/systems';
 import {
   allocate,
@@ -42,7 +42,7 @@ import {
   trooperForce,
 } from '../mission/security/economy';
 import { held as heldCount } from '../shared/ground';
-import { CARS, ENGINES } from '../data/haulage/systems';
+import { profileOf } from '../mission/haulage/profiles';
 import {
   availableHaulageUpgrades,
   carCost,
@@ -239,7 +239,7 @@ function decideSecurity(game: GameState): Action | null {
   return pick ? { type: 'buyTrooper', id: pick.id } : null;
 }
 
-type Haul = MissionOf<'haulage', 'organism'>;
+type Haul = HaulageMission;
 /** Trips' worth of fuel money the bot keeps back before buying anything else. */
 const FUEL_RESERVE_LEGS = 1.5;
 
@@ -267,12 +267,13 @@ function decideHaulage(game: GameState): Action | null {
     const value = gain / cost;
     if (gain > 0 && (!best || value > best.value)) best = { action, value };
   };
-  ENGINES.forEach((e, i) => {
+  const { engines, cars } = profileOf(m);
+  engines.forEach((e, i) => {
     if (!isEngineRevealed(m, i)) return;
     const cost = engineCost(e, m.engines[e.id] ?? 0);
     consider({ type: 'buyEngine', id: e.id }, cost, { ...m, engines: { ...m.engines, [e.id]: (m.engines[e.id] ?? 0) + 1 } });
   });
-  CARS.forEach((c, i) => {
+  cars.forEach((c, i) => {
     if (!isCarRevealed(m, i)) return;
     const cost = carCost(c, m.cars[c.id] ?? 0);
     consider({ type: 'buyCar', id: c.id }, cost, { ...m, cars: { ...m.cars, [c.id]: (m.cars[c.id] ?? 0) + 1 } });
@@ -287,12 +288,13 @@ function decide(game: GameState): Action | null {
   if (shared) return shared;
   if (game.mission.scenario === 'terraform') return decideTerraform(game);
   if (game.mission.scenario === 'security') return decideSecurity(game);
-  if (game.mission.scenario === 'haulage') return decideHaulage(game);
+  if (game.mission.scenario === 'haulage' || game.mission.scenario === 'overland') return decideHaulage(game);
   return decideExtraction(game);
 }
 
 const PRESS: Record<ScenarioId, Action> = { extraction: { type: 'drill' }, terraform: { type: 'surge' }, security: { type: 'fireSupport' },
-  haulage: { type: 'fireThrusters' } };
+  haulage: { type: 'fireThrusters' },
+  overland: { type: 'fireThrusters' } };
 
 const DEFEND_SECONDS = 5;
 const EARLY_TAPS = 4;

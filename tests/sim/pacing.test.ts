@@ -116,3 +116,18 @@ describe('first haulage contract pacing', () => {
     expect(hours(run.terminusAt)).toBeLessThan(6);
   });
 });
+
+/** The overland haul is the short way in: about an hour, one act, and the lift at the end. */
+describe('first overland haul pacing', () => {
+  const run = simulateRun({ seed: 7, scenario: 'overland', maxSeconds: 3 * 3600 });
+  const hours = (s: number | undefined) => (s === undefined ? Infinity : s / 3600);
+
+  it('reaches the lift and its terminus in roughly 45-90 minutes', () => {
+    expect(hours(run.terminusAt)).toBeGreaterThan(0.75);
+    expect(hours(run.terminusAt)).toBeLessThan(1.5);
+  });
+
+  it('never leaves act 1: nothing goes wrong on the road', () => {
+    expect(run.actAt[2]).toBeUndefined();
+  });
+});

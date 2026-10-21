@@ -6,7 +6,7 @@ import type { CreatureMission, ScenarioId } from '../mission/state';
 import { formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
 
-const KIND: Record<ScenarioId, string> = { extraction: 'EXTRACTION', terraform: 'TERRAFORM', security: 'SECURITY', haulage: 'HAULAGE' };
+const KIND: Record<ScenarioId, string> = { extraction: 'EXTRACTION', terraform: 'TERRAFORM', security: 'SECURITY', haulage: 'HAULAGE', overland: 'OVERLAND' };
 /** How each WARDEN's thinking reads from inside the walls. */
 const ACT_NAMES = ['', 'ROUTINE', 'NOTICED', 'HUNTED', 'VENTED'];
 const FEED = 8;

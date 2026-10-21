@@ -1,7 +1,7 @@
 import { formatNumber } from '../../shared/format';
 import type { Store } from '../../core/store';
-import { CARS, ENGINES, stationName } from '../../data/haulage/systems';
-import { HAULAGE_UPGRADES } from '../../data/haulage/upgrades';
+import type { HaulProfile } from '../../mission/haulage/profiles';
+import type { HaulWords } from '../haul-words';
 import {
   autoThrusterRate,
   availableHaulageUpgrades,
@@ -30,16 +30,17 @@ const s = (m: MissionState) => m as HaulageMission;
 const PERIOD_BASE = 1.1;
 const PERIOD_STEP = 0.5;
 
-const MONITOR: MonitorRow[] = [
+function monitorRows(profile: HaulProfile, words: HaulWords): MonitorRow[] {
+  return [
   {
     id: 'pulse',
-    label: 'PULSE TMR',
+    label: words.timer,
     period: 1,
     running: (m) => autoThrusterRate(s(m)) > 0,
     count: (m) => `${formatNumber(autoThrusterRate(s(m)))} BURST/S`,
     output: (m) => `${formatNumber(autoThrusterRate(s(m)) * thrusterPower(s(m)))} KM/S`,
   },
-  ...ENGINES.map((e, i) => ({
+  ...profile.engines.map((e, i) => ({
     id: e.id,
     label: e.short,
     period: PERIOD_BASE + (i % 4) * PERIOD_STEP,
@@ -47,7 +48,7 @@ const MONITOR: MonitorRow[] = [
     count: (m: MissionState) => `×${s(m).engines[e.id] ?? 0}`,
     output: (m: MissionState) => `${formatNumber((s(m).engines[e.id] ?? 0) * engineThrust(s(m), e))} THR`,
   })),
-  ...CARS.map((c, i) => ({
+  ...profile.cars.map((c, i) => ({
     id: c.id,
     label: c.short,
     period: 2 + i * 0.4,
@@ -56,11 +57,12 @@ const MONITOR: MonitorRow[] = [
     output: (m: MissionState) => `${formatNumber((s(m).cars[c.id] ?? 0) * carValue(s(m), c))} CR/KM`,
   })),
 ];
+}
 
-export function createHaulageUi(store: Store): ScenarioUi {
-  const systems = createHaulageSystemsPanel(store);
-  const upgrades = createUpgradesPanel<HaulageMission>(store, { all: HAULAGE_UPGRADES, available: availableHaulageUpgrades });
-  const helm = createHelm(store);
+export function createHaulageUi(store: Store, profile: HaulProfile, words: HaulWords): ScenarioUi {
+  const systems = createHaulageSystemsPanel(store, profile, words);
+  const upgrades = createUpgradesPanel<HaulageMission>(store, { all: profile.upgrades, available: availableHaulageUpgrades });
+  const helm = createHelm(store, words);
   const route = createRoute();
   return {
     flow: {
@@ -83,32 +85,32 @@ export function createHaulageUi(store: Store): ScenarioUi {
           rate: income,
         };
         if (isDocked(m)) {
-          return { ...base, limit: 'docked', highlight: null, severe: false, note: `DOCKED AT ${stationName(m.leg - 1)} · REFUEL BEFORE DEPARTURE` };
+          return { ...base, limit: 'docked', highlight: null, severe: false, note: `AT ${profile.station(m.leg - 1)} · REFUEL BEFORE DEPARTURE` };
         }
         if (thrust(m) === 0) {
-          return { ...base, limit: 'thrust', highlight: 0, severe: false, note: 'NO MAIN ENGINES · FIRE THRUSTERS OR FIT ENGINES IN SYSTEMS' };
+          return { ...base, limit: 'thrust', highlight: 0, severe: false, note: words.noEngines };
         }
         if (m.fuel <= 0) {
           return { ...base, limit: 'fuel', highlight: 0, severe: true, note: 'TANKS DRY · COASTING ON THRUSTERS · CALL A FUEL TENDER OR REFUEL AT THE NEXT STATION' };
         }
         if (burn > safeBurn(m)) {
-          return { ...base, limit: 'strain', highlight: 1, severe: true, note: `BURN ${burn} PAST THE STRAIN LINE (${safeBurn(m)}) · FREIGHT TAKING DAMAGE` };
+          return { ...base, limit: 'strain', highlight: 1, severe: true, note: `${words.dial} ${burn} PAST THE STRAIN LINE (${safeBurn(m)}) · FREIGHT TAKING DAMAGE` };
         }
         if (m.fuel < fuelForLeg(m)) {
           return { ...base, limit: 'fuel', highlight: 0, severe: true, note: `FUEL SHORT FOR THIS LEG · ${formatNumber(fuelForLeg(m) - m.fuel)} MORE NEEDED` };
         }
-        return { ...base, limit: 'thrust', highlight: 0, severe: false, note: `BOUND FOR ${stationName(m.leg)} · BURN ${burn}` };
+        return { ...base, limit: 'thrust', highlight: 0, severe: false, note: `BOUND FOR ${profile.station(m.leg)} · ${words.dial} ${burn}` };
       },
     },
-    monitor: MONITOR,
+    monitor: monitorRows(profile, words),
     stats: [
       { label: 'CREDITS', aria: 'Credits', read: (m) => formatNumber(m.credits) },
       { label: 'LEGS', aria: 'Legs delivered', read: (m) => String(s(m).leg) },
       { label: 'THRUST', aria: 'Total thrust', read: (m) => formatNumber(thrust(s(m))) },
     ],
     action: {
-      label: 'FIRE THRUSTERS',
-      aria: 'Fire thrusters',
+      label: words.action,
+      aria: words.actionAria,
       action: { type: 'fireThrusters' },
       perPress: (m) => thrusterPower(s(m)),
       autoRate: (m) => autoThrusterRate(s(m)),
