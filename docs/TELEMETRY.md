@@ -27,6 +27,7 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 
 | Game | Event | Properties |
 |---|---|---|
+| picker | `site_opened` | game `picker` only. The front page's one event, so a player's first step carries the outside referrer (`$referring_domain`) |
 | both | `game_opened` | (context only) |
 | both | `$exception` | uncaught errors and unhandled rejections |
 | DEEP CONTRACT | `contract_started` | scenario, horror, reason (`start` / `renewal` / `reassign`) |

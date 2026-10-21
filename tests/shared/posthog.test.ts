@@ -10,7 +10,7 @@ const posthog = vi.hoisted(() => ({
 }));
 vi.mock('posthog-js', () => ({ default: posthog }));
 
-import { createPostHogSink, POSTHOG_HOST, startAnalytics } from '../../src/shared/posthog';
+import { createPostHogSink, POSTHOG_HOST, startAnalytics, trackVisit } from '../../src/shared/posthog';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 const sharing = (on = true): OptOut & { on: boolean } => {
@@ -120,5 +120,21 @@ describe('starting analytics for a game', () => {
     window.dispatchEvent(new ErrorEvent('error', { error: new Error('x') }));
     expect(posthog.capture).not.toHaveBeenCalledWith('level_up', expect.anything());
     expect(posthog.captureException).not.toHaveBeenCalled();
+  });
+});
+
+describe('recording a visit to the front page', () => {
+  it('sends one event, so a player\'s first step (and the site that sent them) is on record', async () => {
+    trackVisit({ name: 'site_opened', props: { game: 'picker' }, optOut: sharing(), allowed: true });
+    await flush();
+    expect(posthog.capture).toHaveBeenCalledWith('site_opened', { game: 'picker' });
+  });
+
+  it('sends nothing when telemetry is not allowed or the player opted out', async () => {
+    trackVisit({ name: 'site_opened', optOut: sharing(), allowed: false });
+    trackVisit({ name: 'site_opened', optOut: sharing(false), allowed: true });
+    await flush();
+    expect(posthog.init).not.toHaveBeenCalled();
+    expect(posthog.capture).not.toHaveBeenCalled();
   });
 });

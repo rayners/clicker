@@ -71,3 +71,12 @@ export function startAnalytics<S>(options: {
     window.removeEventListener('unhandledrejection', onRejection);
   };
 }
+
+/** A single event from a page with no game state (the picker). PostHog records the referrer with it. */
+export function trackVisit(options: { name: string; props?: TelemetryProps; optOut: OptOut; allowed: boolean }): void {
+  if (!options.allowed || !options.optOut.sharing()) return;
+  createPostHogSink(() => ({})).then(
+    (sink) => options.optOut.sharing() && sink.capture({ name: options.name, props: options.props }),
+    () => undefined,
+  );
+}
