@@ -1,4 +1,5 @@
 import { appendLog, type LogEntry } from '../shared/log';
+import type { SectionState } from '../shared/ground';
 import { ATTRACTIONS, GUARDS } from '../fathom-data/shallows';
 import { TRAWLERS } from '../fathom-data/shelf';
 import { SPECIMENS } from '../fathom-data/open-water';
@@ -38,6 +39,14 @@ export interface Outfit {
   stationDepth: number;
   /** 0..1. At 0 a module floods. */
   integrity: number;
+  /** The Breach: the coast's cities as held ground (empty until it opens), what defends them, and the kaiju so far. */
+  cities: SectionState[];
+  walls: number;
+  bulwarks: number;
+  pilots: number;
+  /** The category of the kaiju now coming ashore, and seconds until the next, bigger one. */
+  category: number;
+  landfallIn: number;
   /** 0..1: how far the town still trusts the beaches. Scales tourist money. */
   reputation: number;
   bodyCount: number;
@@ -83,6 +92,12 @@ export function createOutfit(seed: number): Outfit {
     crews: 0,
     stationDepth: DEFAULT_STATION_DEPTH,
     integrity: 1,
+    cities: [],
+    walls: 0,
+    bulwarks: 0,
+    pilots: 0,
+    category: 0,
+    landfallIn: 0,
     reputation: 1,
     bodyCount: 0,
     attacks: 0,
