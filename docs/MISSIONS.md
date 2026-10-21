@@ -132,11 +132,29 @@ Strip a derelict hull section by section, using held ground again: sections are 
 - **The economy mirrors terraforming's,** to keep pacing predictable. Troopers use the processor ladder and fabricators the reactor ladder. Threat triples per sector, and the retainer is 0.75 credits per second per point of threat held. WARDEN's tactical net (auto-split) is the load balancer's counterpart, and it can be overruled the same way.
 - **The organism horror** raises `pressure` through the new `HorrorDef.pressure` hook: +1 once loose (act 4), and +0.5 per contact.
 
+**3. The Keep: done** (2026-10-21).
+- **Code:** `src/forest-data/keep.ts` (twelve floors, from the gatehouse to the undercroft), the Keep section of `src/forest/company.ts`, `src/forest-ui/keep.ts`, and `decideKeep` in `src/forest/bot.ts`.
+- **The site split is lighter than sketched.** There is no `SiteDef` abstraction. A company has a `site` (`'forest' | 'keep'`), and a Keep company also carries `floors` (held ground), `posted` (blades per floor) and `oil`. The forest's regions and the Keep's single assault order (`KEEP`) share the dispatch, resolution and projection code: a floor is projected as if it were a region.
+- **How it plays:**
+  - A returning party pushes the frontier floor by `FACE_SECONDS` at its strength.
+  - Taking a floor sets the delve (`charted`) to that floor's `leagues`, so the shared story and acts still work.
+  - Posted blades garrison a floor. They draw wages, never travel, and turn twice as readily at high blight (the Keep keeps its garrison).
+  - Pressure on short-handed floors is `1 + blight/40`, plus 1 once the wood wakes.
+  - Held floors pay stores of about half a matched party's relic rate.
+  - Lamp oil is bought in town. A party short of oil goes into the dark, with more wounds and deaths. The Quartermaster buys a full lamp before sending.
+  - Fragments come from the drowned stair down, each one rarer than the last (×0.8).
+- **Choosing a site:** at the reckoning, or by tearing up the charter in hand from the configuration (nothing is earned for it). The Keep is available from the start while it is play-tested.
+- **Debug jumps:** `/forest/?debug=keep` and `?debug=keep-deep`.
+- **Telemetry:** `floor_secured`, and `site` on every Elderdark event.
+- **Saves:** Elderdark save v8.
+- **Pacing (bot, seeds 1/7/42):** Act II 46m–1h, Act III 2h30–2h52, Act IV 2h52–3h57, terminus 4h07–5h12.
+- **Not built yet:** sappers (a Keep-only hand that lowers a floor's threat on the first assault), and the old lord as a presence beyond the story beats.
+
 ## Build order
 
 1. **Held ground** in `src/shared/ground.ts`, test-first, with no game attached.
 2. **Security detachment**, built on held ground. DEEP CONTRACT already supports scenarios, so this proves the engine with the least refactoring. It adds the `HorrorDef.pressure` hook.
-3. **Elderdark site split, then the Keep**, which reuses held ground in the other game.
+3. **Elderdark site split, then the Keep**, which reuses held ground in the other game. (Done.)
 4. **Haulage.**
 5. **Salvage.**
 

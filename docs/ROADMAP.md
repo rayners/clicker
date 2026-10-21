@@ -52,6 +52,7 @@ Requested 2026-10-19. Tracked in `docs/forest/DESIGN.md`. A playable first slice
   - **Built:** the Killer's Cut, the wood and the creature. **Left:** the hunter, the dragon and Legend.
 
 - **New missions (approved 2026-10-20):** security detachment, haulage and salvage for DEEP CONTRACT, and the Keep for Elderdark, with a shared held-ground engine. The design and build order are in `docs/MISSIONS.md`.
+  - **Built:** held ground, the security detachment and the Keep. **Left:** haulage, then salvage, and the Keep's sappers.
 
 - **Real-device pass on iPhone Safari**, both in-browser and installed to the home screen (offline, audio unlock, safe areas, storage persistence).
 - Debug extras from the plan: a time-scale multiplier, grant resources, a story flag viewer.

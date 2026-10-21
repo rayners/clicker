@@ -4,6 +4,7 @@ import '@fontsource/unifrakturmaguntia';
 import './forest-ui/ledger.css';
 import { catchUp } from './forest/game';
 import { forestSaves } from './forest/save';
+import { applyForestScenario } from './forest/debug';
 import { createForestStore } from './forest/store';
 import { mountForest } from './forest-ui/app';
 import { charterEvents, charterProperties } from './forest/telemetry';
@@ -16,7 +17,9 @@ const AUTOSAVE_MS = 10_000;
 const storage = window.localStorage;
 const seed = (Math.random() * 2 ** 31) | 0;
 const loaded = forestSaves.loadGame(storage, Date.now(), seed);
-const store = createForestStore(catchUp(loaded.game, Date.now()));
+const debug = new URLSearchParams(location.search).get('debug');
+const initial = catchUp(loaded.game, Date.now());
+const store = createForestStore(debug ? applyForestScenario(initial, debug) : initial);
 
 mountForest(document.getElementById('app')!, store);
 

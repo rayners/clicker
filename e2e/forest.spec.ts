@@ -58,3 +58,33 @@ test('elderdark: listen to the wood and lean on a company', async ({ page }) => 
   await wood.getByRole('button', { name: /return to the ledger/i }).click();
   await expect(wood).toBeHidden();
 });
+
+test('elderdark: write a charter for Morrowgate Keep, buy oil, send a party in and post a blade', async ({ page, isMobile }) => {
+  await page.getByRole('button', { name: /^configuration$/i }).click();
+  const dialog = page.getByRole('dialog', { name: /configuration/i });
+  await dialog.getByRole('button', { name: /charter for morrowgate keep/i }).click();
+  await dialog.getByRole('button', { name: /confirm/i }).click();
+  await dialog.getByRole('button', { name: /^close$/i }).click();
+
+  // Debug jump for the rest: hands, silver and floors without the wait.
+  await page.goto('/forest/?debug=keep-deep');
+  await page.getByRole('tab', { name: /expeditions/i }).click();
+  const assault = page.getByRole('article', { name: /assault on the keep/i });
+  await expect(assault.getByRole('heading', { name: /the lord's chapel/i })).toBeVisible();
+  await assault.getByRole('button', { name: /buy oil for one trip/i }).click();
+  await assault.getByRole('button', { name: /send a party into the keep/i }).click();
+  if (isMobile) await page.getByRole('tab', { name: /ledger/i }).click();
+  await expect(page.getByRole('region', { name: /operations board/i })).toContainText("THE LORD'S CHAPEL");
+
+  await page.getByRole('tab', { name: /expeditions/i }).click();
+  const floors = page.getByRole('region', { name: /floors of the keep/i });
+  const posted = floors.getByLabel(/blades posted on the gatehouse/i);
+  const before = Number(await posted.textContent());
+  await floors.getByRole('button', { name: /post a blade on the gatehouse/i }).click();
+  await expect(posted).toHaveText(String(before + 1));
+  if (isMobile) {
+    const box = await floors.getByRole('button', { name: /post a blade on the gatehouse/i }).boundingBox();
+    expect(box!.height).toBeGreaterThanOrEqual(44);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+  }
+});

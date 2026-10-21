@@ -2,6 +2,7 @@ import { h, setAttr, setText } from '../shared/ui/dom';
 import { availableEndings, endingRewards, type Ending } from '../forest/charter';
 import type { ForestGame } from '../forest/game';
 import type { ForestStore } from '../forest/store';
+import type { SiteId } from '../forest/state';
 
 const CONFIRM_TIMEOUT_MS = 5000;
 
@@ -27,6 +28,16 @@ const ENDINGS: Record<Ending, { title: string; text: string; reward(r: { renown:
 export function createReckoning(store: ForestStore): { el: HTMLElement; render(game: ForestGame): void } {
   let pending: Ending | null = null;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let site: SiteId = 'forest';
+  const sites = (['forest', 'keep'] as const).map((id) => {
+    const label = id === 'keep' ? 'Morrowgate Keep' : 'the forest';
+    const button = h('button', { class: 'standing', type: 'button', 'aria-label': `Next charter: ${label}`, 'aria-pressed': 'false' }, label.toUpperCase());
+    button.addEventListener('click', () => {
+      site = id;
+      render(store.getState());
+    });
+    return { id, button };
+  });
 
   const cards = (Object.keys(ENDINGS) as Ending[]).map((ending) => {
     const def = ENDINGS[ending];
@@ -45,7 +56,7 @@ export function createReckoning(store: ForestStore): { el: HTMLElement; render(g
       }
       pending = null;
       clearTimeout(timer);
-      store.dispatch({ type: 'completeCharter', ending, seed: (Math.random() * 2 ** 31) | 0 });
+      store.dispatch({ type: 'completeCharter', ending, seed: (Math.random() * 2 ** 31) | 0, site });
     });
     const el = h(
       'section',
@@ -63,10 +74,12 @@ export function createReckoning(store: ForestStore): { el: HTMLElement; render(g
     { class: 'panel-body' },
     h('h2', { class: 'panel-title' }, 'The Reckoning'),
     h('p', { class: 'reckon-intro' }, 'THE CHARTER HAS COME DUE. THE COMPANY HOLDS THE KEY, OR WHAT THERE IS OF IT. THIS CHOICE ENDS THE CHARTER.'),
+    h('div', { class: 'reckon-site' }, h('span', { class: 'reckon-site-label' }, 'THE NEXT CHARTER DELVES '), ...sites.map((s) => s.button)),
     ...cards.map((c) => c.el),
   );
 
   function render(game: ForestGame) {
+    for (const s of sites) setAttr(s.button, 'aria-pressed', String(s.id === site));
     const offered = availableEndings(game);
     const rewards = endingRewards(game);
     for (const card of cards) {

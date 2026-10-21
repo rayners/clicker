@@ -1220,3 +1220,116 @@ button:focus-visible {
     column-gap: 24px;
   }
 }
+
+/* ---------- Morrowgate Keep: the assault and the floors held behind it ---------- */
+
+.keep-card {
+  border-left: 3px solid var(--gilt);
+  padding-left: 8px;
+}
+
+.keep-card .sys-name {
+  margin: 0;
+  font-size: 1em;
+  font-weight: normal;
+}
+
+.keep-cleared,
+.keep-oil {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 0 0 6px;
+  font-size: 0.82em;
+  letter-spacing: 0.06em;
+}
+
+.keep-cleared .odds-value,
+.oil-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--gilt);
+}
+
+.keep-oil .buy {
+  margin-left: auto;
+  white-space: normal;
+}
+
+.keep-dark {
+  margin: 0 0 8px;
+  font-size: 0.78em;
+  letter-spacing: 0.06em;
+  color: var(--rubric);
+}
+
+.keep-floors {
+  margin-top: 14px;
+}
+
+.floor-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.floor-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'name status'
+    'hold steps';
+  align-items: center;
+  gap: 0 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--faint);
+  font-size: 0.85em;
+}
+
+.floor-name {
+  grid-area: name;
+  letter-spacing: 0.06em;
+}
+
+.floor-status {
+  grid-area: status;
+  font-size: 0.82em;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+}
+
+.floor-hold {
+  grid-area: hold;
+  font-size: 0.8em;
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.floor-row .order-steps {
+  grid-area: steps;
+  width: auto;
+  grid-template-columns: 44px auto 44px;
+}
+
+.floor-row[data-state='held'] .floor-status {
+  color: var(--gilt);
+}
+
+.floor-row[data-state='contested'] .floor-status,
+.floor-row[data-state='lost'] .floor-status {
+  color: var(--rubric);
+}
+
+.floor-row[data-state='frontier'] .floor-name::before {
+  content: '▸ ';
+  color: var(--gilt);
+}
+
+.reckon-site {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+  font-size: 0.85em;
+}

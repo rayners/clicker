@@ -1,5 +1,7 @@
 import { h, setAttr, setText } from '../shared/ui/dom';
-import { frontier } from '../forest/company';
+import { frontier, keepFrontier } from '../forest/company';
+import { FLOORS } from '../forest-data/keep';
+import { held } from '../shared/ground';
 import type { Company } from '../forest/state';
 
 const BAR_CELLS = 16;
@@ -13,7 +15,28 @@ export function createMapStrip(open: () => void): { el: HTMLElement; render(c: C
   const el = h('button', { class: 'map-strip', type: 'button', 'aria-label': 'The map' }, h('span', { class: 'map-head' }, where, count), bar, hint);
   el.addEventListener('click', open);
 
+  function renderKeep(c: Company) {
+    const front = keepFrontier(c);
+    const floor = FLOORS[front];
+    setText(count, `${held(c.floors)} / ${FLOORS.length} HELD`);
+    if (!floor) {
+      setText(where, 'THE KEEP · EVERY FLOOR TAKEN');
+      setText(hint, 'HOLD IT. THE KEEP HAS LONG MEMORIES.');
+      setAttr(bar, 'aria-valuenow', '100');
+      setText(bar, '▰'.repeat(BAR_CELLS));
+      return;
+    }
+    const progress = c.floors[front]!.control;
+    const filled = Math.floor(progress * BAR_CELLS);
+    setText(where, `THE KEEP · ASSAULTING ${floor.name}`);
+    setText(bar, '▰'.repeat(filled) + '▱'.repeat(BAR_CELLS - filled));
+    setAttr(bar, 'aria-valuenow', String(Math.round(progress * 100)));
+    setAttr(bar, 'aria-label', `Cleared of ${floor.name.toLowerCase()}`);
+    setText(hint, 'RETURNING PARTIES CLEAR THE FLOOR · POSTED BLADES HOLD WHAT IS TAKEN');
+  }
+
   function render(c: Company) {
+    if (c.site === 'keep') return renderKeep(c);
     const f = frontier(c);
     if (!f.next) {
       setText(where, `THE MAP · ${f.region.name} REACHED`);

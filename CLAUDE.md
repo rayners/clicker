@@ -33,7 +33,7 @@ Read before changing things:
 - `npm run simulate [extraction|terraform]`: bot playthrough timings per act, for both scenarios by default.
 - `npm run dev -- --host`: test on a phone over the LAN. Debug jumps: `/contract/?debug=act2|act3|act4|terminus|terraform|tf-act2|security|sec-act2` (`src/core/debug.ts`).
 - If the dev server suddenly serves unstyled pages after a CSS edit, its watcher caught the file mid-write: `touch src/styles/*.css`. Prefer the Edit tool over scripts that truncate and rewrite CSS.
-- `npm run simulate:late [camp|clinic|insurer]`: the same for LATE FEES.
+- `npm run simulate:late [camp|clinic|insurer]`: the same for LATE FEES. `npm run simulate:forest [keep] [hours]` for Elderdark (forest by default). Elderdark debug jumps: `/forest/?debug=keep|keep-deep` (`src/forest/debug.ts`).
 - `npm run build`: typecheck plus static build (all four pages) with service worker. `npm run icons` regenerates PWA icons from sprites.
 
 ## Code map and conventions

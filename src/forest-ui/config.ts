@@ -20,6 +20,8 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
   const close = h('button', { class: 'cfg-close', type: 'button', 'aria-label': 'Close' }, '✕');
   // Play as the forest: the ledger turned over (docs/HORROR-TIER.md).
   const listen = h('button', { class: 'buy', type: 'button', 'aria-label': 'Listen to the wood' }, 'LISTEN TO THE WOOD');
+  // Morrowgate Keep instead of the forest (docs/MISSIONS.md): tears up the charter in hand, earning nothing for it.
+  const rewrite = h('button', { class: 'buy', type: 'button' });
   const dialog = h(
     'div',
     { class: 'cfg', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'ed-cfg-title', hidden: true },
@@ -34,6 +36,8 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
       code,
       h('div', { class: 'cfg-row' }, exportButton, copyButton, importButton),
       status,
+      h('h3', { class: 'panel-subtitle' }, 'THE CHARTER'),
+      rewrite,
       h('h3', { class: 'panel-subtitle' }, 'THE WOOD'),
       listen,
       h('h3', { class: 'panel-subtitle' }, 'BURN THE LEDGER'),
@@ -80,6 +84,30 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
     }
   });
 
+  let rewriting = false;
+  let rewriteTimer: ReturnType<typeof setTimeout> | undefined;
+  const elsewhere = () => (store.getState().company.site === 'keep' ? 'forest' : 'keep');
+  const labelRewrite = () => {
+    const place = elsewhere() === 'keep' ? 'Morrowgate Keep' : 'the forest';
+    setText(rewrite, rewriting ? 'CONFIRM: TEAR UP THIS CHARTER' : `WRITE A CHARTER FOR ${place.toUpperCase()}`);
+    rewrite.setAttribute('aria-label', rewriting ? `Confirm: tear up this charter for one at ${place}` : `Write a charter for ${place}`);
+  };
+  rewrite.addEventListener('click', () => {
+    if (!rewriting) {
+      rewriting = true;
+      labelRewrite();
+      rewriteTimer = setTimeout(() => {
+        rewriting = false;
+        labelRewrite();
+      }, CONFIRM_TIMEOUT_MS);
+      return;
+    }
+    rewriting = false;
+    clearTimeout(rewriteTimer);
+    store.dispatch({ type: 'rewriteCharter', site: elsewhere(), seed: (Math.random() * 2 ** 31) | 0 });
+    labelRewrite();
+  });
+
   let pending = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
   reset.addEventListener('click', () => {
@@ -107,6 +135,7 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
     dialog,
     render(game) {
       motion.checked = game.profile.settings.reducedMotion;
+      labelRewrite();
     },
   };
 }

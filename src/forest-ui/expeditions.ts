@@ -5,6 +5,7 @@ import { REGIONS } from '../forest-data/regions';
 import { available, chartingPerTrip, isRegionOpen, maxStandingRegions, project } from '../forest/company';
 import type { Company } from '../forest/state';
 import type { ForestStore } from '../forest/store';
+import { createKeepView } from './keep';
 
 const pct = (x: number) => `${Math.round(x * 100)}%`;
 
@@ -39,9 +40,19 @@ export function createExpeditions(store: ForestStore): { el: HTMLElement; render
     return { region, el, counts, odds, forecast, send, standing };
   });
   const sealed = h('p', { class: 'sealed' });
-  const el = h('div', { class: 'panel-body' }, h('h2', { class: 'panel-title' }, 'Standing Orders'), ...cards.map((c) => c.el), sealed);
+  const keep = createKeepView(store);
+  const el = h('div', { class: 'panel-body' }, h('h2', { class: 'panel-title' }, 'Standing Orders'), ...cards.map((c) => c.el), sealed, keep.el);
 
   function render(c: Company) {
+    // A Keep charter has one assault and its floors in place of the forest's regions.
+    const inKeep = c.site === 'keep';
+    keep.el.hidden = !inKeep;
+    if (inKeep) {
+      for (const card of cards) card.el.hidden = true;
+      sealed.hidden = true;
+      keep.render(c);
+      return;
+    }
     let nextSealed: string | null = null;
     for (const card of cards) {
       const open = isRegionOpen(c, card.region);

@@ -2,7 +2,8 @@ import { formatDuration } from '../shared/format';
 import { h, setText } from '../shared/ui/dom';
 import { CLASSES, CLASS_IDS } from '../forest-data/classes';
 import { REGIONS } from '../forest-data/regions';
-import type { Company, Party } from '../forest/state';
+import { KEEP, type Company, type Party } from '../forest/state';
+import { frontierFloor } from '../forest/company';
 
 const BAR_CELLS = 14;
 
@@ -31,11 +32,11 @@ export function createBoard(): { el: HTMLElement; render(c: Company): void } {
       if (!item) {
         const bar = h('span', { class: 'board-bar', 'aria-hidden': 'true' });
         const due = h('span', { class: 'board-due' });
-        const region = REGIONS.find((r) => r.id === p.region)!;
+        const name = p.region === KEEP ? (frontierFloor(c)?.name ?? 'MORROWGATE KEEP') : REGIONS.find((r) => r.id === p.region)!.name;
         const li = h(
           'li',
           { class: 'board-row', 'data-region': p.region },
-          h('span', { class: 'board-name' }, `${region.name}`),
+          h('span', { class: 'board-name' }, name),
           h('span', { class: 'board-roster' }, roster(p)),
           bar,
           due,
@@ -50,6 +51,7 @@ export function createBoard(): { el: HTMLElement; render(c: Company): void } {
       setText(item.due, `DUE ${formatDuration(Math.max(0, p.returnsAt - c.elapsed))}`);
     }
     idle.hidden = c.parties.length > 0;
+    setText(idle, c.site === 'keep' ? 'NO PARTIES IN THE KEEP · SEND ONE FROM EXPEDITIONS' : 'NO PARTIES IN THE WOOD · SEND ONE FROM EXPEDITIONS');
   }
 
   return { el, render };

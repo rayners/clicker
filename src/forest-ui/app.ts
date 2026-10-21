@@ -19,6 +19,8 @@ import { createConfig } from './config';
 import { createReckoning } from './reckoning';
 import { createWoodView } from './wood';
 import { KEY_FRAGMENTS } from '../forest/company';
+import { FLOORS } from '../forest-data/keep';
+import { held } from '../shared/ground';
 import { availableUpgrades } from '../forest/company';
 
 const PER_MINUTE = 60;
@@ -185,7 +187,7 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
     setText(silver.value, formatNumber(c.silver));
     setText(vault.value, formatNumber(c.relics));
     setText(ready.value, String(CLASS_IDS.reduce((s, id) => s + available(c, id), 0)));
-    setText(depth.value, `${delve(c).toFixed(1)} LEAGUES`);
+    setText(depth.value, c.site === 'keep' ? `${held(c.floors)} / ${FLOORS.length} FLOORS` : `${delve(c).toFixed(1)} LEAGUES`);
     keys.el.hidden = c.keyFragments === 0;
     setText(keys.value, `${c.keyFragments} / ${KEY_FRAGMENTS}`);
     lost.el.hidden = c.turned === 0;
