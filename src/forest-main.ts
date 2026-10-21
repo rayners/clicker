@@ -17,7 +17,8 @@ const AUTOSAVE_MS = 10_000;
 const storage = window.localStorage;
 const seed = (Math.random() * 2 ** 31) | 0;
 const loaded = forestSaves.loadGame(storage, Date.now(), seed);
-const debug = new URLSearchParams(location.search).get('debug');
+// Debug jumps replace the game, and autosave would write that over the real save: dev builds only.
+const debug = import.meta.env.DEV ? new URLSearchParams(location.search).get('debug') : null;
 const initial = catchUp(loaded.game, Date.now());
 const store = createForestStore(debug ? applyForestScenario(initial, debug) : initial);
 
