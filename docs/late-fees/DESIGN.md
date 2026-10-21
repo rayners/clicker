@@ -74,6 +74,27 @@ Code layout, following Elderdark:
 - **The balance:** premiums against payouts against the intervention budget, under fate pressure that rises with every cheat.
 - **Click:** CHECK THE LIST. It reveals the next omen chain and breaks the weakest link.
 
+### CANDY CORN DAY: Grayhaven State Hospital (approved 2026-10-21, next to build)
+
+A *Halloween* homage. The user's decisions: you run the hospital, and the date matters. The film is set on **National Candy Corn Day**, a real day (October 30th, the eve of Halloween), so everyone in town is in costume and escapees blend into the crowd.
+
+*Tagline:* **The night he came home. A day early.**
+
+**You:** the superintendent of Grayhaven State Hospital, a county asylum on the hill above Millbrook, on budget and short-staffed.
+
+- **Income:** state funding per patient housed. More beds filled means more money, and more patients to watch.
+- **Wards** run from the open wards up to the secure wing. Each ward has patients, **orderlies** (the force), and **agitation**, which rises over time and faster at night. A ward whose agitation tops out has an **incident**: a patient gets out.
+- **Sedation** is the dial, in one-tap steps (the clinic's REM dial counterpart). Heavy sedation keeps agitation down, but the **state inspector's** rating falls, and a low rating cuts funding. Light sedation keeps the inspector happy and the wards restless.
+- **Locks and doors** are the upkeep economy. Security doors and keycards slow escapes, and they need maintenance or they fail.
+- **Escapes:** an escaped patient is loose in Millbrook. Search teams find them, slowly. Every patient still loose when Candy Corn Day comes is hidden in a town full of costumes.
+- **The clock** counts down to Candy Corn Day. Act III begins on the day itself: the town fills with costumes, search teams find escapees far more slowly, and **the Patient** walks out.
+- **Click:** WALK THE WARDS. It calms the most agitated ward for a moment.
+
+**The killer: Patient 10-30** (his ward and bed number, and the date). A white mask, silent, who walks and never runs.
+- His mechanic is **inevitability**. Pressure never resets: locks, orderlies and search teams only delay him. He always comes back for the one who got away, his chosen survivor, across sequels too.
+- **Crossovers** follow the existing rules: Patient 10-30 at the camp, the clinic and Providence Mutual, and the Drowned Boy and the Burned Man at Grayhaven. He also joins the Killer's Cut (play as the killer).
+- **Sequels:** *Part II*, *III: Season of the…*, *H-20 (Candy Corn Day)*, and so on.
+
 ## 4. Acts (all tapes)
 
 The horror is obvious, so the arc is about escalation, not reveal.

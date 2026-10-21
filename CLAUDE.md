@@ -14,6 +14,7 @@ Read before changing things:
 - `docs/ROADMAP.md`: what's built, deliberate deviations from the original plan, and the backlog.
 - `docs/late-fees/DESIGN.md`: the third game, LATE FEES (modern-day slasher homages, VHS look, venues × killers, sequels). All three tapes, the six crossovers and the Killer's Cut (play as the killer, on the shared hunt engine `src/shared/hunt.ts`) are built.
 - `docs/HORROR-TIER.md`: the planned play-as-the-horror tier in every game (a shared hunt engine: first-tier runs defended by their bots, the player as the horror). Approved; the engine, LATE FEES's Killer's Cut and Elderdark's wood are built, and DEEP CONTRACT's creature is next.
+- `docs/kaiju/DESIGN.md`: the planned fourth game (working title FATHOM): deep water to kaiju, sharks on the coast down to mechs at the breach. Approved 2026-10-21. The roadmap's build queue puts it after LATE FEES's Candy Corn Day tape and before salvage.
 - `docs/MISSIONS.md`: the approved new missions (security detachment, haulage, salvage, the Keep), the shared held-ground engine, and the build order.
 - `docs/TELEMETRY.md`: anonymous PostHog analytics (published site only, opt-out, events derived from state diffs). Add an event there when a new milestone matters for pacing.
 

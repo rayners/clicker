@@ -42,6 +42,14 @@ Requested 2026-10-19. Tracked in `docs/forest/DESIGN.md`. A playable first slice
 - **Debug mode** is URL scenario jumps only (`/contract/?debug=act2|act3|act4|terminus`).
 - **iPhone e2e** runs on Chromium with iPhone 13 emulation, because the host lacks WebKit system libraries (`sudo npx playwright install-deps webkit`, then `E2E_WEBKIT=1`).
 
+## Build queue (user, 2026-10-21)
+
+In order. Each item has its design written down first, so nothing lives only in a conversation.
+
+1. **LATE FEES: the Candy Corn Day tape.** A Grayhaven State Hospital venue and the killer Patient 10-30, with their crossovers, sequels and Killer's Cut entry. Design: `docs/late-fees/DESIGN.md` §3.
+2. **A fourth game: the deep-water monster game** (working title FATHOM). Sharks, squid and octopus on the coast; deeper water and bigger things; then kaiju from a breach in the trench, and mechs to fight them. Design: `docs/kaiju/DESIGN.md`.
+3. **DEEP CONTRACT: salvage**, the last of the four approved missions (`docs/MISSIONS.md` §5).
+
 ## Backlog / ideas
 
 - **Play as the horror, in every game (user, 2026-10-20).** It reverses the roles as an unlockable higher tier, the way LATE FEES unlocks playing the killer.
