@@ -10,9 +10,9 @@ export interface SpecimenDef {
 
 /** What the research station brings in from open water: each is caught, penned and studied. */
 export const SPECIMENS: readonly SpecimenDef[] = [
-  { id: 'reef', name: 'REEF SHARK', short: 'REEF', description: 'Small, quick, curious. The interns name them. That stops after the first week.', baseCost: 40_000, rate: 120 },
-  { id: 'white', name: 'GREAT WHITE', short: 'WHITES', description: 'Four metres of muscle in a pen built for three. It watches the people on the walkway.', baseCost: 450_000, rate: 1_000 },
-  { id: 'mako', name: 'ENHANCED MAKO', short: 'MAKOS', description: 'The parent company\'s protein work, in a shark. Its brain is twice the size it should be. It has started testing the gate.', baseCost: 5_000_000, rate: 8_000 },
+  { id: 'reef', name: 'REEF SHARK', short: 'REEF', description: 'Small, quick, curious. The interns name them. That stops after the first week.', baseCost: 40_000, rate: 70 },
+  { id: 'white', name: 'GREAT WHITE', short: 'WHITES', description: 'Four metres of muscle in a pen built for three. It watches the people on the walkway.', baseCost: 450_000, rate: 600 },
+  { id: 'mako', name: 'ENHANCED MAKO', short: 'MAKOS', description: 'The parent company\'s protein work, in a shark. Its brain is twice the size it should be. It has started testing the gate.', baseCost: 5_000_000, rate: 4_800 },
 ];
 
 /** Depth (story scale) at which the research station can be built out in open water. */

@@ -12,7 +12,7 @@ export const STORY_GAP = 25;
 export const ACT_TWO_AT = 1_000;
 export const ACT_THREE_AT = 3_200;
 /** From the source found to the first landfall, and from then to the season's end. */
-const BREACH_AFTER = 25 * 60;
+const BREACH_AFTER = 40 * 60;
 const SEASON_AFTER = 75 * 60;
 
 type Args = { o: Outfit };

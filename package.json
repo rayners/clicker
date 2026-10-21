@@ -14,6 +14,7 @@
     "simulate": "tsx scripts/simulate.ts",
     "icons": "tsx scripts/make-icons.ts",
     "simulate:forest": "tsx scripts/simulate-forest.ts",
+    "simulate:fathom": "tsx scripts/simulate-fathom.ts",
     "simulate:late": "tsx scripts/simulate-late.ts"
   },
   "devDependencies": {

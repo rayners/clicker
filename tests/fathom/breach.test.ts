@@ -60,7 +60,7 @@ describe('the Breach', () => {
   it('loses undefended cities to the kaiju, nearest last: walls and Bulwarks hold them', () => {
     const naked = run(open({ cities: held(CITIES.length) }), 600);
     expect(citiesHeld(naked)).toBeLessThan(CITIES.length);
-    const guarded = run(open({ cities: held(2), walls: 10 }), 600);
+    const guarded = run(open({ cities: held(2), walls: 1 }), 600);
     expect(citiesHeld(guarded)).toBe(2);
   });
 

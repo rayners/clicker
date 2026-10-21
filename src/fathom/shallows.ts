@@ -15,6 +15,8 @@ const REPUTATION_HIT = 0.97;
 const REPUTATION_RECOVERY_SECONDS = 900;
 const REPUTATION_FLOOR = 0.4;
 const PASS_PRICE = 1;
+/** The high season: every attraction's rate is worth this much more while the town is full (tuned by the pacing bot). */
+const SEASON_RATE = 2;
 
 // ---------- purchases ----------
 
@@ -75,7 +77,7 @@ export const exposed = (o: Outfit): number => Math.max(0, inWater(o) - watch(o))
 
 // ---------- tourist money ----------
 
-export const attractionRate = (o: Outfit, def: AttractionDef): number => def.rate * (effects(o).attraction[def.id] ?? 1);
+export const attractionRate = (o: Outfit, def: AttractionDef): number => def.rate * SEASON_RATE * (effects(o).attraction[def.id] ?? 1);
 
 export const tourism = (o: Outfit): number => ATTRACTIONS.reduce((s, a) => s + (o.attractions[a.id] ?? 0) * attractionRate(o, a), 0);
 

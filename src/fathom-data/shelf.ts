@@ -10,9 +10,9 @@ export interface TrawlerDef {
 
 /** Boats working the continental shelf. They pay more the further out they fish. */
 export const TRAWLERS: readonly TrawlerDef[] = [
-  { id: 'skiff', name: 'LONGLINE SKIFF', short: 'SKIFFS', description: 'Two men, a line with a thousand hooks, and a radio that works when it feels like it.', baseCost: 2_000, rate: 12 },
-  { id: 'trawler', name: 'STERN TRAWLER', short: 'TRAWLERS', description: 'A net the size of a football field. Lately it comes up torn, as if something pulled it from the inside.', baseCost: 25_000, rate: 110 },
-  { id: 'factory', name: 'FACTORY SHIP', short: 'FACTORY', description: 'Catches, guts and freezes at sea. The crew have stopped eating what comes up from the deep sets.', baseCost: 300_000, rate: 900 },
+  { id: 'skiff', name: 'LONGLINE SKIFF', short: 'SKIFFS', description: 'Two men, a line with a thousand hooks, and a radio that works when it feels like it.', baseCost: 2_000, rate: 7 },
+  { id: 'trawler', name: 'STERN TRAWLER', short: 'TRAWLERS', description: 'A net the size of a football field. Lately it comes up torn, as if something pulled it from the inside.', baseCost: 25_000, rate: 65 },
+  { id: 'factory', name: 'FACTORY SHIP', short: 'FACTORY', description: 'Catches, guts and freezes at sea. The crew have stopped eating what comes up from the deep sets.', baseCost: 300_000, rate: 540 },
 ];
 
 /** Shelf depth (on the story scale, metres) at which the trawlers' grounds open. */
