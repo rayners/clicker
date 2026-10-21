@@ -90,7 +90,10 @@ Play **the kaiju**, using the shared hunt engine (`src/shared/hunt.ts`). Several
   - **Opening depths (story scale):** the Shelf at 100 m, Open Water at 500 m, the Trench at 2,000 m. Act 2 is at 1,000 m. Act 3 is at 3,200 m, once the station sits at notch 8 (the source).
   - **Zones feed each other:** escaped specimens add pressure on the beach until they swim off.
   - **Deviation:** walls and Bulwarks hold the coast like garrisons, and spare force retakes fallen cities. Pilots are a count (two per Bulwark) for now; the link rating is still to come.
-- **Next:** step 6, the screen. The page is held at `/fathom/` and kept off the picker until the name is chosen.
+- **Built (screen, 2026-10-21):** a sonar console at `/fathom/`.
+  - **Code:** `src/fathom-ui/`, with `sonar.css` (cyan on deep teal, switching to a red and yellow alarm palette in act 4), `fathom/index.html`, `src/fathom-main.ts`, `public/fathom/` (manifest and fin icon).
+  - **Telemetry:** `zone_reached`, `act_reached`, `landfall`, `season_completed`.
+  - **Not yet on the picker:** it gets a door once it has a name.
 
 ## Open questions (for the user, before building)
 

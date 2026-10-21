@@ -78,7 +78,7 @@ export interface Outfit {
 }
 
 export const DEFAULT_OPEN = 5;
-export const DEFAULT_RANGE = 2;
+export const DEFAULT_RANGE = 1;
 export const DEFAULT_ENHANCE = 0;
 export const DEFAULT_STATION_DEPTH = 1;
 

@@ -22,7 +22,7 @@ with real players and to catch errors on devices we don't test on.
 
 ## Events
 
-Every event carries the game's context: `game` (`deep-contract` | `elderdark` | `late-fees`), `act`, and `scenario`/`horror`/`cycle`
+Every event carries the game's context: `game` (`deep-contract` | `elderdark` | `late-fees` | `fathom`), `act`, and `scenario`/`horror`/`cycle`
 (DEEP CONTRACT) or `site`/`charter` (Elderdark). `minutes` is in-game time on the current contract or charter.
 
 | Game | Event | Properties |
@@ -57,6 +57,10 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 | LATE FEES | `cut_started` | killer (the tape flipped to the Killer's Cut) |
 | LATE FEES | `cut_beaten` | killer, beaten (times put down), harvest |
 | LATE FEES | `survivor_lost` | survivor, left (names still on the list), minutes, part (Providence Mutual) |
+| FATHOM | `zone_reached` | zone (`shelf`, `open-water`, `trench`), minutes, season |
+| FATHOM | `act_reached` | act, minutes, season |
+| FATHOM | `landfall` | category (2–5; the first comes with act 4), minutes, season |
+| FATHOM | `season_completed` | ending (`close`, `study`, `through`), minutes, lost, season |
 | LATE FEES | `film_completed` | ending, venue, bodyCount, minutes, part |
 
 Useful PostHog insights: a funnel `act_reached` (act = 2, 3, 4) → `contract_completed`, broken down by scenario; the
