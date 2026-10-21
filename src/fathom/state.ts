@@ -1,6 +1,7 @@
 import { appendLog, type LogEntry } from '../shared/log';
 import { ATTRACTIONS, GUARDS } from '../fathom-data/shallows';
 import { TRAWLERS } from '../fathom-data/shelf';
+import { SPECIMENS } from '../fathom-data/open-water';
 
 /** sonar: the outfit's own instruments; town: Harrow Point and its council; crew: your people; attack: what the water takes. */
 export type EntryKind = 'sonar' | 'town' | 'crew' | 'attack';
@@ -23,6 +24,14 @@ export interface Outfit {
   range: number;
   /** Fractional boats lost carried between ticks. */
   losses: number;
+  /** Open Water: penned specimens, their pens, how hard the lab enhances them (tenths), and what has got out. */
+  specimens: Record<string, number>;
+  pens: number;
+  enhance: number;
+  loose: number;
+  /** Fractional escapes, and escapees drifting away, carried between ticks. */
+  escaping: number;
+  drifting: number;
   /** 0..1: how far the town still trusts the beaches. Scales tourist money. */
   reputation: number;
   bodyCount: number;
@@ -39,6 +48,7 @@ export interface Outfit {
 
 export const DEFAULT_OPEN = 5;
 export const DEFAULT_RANGE = 2;
+export const DEFAULT_ENHANCE = 0;
 
 const zeroes = (ids: readonly { id: string }[]) => Object.fromEntries(ids.map((x) => [x.id, 0]));
 
@@ -56,6 +66,12 @@ export function createOutfit(seed: number): Outfit {
     buoys: 0,
     range: DEFAULT_RANGE,
     losses: 0,
+    specimens: zeroes(SPECIMENS),
+    pens: 0,
+    enhance: DEFAULT_ENHANCE,
+    loose: 0,
+    escaping: 0,
+    drifting: 0,
     reputation: 1,
     bodyCount: 0,
     attacks: 0,
