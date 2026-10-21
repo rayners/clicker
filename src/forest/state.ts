@@ -61,6 +61,8 @@ export interface Company {
   turning: number;
   /** Fragments of the Ashen Key recovered from the deep wood. */
   keyFragments: number;
+  /** How hard the wood itself is pushing on this company (the play-as-the-wood tier). Zero in an ordinary charter. */
+  woodPush: number;
   buildings: Record<BuildingId, number>;
   upgrades: string[];
   act: number;
@@ -101,6 +103,7 @@ export function createCompany(seed: number, charter: CharterTerms = FIRST_CHARTE
     turned: 0,
     turning: 0,
     keyFragments: 0,
+    woodPush: 0,
     buildings: Object.fromEntries(BUILDINGS.map((b) => [b.id, 0])) as Record<BuildingId, number>,
     upgrades: [],
     act: 1,

@@ -15,7 +15,9 @@ import {
   project,
   wages,
 } from './company';
-import { createForestGame, type ForestGame } from './game';
+import { advance, createForestGame, type ForestGame } from './game';
+import { isWoodUpgradeAvailable, startWood, woodUpgradeCost, WOOD_ADAPTER } from './wood';
+import { WOOD_UPGRADES } from '../forest-data/wood-upgrades';
 import { reduce, type ForestAction } from './store';
 import type { Company, Composition } from './state';
 
@@ -128,6 +130,34 @@ function frontierWork(c: Company, frontierIndex: number): ForestAction | null {
   return null;
 }
 
+/** Seconds between a defending Factor's check-ins, and its forage taps per second while still tapping hard. */
+const DEFEND_SECONDS = 5;
+const EARLY_TAPS = 4;
+const LATE_TAPS = 0.1;
+const EARLY_SECONDS = 20 * 60;
+
+/** A company run by its Factor's bot, for the play-as-the-wood tier: taps, and every few seconds clears what it can. */
+export function defendCompany<P extends { company: Company; taps: number; decideIn: number }>(p: P, dt: number): P {
+  let game = { company: p.company } as ForestGame;
+  let taps = p.taps + dt * (p.company.elapsed < EARLY_SECONDS ? EARLY_TAPS : LATE_TAPS);
+  while (taps >= 1) {
+    game = reduce(game, { type: 'forage' });
+    taps -= 1;
+  }
+  let decideIn = p.decideIn - dt;
+  if (decideIn <= 0) {
+    decideIn += DEFEND_SECONDS;
+    for (let i = 0; i < 30; i++) {
+      const action = decide(game);
+      if (!action) break;
+      const next = reduce(game, action);
+      if (next === game) break;
+      game = next;
+    }
+  }
+  return { ...p, company: game.company, taps, decideIn };
+}
+
 /** A sensible, greedy player. Not optimal: taps for the first stretch, then checks in periodically. */
 export function simulateForest(options: ForestSimOptions): ForestSimResult {
   const { seed, maxSeconds, activeTaps = 4, activeSeconds = 20 * 60, decisionInterval = 5 } = options;
@@ -157,4 +187,45 @@ export function simulateForest(options: ForestSimOptions): ForestSimResult {
     }
   }
   return { actAt, openedAt, terminusAt, final: game };
+}
+
+export interface WoodSimOptions {
+  seed: number;
+  maxSeconds: number;
+  /** A wood that never pushes, for comparison. */
+  passive?: boolean;
+}
+
+/** A sensible wood: grow what sap allows, lean on the least alarmed companies, sleep when the town is too afraid. */
+function decideWood(game: ForestGame): ForestAction | null {
+  const w = game.wood!;
+  const h = w.hunt;
+  const upgrade = WOOD_UPGRADES.find((u) => isWoodUpgradeAvailable(w, u.id) && woodUpgradeCost(w, u.id) <= h.dread);
+  if (upgrade) return { type: 'buyWoodUpgrade', id: upgrade.id };
+  if (!h.dormant && h.notoriety > 4) return { type: 'toggleWoodDormant' };
+  if (h.dormant && h.notoriety < 1) return { type: 'toggleWoodDormant' };
+  const used = h.split.reduce((a, b) => a + b, 0);
+  if (used < h.strength) {
+    const order = h.prey.map((p, i) => ({ i, alarm: WOOD_ADAPTER.alarm(p) + h.split[i]! * 0.2 })).sort((a, b) => a.alarm - b.alarm);
+    return { type: 'shiftWoodPush', index: order[0]!.i, step: 1 };
+  }
+  return null;
+}
+
+export function simulateWood(options: WoodSimOptions): { harvest: number; upgrades: number; beaten: number; final: ForestGame } {
+  let game = startWood(createForestGame(options.seed, 0), options.seed);
+  for (let t = 1; t <= options.maxSeconds; t++) {
+    if (!options.passive && t % 5 === 0) {
+      for (let i = 0; i < 20; i++) {
+        const action = decideWood(game);
+        if (!action) break;
+        const next = reduce(game, action);
+        if (next === game) break;
+        game = next;
+      }
+    }
+    game = advance(game, 1);
+  }
+  const h = game.wood!.hunt;
+  return { harvest: h.harvest, upgrades: Object.values(game.wood!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
 }

@@ -4,6 +4,8 @@ import { createReducerStore, type Store } from '../shared/store';
 import { adjustOrder, buyBuilding, buyUpgrade, dispatch, forage, hire, penance, toggleStanding } from './company';
 import { advance, createForestGame, type ForestGame, type ForestSettings } from './game';
 import { completeCharter, type Ending } from './charter';
+import { buyWoodUpgrade, leaveWood, startWood } from './wood';
+import { shiftPush, toggleDormant } from '../shared/hunt';
 
 export type ForestAction =
   | { type: 'forage' }
@@ -15,13 +17,19 @@ export type ForestAction =
   | { type: 'buyUpgrade'; id: string }
   | { type: 'toggleStanding'; region: string }
   | { type: 'completeCharter'; ending: Ending; seed: number }
+  | { type: 'startWood'; seed: number }
+  | { type: 'shiftWoodPush'; index: number; step: 1 | -1 }
+  | { type: 'toggleWoodDormant' }
+  | { type: 'buyWoodUpgrade'; id: string }
+  | { type: 'leaveWood' }
   | { type: 'setSetting'; key: keyof ForestSettings; value: boolean }
   | { type: 'hardReset'; seed: number; now: number }
   | { type: 'tick'; dt: number };
 
 export type ForestStore = Store<ForestGame, ForestAction>;
 
-const company = (game: ForestGame, next: ForestGame['company']): ForestGame => (next === game.company ? game : { ...game, company: next });
+const company = (game: ForestGame, next: ForestGame['company']): ForestGame =>
+  next === game.company || game.mode === 'wood' ? game : { ...game, company: next };
 
 export function reduce(game: ForestGame, action: ForestAction): ForestGame {
   const c = game.company;
@@ -44,6 +52,16 @@ export function reduce(game: ForestGame, action: ForestAction): ForestGame {
       return company(game, toggleStanding(c, action.region));
     case 'completeCharter':
       return completeCharter(game, action.ending, action.seed);
+    case 'startWood':
+      return startWood(game, action.seed);
+    case 'shiftWoodPush':
+      return game.wood ? { ...game, wood: { ...game.wood, hunt: shiftPush(game.wood.hunt, action.index, action.step) } } : game;
+    case 'toggleWoodDormant':
+      return game.wood ? { ...game, wood: { ...game.wood, hunt: toggleDormant(game.wood.hunt) } } : game;
+    case 'buyWoodUpgrade':
+      return buyWoodUpgrade(game, action.id);
+    case 'leaveWood':
+      return leaveWood(game);
     case 'setSetting':
       return { ...game, profile: { ...game.profile, settings: { ...game.profile.settings, [action.key]: action.value } } };
     case 'hardReset': {

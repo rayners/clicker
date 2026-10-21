@@ -2,8 +2,9 @@ import { appendLog } from '../shared/log';
 import { formatDuration, formatNumber } from '../shared/format';
 import { tickCompany } from './company';
 import { createCompany, type Company, type EntryKind } from './state';
+import { tickWood, type WoodHunt } from './wood';
 
-export const FOREST_VERSION = 6;
+export const FOREST_VERSION = 7;
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
 const CATCH_UP_STEP_SECONDS = 1;
 /** Frame gaps longer than this are treated as the player having been away. */
@@ -36,6 +37,9 @@ export interface ForestGame {
   savedAt: number;
   profile: ForestProfile;
   company: Company;
+  /** Which side of the ledger is open: the charter, or the wood. Only that side's time passes. */
+  mode: 'charter' | 'wood';
+  wood: WoodHunt | null;
 }
 
 export function createForestProfile(): ForestProfile {
@@ -43,10 +47,19 @@ export function createForestProfile(): ForestProfile {
 }
 
 export function createForestGame(seed: number, now: number): ForestGame {
-  return { version: FOREST_VERSION, savedAt: now, profile: createForestProfile(), company: createCompany(seed) };
+  return { version: FOREST_VERSION, savedAt: now, profile: createForestProfile(), company: createCompany(seed), mode: 'charter', wood: null };
 }
 
+/** The wood runs several companies at once; away from the screen it steps coarsely to keep catch-up cheap. */
+const WOOD_CATCH_UP_STEP_SECONDS = 5;
+
 function simulate(game: ForestGame, seconds: number): ForestGame {
+  if (game.mode === 'wood') {
+    let g = game;
+    const step = seconds > LIVE_MAX_DT ? WOOD_CATCH_UP_STEP_SECONDS : seconds;
+    for (let left = seconds; left > 0; left -= step) g = tickWood(g, Math.min(step, left));
+    return g;
+  }
   let company = game.company;
   for (let left = seconds; left > 0; left -= CATCH_UP_STEP_SECONDS) company = tickCompany(company, Math.min(CATCH_UP_STEP_SECONDS, left));
   return { ...game, company };
@@ -55,7 +68,7 @@ function simulate(game: ForestGame, seconds: number): ForestGame {
 function away(game: ForestGame, gap: number): ForestGame {
   const seconds = Math.min(gap, OFFLINE_CAP_SECONDS);
   const g = simulate(game, seconds);
-  if (seconds < ABSENCE_NOTE_SECONDS) return g;
+  if (seconds < ABSENCE_NOTE_SECONDS || game.mode === 'wood') return g;
   const relics = g.company.lifetimeRelics - game.company.lifetimeRelics;
   const silver = g.company.silver - game.company.silver;
   const sign = silver >= 0 ? '+' : '-';

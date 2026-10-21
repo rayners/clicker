@@ -31,6 +31,9 @@ export const TURN_THRESHOLD = 40;
 const TURN_RATE = 1 / 600;
 /** Each turned hand makes every region this much more dangerous. */
 const TURNED_DANGER = 0.03;
+/** Danger and blight the wood adds per point of its push on a company (the play-as-the-wood tier). */
+const WOOD_DANGER = 0.6;
+const WOOD_BLIGHT = 1;
 /** Once the wood wakes (Act IV), danger rises by this share per minute. */
 const WAKING_DANGER = 0.01;
 export const KEY_FRAGMENTS = 7;
@@ -111,6 +114,8 @@ function modifiers(c: Company): Modifiers {
   // What earlier charters earned: Renown fills the packs, Grace keeps the dark off.
   m.haul *= 1 + RENOWN_HAUL * c.charter.renown;
   m.blight /= 1 + GRACE_BLIGHT * c.charter.grace;
+  // The wood leaning on the company (the play-as-the-wood tier): every trip comes back dirtier.
+  m.blight *= 1 + WOOD_BLIGHT * c.woodPush;
   return m;
 }
 const size = (comp: Composition) => CLASS_IDS.reduce((s, id) => s + comp[id], 0);
@@ -249,7 +254,7 @@ export interface Projection {
 export function dangerMultiplier(c: Company): number {
   const awake = sinceBeat(c, 'act-4');
   const waking = awake > 0 ? WAKING_DANGER * (awake / 60) : 0;
-  return (1 + TURNED_DANGER * c.turned) * (1 + waking);
+  return (1 + TURNED_DANGER * c.turned) * (1 + waking) * (1 + WOOD_DANGER * c.woodPush);
 }
 
 export function project(c: Company, region: RegionDef, comp: Composition): Projection {
