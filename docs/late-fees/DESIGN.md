@@ -60,7 +60,7 @@ Code layout, following Elderdark:
 - **The balance:** sleep against wake against exhaustion. It is the most Paperclips-like tape, with a dial, a stockpile and a decay.
 - **Click:** WAKE THEM UP. It shakes the patients nearest the danger out of REM.
 
-### FINAL DEPARTURE: Providence Mutual
+### PENULTIMATE DEPARTURE: Providence Mutual
 
 **You:** the claims manager at Providence Mutual Life, the morning after a teenager's premonition pulled forty people off **Flight 213** before it fell.
 
@@ -137,7 +137,7 @@ After enough sequels, the franchise "goes in a new direction": you play **the ki
 - **Pacing (bot):** act 2 at 1h05m, the final girl at 2h34m, the confrontation at 2h59m, credits at 4h14m.
 - **The interface** now takes a per-venue UI (`src/late-fees-ui/venues.ts`, `clinic.ts`), the same pattern as DEEP CONTRACT's `ScenarioUi`.
 - **Telemetry:** adds `bed_opened`.
-- **Out of stock** on the shelf for now: *Final Departure*.
+- **Out of stock** on the shelf for now: *Penultimate Departure*.
 
 ## Build order
 

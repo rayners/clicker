@@ -22,7 +22,7 @@ export interface TapeDef {
 export const TAPES: readonly TapeDef[] = [
   { venue: 'camp', title: 'FRIDAY THE 12TH', blurb: 'Camp Blackwater reopens twenty years after the drowning. Fill every bunk. Keep the lights on.', available: true },
   { venue: 'clinic', title: 'A NIGHTMARE ON SYCAMORE STREET', blurb: 'A sleep study pays by the dreaming hour. Something else is in the dreams.', available: true },
-  { venue: 'insurer', title: 'FINAL DEPARTURE', blurb: 'You insured every survivor of Flight 213. Death has a list, and it is very patient.', available: false },
+  { venue: 'insurer', title: 'PENULTIMATE DEPARTURE', blurb: 'You insured every survivor of Flight 213. Death has a list, and it is very patient.', available: false },
 ];
 
 const BASE: Record<VenueId, RunConfig> = { camp: CAMP_CONFIG, clinic: CLINIC_CONFIG };

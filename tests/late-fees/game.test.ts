@@ -19,7 +19,7 @@ describe('the shelf at Late Fees Video', () => {
     expect(newLateGame(1, NOW).shelf).toBe(true);
   });
 
-  it('stocks Friday the 12th and A Nightmare on Sycamore Street, with Final Departure coming soon', () => {
+  it('stocks Friday the 12th and A Nightmare on Sycamore Street, with Penultimate Departure coming soon', () => {
     const stocked = TAPES.filter((t) => t.available).map((t) => t.venue);
     expect(stocked).toEqual(['camp', 'clinic']);
     expect(TAPES.length).toBeGreaterThanOrEqual(3);
