@@ -87,3 +87,19 @@ export function createTelemetry<S>(options: { diff: (prev: S, next: S) => Teleme
     },
   };
 }
+
+/** Upgrades bought and story beats seen between two states: the small steps that fill the time before the first milestone. */
+export function progressEvents(
+  prev: { upgrades: string[]; beats: Record<string, number> },
+  next: { upgrades: string[]; beats: Record<string, number> },
+  elapsed: number,
+): TelemetryEvent[] {
+  if (prev.upgrades === next.upgrades && prev.beats === next.beats) return [];
+  const minutes = Math.round(elapsed / 6) / 10;
+  const bought = next.upgrades.filter((u) => !prev.upgrades.includes(u));
+  const seen = Object.keys(next.beats).filter((b) => !(b in prev.beats));
+  return [
+    ...bought.map((upgrade) => ({ name: 'upgrade_bought', props: { upgrade, upgrades: next.upgrades.length, minutes } })),
+    ...seen.map((beat) => ({ name: 'beat_seen', props: { beat, minutes } })),
+  ];
+}

@@ -1,4 +1,4 @@
-import type { TelemetryEvent, TelemetryProps } from '../shared/telemetry';
+import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../shared/telemetry';
 import { REGIONS } from '../forest-data/regions';
 import { isRegionOpen } from './company';
 import type { ForestGame } from './game';
@@ -33,5 +33,6 @@ export function charterEvents(prev: ForestGame, next: ForestGame): TelemetryEven
   }
   if (c.act > was.act) events.push({ name: 'act_reached', props: { act: c.act, ...at } });
   if (c.keyFragments > was.keyFragments) events.push({ name: 'key_fragment_found', props: { fragments: c.keyFragments, ...at } });
+  events.push(...progressEvents(was, c, c.elapsed));
   return events;
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createOptOut, createTelemetry, telemetryAllowed, type TelemetryEvent, type TelemetrySink } from '../../src/shared/telemetry';
+import { createOptOut, createTelemetry, progressEvents, telemetryAllowed, type TelemetryEvent, type TelemetrySink } from '../../src/shared/telemetry';
 
 const live = { prod: true, hostname: 'rayners.github.io', search: '', optedOut: false };
 
@@ -125,5 +125,23 @@ describe('turning state changes into events', () => {
     t.observe({ level: 1 });
     expect(() => t.observe({ level: 2 })).not.toThrow();
     expect(() => t.error(new Error('x'))).not.toThrow();
+  });
+});
+
+describe('the small steps before the first milestone', () => {
+  const run = (upgrades: string[], beats: Record<string, number>) => ({ upgrades, beats });
+
+  it('reports each upgrade bought and each story beat seen, with the minute it happened to a tenth', () => {
+    const before = run(['a'], { boot: 0 });
+    const after = run(['a', 'b'], { boot: 0, memo: 200 });
+    expect(progressEvents(before, after, 200)).toEqual([
+      { name: 'upgrade_bought', props: { upgrade: 'b', upgrades: 2, minutes: 3.3 } },
+      { name: 'beat_seen', props: { beat: 'memo', minutes: 3.3 } },
+    ]);
+  });
+
+  it('reports nothing when nothing new was bought or seen', () => {
+    const same = run(['a'], { boot: 0 });
+    expect(progressEvents(same, run(['a'], { boot: 0 }), 10)).toEqual([]);
   });
 });

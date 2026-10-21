@@ -9,6 +9,12 @@ const withMission = (g: GameState, patch: Partial<GameState['mission']>): GameSt
 const names = (prev: GameState, next: GameState) => contractEvents(prev, next).map((e) => e.name);
 
 describe('DEEP CONTRACT play events', () => {
+  it('reports upgrades bought and story beats seen on the way to the first act', () => {
+    const before = withMission(game(), { elapsed: 120 });
+    const after = withMission(before, { upgrades: [...before.mission.upgrades, 'x'], beats: { ...before.mission.beats, memo: 120 } });
+    expect(names(before, after)).toEqual(['upgrade_bought', 'beat_seen']);
+  });
+
   it('reports nothing for an ordinary tick', () => {
     const g = game();
     expect(contractEvents(g, reduce(g, { type: 'tick', dt: 1 }))).toEqual([]);

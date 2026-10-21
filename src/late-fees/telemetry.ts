@@ -1,4 +1,4 @@
-import type { TelemetryEvent, TelemetryProps } from '../shared/telemetry';
+import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../shared/telemetry';
 import { ZONES } from '../late-fees-data/camp';
 import { BEDS } from '../late-fees-data/clinic';
 import type { LateGame } from './game';
@@ -54,5 +54,6 @@ export function filmEvents(prev: LateGame, next: LateGame): TelemetryEvent[] {
       if (lost) events.push({ name: 'survivor_lost', props: { survivor: lost, left: now.list.length, ...at } });
     }
   }
+  events.push(...progressEvents(prev.run, r, r.elapsed));
   return events;
 }

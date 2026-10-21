@@ -9,6 +9,12 @@ import { startCut } from '../../src/late-fees/cut';
 const withRun = (g: LateGame, patch: Partial<CampRun>): LateGame => ({ ...g, run: { ...g.run, ...patch } as LateGame['run'] });
 
 describe('LATE FEES play events', () => {
+  it('reports upgrades bought and story beats seen on the way to the first act', () => {
+    const g = withRun(createLateGame(1, 0), { elapsed: 120 });
+    const after = withRun(g, { upgrades: [...g.run.upgrades, 'x'], beats: { ...g.run.beats, memo: 120 } });
+    expect(filmEvents(g, after).map((e) => e.name)).toEqual(['upgrade_bought', 'beat_seen']);
+  });
+
   it('reports nothing for an ordinary tick', () => {
     const g = createLateGame(1, 0);
     expect(filmEvents(g, reduce(g, { type: 'tick', dt: 1 }))).toEqual([]);

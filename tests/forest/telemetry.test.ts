@@ -14,6 +14,12 @@ const company = (g: ForestGame, patch: Partial<Company>): ForestGame => ({ ...g,
 const hollows = REGIONS[1]!;
 
 describe('Elderdark play events', () => {
+  it('reports upgrades bought and story beats seen on the way to the first act', () => {
+    const before = game({ elapsed: 120 });
+    const after = company(before, { upgrades: [...before.company.upgrades, 'x'], beats: { ...before.company.beats, memo: 120 } });
+    expect(charterEvents(before, after).map((e) => e.name)).toEqual(['upgrade_bought', 'beat_seen']);
+  });
+
   it('reports nothing for an ordinary tick', () => {
     const g = game();
     expect(charterEvents(g, reduce(g, { type: 'tick', dt: 1 }))).toEqual([]);

@@ -39,6 +39,7 @@ export function startAnalytics<S>(options: {
   context: (state: S) => TelemetryProps;
   optOut: OptOut;
   allowed: boolean;
+  now?: () => number;
 }): () => void {
   if (!options.allowed) return () => undefined;
   const { store, optOut } = options;
@@ -53,8 +54,20 @@ export function startAnalytics<S>(options: {
   const onRejection = (e: PromiseRejectionEvent) => {
     if (optOut.sharing()) telemetry.error(e.reason);
   };
+  // How long each stretch in view lasted, sent as the game goes out of view (a tab switch, the phone locking, closing).
+  const now = options.now ?? Date.now;
+  let shownAt: number | null = now();
+  const onVisibility = () => {
+    if (document.visibilityState === 'visible') {
+      shownAt = now();
+    } else if (shownAt !== null) {
+      if (optOut.sharing()) telemetry.track({ name: 'sitting_ended', props: { seconds: Math.round((now() - shownAt) / 1000) } });
+      shownAt = null;
+    }
+  };
   window.addEventListener('error', onError);
   window.addEventListener('unhandledrejection', onRejection);
+  document.addEventListener('visibilitychange', onVisibility);
   telemetry.track({ name: 'game_opened' });
   // Checked again at send time: anything buffered while PostHog loaded is dropped if the player opted out meanwhile.
   createPostHogSink(() => options.context(store.getState())).then(
@@ -69,6 +82,7 @@ export function startAnalytics<S>(options: {
     unsubscribe();
     window.removeEventListener('error', onError);
     window.removeEventListener('unhandledrejection', onRejection);
+    document.removeEventListener('visibilitychange', onVisibility);
   };
 }
 

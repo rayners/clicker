@@ -112,6 +112,25 @@ describe('starting analytics for a game', () => {
     expect(posthog.capture).not.toHaveBeenCalled();
   });
 
+  it('reports how long the player stayed each time the game goes out of view', async () => {
+    let now = 1_000;
+    const store = createReducerStore<S, number>({ level: 0 }, (_s, level) => ({ level }));
+    stops.push(startAnalytics({ store, diff, context: (s) => ({ level: s.level }), optOut: sharing(), allowed: true, now: () => now }));
+    const visibility = (state: 'hidden' | 'visible') => {
+      Object.defineProperty(document, 'visibilityState', { value: state, configurable: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    };
+    now += 95_400;
+    visibility('hidden');
+    now += 600_000;
+    visibility('visible');
+    now += 30_000;
+    visibility('hidden');
+    await flush();
+    expect(posthog.capture).toHaveBeenCalledWith('sitting_ended', { level: 0, seconds: 95 });
+    expect(posthog.capture).toHaveBeenCalledWith('sitting_ended', { level: 0, seconds: 30 });
+  });
+
   it('stops sending the moment the player opts out', async () => {
     const { store, optOut } = setup(true);
     await flush();

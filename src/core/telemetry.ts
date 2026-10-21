@@ -1,4 +1,4 @@
-import type { TelemetryEvent, TelemetryProps } from '../shared/telemetry';
+import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../shared/telemetry';
 import type { GameState } from './game';
 import { SECTIONS } from '../data/security/systems';
 import { isSecurity } from '../mission/state';
@@ -44,6 +44,7 @@ export function contractEvents(prev: GameState, next: GameState): TelemetryEvent
       const sector = SECTIONS[m.deepest - 1]!.id;
       events.push({ name: 'sector_secured', props: { sector, sectors: m.deepest, minutes: minutes(m.elapsed), horror: m.horror, cycle } });
     }
+    events.push(...progressEvents(was, m, m.elapsed));
   }
   return events;
 }

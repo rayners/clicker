@@ -28,8 +28,11 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 | Game | Event | Properties |
 |---|---|---|
 | picker | `site_opened` | game `picker` only. The front page's one event, so a player's first step carries the outside referrer (`$referring_domain`) |
-| both | `game_opened` | (context only) |
-| both | `$exception` | uncaught errors and unhandled rejections |
+| all | `game_opened` | (context only) |
+| all | `$exception` | uncaught errors and unhandled rejections |
+| all | `sitting_ended` | seconds (how long the game was in view before a tab switch, the phone locking or closing) |
+| all | `upgrade_bought` | upgrade (id), upgrades (how many owned), minutes (to a tenth). Fills the time before the first milestone |
+| all | `beat_seen` | beat (story beat id), minutes (to a tenth) |
 | DEEP CONTRACT | `contract_started` | scenario, horror, reason (`start` / `renewal` / `reassign`) |
 | DEEP CONTRACT | `act_reached` | act, minutes |
 | DEEP CONTRACT | `contract_abandoned` | scenario, horror, act, minutes (reassignment) |
