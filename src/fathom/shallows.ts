@@ -1,6 +1,7 @@
 import { ATTRACTIONS, GUARDS, SWIMMERS, type AttractionDef, type GuardDef } from '../fathom-data/shallows';
 import { appendLog } from '../shared/log';
 import { nextRandom } from '../shared/rng';
+import { effects } from './upgrades';
 import { coverMultiplier, incomeMultiplier, type EntryKind, type Outfit } from './state';
 
 export const COST_GROWTH = 1.15;
@@ -46,9 +47,16 @@ export const isGuardRevealed = (o: Outfit, index: number): boolean => index === 
 /** Everyone the attractions bring down to the water. */
 export const swimmers = (o: Outfit): number => ATTRACTIONS.reduce((n, a) => n + (o.attractions[a.id] ?? 0), 0);
 
-export const watch = (o: Outfit): number => GUARDS.reduce((n, g) => n + (o.guards[g.id] ?? 0) * g.covers, 0) * coverMultiplier(o);
+export const watch = (o: Outfit): number => GUARDS.reduce((n, g) => n + (o.guards[g.id] ?? 0) * g.covers, 0) * coverMultiplier(o) * effects(o).guard;
 
-export const openShare = (o: Outfit): number => o.open / DIAL_STEPS;
+/** How much of the beach is open: the player's dial, or the head lifeguard's (as wide as the watch covers). */
+export function openShare(o: Outfit): number {
+  if (!effects(o).autoOpen) return o.open / DIAL_STEPS;
+  const n = swimmers(o);
+  return n === 0 ? 1 : Math.min(1, Math.floor((watch(o) / n) * DIAL_STEPS) / DIAL_STEPS);
+}
+
+export const isAutoOpenActive = (o: Outfit): boolean => effects(o).autoOpen;
 
 export function shiftOpen(o: Outfit, step: 1 | -1): Outfit {
   const open = Math.max(0, Math.min(DIAL_STEPS, o.open + step));
@@ -67,9 +75,9 @@ export const exposed = (o: Outfit): number => Math.max(0, inWater(o) - watch(o))
 
 // ---------- tourist money ----------
 
-export const attractionRate = (def: AttractionDef): number => def.rate;
+export const attractionRate = (o: Outfit, def: AttractionDef): number => def.rate * (effects(o).attraction[def.id] ?? 1);
 
-export const tourism = (o: Outfit): number => ATTRACTIONS.reduce((s, a) => s + (o.attractions[a.id] ?? 0) * attractionRate(a), 0);
+export const tourism = (o: Outfit): number => ATTRACTIONS.reduce((s, a) => s + (o.attractions[a.id] ?? 0) * attractionRate(o, a), 0);
 
 export function incomeRate(o: Outfit): number {
   const open = openShare(o);
@@ -78,8 +86,12 @@ export function incomeRate(o: Outfit): number {
 }
 
 /** Sell a beach pass at the hut by hand. */
+export const passPrice = (o: Outfit): number => PASS_PRICE * effects(o).pass;
+export const autoPassRate = (o: Outfit): number => effects(o).autoPasses;
+
 export function sellPass(o: Outfit): Outfit {
-  return { ...o, cash: o.cash + PASS_PRICE, lifetimeCash: o.lifetimeCash + PASS_PRICE };
+  const p = passPrice(o);
+  return { ...o, cash: o.cash + p, lifetimeCash: o.lifetimeCash + p };
 }
 
 const log = (o: Outfit, kind: EntryKind, text: string) => appendLog<EntryKind, Outfit>(o, kind, text);
@@ -98,7 +110,7 @@ function attacks(o: Outfit, dt: number, pressure: number): Outfit {
 
 /** The beach for one tick: tourist money, the town's trust healing, and the water taking whoever is unwatched. */
 export function tickShallows(o: Outfit, dt: number, pressure = 1): Outfit {
-  const income = incomeRate(o) * dt;
+  const income = (incomeRate(o) + autoPassRate(o) * passPrice(o)) * dt;
   const reputation = Math.min(1, o.reputation + ((1 - o.reputation) * dt) / REPUTATION_RECOVERY_SECONDS);
   return attacks({ ...o, reputation, cash: o.cash + income, lifetimeCash: o.lifetimeCash + income }, dt, pressure);
 }

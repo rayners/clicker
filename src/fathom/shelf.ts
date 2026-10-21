@@ -2,6 +2,7 @@ import { BUOY_BASE_COST, BUOY_COST_GROWTH, BUOY_REACH, SHELF_OPENS_AT, SHELF_TAK
 import { appendLog } from '../shared/log';
 import { nextRandom } from '../shared/rng';
 import { depth } from './depth';
+import { effects } from './upgrades';
 import { incomeMultiplier, type EntryKind, type Outfit } from './state';
 
 export const TRAWLER_COST_GROWTH = 1.15;
@@ -36,7 +37,12 @@ export function buyBuoy(o: Outfit): Outfit {
 
 export const isTrawlerRevealed = (o: Outfit, index: number): boolean => index === 0 || TRAWLERS.slice(index - 1).some((t) => (o.trawlers[t.id] ?? 0) > 0);
 
-export const rangeShare = (o: Outfit): number => o.range / DIAL_STEPS;
+/** How far out the boats fish: the player's dial, or the sonar operator's (exactly as far as the buoys see). */
+export const effectiveRange = (o: Outfit): number => (effects(o).autoRange ? coveredRange(o) : o.range);
+
+export const isAutoRangeActive = (o: Outfit): boolean => effects(o).autoRange;
+
+export const rangeShare = (o: Outfit): number => effectiveRange(o) / DIAL_STEPS;
 
 export function shiftRange(o: Outfit, step: 1 | -1): Outfit {
   const range = Math.max(1, Math.min(DIAL_STEPS, o.range + step));
@@ -49,10 +55,13 @@ export const boats = (o: Outfit): number => TRAWLERS.reduce((n, t) => n + (o.tra
 export const coveredRange = (o: Outfit): number => Math.min(DIAL_STEPS, HARBOUR_REACH + o.buoys * BUOY_REACH);
 
 /** The share of the fishing grounds the boats work that the sonar cannot see. */
-export const blindShare = (o: Outfit): number => (o.range <= coveredRange(o) ? 0 : (o.range - coveredRange(o)) / o.range);
+export function blindShare(o: Outfit): number {
+  const range = effectiveRange(o);
+  return range <= coveredRange(o) ? 0 : (range - coveredRange(o)) / range;
+}
 
 export const catchRate = (o: Outfit): number =>
-  TRAWLERS.reduce((s, t) => s + (o.trawlers[t.id] ?? 0) * t.rate, 0) * (NEAR_SHARE + RANGE_SHARE * o.range) * incomeMultiplier(o);
+  TRAWLERS.reduce((s, t) => s + (o.trawlers[t.id] ?? 0) * t.rate, 0) * (NEAR_SHARE + RANGE_SHARE * effectiveRange(o)) * incomeMultiplier(o) * effects(o).catch;
 
 const log = (o: Outfit, kind: EntryKind, text: string) => appendLog<EntryKind, Outfit>(o, kind, text);
 

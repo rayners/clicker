@@ -2,6 +2,7 @@ import { ESCAPE_LINES, OPEN_WATER_AT, PEN_BASE_COST, PEN_COST_GROWTH, PEN_HOLDS,
 import { appendLog } from '../shared/log';
 import { nextRandom } from '../shared/rng';
 import { depth } from './depth';
+import { effects } from './upgrades';
 import { incomeMultiplier, type EntryKind, type Outfit } from './state';
 
 export const SPECIMEN_COST_GROWTH = 1.15;
@@ -37,7 +38,17 @@ export function buyPen(o: Outfit): Outfit {
 
 export const isSpecimenRevealed = (o: Outfit, index: number): boolean => index === 0 || SPECIMENS.slice(index - 1).some((s) => (o.specimens[s.id] ?? 0) > 0);
 
-export const enhancement = (o: Outfit): number => o.enhance / DIAL_STEPS;
+const containedAt = (o: Outfit, share: number): number => (o.pens * PEN_HOLDS) / (1 + (ENHANCED_HOLD - 1) * share);
+
+/** How hard the lab pushes: the player's dial, or the protocol's (as far as the pens still hold every specimen). */
+export function enhancement(o: Outfit): number {
+  if (!effects(o).autoEnhance) return o.enhance / DIAL_STEPS;
+  const n = specimens(o);
+  for (let notch = DIAL_STEPS; notch > 0; notch--) if (containedAt(o, notch / DIAL_STEPS) >= n) return notch / DIAL_STEPS;
+  return 0;
+}
+
+export const isAutoEnhanceActive = (o: Outfit): boolean => effects(o).autoEnhance;
 
 export function shiftEnhancement(o: Outfit, step: 1 | -1): Outfit {
   const enhance = Math.max(0, Math.min(DIAL_STEPS, o.enhance + step));
@@ -47,12 +58,12 @@ export function shiftEnhancement(o: Outfit, step: 1 | -1): Outfit {
 export const specimens = (o: Outfit): number => SPECIMENS.reduce((n, s) => n + (o.specimens[s.id] ?? 0), 0);
 
 /** How many specimens the pens can hold at this level of enhancement. */
-export const contained = (o: Outfit): number => (o.pens * PEN_HOLDS) / (1 + (ENHANCED_HOLD - 1) * enhancement(o));
+export const contained = (o: Outfit): number => containedAt(o, enhancement(o));
 
 export const uncontained = (o: Outfit): number => Math.max(0, specimens(o) - contained(o));
 
 export const researchRate = (o: Outfit): number =>
-  SPECIMENS.reduce((s, sp) => s + (o.specimens[sp.id] ?? 0) * sp.rate, 0) * (1 + (ENHANCED_PAY - 1) * enhancement(o)) * incomeMultiplier(o);
+  SPECIMENS.reduce((s, sp) => s + (o.specimens[sp.id] ?? 0) * sp.rate, 0) * (1 + (ENHANCED_PAY - 1) * enhancement(o)) * incomeMultiplier(o) * effects(o).research;
 
 /** How hard the water pushes on the beach: the season, plus whatever the lab let out. */
 export const beachPressure = (o: Outfit): number => 1 + LOOSE_PRESSURE * o.loose;

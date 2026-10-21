@@ -6,6 +6,7 @@ import { completeSeason, type Ending } from './season';
 import { buyAttraction, hireGuard, sellPass, shiftOpen } from './shallows';
 import { buyBuoy, buyTrawler, shiftRange } from './shelf';
 import { buyModule, hireRepairCrew, shiftStation } from './trench';
+import { buyUpgrade } from './upgrades';
 import type { Outfit } from './state';
 
 export type FathomAction =
@@ -25,6 +26,7 @@ export type FathomAction =
   | { type: 'buildWall' }
   | { type: 'buildBulwark' }
   | { type: 'hirePilot' }
+  | { type: 'buyUpgrade'; id: string }
   | { type: 'completeSeason'; ending: Ending; seed: number }
   | { type: 'setSetting'; key: keyof FathomSettings; value: boolean }
   | { type: 'hardReset'; seed: number; now: number }
@@ -69,6 +71,8 @@ export function reduce(game: FathomGame, action: FathomAction): FathomGame {
       return outfit(game, buildBulwark(o));
     case 'hirePilot':
       return outfit(game, hirePilot(o));
+    case 'buyUpgrade':
+      return outfit(game, buyUpgrade(o, action.id));
     case 'completeSeason':
       return completeSeason(game, action.ending, action.seed);
     case 'setSetting':

@@ -2,6 +2,7 @@ import { CREW_BASE_COST, CREW_COST_GROWTH, CREW_PER_MODULE, FLOOD_LINES, MODULE_
 import { appendLog } from '../shared/log';
 import { nextRandom } from '../shared/rng';
 import { depth } from './depth';
+import { effects } from './upgrades';
 import { incomeMultiplier, type EntryKind, type Outfit } from './state';
 
 const DIAL_STEPS = 10;
@@ -36,7 +37,15 @@ export function shiftStation(o: Outfit, step: 1 | -1): Outfit {
   return stationDepth === o.stationDepth ? o : { ...o, stationDepth };
 }
 
-export const sampleRate = (o: Outfit): number => o.modules * MODULE_RATE * (1 + DEPTH_PAY * (o.stationDepth - 1)) * incomeMultiplier(o);
+export const sampleRate = (o: Outfit): number => o.modules * MODULE_RATE * (1 + DEPTH_PAY * (o.stationDepth - 1)) * incomeMultiplier(o) * effects(o).sample;
+
+export const isAutoStationActive = (o: Outfit): boolean => effects(o).autoStation;
+
+/** The station computer's notch: the deepest at which the crews keep up with the hull. */
+function autoNotch(o: Outfit): number {
+  for (let notch = DIAL_STEPS; notch > 1; notch--) if (hullRate({ ...o, stationDepth: notch }) >= 0) return notch;
+  return 1;
+}
 
 /** Change in hull integrity per second: the depth crushing every module, the crews patching it. */
 export function hullRate(o: Outfit): number {
@@ -56,8 +65,9 @@ function flood(o: Outfit): Outfit {
 }
 
 /** The station for one tick: samples paid for, the hull crushed and patched, and a module lost if it gives. */
-export function tickTrench(o: Outfit, dt: number): Outfit {
-  if (o.modules === 0) return o;
+export function tickTrench(o0: Outfit, dt: number): Outfit {
+  if (o0.modules === 0) return o0;
+  const o = effects(o0).autoStation ? { ...o0, stationDepth: autoNotch(o0) } : o0;
   const income = sampleRate(o) * dt;
   const integrity = Math.min(1, o.integrity + hullRate(o) * dt);
   const next = { ...o, integrity: Math.max(0, integrity), cash: o.cash + income, lifetimeCash: o.lifetimeCash + income };
