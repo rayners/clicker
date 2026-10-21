@@ -42,13 +42,15 @@ import {
 } from './insurer/economy';
 import { createLateGame, type LateGame } from './game';
 import { runConfigFor } from './sequels';
-import { createRun, type CampRun, type ClinicRun, type InsurerRun, type VenueId } from './state';
+import { createRun, type CampRun, type ClinicRun, type InsurerRun, type KillerId, type VenueId } from './state';
 import { reduce, type LateAction } from './store';
 import { tickRun } from './tick';
 
 export interface LateSimOptions {
   seed: number;
   venue?: VenueId;
+  /** A crossover: this killer in that place (defaults to the place's own). */
+  killer?: KillerId;
   maxSeconds: number;
   /** Films already finished (sequels start richer, against a stronger killer). */
   sequels?: number;
@@ -187,8 +189,14 @@ const PRESS: Record<VenueId, LateAction> = { camp: { type: 'whistle' }, clinic: 
 export function simulateLate(options: LateSimOptions): LateSimResult {
   const { seed, maxSeconds, venue = 'camp', sequels = 0, activeClicks = 4, activeSeconds = 20 * 60, decisionInterval = 5 } = options;
   const base = createLateGame(seed, 0);
-  const profile = { ...base.profile, sequels, boxOffice: sequels, history: Array.from({ length: sequels }, () => ({ venue, title: '', ending: 'kill', bodyCount: 0, duration: 0 })) };
-  let game: LateGame = { ...base, profile, run: createRun(runConfigFor(profile, venue), seed) };
+  const killer = options.killer ?? createRun(runConfigFor(base.profile, venue), seed).killer;
+  const profile = {
+    ...base.profile,
+    sequels,
+    boxOffice: sequels,
+    history: Array.from({ length: sequels }, () => ({ venue, killer, title: '', ending: 'kill', bodyCount: 0, duration: 0 })),
+  };
+  let game: LateGame = { ...base, profile, run: createRun(runConfigFor(profile, venue, killer), seed) };
   const actAt: Record<number, number> = { 1: 0 };
   let terminusAt: number | undefined;
   for (let t = 1; t <= maxSeconds; t++) {

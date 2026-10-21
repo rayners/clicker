@@ -1,5 +1,5 @@
 import { AGENTS, POLICIES, SURVIVORS } from '../../late-fees-data/insurer';
-import { INSURER_BEATS, INSURER_LEXICON } from '../../late-fees-data/insurer-story';
+import { INSURER_BEATS, INSURER_ENDINGS, INSURER_LEXICON } from '../../late-fees-data/insurer-story';
 import type { VenueDef } from '../kinds';
 import type { InsurerRun, Run, RunConfig } from '../state';
 import { DEFAULT_APPETITE, DUE_SECONDS, insurerSignals, payClaim, tickInsurer } from './economy';
@@ -32,6 +32,7 @@ export const INSURER: VenueDef = {
   signals: (r) => insurerSignals(i(r)),
   lexicon: INSURER_LEXICON,
   beats: INSURER_BEATS,
+  endings: INSURER_ENDINGS,
   claim: (r, roll) => {
     const ins = i(r);
     if (!POLICIES.some((p) => (ins.policies[p.id] ?? 0) > 0)) return null;

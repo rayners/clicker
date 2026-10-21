@@ -1,5 +1,5 @@
 import type { ActTexts } from '../late-fees/story';
-import type { Ending, RunBeat } from '../late-fees/kinds';
+import type { EndingText, RunBeat } from '../late-fees/kinds';
 
 /**
  * The Drowned Boy. Written against signals and the venue's words, so the same killer could stalk a clinic or
@@ -21,14 +21,14 @@ export const DROWNED_KILLS = [
   '{victim} SAID THEY WOULD BE RIGHT BACK.',
   '{victim} WAS LAST SEEN WALKING TOWARD THE TREELINE, NOT RUNNING.',
   'A WET FOOTPRINT ON THE FLOOR OF THE {refuge}. {victim} IS MISSING FROM ROLL CALL.',
-  '{victim} LOCKED THE CABIN DOOR. THE WINDOW WAS OPEN.',
+  '{victim} LOCKED THE DOOR. THE WINDOW WAS OPEN.',
 ];
 
 export const DROWNED_BEATS: readonly RunBeat[] = [
   {
     id: 'drowned-legend',
     when: ({ r }) => r.elapsed >= 120,
-    entries: [{ kind: 'staff', text: 'AROUND THE CAMPFIRE, THE OLD COOK TELLS THE {victims} ABOUT THE BOY WHO DROWNED IN 1958. EVERYONE LAUGHS. MOST OF THEM.' }],
+    entries: [{ kind: 'staff', text: 'SOMEONE AT {place} TELLS THE {victims} ABOUT THE BOY WHO DROWNED AT CAMP BLACKWATER IN 1958. EVERYONE LAUGHS. MOST OF THEM.' }],
   },
   {
     id: 'drowned-mask',
@@ -50,17 +50,9 @@ export const DROWNED_BEATS: readonly RunBeat[] = [
   },
 ];
 
-export const DROWNED_ENDINGS: Readonly<Record<Ending, { title: string; text: string }>> = {
+export const DROWNED_ENDINGS: Readonly<Record<'kill', EndingText>> = {
   kill: {
-    title: 'PUT HIM BACK IN THE LAKE',
-    text: '{finalGirl} and whoever is left drive him into the water at dawn. He sinks. The camp closes for the season. The lake does not freeze over this winter.',
-  },
-  sell: {
-    title: 'SELL THE STORY',
-    text: 'The studio pays for the rights and the real location. You reopen next summer with a gift shop. Nobody goes near the far shore. He is still out there.',
-  },
-  burn: {
-    title: 'BURN THE CAMP',
-    text: 'Every cabin, the boathouse, the dock. You burn {place} to the waterline and salt the trail. There will be no Part {nextPart}. Not here.',
+    title: 'PUT HIM BACK IN THE WATER',
+    text: '{finalGirl} and whoever is left drive him into the deepest water at {place} at dawn. He sinks without a sound. The water does not freeze this winter.',
   },
 };

@@ -148,7 +148,21 @@ After enough sequels, the franchise "goes in a new direction": you play **the ki
 - **Death's design** adds accidents away from the list every 15 minutes or so. Its text works at the camp and the clinic too (a test checks this).
 - **Pacing (bot):** act 2 at 1h09m, the final girl at 2h30m, the confrontation at 2h55m, credits at 4h10m, with about 27 dead and the list never emptied.
 - **Telemetry:** adds `survivor_lost`.
-- **All three tapes are now in stock.** Next: crossovers.
+- **All three tapes are now in stock.**
+
+**Step 5 is done: crossovers.**
+- **Six tapes**, each a killer in another killer's place:
+  - *A Nightmare at Camp Blackwater*;
+  - *Penultimate Summer*;
+  - *Friday the 12th: Checked In*;
+  - *Penultimate Dream*;
+  - *Friday the 12th: Claims Pending*;
+  - *Sycamore Street 4: The Adjuster*.
+- They're on the shelf from the start while being play-tested (`CROSSOVER_UNLOCK_FILMS = 0`); they're meant to unlock after a few films.
+- **Endings are split:** the killer says how it is stopped (`kill`), and the venue says how the business ends (`sell`, `burn`). Every pairing reads correctly, and a test checks all nine combinations for unfilled placeholders.
+- **Sequels number per pairing.** Save v2 records each film's killer.
+- **Per-crossover pressure tuning** (`CROSSOVER_PRESSURE` in `sequels.ts`) keeps every pairing on the same act targets. The Drowned Boy, whose night surge is always on at the clinic and the insurer, is tuned down. The design and the Burned Man at the camp are tuned up. A pacing test covers each crossover.
+- **Next: play as the horror**, to be designed with the other games' horror tiers.
 
 ## Build order
 
@@ -156,5 +170,5 @@ After enough sequels, the franchise "goes in a new direction": you play **the ki
 2. **Venues × killers architecture,** then **Camp Blackwater** with the Drowned Boy on held ground, sequels, and the pacing bot.
 3. **The Sycamore Street Sleep Clinic** with the Burned Man.
 4. **Providence Mutual** with Death's design.
-5. **Crossovers.**
+5. **Crossovers.** (done)
 6. **Play as the horror** (design pass first).

@@ -1,9 +1,9 @@
 import { appendLog } from '../shared/log';
 import { formatDuration, formatNumber } from '../shared/format';
-import { CAMP_CONFIG, createRun, type EntryKind, type Run, type VenueId } from './state';
+import { CAMP_CONFIG, createRun, type EntryKind, type KillerId, type Run, type VenueId } from './state';
 import { tickRun } from './tick';
 
-export const LATE_VERSION = 1;
+export const LATE_VERSION = 2;
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
 const CATCH_UP_STEP_SECONDS = 1;
 /** Frame gaps longer than this are treated as the player having been away. */
@@ -18,6 +18,7 @@ export interface LateSettings {
 /** One finished film, kept forever on the franchise's record. */
 export interface SequelRecord {
   venue: VenueId;
+  killer: KillerId;
   title: string;
   ending: string;
   bodyCount: number;

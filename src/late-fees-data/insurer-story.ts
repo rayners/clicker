@@ -1,5 +1,5 @@
 import type { Lexicon } from '../shared/lexicon';
-import type { RunBeat } from '../late-fees/kinds';
+import type { EndingText, RunBeat } from '../late-fees/kinds';
 import { bookRate } from '../late-fees/insurer/economy';
 import type { InsurerRun, Run } from '../late-fees/state';
 
@@ -43,3 +43,14 @@ export const INSURER_BEATS: readonly RunBeat[] = [
     entries: [{ kind: 'news', text: 'A TABLOID CALLS PROVIDENCE MUTUAL "THE DEATH POLICY". SALES DOUBLE. EVERYONE WANTS TO BE COVERED WHEN IT COMES FOR THEM.' }],
   },
 ];
+
+export const INSURER_ENDINGS: Readonly<Record<'sell' | 'burn', EndingText>> = {
+  sell: {
+    title: 'SELL THE BOOK',
+    text: 'You sell every policy to a larger insurer for a fortune and do not mention the pattern. The buyer\'s actuaries notice within a week. By then you are on a plane. You check your seat number twice.',
+  },
+  burn: {
+    title: 'TEAR UP THE LIST',
+    text: 'You shred the seating chart, cancel every policy, and close Providence Mutual for good. Without a list to follow, whatever was hunting the survivors loses the thread. There will be no Part {nextPart}. Not for you.',
+  },
+};

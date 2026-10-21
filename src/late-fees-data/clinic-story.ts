@@ -1,5 +1,5 @@
 import type { Lexicon } from '../shared/lexicon';
-import type { RunBeat } from '../late-fees/kinds';
+import type { EndingText, RunBeat } from '../late-fees/kinds';
 import { patients } from '../late-fees/clinic/economy';
 import type { ClinicRun, Run } from '../late-fees/state';
 
@@ -43,3 +43,14 @@ export const CLINIC_BEATS: readonly RunBeat[] = [
     entries: [{ kind: 'news', text: 'THE LOCAL PAPER CALLS IT "THE SLEEP OF DEATH STUDY". VOLUNTEERS KEEP COMING. THEY SAY THE CLINIC IS THE ONLY PLACE ANYONE IS WATCHING THEM.' }],
   },
 ];
+
+export const CLINIC_ENDINGS: Readonly<Record<'sell' | 'burn', EndingText>> = {
+  sell: {
+    title: 'SELL THE DREAM DATA',
+    text: 'The grant-holder buys every recording and every patient file, and the clinic closes. The data turns up in a defense contractor\'s budget a year later. On Sycamore Street, the children are still skipping rope.',
+  },
+  burn: {
+    title: 'BURN THE HOUSE ON SYCAMORE STREET',
+    text: 'You burn the clinic to the foundations with the boiler room still roaring, and nobody on the street ever dreams of it again. There will be no Part {nextPart}. Not here.',
+  },
+};

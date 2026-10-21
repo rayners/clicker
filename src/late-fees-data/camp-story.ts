@@ -1,5 +1,5 @@
 import type { Lexicon } from '../shared/lexicon';
-import type { RunBeat } from '../late-fees/kinds';
+import type { EndingText, RunBeat } from '../late-fees/kinds';
 import { staff } from '../late-fees/camp/economy';
 import type { CampRun, Run } from '../late-fees/state';
 
@@ -43,3 +43,14 @@ export const CAMP_BEATS: readonly RunBeat[] = [
     entries: [{ kind: 'news', text: 'PARENTS ARE CALLING THE OFFICE. SOME WANT THEIR KIDS BACK. SOME WANT TO KNOW IF THERE ARE STILL SPACES.' }],
   },
 ];
+
+export const CAMP_ENDINGS: Readonly<Record<'sell' | 'burn', EndingText>> = {
+  sell: {
+    title: 'SELL THE STORY',
+    text: 'A studio pays for the rights and the real location. You reopen next summer with a gift shop and a guided night walk. Nobody goes near the far shore. Whatever came for the camp is still out there.',
+  },
+  burn: {
+    title: 'BURN THE CAMP',
+    text: 'Every cabin, the boathouse, the dock. You burn Camp Blackwater to the waterline and salt the trail. There will be no Part {nextPart}. Not here.',
+  },
+};

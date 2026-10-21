@@ -806,7 +806,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   padding: calc(16px + env(safe-area-inset-top)) var(--gutter) calc(16px + env(safe-area-inset-bottom));
-  background: rgba(4, 2, 8, 0.94);
+  background: rgba(4, 2, 8, 0.985);
   overflow-y: auto;
 }
 
@@ -872,6 +872,20 @@ button:disabled {
   border: 1px solid var(--faint);
   border-left: 8px solid var(--neon);
   background: linear-gradient(90deg, #1a0f26, var(--bg-raise));
+}
+
+.shelf-section {
+  margin-top: 8px;
+  font-family: var(--font-neon);
+  font-size: 1em;
+  letter-spacing: 0.1em;
+  text-align: center;
+  color: var(--cyan);
+  text-shadow: 0 0 8px rgba(43, 240, 255, 0.6);
+}
+
+.tape[data-crossover='true'] {
+  border-left-color: var(--cyan);
 }
 
 .tape[data-stock='out'] {

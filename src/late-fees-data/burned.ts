@@ -1,5 +1,5 @@
 import type { ActTexts } from '../late-fees/story';
-import type { Ending, RunBeat } from '../late-fees/kinds';
+import type { EndingText, RunBeat } from '../late-fees/kinds';
 
 /**
  * The Burned Man. Written against signals and the venue's words, so he could walk a camp's dreams as easily as a
@@ -48,17 +48,9 @@ export const BURNED_BEATS: readonly RunBeat[] = [
   },
 ];
 
-export const BURNED_ENDINGS: Readonly<Record<Ending, { title: string; text: string }>> = {
+export const BURNED_ENDINGS: Readonly<Record<'kill', EndingText>> = {
   kill: {
     title: 'PULL HIM OUT OF THE DREAM',
     text: '{finalGirl} falls asleep on purpose, grabs him by the sweater, and wakes up holding on. Out here he burns like anything else. The ashes are swept up. Somebody keeps the hat.',
-  },
-  sell: {
-    title: 'SELL THE DREAM DATA',
-    text: 'The grant-holder buys every recording and every patient file, and the clinic closes. The data turns up in a defense contractor\'s budget a year later. On Sycamore Street, the children are still skipping rope.',
-  },
-  burn: {
-    title: 'BURN THE HOUSE ON SYCAMORE STREET',
-    text: 'You burn the clinic to the foundations with the boiler room still roaring, and nobody on the street ever dreams of it again. There will be no Part {nextPart}. Not here.',
   },
 };

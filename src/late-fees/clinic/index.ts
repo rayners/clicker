@@ -1,5 +1,5 @@
 import { BEDS, PATIENT_NAMES, STAFF } from '../../late-fees-data/clinic';
-import { CLINIC_BEATS, CLINIC_LEXICON } from '../../late-fees-data/clinic-story';
+import { CLINIC_BEATS, CLINIC_ENDINGS, CLINIC_LEXICON } from '../../late-fees-data/clinic-story';
 import type { VenueDef } from '../kinds';
 import type { ClinicRun, Run, RunConfig } from '../state';
 import { clinicSignals, patients, REM_NEED, tickClinic } from './economy';
@@ -30,6 +30,7 @@ export const CLINIC: VenueDef = {
   signals: (r) => clinicSignals(c(r)),
   lexicon: CLINIC_LEXICON,
   beats: CLINIC_BEATS,
+  endings: CLINIC_ENDINGS,
   claim: (r, roll) => (patients(c(r)) > 0 ? { r, victim: `PATIENT ${PATIENT_NAMES[Math.floor(roll() * PATIENT_NAMES.length)]!}` } : null),
   outcome: (r) => ({ output: patients(c(r)), unit: 'BEDS' }),
   stakes: (r) => {

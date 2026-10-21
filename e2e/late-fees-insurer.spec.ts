@@ -4,7 +4,7 @@ test('late fees: rent penultimate destination, write a policy and see who is nex
   await page.goto('/late-fees/');
   await page.evaluate(() => localStorage.removeItem('latefees.save'));
   await page.reload();
-  await page.getByRole('button', { name: /rent penultimate destination/i }).click();
+  await page.getByRole('button', { name: /^rent penultimate destination$/i }).click();
   const sell = page.getByRole('button', { name: /sell a policy/i });
   for (let i = 0; i < 30; i++) await sell.click();
   await page.getByRole('tab', { name: /office/i }).click();

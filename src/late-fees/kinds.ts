@@ -41,6 +41,13 @@ export interface VenueDef {
   outcome(r: Run): { output: number; unit: string };
   /** Who is still alive when the credits roll. */
   stakes(r: Run): string;
+  /** How the business ends, whatever hunted there: selling up, or burning the place down. */
+  endings: Readonly<Record<'sell' | 'burn', EndingText>>;
+}
+
+export interface EndingText {
+  title: string;
+  text: string;
 }
 
 export type Ending = 'kill' | 'sell' | 'burn';
@@ -54,5 +61,6 @@ export interface KillerDef {
   beats: readonly RunBeat[];
   /** How hard it pushes back on ground the venue holds (1 = an ordinary night). */
   pressure(r: Run, signals: Signals): number;
-  endings: Readonly<Record<Ending, { title: string; text: string }>>;
+  /** How this killer is stopped (for now), wherever it was. */
+  endings: Readonly<Record<'kill', EndingText>>;
 }

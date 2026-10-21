@@ -28,7 +28,7 @@ import {
 import { advance, newLateGame, type LateGame, type LateSettings } from './game';
 import { chooseTape, completeRun } from './sequels';
 import type { Ending } from './kinds';
-import type { CampRun, ClinicRun, InsurerRun, Run, VenueId } from './state';
+import type { CampRun, ClinicRun, InsurerRun, KillerId, Run, VenueId } from './state';
 
 export type LateAction =
   | { type: 'whistle' }
@@ -49,7 +49,7 @@ export type LateAction =
   | { type: 'shiftAppetite'; step: 1 | -1 }
   | { type: 'toggleActuary' }
   | { type: 'buyUpgrade'; id: string }
-  | { type: 'chooseTape'; venue: VenueId; seed: number }
+  | { type: 'chooseTape'; venue: VenueId; seed: number; killer?: KillerId }
   | { type: 'completeRun'; ending: Ending; seed: number }
   | { type: 'setSetting'; key: keyof LateSettings; value: boolean }
   | { type: 'hardReset'; seed: number; now: number }
@@ -110,7 +110,7 @@ export function reduce(game: LateGame, action: LateAction): LateGame {
       if (game.run.venue === 'insurer') return insurer(game, (r) => buyInsurerUpgrade(r, action.id));
       return camp(game, (r) => buyCampUpgrade(r, action.id));
     case 'chooseTape':
-      return chooseTape(game, action.venue, action.seed);
+      return chooseTape(game, action.venue, action.seed, action.killer);
     case 'completeRun':
       return completeRun(game, action.ending, action.seed);
     case 'setSetting':

@@ -1,5 +1,5 @@
 import { COUNSELORS, LIGHTS, STAFF_NAMES, ZONES } from '../../late-fees-data/camp';
-import { CAMP_BEATS, CAMP_LEXICON } from '../../late-fees-data/camp-story';
+import { CAMP_BEATS, CAMP_ENDINGS, CAMP_LEXICON } from '../../late-fees-data/camp-story';
 import { createGround, held } from '../../shared/ground';
 import type { VenueDef } from '../kinds';
 import type { CampRun, RunConfig, Run } from '../state';
@@ -32,6 +32,7 @@ export const CAMP: VenueDef = {
   signals: (r) => campSignals(c(r)),
   lexicon: CAMP_LEXICON,
   beats: CAMP_BEATS,
+  endings: CAMP_ENDINGS,
   claim: (r, roll) => {
     const camp = c(r);
     const tier = COUNSELORS.find((x) => (camp.counselors[x.id] ?? 0) > 0);

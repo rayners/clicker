@@ -90,7 +90,7 @@ describe('the sleep clinic on tape', () => {
     const user = setup({ flags: ['terminus'] });
     await user.click(screen.getByRole('tab', { name: /credits/i }));
     await user.click(within(screen.getByRole('tabpanel', { name: /credits/i })).getByRole('button', { name: /pull him out of the dream/i }));
-    await user.click(within(screen.getByRole('dialog', { name: /horror/i })).getByRole('button', { name: /rent friday the 12th/i }));
+    await user.click(within(screen.getByRole('dialog', { name: /horror/i })).getByRole('button', { name: /^rent friday the 12th$/i }));
     expect(screen.getByRole('button', { name: /blow the whistle/i })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /take a reading/i })).toBeNull();
     expect(screen.getAllByRole('region', { name: /camp zones/i })).toHaveLength(1);

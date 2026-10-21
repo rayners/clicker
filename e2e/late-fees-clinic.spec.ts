@@ -4,7 +4,7 @@ test('late fees: rent the nightmare, take readings, fill a bed and turn the dial
   await page.goto('/late-fees/');
   await page.evaluate(() => localStorage.removeItem('latefees.save'));
   await page.reload();
-  await page.getByRole('button', { name: /rent a nightmare on sycamore street/i }).click();
+  await page.getByRole('button', { name: /^rent a nightmare on sycamore street$/i }).click();
   const reading = page.getByRole('button', { name: /take a reading/i });
   for (let i = 0; i < 30; i++) await reading.click();
   await page.getByRole('tab', { name: /ward/i }).click();

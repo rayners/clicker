@@ -12,7 +12,7 @@ Read before changing things:
 - `docs/BOARDROOM.md`: the planned second-tier layer and the architecture rules it imposes **now**.
 - `docs/TERRAFORM.md`: the terraforming scenario and the **scenario × horror** architecture (built).
 - `docs/ROADMAP.md`: what's built, deliberate deviations from the original plan, and the backlog.
-- `docs/late-fees/DESIGN.md`: the third game, LATE FEES (modern-day slasher homages, VHS look, venues × killers, sequels). All three tapes are built (camp, sleep clinic, insurer); crossovers and play-as-the-killer are next.
+- `docs/late-fees/DESIGN.md`: the third game, LATE FEES (modern-day slasher homages, VHS look, venues × killers, sequels). All three tapes and the six crossovers are built; play-as-the-killer is next.
 - `docs/MISSIONS.md`: the approved new missions (security detachment, haulage, salvage, the Keep), the shared held-ground engine, and the build order.
 - `docs/TELEMETRY.md`: anonymous PostHog analytics (published site only, opt-out, events derived from state diffs). Add an event there when a new milestone matters for pacing.
 

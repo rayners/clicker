@@ -34,9 +34,9 @@ describe('the shelf', () => {
   it('greets a new player with the horror shelf, and renting Friday the 12th starts it', async () => {
     const user = setup(newLateGame(1, 0));
     const shelf = within(screen.getByRole('dialog', { name: /horror/i }));
-    expect(shelf.getByRole('button', { name: /rent a nightmare on sycamore street/i })).toBeTruthy();
-    expect(shelf.getByRole('button', { name: /rent penultimate destination/i })).toBeTruthy();
-    await user.click(shelf.getByRole('button', { name: /rent friday the 12th/i }));
+    expect(shelf.getByRole('button', { name: /^rent a nightmare on sycamore street$/i })).toBeTruthy();
+    expect(shelf.getByRole('button', { name: /^rent penultimate destination$/i })).toBeTruthy();
+    await user.click(shelf.getByRole('button', { name: /^rent friday the 12th$/i }));
     expect(store.getState().shelf).toBe(false);
     expect(screen.queryByRole('dialog', { name: /horror/i })).toBeNull();
   });
@@ -125,9 +125,9 @@ describe('Camp Blackwater on tape', () => {
     await user.click(screen.getByRole('tab', { name: /credits/i }));
     const credits = within(screen.getByRole('tabpanel', { name: /credits/i }));
     expect(credits.getByText(/40 DEAD THIS SUMMER/)).toBeTruthy();
-    await user.click(credits.getByRole('button', { name: /put him back in the lake/i }));
+    await user.click(credits.getByRole('button', { name: /put him back in the water/i }));
     expect(store.getState().shelf).toBe(true);
-    expect(within(screen.getByRole('dialog', { name: /horror/i })).getByRole('button', { name: /rent friday the 12th part ii/i })).toBeTruthy();
+    expect(within(screen.getByRole('dialog', { name: /horror/i })).getByRole('button', { name: /^rent friday the 12th part ii$/i })).toBeTruthy();
   });
 });
 

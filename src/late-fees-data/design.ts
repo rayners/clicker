@@ -1,5 +1,5 @@
 import type { ActTexts } from '../late-fees/story';
-import type { Ending, RunBeat } from '../late-fees/kinds';
+import type { EndingText, RunBeat } from '../late-fees/kinds';
 
 /**
  * Death's design. No mask, no glove: a pattern. Written against signals and the venue's words, so it could come
@@ -47,17 +47,9 @@ export const DESIGN_BEATS: readonly RunBeat[] = [
   },
 ];
 
-export const DESIGN_ENDINGS: Readonly<Record<Ending, { title: string; text: string }>> = {
+export const DESIGN_ENDINGS: Readonly<Record<'kill', EndingText>> = {
   kill: {
     title: 'CHEAT IT ONE LAST TIME',
-    text: '{finalGirl} holds the last name safe until the design moves past it. The office empties. The survivors scatter to other cities, other insurers. Death keeps a long list. It is in no hurry.',
-  },
-  sell: {
-    title: 'SELL THE BOOK',
-    text: 'You sell every policy to a larger insurer for a fortune and do not mention the pattern. The buyer\'s actuaries notice it within a week. By then you are on a plane. You check your seat number twice.',
-  },
-  burn: {
-    title: 'TEAR UP THE LIST',
-    text: 'You shred the seating chart, cancel every policy, and close {place} for good. Without a list to follow, the design loses the thread. There will be no Part {nextPart}. Not for you.',
+    text: '{finalGirl} holds the last name safe until the design moves past it. {place} empties. The survivors scatter to other cities. Death keeps a long list, and it is in no hurry.',
   },
 };
