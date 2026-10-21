@@ -92,8 +92,17 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
 
 ## Status
 
-- **Built:** the hunt engine (step 1) and LATE FEES's Killer's Cut (step 2). See `docs/late-fees/DESIGN.md`.
-- **Next:** Elderdark's wood.
+- **Built:** the hunt engine (step 1), LATE FEES's Killer's Cut (step 2) and Elderdark's wood (step 3).
+- **The wood as built:**
+  - **Entry:** "Listen to the wood" in Elderdark's configuration.
+  - **Prey:** three companies under charter, each run by its Factor's bot (`defendCompany` in `src/forest/bot.ts`).
+  - **The push** is a new `Company.woodPush`, zero in ordinary charters. Each point adds 60% danger and 100% expedition blight.
+  - **Sap** comes from hands lost: the dead plus the turned.
+  - **Fear** (notoriety) is added to the companies as Renown, which brings more haul and a better-armed company.
+  - **A charter reaching its reckoning** beats the wood back for 10 minutes and is replaced by its next charter.
+  - **Saves:** Elderdark save v7.
+  - **Balance (bot, 5 hours):** about six times the harvest of a passive wood, hands turning in numbers, nine upgrades.
+- **Next:** DEEP CONTRACT's creature.
 
 ## Build order
 

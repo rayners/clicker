@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createForestGame, type ForestGame } from '../../src/forest/game';
 import { reduce } from '../../src/forest/store';
 import { charterEvents, charterProperties } from '../../src/forest/telemetry';
+import { startWood } from '../../src/forest/wood';
 import { REGIONS } from '../../src/forest-data/regions';
 import type { Company } from '../../src/forest/state';
 
@@ -38,6 +39,14 @@ describe('Elderdark play events', () => {
     const due = game({ flags: ['terminus'], elapsed: 4 * 3600 });
     const done = reduce(due, { type: 'completeCharter', ending: 'sell', seed: 4 });
     expect(charterEvents(due, done)[0]).toMatchObject({ name: 'charter_completed', props: { ending: 'sell', minutes: 240, charter: 1 } });
+  });
+
+  it('reports listening to the wood, and each time a charter beats it back', () => {
+    const g = game();
+    const listening = startWood(g, 5);
+    expect(charterEvents(g, listening)).toEqual([{ name: 'wood_started', props: {} }]);
+    const beaten = { ...listening, wood: { ...listening.wood!, hunt: { ...listening.wood!.hunt, beaten: 1, harvest: 20 } } };
+    expect(charterEvents(listening, beaten)).toEqual([{ name: 'wood_beaten', props: { beaten: 1, harvest: 20 } }]);
   });
 
   it('describes the player for every event: game, charter and how far along', () => {

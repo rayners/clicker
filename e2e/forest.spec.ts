@@ -44,3 +44,17 @@ test('elderdark: keeps its own save, apart from DEEP CONTRACT', async ({ page })
   expect(keys).toContain('elderdark.save');
   expect(keys).not.toContain('deep-contract.save');
 });
+
+test('elderdark: listen to the wood and lean on a company', async ({ page }) => {
+  await page.goto('/forest/');
+  await page.evaluate(() => localStorage.removeItem('elderdark.save'));
+  await page.reload();
+  await page.getByRole('button', { name: /^configuration$/i }).click();
+  await page.getByRole('button', { name: /listen to the wood/i }).click();
+  const wood = page.getByRole('region', { name: /the wood/i });
+  await expect(wood).toBeVisible();
+  await wood.getByRole('button', { name: /lean harder on the company of the ashen key/i }).click();
+  await expect(wood.getByLabel('Strength free')).toHaveText('2 / 3');
+  await wood.getByRole('button', { name: /return to the ledger/i }).click();
+  await expect(wood).toBeHidden();
+});

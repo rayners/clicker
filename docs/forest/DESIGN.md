@@ -179,3 +179,7 @@ The pacing targets mirror DEEP CONTRACT (about 1h / 2.5h / 3h / 4.5h) and are en
 - **Sound:** quill scratch, a bell, the vault's note.
 - **Mechanical teeth for Act IV beats:** the audit burning hands, assaults on the palisade.
 - **A real-device pass** on iPhone Safari, in the browser and installed.
+
+## Play as the wood (built 2026-10-20)
+
+"Listen to the wood" (in the configuration) turns the ledger over. You are the forest, leaning on several companies under charter at once, each run by its Factor's bot. The shared design is in `docs/HORROR-TIER.md`. The code is `src/forest/wood.ts`, `src/forest-ui/wood.ts` and `src/forest-data/wood-upgrades.ts`.

@@ -12,6 +12,12 @@ export function charterProperties(game: ForestGame): TelemetryProps {
 
 /** Milestones between two successive states: regions opened, acts reached, Key fragments found, charters completed. */
 export function charterEvents(prev: ForestGame, next: ForestGame): TelemetryEvent[] {
+  if (next.mode === 'wood' && next.wood) {
+    if (prev.mode !== 'wood') return [{ name: 'wood_started', props: {} }];
+    const h = next.wood.hunt;
+    if (prev.wood && h.beaten > prev.wood.hunt.beaten) return [{ name: 'wood_beaten', props: { beaten: h.beaten, harvest: Math.round(h.harvest) } }];
+    return [];
+  }
   if (next.profile.chartersCompleted > prev.profile.chartersCompleted) {
     const record = next.profile.history.at(-1)!;
     const props = { ending: record.ending, minutes: minutes(record.duration), relics: record.relics, dead: record.dead, charter: prev.company.charter.number };

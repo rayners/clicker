@@ -18,6 +18,8 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
   const importButton = h('button', { class: 'buy', type: 'button' }, 'IMPORT');
   const reset = h('button', { class: 'buy cfg-danger', type: 'button', 'aria-label': 'Start a new charter' }, 'START A NEW CHARTER');
   const close = h('button', { class: 'cfg-close', type: 'button', 'aria-label': 'Close' }, '✕');
+  // Play as the forest: the ledger turned over (docs/HORROR-TIER.md).
+  const listen = h('button', { class: 'buy', type: 'button', 'aria-label': 'Listen to the wood' }, 'LISTEN TO THE WOOD');
   const dialog = h(
     'div',
     { class: 'cfg', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'ed-cfg-title', hidden: true },
@@ -32,6 +34,8 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
       code,
       h('div', { class: 'cfg-row' }, exportButton, copyButton, importButton),
       status,
+      h('h3', { class: 'panel-subtitle' }, 'THE WOOD'),
+      listen,
       h('h3', { class: 'panel-subtitle' }, 'BURN THE LEDGER'),
       reset,
     ),
@@ -50,6 +54,10 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
   const optOut = createOptOut(window.localStorage);
   share.checked = optOut.sharing();
   share.addEventListener('change', () => optOut.setSharing(share.checked));
+  listen.addEventListener('click', () => {
+    store.dispatch({ type: 'startWood', seed: (Math.random() * 2 ** 31) | 0 });
+    show(false);
+  });
   motion.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'reducedMotion', value: motion.checked }));
   exportButton.addEventListener('click', () => {
     code.value = forestSaves.exportSave(store.getState());

@@ -34,6 +34,8 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 | Elderdark | `act_reached` | act, minutes |
 | Elderdark | `key_fragment_found` | fragments, minutes |
 | Elderdark | `charter_completed` | ending, minutes, relics, dead |
+| Elderdark | `wood_started` | (playing as the wood) |
+| Elderdark | `wood_beaten` | beaten (times a charter beat the wood back), harvest |
 | LATE FEES | `film_started` | venue, killer, part |
 | LATE FEES | `act_reached` | act, venue, killer, part, minutes |
 | LATE FEES | `zone_opened` | zone, zones, minutes, part (Camp Blackwater) |
