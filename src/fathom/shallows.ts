@@ -96,8 +96,9 @@ function attacks(o: Outfit, dt: number, pressure: number): Outfit {
   return next;
 }
 
-export function tickOutfit(o: Outfit, dt: number, pressure = 1): Outfit {
+/** The beach for one tick: tourist money, the town's trust healing, and the water taking whoever is unwatched. */
+export function tickShallows(o: Outfit, dt: number, pressure = 1): Outfit {
   const income = incomeRate(o) * dt;
   const reputation = Math.min(1, o.reputation + ((1 - o.reputation) * dt) / REPUTATION_RECOVERY_SECONDS);
-  return attacks({ ...o, elapsed: o.elapsed + dt, reputation, cash: o.cash + income, lifetimeCash: o.lifetimeCash + income }, dt, pressure);
+  return attacks({ ...o, reputation, cash: o.cash + income, lifetimeCash: o.lifetimeCash + income }, dt, pressure);
 }

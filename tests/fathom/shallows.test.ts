@@ -13,8 +13,8 @@ import {
   sellPass,
   shiftOpen,
   swimmers,
-  tickOutfit,
 } from '../../src/fathom/shallows';
+import { tickOutfit } from '../../src/fathom/tick';
 
 const fresh = (patch: Partial<Outfit> = {}): Outfit => ({ ...createOutfit(1), ...patch });
 const run = (o: Outfit, seconds: number) => {
