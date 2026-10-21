@@ -21,6 +21,7 @@ import { held } from '../../src/shared/ground';
 import { createForestGame } from '../../src/forest/game';
 import { startWood } from '../../src/forest/wood';
 import { forestSaves } from '../../src/forest/save';
+import { reduce } from '../../src/forest/store';
 
 const keep = (patch: Partial<Company> = {}): Company => ({ ...createCompany(1, undefined, 'keep'), ...patch });
 const run = (c: Company, seconds: number) => {
@@ -160,5 +161,14 @@ describe('a charter for Morrowgate Keep', () => {
       expect(c.oil).toBe(0);
       expect(c.orders[KEEP]).toBeDefined();
     }
+  });
+
+  it('takes orders: buy oil, post a blade, call one back', () => {
+    const g = { ...createForestGame(1, 0), company: blades(5, { floors: secured(1) }) };
+    const oiled = reduce(g, { type: 'buyOil', flasks: 10 });
+    expect(oiled.company.oil).toBe(10);
+    const posted = reduce(oiled, { type: 'post', floor: 0, step: 1 });
+    expect(posted.company.posted[0]).toBe(1);
+    expect(reduce(posted, { type: 'post', floor: 0, step: -1 }).company.posted[0]).toBe(0);
   });
 });

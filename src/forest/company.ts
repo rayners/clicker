@@ -61,12 +61,13 @@ const SCOUT_CHARTING = 0.5;
 /** Thalers per flask of lamp oil. */
 export const OIL_PRICE = 1;
 /** Seconds of each Keep assault spent at the face: how far one party's return pushes the frontier floor. */
-const FACE_SECONDS = 15;
+const FACE_SECONDS = 10;
 /** Going without oil multiplies wounds by up to this much more, and adds this much to the chance of dying. */
 const DARK_WOUNDS = 2;
 const DARK_DEATH = 0.3;
 /** Blight at which the Keep presses twice as hard on its floors. */
 const KEEP_BLIGHT_PRESSURE = 40;
+const KEEP_FRAGMENT_DECAY = 0.8;
 
 const def = (id: ClassId) => CLASSES.find((k) => k.id === id)!;
 
@@ -342,7 +343,8 @@ function resolve(c: Company, party: Party): Company {
   }
   const haul = Math.max(0, p.haul * (1 + HAUL_VARIANCE * (2 * r.roll() - 1)));
   const survivors = size(party.comp) - size(dead);
-  const chance = keep ? (floor?.fragment ?? 0) : (FRAGMENT_CHANCE[region.id] ?? 0);
+  // The Keep gives up its fragments grudgingly: each one found makes the next harder to find.
+  const chance = keep ? (floor?.fragment ?? 0) * KEEP_FRAGMENT_DECAY ** c.keyFragments : (FRAGMENT_CHANCE[region.id] ?? 0);
   const fragment = survivors > 0 && c.keyFragments < KEY_FRAGMENTS && r.roll() < chance;
   const blight = p.blightPerHand * size(party.comp);
   let next: Company = {
@@ -587,7 +589,7 @@ export function floorStores(c: Company): number {
 }
 
 /** Garrison strength of one posted blade, in the same units as a floor's threat. */
-function postStrength(c: Company): number {
+export function postStrength(c: Company): number {
   return (def('blade').strength * modifiers(c).strength.blade * ARMOURY_STRENGTH ** c.buildings.armoury) / dangerMultiplier(c);
 }
 

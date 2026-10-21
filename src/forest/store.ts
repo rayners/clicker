@@ -1,7 +1,7 @@
 import type { ClassId } from '../forest-data/classes';
 import type { BuildingId } from '../forest-data/buildings';
 import { createReducerStore, type Store } from '../shared/store';
-import { adjustOrder, buyBuilding, buyUpgrade, dispatch, forage, hire, penance, toggleStanding } from './company';
+import { adjustOrder, buyBuilding, buyOil, buyUpgrade, dispatch, forage, hire, penance, post, toggleStanding } from './company';
 import { advance, createForestGame, type ForestGame, type ForestSettings } from './game';
 import { completeCharter, rewriteCharter, type Ending } from './charter';
 import type { SiteId } from './state';
@@ -17,6 +17,8 @@ export type ForestAction =
   | { type: 'penance' }
   | { type: 'buyUpgrade'; id: string }
   | { type: 'toggleStanding'; region: string }
+  | { type: 'buyOil'; flasks: number }
+  | { type: 'post'; floor: number; step: 1 | -1 }
   | { type: 'completeCharter'; ending: Ending; seed: number; site?: SiteId }
   | { type: 'rewriteCharter'; site: SiteId; seed: number }
   | { type: 'startWood'; seed: number }
@@ -52,6 +54,10 @@ export function reduce(game: ForestGame, action: ForestAction): ForestGame {
       return company(game, buyUpgrade(c, action.id));
     case 'toggleStanding':
       return company(game, toggleStanding(c, action.region));
+    case 'buyOil':
+      return company(game, buyOil(c, action.flasks));
+    case 'post':
+      return company(game, post(c, action.floor, action.step));
     case 'completeCharter':
       return completeCharter(game, action.ending, action.seed, action.site);
     case 'rewriteCharter':

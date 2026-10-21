@@ -12,14 +12,21 @@ import {
   isRegionOpen,
   maxStandingRegions,
   penanceCost,
+  TURN_THRESHOLD,
   project,
   wages,
+  frontierFloor,
+  keepProject,
+  oilPerTrip,
+  postStrength,
+  KEEP,
 } from './company';
+import { FLOORS } from '../forest-data/keep';
 import { advance, createForestGame, type ForestGame } from './game';
 import { isWoodUpgradeAvailable, startWood, woodUpgradeCost, WOOD_ADAPTER } from './wood';
 import { WOOD_UPGRADES } from '../forest-data/wood-upgrades';
 import { reduce, type ForestAction } from './store';
-import type { Company, Composition } from './state';
+import { createCompany, type Company, type Composition, type SiteId } from './state';
 
 export interface ForestSimOptions {
   seed: number;
@@ -28,12 +35,17 @@ export interface ForestSimOptions {
   activeTaps?: number;
   activeSeconds?: number;
   decisionInterval?: number;
+  site?: SiteId;
 }
 
 export interface ForestSimResult {
   actAt: Record<number, number>;
   /** Seconds at which each region first opened. */
   openedAt: Record<string, number>;
+  /** Seconds at which each floor of the Keep was first taken. */
+  floorAt: Record<string, number>;
+  /** Floors of the Keep held as each act began. */
+  heldAt: Record<number, number>;
   terminusAt?: number;
   final: ForestGame;
 }
@@ -60,6 +72,7 @@ function idealOrder(c: Company, regionIndex: number): Composition {
 
 function decide(game: ForestGame): ForestAction | null {
   const c = game.company;
+  if (c.site === 'keep') return decideKeep(c);
   const f = frontier(c);
   const frontierIndex = REGIONS.indexOf(f.region);
 
@@ -118,6 +131,101 @@ function decide(game: ForestGame): ForestAction | null {
   return null;
 }
 
+/** Strength over threat the bot wants from an assault on the Keep. */
+const KEEP_TARGET_RATIO = 1.25;
+const KEEP_PARTIES = 2;
+const KEEP_PENANCE_AT = 25;
+/** Relics in the vault before the bot buys more appraisal, whatever the parties are bringing. */
+const VAULT_LIMIT = 200;
+/** Trips' worth of oil the bot keeps in the stores. */
+const OIL_TRIPS = 3;
+
+/** An assault party for the frontier floor: a mender, a scout, a mystic once the floors run deep, blades for the rest. */
+function keepOrder(c: Company): Composition {
+  const floor = frontierFloor(c) ?? FLOORS.at(-1)!;
+  const depth = FLOORS.indexOf(floor);
+  const order: Composition = { blade: 0, mender: 1, scout: 1, mystic: depth >= 7 ? 2 : depth >= 4 ? 1 : 0 };
+  const per = keepProject(c, { blade: 1, mender: 0, scout: 0, mystic: 0 }).strength || strengthOf('blade');
+  const rest = keepProject(c, order).strength;
+  order.blade = Math.max(1, Math.ceil((KEEP_TARGET_RATIO * floor.threat - rest) / per));
+  return order;
+}
+
+/** What the bot actually sends: never more blades than a sensible party, even if it means a slower, bloodier assault. */
+function keepParty(c: Company): Composition {
+  const ideal = keepOrder(c);
+  return { ...ideal, blade: Math.min(ideal.blade, MAX_BLADES * 2) };
+}
+
+/** Blades each held floor needs posted so its garrison covers its threat. */
+function garrisonNeeds(c: Company): number[] {
+  const per = postStrength(c);
+  return c.floors.map((f, i) => (f.control > 0 && (f.secured || i < c.floors.findIndex((x) => !x.secured)) ? Math.ceil(FLOORS[i]!.threat / per) : 0));
+}
+
+function decideKeep(c: Company): ForestAction | null {
+  // Blight past the turning line costs the Keep its garrisons, so penance comes before anything else, and is saved for.
+  if (c.blight >= KEEP_PENANCE_AT) {
+    if (c.silver >= penanceCost(c)) return { type: 'penance' };
+    if (c.blight >= TURN_THRESHOLD - 5) return keepWork(c);
+  }
+  if (c.relics > VAULT_LIMIT && c.silver >= buildingCost(c, 'appraisal')) return { type: 'buyBuilding', id: 'appraisal' };
+
+  const ideal = keepOrder(c);
+  const want = keepParty(c);
+  const needs = garrisonNeeds(c);
+  const garrison = needs.reduce((a, b) => a + b, 0);
+  // Arm rather than hire armies: the assault and the garrisons both get cheaper in blades with every armoury level.
+  if (ideal.blade > MAX_BLADES || garrison > MAX_BLADES * 3) {
+    if (c.silver >= buildingCost(c, 'armoury')) return { type: 'buyBuilding', id: 'armoury' };
+    // Save for it, while the assault keeps going.
+    if (ideal.blade > MAX_BLADES * 2) return keepWork(c);
+  }
+
+  const upgrade = availableUpgrades(c).find((u) => u.cost <= c.silver * 0.8);
+  if (upgrade) return { type: 'buyUpgrade', id: upgrade.id };
+  if (gatherRate(c) > appraisalRate(c) * 0.8 && c.silver >= buildingCost(c, 'appraisal')) return { type: 'buyBuilding', id: 'appraisal' };
+  const wounded = CLASS_IDS.reduce((s, id) => s + c.wounded[id], 0);
+  const roster = CLASS_IDS.reduce((s, id) => s + c.hired[id], 0);
+  if (roster > 0 && wounded / roster > 0.2 && c.silver >= buildingCost(c, 'hospice') * 2) return { type: 'buyBuilding', id: 'hospice' };
+  if (c.blight > 20 && c.silver >= buildingCost(c, 'chapel') * 2) return { type: 'buyBuilding', id: 'chapel' };
+
+  // Hold what has been taken, shallowest floor first, but never with the blades the next assault needs.
+  const spare = available(c, 'blade') - (c.parties.length === 0 ? want.blade : 0);
+  for (let i = 0; i < needs.length; i++) {
+    if (c.posted[i]! > needs[i]!) return { type: 'post', floor: i, step: -1 };
+    if (c.posted[i]! < needs[i]! && spare > 0) return { type: 'post', floor: i, step: 1 };
+  }
+
+  const have = c.orders[KEEP]!;
+  for (const id of CLASS_IDS) {
+    if (have[id] !== want[id]) return { type: 'adjustOrder', region: KEEP, id, step: have[id] < want[id] ? 1 : -1 };
+  }
+  if (maxStandingRegions(c) > 0 && !c.standing.includes(KEEP)) return { type: 'toggleStanding', region: KEEP };
+
+  const trip = oilPerTrip(c, want);
+  if (c.oil < trip * OIL_TRIPS && c.silver >= trip) return { type: 'buyOil', flasks: Math.ceil(trip) };
+
+  const affordableWages = Math.max(incomeRate(c) * WAGE_SHARE, 0.4, c.silver / 600);
+  for (const id of CLASS_IDS) {
+    const needed = want[id] * KEEP_PARTIES + (id === 'blade' ? garrison : 0);
+    if (c.hired[id] < needed && wages(c) + CLASSES.find((k) => k.id === id)!.wage <= affordableWages && c.silver >= hireCost(c, id)) {
+      return { type: 'hire', id };
+    }
+  }
+
+  return keepWork(c);
+}
+
+/** Keep the assault going: fuel it and send it, whatever else is being saved for. */
+function keepWork(c: Company): ForestAction | null {
+  const want = c.orders[KEEP]!;
+  const trip = oilPerTrip(c, want);
+  if (c.oil < trip && c.silver >= trip - c.oil) return { type: 'buyOil', flasks: Math.ceil(trip - c.oil) };
+  if (c.oil >= trip && CLASS_IDS.every((id) => available(c, id) >= want[id])) return { type: 'dispatch', region: KEEP };
+  return null;
+}
+
 /** While saving for armour: just keep whatever parties can go, going. */
 function frontierWork(c: Company, frontierIndex: number): ForestAction | null {
   for (let i = frontierIndex; i >= 0; i--) {
@@ -160,8 +268,11 @@ export function defendCompany<P extends { company: Company; taps: number; decide
 
 /** A sensible, greedy player. Not optimal: taps for the first stretch, then checks in periodically. */
 export function simulateForest(options: ForestSimOptions): ForestSimResult {
-  const { seed, maxSeconds, activeTaps = 4, activeSeconds = 20 * 60, decisionInterval = 5 } = options;
-  let game = createForestGame(seed, 0);
+  const { seed, maxSeconds, activeTaps = 4, activeSeconds = 20 * 60, decisionInterval = 5, site = 'forest' } = options;
+  const blank = createForestGame(seed, 0);
+  let game = site === 'forest' ? blank : { ...blank, company: createCompany(seed, undefined, site) };
+  const floorAt: Record<string, number> = {};
+  const heldAt: Record<number, number> = { 1: 0 };
   const actAt: Record<number, number> = { 1: 0 };
   const openedAt: Record<string, number> = { [REGIONS[0]!.id]: 0 };
   let terminusAt: number | undefined;
@@ -179,14 +290,20 @@ export function simulateForest(options: ForestSimOptions): ForestSimResult {
     }
     game = reduce(game, { type: 'tick', dt: 1 });
     const c = game.company;
-    if (actAt[c.act] === undefined) actAt[c.act] = t;
+    if (actAt[c.act] === undefined) {
+      actAt[c.act] = t;
+      heldAt[c.act] = c.floors.filter((f) => f.secured).length;
+    }
     for (const r of REGIONS) if (openedAt[r.id] === undefined && isRegionOpen(c, r)) openedAt[r.id] = t;
+    c.floors.forEach((f, i) => {
+      if (f.secured && floorAt[FLOORS[i]!.id] === undefined) floorAt[FLOORS[i]!.id] = t;
+    });
     if (terminusAt === undefined && c.flags.includes('terminus')) {
       terminusAt = t;
       break;
     }
   }
-  return { actAt, openedAt, terminusAt, final: game };
+  return { actAt, openedAt, floorAt, heldAt, terminusAt, final: game };
 }
 
 export interface WoodSimOptions {
