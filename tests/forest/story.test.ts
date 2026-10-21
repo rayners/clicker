@@ -31,7 +31,7 @@ describe('the Elderdark story', () => {
       }),
     );
     // Later-charter beats (cycle-*) can't fire on a first charter.
-    const act1 = FOREST_STORY.filter((b) => (b.act ?? 1) === 1 && !b.id.startsWith('cycle-'));
+    const act1 = FOREST_STORY.filter((b) => (b.act ?? 1) === 1 && !b.id.startsWith('cycle-') && !b.id.startsWith('keep-'));
     expect(act1.filter((b) => c.beats[b.id] === undefined).map((b) => b.id)).toEqual([]);
   });
 
@@ -69,8 +69,26 @@ describe('later acts', () => {
     step({ charted: 99, keyFragments: 1 });
     step({ keyFragments: 3 });
     step({ keyFragments: 7 }, 60);
-    const later = FOREST_STORY.filter((b) => (b.act ?? 1) >= 2);
+    const later = FOREST_STORY.filter((b) => (b.act ?? 1) >= 2 && !b.id.startsWith('keep-'));
     expect(later.filter((b) => c.beats[b.id] === undefined).map((b) => b.id)).toEqual([]);
+    expect(c.flags).toContain('terminus');
+  });
+
+  it('writes a Keep charter its own entries, and never sends its hands past the forest\'s landmarks', () => {
+    let c = createCompany(1, undefined, 'keep');
+    c = { ...c, silver: 1e9, lifetimeRelics: 1e9, lifetimeSilver: 1e9, lifetimeDead: 10, blight: 30, hired: { blade: 9, mender: 1, scout: 1, mystic: 0 } };
+    const step = (patch: Partial<Company>, times = 40) => {
+      for (let i = 0; i < times; i++) c = runForestStory({ ...c, ...patch, elapsed: c.elapsed + FOREST_STORY_GAP + 61 });
+    };
+    step({ charted: 2, posted: c.posted.map((_, i) => (i === 0 ? 1 : 0)) });
+    step({ charted: 12 });
+    step({ charted: 31, keyFragments: 1 });
+    step({ keyFragments: 3 });
+    step({ keyFragments: 7 }, 60);
+    const keepBeats = FOREST_STORY.filter((b) => b.id.startsWith('keep-'));
+    expect(keepBeats.length).toBeGreaterThanOrEqual(4);
+    expect(keepBeats.filter((b) => c.beats[b.id] === undefined).map((b) => b.id)).toEqual([]);
+    for (const id of ['carved-arch', 'thornmaze-antlers', 'undercity-hours']) expect(c.beats[id]).toBeUndefined();
     expect(c.flags).toContain('terminus');
   });
 });

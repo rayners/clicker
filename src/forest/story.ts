@@ -10,6 +10,8 @@ type ForestBeat = Beat<Args, EntryKind>;
 
 const hands = (c: Company) => c.hired.blade + c.hired.mender + c.hired.scout + c.hired.mystic;
 const barrows = REGIONS[2]!;
+const inForest = (c: Company) => c.site === 'forest';
+const inKeep = (c: Company) => c.site === 'keep';
 
 /**
  * Act I: the company finds its feet. Dark from the start (the wood kills, the town profits),
@@ -61,7 +63,7 @@ const ACT_1: ForestBeat[] = [
   },
   {
     id: 'carved-arch',
-    when: ({ c }) => c.charted >= 1,
+    when: ({ c }) => inForest(c) && c.charted >= 1,
     entries: [{ kind: 'ledger', text: 'THE HANDS SPEAK OF A STONE ARCH A MILE IN, CARVED ALL OVER WITH EYES. NOTED FOR THE MAP.' }],
   },
   {
@@ -135,7 +137,7 @@ const ACT_2: ForestBeat[] = [
   {
     id: 'thornmaze-antlers',
     act: 2,
-    when: ({ c }) => c.charted >= thornmaze.opensAt,
+    when: ({ c }) => inForest(c) && c.charted >= thornmaze.opensAt,
     entries: [
       { kind: 'ledger', text: 'ANTLERS NAILED TO EVERY TREE AT THE THORNMAZE\'S EDGE. THE WOLD-KIN\'S BORDER. THE HANDS GO PAST THEM ANYWAY. THE FACTOR SENDS THEM.' },
     ],
@@ -186,7 +188,7 @@ const ACT_3_MORE: ForestBeat[] = [
   {
     id: 'undercity-hours',
     act: 3,
-    when: ({ c }) => inAct(c, 3) && c.charted >= undercity.opensAt + 1,
+    when: ({ c }) => inForest(c) && inAct(c, 3) && c.charted >= undercity.opensAt + 1,
     entries: [{ kind: 'omen', text: 'PARTIES IN THE UNDERCITY HEAR A BELL BELOW THEM, STRIKING HOURS THAT DO NOT EXIST.' }],
   },
 ];
@@ -248,7 +250,38 @@ const ACT_4: ForestBeat[] = [
   },
 ];
 
-export const FOREST_STORY: readonly ForestBeat[] = [...CHARTERS, ...ACT_1, ...ACT_2, ...ACT_3, ...ACT_3_MORE, ...ACT_4];
+/** A charter written for Morrowgate Keep: its own landmarks in place of the forest's. */
+const KEEP_BEATS: ForestBeat[] = [
+  {
+    id: 'keep-gatehouse',
+    when: ({ c }) => inKeep(c) && c.charted >= 1,
+    entries: [{ kind: 'ledger', text: 'THE TOLL-KEEPER\'S LEDGER AT THE GATEHOUSE LISTS EVERY TRAVELLER FOR A CENTURY. NONE IS RECORDED LEAVING. NOTED.' }],
+  },
+  {
+    id: 'keep-chandler',
+    when: ({ c }) => inKeep(c) && c.charted >= 2,
+    entries: [{ kind: 'town', text: 'The chandler has raised the price of lamp oil twice this week, and bought a second cart. He thanks the company for its custom.' }],
+  },
+  {
+    id: 'keep-posted',
+    when: ({ c }) => inKeep(c) && c.posted.some((n) => n > 0),
+    entries: [{ kind: 'hand', text: 'The blades posted in the keep ask for a second blanket each, and a priest. Mostly the blanket. It is cold in there in high summer.' }],
+  },
+  {
+    id: 'keep-portraits',
+    act: 2,
+    when: ({ c }) => inKeep(c) && c.charted >= 12,
+    entries: [{ kind: 'ledger', text: 'THE HANDS POSTED IN THE LONG GALLERY TURNED THE PORTRAITS TO THE WALL. BY MORNING EVERY ONE FACED OUT AGAIN.' }],
+  },
+  {
+    id: 'keep-stair',
+    act: 3,
+    when: ({ c }) => inKeep(c) && inAct(c, 3) && c.charted >= 22,
+    entries: [{ kind: 'omen', text: 'THE HANDS ON THE DROWNED STAIR HEAR SOMEONE CLIMBING UP OUT OF THE WARM WATER. EVERY NIGHT, ONE STEP NEARER.' }],
+  },
+];
+
+export const FOREST_STORY: readonly ForestBeat[] = [...CHARTERS, ...ACT_1, ...KEEP_BEATS, ...ACT_2, ...ACT_3, ...ACT_3_MORE, ...ACT_4];
 
 export function runForestStory(c: Company): Company {
   return runBeats<EntryKind, Company, Args>(c, FOREST_STORY, { c }, { minGap: FOREST_STORY_GAP });
