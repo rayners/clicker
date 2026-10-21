@@ -23,6 +23,7 @@ const area = (path: string) => {
   if (path.startsWith('shared/')) return 'shared';
   if (path.startsWith('picker')) return 'picker';
   if (path.startsWith('late-fees')) return 'late-fees';
+  if (path.startsWith('fathom')) return 'fathom';
   if (path.startsWith('forest')) return 'elderdark';
   return 'deep-contract';
 };
@@ -51,6 +52,13 @@ describe('code boundaries between the two games', () => {
   it('keeps LATE FEES to itself and the shared engine, and the other games out of it', () => {
     const outward = edges.filter(([from, to]) => area(from) === 'late-fees' && area(to) !== 'shared' && area(to) !== 'late-fees');
     const inward = edges.filter(([from, to]) => area(from) !== 'late-fees' && area(to) === 'late-fees');
+    expect(outward).toEqual([]);
+    expect(inward).toEqual([]);
+  });
+
+  it('keeps the deep-water game to itself and the shared engine, and the other games out of it', () => {
+    const outward = edges.filter(([from, to]) => area(from) === 'fathom' && area(to) !== 'shared' && area(to) !== 'fathom');
+    const inward = edges.filter(([from, to]) => area(from) !== 'fathom' && area(to) === 'fathom');
     expect(outward).toEqual([]);
     expect(inward).toEqual([]);
   });
