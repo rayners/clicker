@@ -72,6 +72,16 @@ Play **the kaiju**, using the shared hunt engine (`src/shared/hunt.ts`). Several
 - The architecture test gains a `fathom` area that may import only `src/shared/`.
 - The final name is to be decided with the user before the page and save key are fixed. FATHOM is a placeholder.
 
+## Build order (each step test-first)
+
+1. **The Shallows** (`src/fathom/`): the outfit, the tourist season, opening and closing beaches, nets, patrols and sharks. This is the playable core and the first act.
+2. **The Shelf and Open Water:** trawlers and sonar, squid and octopus, the research station, pens and containment.
+3. **The Trench:** the pressure station, hull integrity and crush depth.
+4. **The Breach:** coastal cities on held ground, kaiju by category, walls and Bulwarks with paired pilots.
+5. **Story, acts, endings and seasons** (prestige), with saves and migrations.
+6. **The shell:** the sonar look, the page, its manifest and the picker door. This waits for the name.
+7. **Pacing bot, telemetry and dashboard tiles, e2e.**
+
 ## Open questions (for the user, before building)
 
 1. **The name.** Candidates: FATHOM, DEEP WATER, BREACHWATER, CRUSH DEPTH.
