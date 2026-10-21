@@ -4,7 +4,7 @@ import { reduce } from '../../src/forest/store';
 import { charterEvents, charterProperties } from '../../src/forest/telemetry';
 import { startWood } from '../../src/forest/wood';
 import { REGIONS } from '../../src/forest-data/regions';
-import type { Company } from '../../src/forest/state';
+import { createCompany, type Company } from '../../src/forest/state';
 
 const game = (patch: Partial<Company> = {}): ForestGame => {
   const g = createForestGame(1, 0);
@@ -14,6 +14,14 @@ const company = (g: ForestGame, patch: Partial<Company>): ForestGame => ({ ...g,
 const hollows = REGIONS[1]!;
 
 describe('Elderdark play events', () => {
+  it('reports each floor of the Keep first taken, and says which site every event comes from', () => {
+    const g = { ...game(), company: { ...createCompany(1, undefined, 'keep'), elapsed: 600 } };
+    const floors = g.company.floors.map((f, i) => (i === 0 ? { ...f, control: 1, secured: true } : f));
+    expect(charterEvents(g, company(g, { floors, charted: 2 }))).toEqual([{ name: 'floor_secured', props: { floor: 'bailey', floors: 2, minutes: 10, charter: 1 } }, { name: 'floor_secured', props: { floor: 'gatehouse', floors: 1, minutes: 10, charter: 1 } }].reverse());
+    expect(charterProperties(g)).toMatchObject({ site: 'keep' });
+    expect(charterProperties(game())).toMatchObject({ site: 'forest' });
+  });
+
   it('reports upgrades bought and story beats seen on the way to the first act', () => {
     const before = game({ elapsed: 120 });
     const after = company(before, { upgrades: [...before.company.upgrades, 'x'], beats: { ...before.company.beats, memo: 120 } });
@@ -55,7 +63,7 @@ describe('Elderdark play events', () => {
     expect(charterEvents(listening, beaten)).toEqual([{ name: 'wood_beaten', props: { beaten: 1, harvest: 20 } }]);
   });
 
-  it('describes the player for every event: game, charter and how far along', () => {
-    expect(charterProperties(game({ act: 2 }))).toEqual({ game: 'elderdark', act: 2, charter: 1 });
+  it('describes the player for every event: game, site, charter and how far along', () => {
+    expect(charterProperties(game({ act: 2 }))).toEqual({ game: 'elderdark', site: 'forest', act: 2, charter: 1 });
   });
 });

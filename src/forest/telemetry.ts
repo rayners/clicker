@@ -1,5 +1,6 @@
 import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../shared/telemetry';
 import { REGIONS } from '../forest-data/regions';
+import { FLOORS } from '../forest-data/keep';
 import { isRegionOpen } from './company';
 import type { ForestGame } from './game';
 
@@ -7,7 +8,7 @@ const minutes = (seconds: number) => Math.round(seconds / 60);
 
 /** Sent with every event, so any one of them says where the player is. */
 export function charterProperties(game: ForestGame): TelemetryProps {
-  return { game: 'elderdark', act: game.company.act, charter: game.company.charter.number };
+  return { game: 'elderdark', site: game.company.site, act: game.company.act, charter: game.company.charter.number };
 }
 
 /** Milestones between two successive states: regions opened, acts reached, Key fragments found, charters completed. */
@@ -28,8 +29,15 @@ export function charterEvents(prev: ForestGame, next: ForestGame): TelemetryEven
   if (c.seed !== was.seed) return [];
   const at = { minutes: minutes(c.elapsed), charter: c.charter.number };
   const events: TelemetryEvent[] = [];
-  for (const region of REGIONS) {
-    if (isRegionOpen(c, region) && !isRegionOpen(was, region)) events.push({ name: 'region_opened', props: { region: region.id, ...at } });
+  if (c.site === 'keep') {
+    // The delve only ever deepens, so a floor lost and retaken is not reported twice.
+    FLOORS.forEach((floor, i) => {
+      if (floor.leagues > was.charted && floor.leagues <= c.charted) events.push({ name: 'floor_secured', props: { floor: floor.id, floors: i + 1, ...at } });
+    });
+  } else {
+    for (const region of REGIONS) {
+      if (isRegionOpen(c, region) && !isRegionOpen(was, region)) events.push({ name: 'region_opened', props: { region: region.id, ...at } });
+    }
   }
   if (c.act > was.act) events.push({ name: 'act_reached', props: { act: c.act, ...at } });
   if (c.keyFragments > was.keyFragments) events.push({ name: 'key_fragment_found', props: { fragments: c.keyFragments, ...at } });

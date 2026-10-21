@@ -23,7 +23,7 @@ with real players and to catch errors on devices we don't test on.
 ## Events
 
 Every event carries the game's context: `game` (`deep-contract` | `elderdark` | `late-fees`), `act`, and `scenario`/`horror`/`cycle`
-(DEEP CONTRACT) or `charter` (Elderdark). `minutes` is in-game time on the current contract or charter.
+(DEEP CONTRACT) or `site`/`charter` (Elderdark). `minutes` is in-game time on the current contract or charter.
 
 | Game | Event | Properties |
 |---|---|---|
@@ -40,7 +40,8 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 | DEEP CONTRACT | `sector_secured` | sector, sectors (how many reached), minutes (security contracts) |
 | DEEP CONTRACT | `creature_started` | (Special Order 0-77 accepted: playing as the creature) |
 | DEEP CONTRACT | `creature_vented` | vented (times a WARDEN vented its decks on the creature), harvest |
-| Elderdark | `region_opened` | region, minutes |
+| Elderdark | `region_opened` | region, minutes (forest charters) |
+| Elderdark | `floor_secured` | floor, floors (how deep), minutes (Keep charters; each floor once, however often it is lost and retaken) |
 | Elderdark | `act_reached` | act, minutes |
 | Elderdark | `key_fragment_found` | fragments, minutes |
 | Elderdark | `charter_completed` | ending, minutes, relics, dead |
