@@ -90,6 +90,11 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
 
 - The horror tier unlocks after finished first-tier runs, like the Boardroom (`BOARDROOM_UNLOCK_CONTRACTS = 10`). As with terraforming, security and crossovers, it will be **available from the start while being play-tested**.
 
+## Status
+
+- **Built:** the hunt engine (step 1) and LATE FEES's Killer's Cut (step 2). See `docs/late-fees/DESIGN.md`.
+- **Next:** Elderdark's wood.
+
 ## Build order
 
 1. **The hunt engine** (`src/shared/hunt.ts`), test-first, with no game attached. It covers push, hunger, notoriety, dormancy and growth, and drives stub prey.

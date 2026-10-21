@@ -164,6 +164,20 @@ After enough sequels, the franchise "goes in a new direction": you play **the ki
 - **Per-crossover pressure tuning** (`CROSSOVER_PRESSURE` in `sequels.ts`) keeps every pairing on the same act targets. The Drowned Boy, whose night surge is always on at the clinic and the insurer, is tuned down. The design and the Burned Man at the camp are tuned up. A pacing test covers each crossover.
 - **Next: play as the horror**, to be designed with the other games' horror tiers.
 
+**Step 6 is done: the Killer's Cut (play as the horror; design in `docs/HORROR-TIER.md`).**
+- **Side B of the shelf:** pick a killer, and it haunts the camp, the clinic and the insurer at once (original or crossover). Each place runs itself, defended by its pacing bot (`src/late-fees/defenders.ts`).
+- **The shared hunt engine** (`src/shared/hunt.ts`) splits the killer's strength across places in ± steps.
+  - The push becomes the place's killer pressure (minimum 0.1 when left alone).
+  - Hunger is spent per step and fed by the dead.
+  - Dread buys upgrades: more strength, harder push, patience, appetite, quiet.
+  - Notoriety funds the defenders (+30% production per point), and going to ground lets it fade.
+  - A place that rolls credits puts the killer down for 10 minutes and reopens as its next sequel.
+- **Dread per body** is weighted by place (camp 1, clinic 1.5, insurer 8).
+- **Only the side that is playing advances.** The cut steps 5 seconds at a time when catching up offline.
+- **Save v3** adds `mode` and `cut`.
+- **Telemetry:** adds `cut_started` and `cut_beaten`.
+- **Balance (horror bot over a 5-hour hunt):** about 40 times the harvest of a killer who never pushes, about 13 upgrades, strength 3 → 7.
+
 ## Build order
 
 1. **The page:** `/late-fees/`, the VHS shell, the tape shelf, save, PWA, the picker's third door and telemetry.
@@ -171,4 +185,4 @@ After enough sequels, the franchise "goes in a new direction": you play **the ki
 3. **The Sycamore Street Sleep Clinic** with the Burned Man.
 4. **Providence Mutual** with Death's design.
 5. **Crossovers.** (done)
-6. **Play as the horror** (design pass first).
+6. **Play as the horror** (done: the Killer's Cut).

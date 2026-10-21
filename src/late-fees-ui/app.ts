@@ -8,6 +8,7 @@ import { createCredits } from './credits';
 import { createSetup } from './setup';
 import { createShelf } from './shelf';
 import { createVenueUis, type VenueUi } from './venues';
+import { createCutView } from './cut';
 
 /** The VCR's tape counter: H:MM:SS. */
 export function tapeCounter(seconds: number): string {
@@ -33,6 +34,7 @@ interface Panel {
 export function mountLate(root: HTMLElement, store: LateStore): void {
   const setup = createSetup(store);
   const shelf = createShelf(store);
+  const cutView = createCutView(store);
   const venues = createVenueUis(store);
   let view: VenueUi | null = null;
 
@@ -144,6 +146,7 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
     h('div', { class: 'whistle-bay' }, action),
     tabbar,
     h('div', { class: 'vhs-noise', 'aria-hidden': 'true' }),
+    cutView.el,
     shelf.el,
     setup.dialog,
   );
@@ -165,6 +168,8 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
     setText(clock.value, view!.clock.read(r));
     shelf.render(game);
     setup.render(game);
+    cutView.render(game);
+    root.dataset.mode = game.mode;
     for (const p of panels) {
       const shown = p.visible?.(game) ?? true;
       p.tab.hidden = !shown;

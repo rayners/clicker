@@ -4,6 +4,7 @@ import { reduce } from '../../src/late-fees/store';
 import { filmEvents, filmProperties } from '../../src/late-fees/telemetry';
 import type { CampRun, ClinicRun, InsurerRun } from '../../src/late-fees/state';
 import { chooseTape } from '../../src/late-fees/sequels';
+import { startCut } from '../../src/late-fees/cut';
 
 const withRun = (g: LateGame, patch: Partial<CampRun>): LateGame => ({ ...g, run: { ...g.run, ...patch } as LateGame['run'] });
 
@@ -47,6 +48,14 @@ describe('LATE FEES play events', () => {
     const done = withRun(createLateGame(1, 0), { flags: ['terminus'], bodyCount: 61, elapsed: 4 * 3600 });
     const [event] = filmEvents(done, reduce(done, { type: 'completeRun', ending: 'sell', seed: 3 }));
     expect(event).toMatchObject({ name: 'film_completed', props: { ending: 'sell', venue: 'camp', bodyCount: 61, minutes: 240, part: 1 } });
+  });
+
+  it("reports the tape flipped to the Killer's Cut, and each time a place puts the killer down", () => {
+    const shelf = newLateGame(1, 0);
+    const cut = startCut(shelf, 'burned', 5);
+    expect(filmEvents(shelf, cut)).toEqual([{ name: 'cut_started', props: { killer: 'burned' } }]);
+    const beaten = { ...cut, cut: { ...cut.cut!, hunt: { ...cut.cut!.hunt, beaten: 1, harvest: 77 } } };
+    expect(filmEvents(cut, beaten)).toEqual([{ name: 'cut_beaten', props: { killer: 'burned', beaten: 1, harvest: 77 } }]);
   });
 
   it('describes the player for every event', () => {

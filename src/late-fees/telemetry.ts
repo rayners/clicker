@@ -14,6 +14,12 @@ export function filmProperties(game: LateGame): TelemetryProps {
 
 /** Milestones between two successive states: tapes rented, acts, camp zones and clinic beds opened, survivors lost, films finished. */
 export function filmEvents(prev: LateGame, next: LateGame): TelemetryEvent[] {
+  if (next.mode === 'cut' && next.cut) {
+    if (prev.mode !== 'cut' || prev.cut?.killer !== next.cut.killer) return [{ name: 'cut_started', props: { killer: next.cut.killer } }];
+    const h = next.cut.hunt;
+    if (prev.cut && h.beaten > prev.cut.hunt.beaten) return [{ name: 'cut_beaten', props: { killer: next.cut.killer, beaten: h.beaten, harvest: Math.round(h.harvest) } }];
+    return [];
+  }
   if (next.profile.sequels > prev.profile.sequels) {
     const record = next.profile.history.at(-1)!;
     return [

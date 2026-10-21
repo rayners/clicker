@@ -1134,3 +1134,147 @@ button:disabled {
 .vhs-shell[data-motion='reduced'] * {
   animation: none !important;
 }
+
+/* ---------- side B: the Killer's Cut ---------- */
+
+.cut {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overflow: hidden;
+  /* The killer's eye: everything through red, the tape worn thin. */
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(255, 50, 70, 0.16), transparent 65%),
+    radial-gradient(ellipse at 50% 120%, rgba(0, 0, 0, 0.85), transparent 60%),
+    #0a0204;
+}
+
+.cut::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.32) 0 1px, transparent 1px 3px);
+}
+
+.cut .osd {
+  text-shadow: 0 0 6px rgba(255, 50, 70, 0.6);
+}
+
+.osd-rec-live {
+  flex: none;
+  color: var(--rec);
+  animation: blink 1s steps(2, end) infinite;
+}
+
+.cut-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px var(--gutter) 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cut .stats {
+  margin-bottom: 4px;
+}
+
+.cut-note {
+  margin: 4px 0 8px;
+  font-size: 0.9em;
+  letter-spacing: 0.06em;
+  color: var(--rec);
+}
+
+.cut[data-state='dormant'] .cut-note,
+.cut[data-state='beaten'] .cut-note {
+  color: var(--dim);
+}
+
+.cut-places {
+  display: grid;
+  gap: 6px;
+}
+
+.cut-place {
+  display: grid;
+  gap: 4px;
+  padding: 6px 8px;
+  border: 1px solid var(--faint);
+  background: rgba(20, 4, 8, 0.8);
+}
+
+.cut-place[data-pushed='true'] {
+  border-color: var(--rec);
+  box-shadow: 0 0 10px rgba(255, 50, 70, 0.3);
+}
+
+.cut-place-head,
+.cut-place-mid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.cut-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  letter-spacing: 0.06em;
+}
+
+.cut-dead {
+  flex: none;
+  color: var(--rec);
+  font-variant-numeric: tabular-nums;
+}
+
+.cut-act {
+  font-size: 0.8em;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+}
+
+/* How much the place has worked out: the final girl's bar. */
+.cut-alarm {
+  flex: 0 0 35%;
+  height: 6px;
+  border: 1px solid var(--faint);
+}
+
+.cut-alarm-fill {
+  display: block;
+  height: 100%;
+  background: var(--gold);
+}
+
+.cut-steps {
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+}
+
+.cut-feed {
+  font-size: 0.9em;
+}
+
+@media (min-width: 900px) {
+  .cut-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    column-gap: 24px;
+  }
+}
+
+.tape[data-side='b'] {
+  border-left-color: var(--rec);
+}
+
+.shelf-side-b {
+  color: var(--rec);
+  text-shadow: 0 0 8px rgba(255, 50, 70, 0.6);
+}

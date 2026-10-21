@@ -2,6 +2,8 @@ import { h } from '../shared/ui/dom';
 import type { LateGame } from '../late-fees/game';
 import { CROSSOVERS, isTapeStocked, ORIGINALS, runConfigFor, type TapeDef } from '../late-fees/sequels';
 import type { LateStore } from '../late-fees/store';
+import { KILLERS } from '../late-fees/registry';
+import type { KillerId } from '../late-fees/state';
 
 /** The horror shelf at Late Fees Video: pick a tape. The sequel replaces the original once a film is finished. */
 export function createShelf(store: LateStore): { el: HTMLElement; render(game: LateGame): void } {
@@ -32,16 +34,28 @@ export function createShelf(store: LateStore): { el: HTMLElement; render(game: L
     return h('li', { class: 'tape', 'data-stock': 'in', 'data-crossover': String(Boolean(t.crossover)) }, spine, blurb, rent);
   };
 
+  /** Side B: flip the tape and play the killer, haunting every place at once. */
+  const killerTape = (game: LateGame, k: KillerId) => {
+    const name = KILLERS[k].name;
+    const resuming = game.cut?.killer === k;
+    const play = h('button', { class: 'tape-rent', type: 'button', 'aria-label': `Play as ${name}` }, resuming ? 'RESUME ▶' : 'FLIP ▶');
+    play.addEventListener('click', () => store.dispatch({ type: 'startCut', killer: k, seed: (Math.random() * 2 ** 31) | 0 }));
+    const blurb = resuming ? 'Your cut is waiting where you left it.' : 'Haunt the camp, the clinic and the insurer at once. They run themselves. You decide where it hurts.';
+    return h('li', { class: 'tape', 'data-stock': 'in', 'data-side': 'b' }, h('span', { class: 'tape-spine' }, name), h('p', { class: 'tape-blurb' }, blurb), play);
+  };
+
   function render(game: LateGame) {
     el.hidden = !game.shelf;
     if (!game.shelf) return;
-    const key = `${game.profile.sequels}:${game.profile.history.length}`;
+    const key = `${game.profile.sequels}:${game.profile.history.length}:${game.cut?.killer ?? ''}`;
     if (key === shown) return;
     shown = key;
     list.replaceChildren(
       ...ORIGINALS.map((t) => tape(game, t)),
       h('li', { class: 'shelf-section', 'aria-hidden': 'true' }, 'CROSSOVERS'),
       ...CROSSOVERS.map((t) => tape(game, t)),
+      h('li', { class: 'shelf-section shelf-side-b', 'aria-hidden': 'true' }, "SIDE B · THE KILLER'S CUT"),
+      ...(Object.keys(KILLERS) as KillerId[]).map((k) => killerTape(game, k)),
     );
   }
 
