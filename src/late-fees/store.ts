@@ -27,6 +27,8 @@ import {
 } from './insurer/economy';
 import { advance, newLateGame, type LateGame, type LateSettings } from './game';
 import { chooseTape, completeRun } from './sequels';
+import { buyCutUpgrade, leaveCut, startCut } from './cut';
+import { shiftPush, toggleDormant } from '../shared/hunt';
 import type { Ending } from './kinds';
 import type { CampRun, ClinicRun, InsurerRun, KillerId, Run, VenueId } from './state';
 
@@ -51,6 +53,11 @@ export type LateAction =
   | { type: 'buyUpgrade'; id: string }
   | { type: 'chooseTape'; venue: VenueId; seed: number; killer?: KillerId }
   | { type: 'completeRun'; ending: Ending; seed: number }
+  | { type: 'startCut'; killer: KillerId; seed: number }
+  | { type: 'shiftCutPush'; index: number; step: 1 | -1 }
+  | { type: 'toggleCutDormant' }
+  | { type: 'buyCutUpgrade'; id: string }
+  | { type: 'leaveCut' }
   | { type: 'setSetting'; key: keyof LateSettings; value: boolean }
   | { type: 'hardReset'; seed: number; now: number }
   | { type: 'tick'; dt: number };
@@ -61,7 +68,7 @@ export type LateStore = Store<LateGame, LateAction>;
 const at =
   <R extends Run>(venue: VenueId) =>
   (game: LateGame, f: (r: R) => Run): LateGame => {
-    if (game.shelf || game.run.venue !== venue) return game;
+    if (game.shelf || game.mode === 'cut' || game.run.venue !== venue) return game;
     const next = f(game.run as R);
     return next === game.run ? game : { ...game, run: next };
   };
@@ -113,6 +120,16 @@ export function reduce(game: LateGame, action: LateAction): LateGame {
       return chooseTape(game, action.venue, action.seed, action.killer);
     case 'completeRun':
       return completeRun(game, action.ending, action.seed);
+    case 'startCut':
+      return startCut(game, action.killer, action.seed);
+    case 'shiftCutPush':
+      return game.cut ? { ...game, cut: { ...game.cut, hunt: shiftPush(game.cut.hunt, action.index, action.step) } } : game;
+    case 'toggleCutDormant':
+      return game.cut ? { ...game, cut: { ...game.cut, hunt: toggleDormant(game.cut.hunt) } } : game;
+    case 'buyCutUpgrade':
+      return buyCutUpgrade(game, action.id);
+    case 'leaveCut':
+      return leaveCut(game);
     case 'setSetting':
       return { ...game, profile: { ...game.profile, settings: { ...game.profile.settings, [action.key]: action.value } } };
     case 'hardReset': {

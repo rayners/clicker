@@ -1,50 +1,11 @@
-import { COUNSELORS, LIGHTS, ZONES } from '../late-fees-data/camp';
-import { held } from '../shared/ground';
-import {
-  availableCampUpgrades,
-  counselorCost,
-  counselorForce,
-  isCounselorRevealed,
-  isHeadCounselorActive,
-  isLightRevealed,
-  lightCost,
-  lightDemand,
-  lightSupply,
-  towerCost,
-  watchForce,
-} from './camp/economy';
-import { BEDS, STAFF } from '../late-fees-data/clinic';
-import {
-  availableClinicUpgrades,
-  bedCost,
-  bedRate,
-  isAutoDialActive,
-  isBedRevealed,
-  isStaffRevealed,
-  patients,
-  protectedCount,
-  staffCost,
-  suppressantCost,
-  watchCapacity,
-} from './clinic/economy';
-import { AGENTS, POLICIES } from '../late-fees-data/insurer';
-import {
-  agentCost,
-  availableInsurerUpgrades,
-  isActuaryActive,
-  isAgentRevealed,
-  isPolicyRevealed,
-  omenRate,
-  policyCost,
-  policyRate,
-  prevention,
-  shiftAppetite,
-} from './insurer/economy';
-import { createLateGame, type LateGame } from './game';
+import { advance, createLateGame, newLateGame, type LateGame } from './game';
+import { CUT_ADAPTER, cutUpgradeCost, isCutUpgradeAvailable, startCut } from './cut';
+import { CUT_UPGRADES } from '../late-fees-data/cut-upgrades';
 import { runConfigFor } from './sequels';
-import { createRun, type CampRun, type ClinicRun, type InsurerRun, type KillerId, type VenueId } from './state';
+import { createRun, type KillerId, type VenueId } from './state';
 import { reduce, type LateAction } from './store';
 import { tickRun } from './tick';
+import { DECIDE, PRESS } from './defenders';
 
 export interface LateSimOptions {
   seed: number;
@@ -65,125 +26,6 @@ export interface LateSimResult {
   terminusAt?: number;
   final: LateGame;
 }
-
-const MIN_PREP_SHARE = 3;
-
-/** Watch what is open, open more with the rest, keep the lights ahead of the work. */
-function decideCamp(game: LateGame): LateAction | null {
-  const r = game.run as CampRun;
-  const upgrade = availableCampUpgrades(r).find((u) => u.cost <= r.cash);
-  if (upgrade) return { type: 'buyUpgrade', id: upgrade.id };
-  if (!isHeadCounselorActive(r)) {
-    const need = r.zones.reduce((s, z, i) => (z.secured ? s + ZONES[i]!.threat : s), 0);
-    const watch = watchForce(r);
-    if (watch < need && r.prepShare > MIN_PREP_SHARE) return { type: 'shiftSplit', step: -1 };
-    if (watch > need * 1.5 && r.prepShare < 10) return { type: 'shiftSplit', step: 1 };
-  }
-  // Plan for the night: light demand by day is a quarter of what darkness asks.
-  const nightDemand = lightDemand({ ...r, elapsed: 360 + Math.floor(r.elapsed / 540) * 540 });
-  if (Math.max(lightDemand(r), nightDemand) > lightSupply(r) * 0.95) {
-    let best: { id: string; value: number } | null = null;
-    LIGHTS.forEach((l, i) => {
-      if (!isLightRevealed(r, i)) return;
-      const cost = lightCost(l, r.lights[l.id] ?? 0);
-      if (cost > r.cash) return;
-      const value = l.rate / cost;
-      if (!best || value > best.value) best = { id: l.id, value };
-    });
-    const pick = best as { id: string; value: number } | null;
-    if (pick) return { type: 'buyLight', id: pick.id };
-    if (nightDemand > lightSupply(r) * 1.5) return null;
-  }
-  if (held(r.zones) > r.towers + 2 && towerCost(r) < r.cash * 0.3) return { type: 'buyTower' };
-  let best: { id: string; value: number } | null = null;
-  COUNSELORS.forEach((c, i) => {
-    if (!isCounselorRevealed(r, i)) return;
-    const cost = counselorCost(c, r.counselors[c.id] ?? 0);
-    if (cost > r.cash) return;
-    const value = counselorForce(r, c) / cost;
-    if (!best || value > best.value) best = { id: c.id, value };
-  });
-  const pick = best as { id: string; value: number } | null;
-  return pick ? { type: 'hire', id: pick.id } : null;
-}
-
-/** How deep the bot wants its patients to sleep, when the watch can cover it. */
-const DEEP_TARGET = 0.6;
-
-/** Keep the watch ahead of the deep sleepers, set the dial as deep as it covers, fill beds with the rest. */
-function decideClinic(game: LateGame): LateAction | null {
-  const r = game.run as ClinicRun;
-  const upgrade = availableClinicUpgrades(r).find((u) => u.cost <= r.cash);
-  if (upgrade) return { type: 'buyUpgrade', id: upgrade.id };
-  const n = patients(r);
-  const cover = watchCapacity(r) + protectedCount(r);
-  if (!isAutoDialActive(r) && n > 0) {
-    const target = Math.max(3, Math.min(10, Math.floor((cover / n) * 10)));
-    if (r.remShare < target) return { type: 'shiftRem', step: 1 };
-    if (r.remShare > target) return { type: 'shiftRem', step: -1 };
-  }
-  if (cover < n * DEEP_TARGET) {
-    let best: { id: string; value: number } | null = null;
-    STAFF.forEach((s, i) => {
-      if (!isStaffRevealed(r, i)) return;
-      const cost = staffCost(s, r.staff[s.id] ?? 0);
-      if (cost > r.cash) return;
-      const value = s.watches / cost;
-      if (!best || value > best.value) best = { id: s.id, value };
-    });
-    const pick = best as { id: string; value: number } | null;
-    if (pick) return { type: 'hireStaff', id: pick.id };
-    if (cover < n * 0.3) return null;
-  }
-  if (n > 20 && suppressantCost(r) < r.cash * 0.3) return { type: 'buySuppressant' };
-  let best: { id: string; value: number } | null = null;
-  BEDS.forEach((b, i) => {
-    if (!isBedRevealed(r, i)) return;
-    const cost = bedCost(b, r.beds[b.id] ?? 0);
-    if (cost > r.cash) return;
-    const value = bedRate(r, b) / cost;
-    if (!best || value > best.value) best = { id: b.id, value };
-  });
-  const pick = best as { id: string; value: number } | null;
-  return pick ? { type: 'buyBed', id: pick.id } : null;
-}
-
-/** Keep prevention ahead of the design, push the appetite as far as prevention allows, write policies with the rest. */
-function decideInsurer(game: LateGame): LateAction | null {
-  const r = game.run as InsurerRun;
-  const upgrade = availableInsurerUpgrades(r).find((u) => u.cost <= r.cash);
-  if (upgrade) return { type: 'buyUpgrade', id: upgrade.id };
-  const p = prevention(r);
-  if (!isActuaryActive(r)) {
-    if (omenRate(r) > p && r.appetite > 0) return { type: 'shiftAppetite', step: -1 };
-    if (r.appetite < 10 && omenRate(shiftAppetite(r, 1)) <= p) return { type: 'shiftAppetite', step: 1 };
-  }
-  if (r.list.length > 0 && omenRate(r) > p * 0.9) {
-    let best: { id: string; value: number } | null = null;
-    AGENTS.forEach((a, i) => {
-      if (!isAgentRevealed(r, i)) return;
-      const cost = agentCost(a, r.agents[a.id] ?? 0);
-      if (cost > r.cash) return;
-      const value = a.power / cost;
-      if (!best || value > best.value) best = { id: a.id, value };
-    });
-    const pick = best as { id: string; value: number } | null;
-    if (pick) return { type: 'hireAgent', id: pick.id };
-  }
-  let best: { id: string; value: number } | null = null;
-  POLICIES.forEach((pol, i) => {
-    if (!isPolicyRevealed(r, i)) return;
-    const cost = policyCost(pol, r.policies[pol.id] ?? 0);
-    if (cost > r.cash) return;
-    const value = policyRate(r, pol) / cost;
-    if (!best || value > best.value) best = { id: pol.id, value };
-  });
-  const pick = best as { id: string; value: number } | null;
-  return pick ? { type: 'buyPolicy', id: pick.id } : null;
-}
-
-const DECIDE: Record<VenueId, (game: LateGame) => LateAction | null> = { camp: decideCamp, clinic: decideClinic, insurer: decideInsurer };
-const PRESS: Record<VenueId, LateAction> = { camp: { type: 'whistle' }, clinic: { type: 'reading' }, insurer: { type: 'sell' } };
 
 /** A sensible, greedy player: clicks for the first stretch, then checks in now and then. */
 export function simulateLate(options: LateSimOptions): LateSimResult {
@@ -220,4 +62,58 @@ export function simulateLate(options: LateSimOptions): LateSimResult {
     }
   }
   return { actAt, terminusAt, final: game };
+}
+
+export interface CutSimOptions {
+  seed: number;
+  killer: KillerId;
+  maxSeconds: number;
+  /** A killer who never pushes, for comparison. */
+  passive?: boolean;
+}
+
+export interface CutSimResult {
+  harvest: number;
+  upgrades: number;
+  beaten: number;
+  final: LateGame;
+}
+
+/** Notoriety at which the horror bot goes to ground, and where it wakes again. */
+const HIDE_ABOVE = 4;
+const WAKE_BELOW = 1;
+
+/** A sensible killer: buy what dread allows, push the least alarmed places, lie low when too notorious. */
+function decideCut(game: LateGame): LateAction | null {
+  const cut = game.cut!;
+  const h = cut.hunt;
+  const upgrade = CUT_UPGRADES.find((u) => isCutUpgradeAvailable(cut, u.id) && cutUpgradeCost(cut, u.id) <= h.dread);
+  if (upgrade) return { type: 'buyCutUpgrade', id: upgrade.id };
+  if (!h.dormant && h.notoriety > HIDE_ABOVE) return { type: 'toggleCutDormant' };
+  if (h.dormant && h.notoriety < WAKE_BELOW) return { type: 'toggleCutDormant' };
+  const used = h.split.reduce((a, b) => a + b, 0);
+  if (used < h.strength) {
+    // The place that has worked out the least about you.
+    const order = h.prey.map((p, i) => ({ i, alarm: CUT_ADAPTER.alarm(p) + h.split[i]! * 0.2 })).sort((a, b) => a.alarm - b.alarm);
+    return { type: 'shiftCutPush', index: order[0]!.i, step: 1 };
+  }
+  return null;
+}
+
+export function simulateCut(options: CutSimOptions): CutSimResult {
+  let game = startCut(newLateGame(options.seed, 0), options.killer, options.seed);
+  for (let t = 1; t <= options.maxSeconds; t++) {
+    if (!options.passive && t % 5 === 0) {
+      for (let i = 0; i < 20; i++) {
+        const action = decideCut(game);
+        if (!action) break;
+        const next = reduce(game, action);
+        if (next === game) break;
+        game = next;
+      }
+    }
+    game = advance(game, 1);
+  }
+  const h = game.cut!.hunt;
+  return { harvest: h.harvest, upgrades: Object.values(game.cut!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
 }

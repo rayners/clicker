@@ -14,6 +14,8 @@ export const lateSaves = createSaveSystem<LateGame>({
       const profile = save.profile as { history: { venue: string; killer?: string }[] };
       return { ...save, profile: { ...profile, history: profile.history.map((h) => ({ killer: home[h.venue] ?? 'drowned', ...h })) } };
     },
+    // v3: the Killer's Cut. Old saves are playing the films, with no cut started.
+    3: (save) => ({ ...save, mode: 'films', cut: null }),
   },
   label: 'LATE FEES',
   required: ['profile', 'run'],
