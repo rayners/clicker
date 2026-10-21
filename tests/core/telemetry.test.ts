@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createGame, newGame, type GameState } from '../../src/core/game';
 import { reduce } from '../../src/core/store';
 import { contractEvents, contractProperties } from '../../src/core/telemetry';
+import { startCreature } from '../../src/core/creature';
 
 const game = (patch: Partial<GameState> = {}): GameState => ({ ...createGame(1, 0), ...patch });
 const withMission = (g: GameState, patch: Partial<GameState['mission']>): GameState => ({ ...g, mission: { ...g.mission, ...patch } as GameState['mission'] });
@@ -59,6 +60,15 @@ describe('DEEP CONTRACT play events', () => {
     expect(contractEvents(before, after)).toEqual([
       { name: 'sector_secured', props: { sector: 'pad', sectors: 1, minutes: 10, horror: 'organism', cycle: 0 } },
     ]);
+  });
+
+  it('reports Special Order 0-77 accepted, and each time a WARDEN vents its decks on the creature', () => {
+    const g = game();
+    const hunting = startCreature(g, 5);
+    expect(contractEvents(g, hunting)).toEqual([{ name: 'creature_started', props: {} }]);
+    const vented = { ...hunting, creature: { ...hunting.creature!, hunt: { ...hunting.creature!.hunt, beaten: 1, harvest: 20 } } };
+    expect(contractEvents(hunting, vented)).toEqual([{ name: 'creature_vented', props: { vented: 1, harvest: 20 } }]);
+    expect(contractEvents(vented, reduce(vented, { type: 'tick', dt: 1 }))).toEqual([]);
   });
 
   it('describes the player for every event: game, contract and how far along', () => {

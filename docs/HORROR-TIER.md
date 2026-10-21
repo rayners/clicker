@@ -1,6 +1,6 @@
 # Play as the horror (design approved 2026-10-20)
 
-An unlockable higher tier in every game, requested by the user on 2026-10-20: reverse the roles and play the thing that hunts. It is the counterpart of DEEP CONTRACT's Boardroom, which the user pointed out is already a horror tier: the company is the monster. This doc covers the creature and killer tiers, how they share one engine, and what to build first. Nothing here is built yet.
+An unlockable higher tier in every game, requested by the user on 2026-10-20: reverse the roles and play the thing that hunts. It is the counterpart of DEEP CONTRACT's Boardroom, which the user pointed out is already a horror tier: the company is the monster. This doc covers the creature and killer tiers, how they share one engine, and what to build first. Build status is at the end.
 
 | Game | First tier: you are… | Horror tier: you are… |
 |---|---|---|
@@ -92,7 +92,7 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
 
 ## Status
 
-- **Built:** the hunt engine (step 1), LATE FEES's Killer's Cut (step 2) and Elderdark's wood (step 3).
+- **Built:** the hunt engine (step 1), LATE FEES's Killer's Cut (step 2), Elderdark's wood (step 3) and DEEP CONTRACT's creature (step 4).
 - **The wood as built:**
   - **Entry:** "Listen to the wood" in Elderdark's configuration.
   - **Prey:** three companies under charter, each run by its Factor's bot (`defendCompany` in `src/forest/bot.ts`).
@@ -102,7 +102,17 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
   - **A charter reaching its reckoning** beats the wood back for 10 minutes and is replaced by its next charter.
   - **Saves:** Elderdark save v7.
   - **Balance (bot, 5 hours):** about six times the harvest of a passive wood, hands turning in numbers, nine upgrades.
-- **Next:** DEEP CONTRACT's creature.
+- **The creature as built:**
+  - **Entry:** "Special Order 0-77: accept" under RESTRICTED in DEEP CONTRACT's configuration. The player's own contract waits while the creature hunts.
+  - **Prey:** three contracts, one of each kind (extraction, terraform, security), each run by its WARDEN's bot (`defendMission` in `src/sim/bot.ts`).
+  - **The creature** is a third horror (`src/mission/creature/`) beside the organism and the quiet. The hunt sets its `push` in mission state, so the mission stays pure. It takes equipment through `HorrorHooks.loseEquipment`, and crew directly.
+  - **Held ground inverted:** its `pressure` is `1 + push`, so a security contract's sectors slip faster where it stalks.
+  - **Suspicion** rises with each taking and fades by one every two minutes. WARDEN notices at 10 and tracks at 20, and at 30 vents every deck: that beats the creature back for 10 minutes and the next ship is sent. Because suspicion fades, the play is to rotate between ships.
+  - **Biomass** is the harvest: one per piece of equipment, three per crew member.
+  - **Whispers** (notoriety) raise every ship's output: the Combine pays for better-run crews.
+  - **Saves:** DEEP CONTRACT save v6 (`mode`, `creature`).
+  - **Balance (bot):** 258 biomass in 2 hours and 424 in 4, with no vents. A passive creature takes nothing.
+- **Next:** the hunter (DEEP CONTRACT) and the dragon (Elderdark), then Legend (prestige across hunts).
 
 ## Build order
 

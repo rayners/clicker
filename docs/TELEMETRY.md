@@ -30,6 +30,8 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 | DEEP CONTRACT | `contract_abandoned` | scenario, horror, act, minutes (reassignment) |
 | DEEP CONTRACT | `contract_completed` | ending, scenario, minutes, crewSurvived |
 | DEEP CONTRACT | `sector_secured` | sector, sectors (how many reached), minutes (security contracts) |
+| DEEP CONTRACT | `creature_started` | (Special Order 0-77 accepted: playing as the creature) |
+| DEEP CONTRACT | `creature_vented` | vented (times a WARDEN vented its decks on the creature), harvest |
 | Elderdark | `region_opened` | region, minutes |
 | Elderdark | `act_reached` | act, minutes |
 | Elderdark | `key_fragment_found` | fragments, minutes |

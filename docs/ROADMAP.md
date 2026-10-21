@@ -49,6 +49,7 @@ Requested 2026-10-19. Tracked in `docs/forest/DESIGN.md`. A playable first slice
   - Elderdark: a dragon, hungry forest spirits, the wood itself.
   - LATE FEES: the killers (`docs/late-fees/DESIGN.md` §7).
   - Designed together in `docs/HORROR-TIER.md` (2026-10-20): a shared hunt engine where first-tier runs play themselves, defended by their bots, and the player is the horror.
+  - **Built:** the Killer's Cut, the wood and the creature. **Left:** the hunter, the dragon and Legend.
 
 - **New missions (approved 2026-10-20):** security detachment, haulage and salvage for DEEP CONTRACT, and the Keep for Elderdark, with a shared held-ground engine. The design and build order are in `docs/MISSIONS.md`.
 

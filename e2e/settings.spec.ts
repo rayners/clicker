@@ -38,3 +38,15 @@ test('phone tab bar switches panels and the drill stays reachable', async ({ pag
   await page.getByRole('tab', { name: /ops/i }).click();
   await expect(page.getByRole('log')).toBeVisible();
 });
+
+test('accept Special Order 0-77 and stalk a contract as the creature', async ({ page }) => {
+  await page.getByRole('button', { name: /system configuration/i }).click();
+  await page.getByRole('button', { name: /accept special order 0-77/i }).click();
+  const view = page.getByRole('region', { name: /special order 0-77/i });
+  await expect(view).toBeVisible();
+  await expect(view.getByRole('group')).toHaveCount(3);
+  await view.getByRole('button', { name: /stalk .* harder/i }).first().click();
+  await expect(view.getByLabel('Strength free')).toHaveText('2 / 3');
+  await view.getByRole('button', { name: /return to the contract/i }).click();
+  await expect(view).toBeHidden();
+});

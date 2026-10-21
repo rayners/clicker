@@ -21,6 +21,8 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
   const resetButton = h('button', { class: 'buy cfg-danger', type: 'button' }, 'HARD RESET');
   const reassignButton = h('button', { class: 'buy', type: 'button' }, 'REQUEST REASSIGNMENT');
   const close = h('button', { class: 'cfg-close', type: 'button', 'aria-label': 'Close' }, 'X');
+  // Play as the creature (docs/HORROR-TIER.md).
+  const specialOrder = h('button', { class: 'buy cfg-danger', type: 'button', 'aria-label': 'Accept Special Order 0-77' }, 'SPECIAL ORDER 0-77: ACCEPT');
 
   const dialog = h(
     'div',
@@ -39,6 +41,8 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
       status,
       h('h3', { class: 'panel-subtitle' }, 'CONTRACT'),
       reassignButton,
+      h('h3', { class: 'panel-subtitle' }, 'RESTRICTED'),
+      specialOrder,
       h('h3', { class: 'panel-subtitle' }, 'DANGER'),
       resetButton,
     ),
@@ -129,7 +133,13 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
     show(false);
   });
 
+  specialOrder.addEventListener('click', () => {
+    store.dispatch({ type: 'startCreature', seed: (Math.random() * 2 ** 31) | 0 });
+    show(false);
+  });
+
   function render(game: GameState) {
+    setText(specialOrder, game.creature ? 'SPECIAL ORDER 0-77: RESUME' : 'SPECIAL ORDER 0-77: ACCEPT');
     sound.checked = game.profile.settings.sound;
     motion.checked = game.profile.settings.reducedMotion;
   }

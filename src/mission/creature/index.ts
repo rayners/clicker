@@ -54,7 +54,7 @@ export const CREATURE: HorrorDef = {
       } else {
         const lost = hooks.loseEquipment(next, roll);
         if (!lost) continue;
-        next = appendLog(lost.m, 'sys', EQUIPMENT_LINES[Math.floor(roll() * EQUIPMENT_LINES.length)]!(lost.name));
+        next = appendLog(lost.m, 'anomaly', EQUIPMENT_LINES[Math.floor(roll() * EQUIPMENT_LINES.length)]!(lost.name));
       }
       next = { ...next, taken: c(next).taken + 1, suspicion: c(next).suspicion + 1 } as MissionState;
     }
