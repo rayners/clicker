@@ -14,6 +14,8 @@ import {
   engineCost,
   fireThrusters,
   fuelForLeg,
+  fuelPrice,
+  FUEL_PRICE,
   isAutopilotActive,
   legDistance,
   legWindow,
@@ -100,6 +102,20 @@ describe('engines, cars and the burn', () => {
     expect(light.fuel).toBeLessThan(1_000);
   });
 
+  it('earns as it moves, not only at the station: freight pays by the kilometre, the window bonus at delivery', () => {
+    const moving = run(underway(), 5);
+    expect(moving.leg).toBe(0);
+    expect(moving.credits).toBeGreaterThan(underway().credits - 1);
+    expect(moving.delivered).toBeGreaterThan(0);
+  });
+
+  it('pays for the distance each car actually hauled: a car coupled just short of the station adds little', () => {
+    const nearly = underway({ travelled: legDistance(0) * 0.9, accrued: legDistance(0) * 0.9 * trainValue(underway()) });
+    const coupled = { ...nearly, cars: { ...nearly.cars, hopper: nearly.cars.hopper! + 10 } };
+    expect(deliveryPay(coupled)).toBeLessThan(deliveryPay(nearly) * 2);
+    expect(deliveryPay(coupled)).toBeGreaterThan(deliveryPay(nearly));
+  });
+
   it('burns fuel faster than it gains speed: a hot burn costs more per leg', () => {
     const m = underway();
     expect(fuelForLeg(setBurn(m, 8))).toBeGreaterThan(fuelForLeg(setBurn(m, 4)));
@@ -117,10 +133,15 @@ describe('engines, cars and the burn', () => {
     expect(deliveryPay(hard)).toBeLessThan(deliveryPay({ ...hard, condition: 1 }));
   });
 
-  it('coasts when the tank runs dry, and only manual bursts move it', () => {
-    const dry = run(underway({ fuel: 0 }), 30);
-    expect(dry.travelled).toBe(0);
-    expect(fireThrusters(dry).travelled).toBeGreaterThan(0);
+  it('coasts when the tank runs dry: slower than the gentlest burn, but it always gets there', () => {
+    const dry = run(underway({ fuel: 0, credits: 0 }), 10);
+    const lit = run(setBurn(underway(), 1), 10);
+    expect(dry.travelled).toBeGreaterThan(0);
+    expect(dry.travelled).toBeLessThan(lit.travelled);
+    expect(dry.fuel).toBe(0);
+    let stranded = underway({ fuel: 0, credits: 0 });
+    for (let i = 0; i < 5_000 && stranded.leg === 0; i++) stranded = run(stranded, 1);
+    expect(stranded.leg).toBe(1);
   });
 });
 
@@ -139,12 +160,20 @@ describe('stations and windows', () => {
     expect(late.leg).toBe(1);
   });
 
-  it('refuels only at a station, enough for the next leg at the current burn', () => {
-    expect(refuel(underway({ fuel: 0 }))).toEqual(underway({ fuel: 0 }));
+  it('refuels at a station for the next leg at the posted price', () => {
     const docked = underway({ fuel: 0, docked: 5 });
     const filled = refuel(docked);
     expect(filled.fuel).toBeCloseTo(fuelForLeg(docked));
-    expect(filled.credits).toBeLessThan(docked.credits);
+    expect(docked.credits - filled.credits).toBeCloseTo(fuelForLeg(docked) * FUEL_PRICE);
+  });
+
+  it('can call a fuel tender out under way, so a dry tank never strands the train, at three times the price', () => {
+    const dry = underway({ fuel: 0 });
+    const tendered = refuel(dry);
+    expect(tendered.fuel).toBeCloseTo(fuelForLeg(dry));
+    expect(dry.credits - tendered.credits).toBeCloseTo(fuelForLeg(dry) * FUEL_PRICE * 3);
+    expect(fuelPrice(dry)).toBe(FUEL_PRICE * 3);
+    expect(fuelPrice(underway({ docked: 5 }))).toBe(FUEL_PRICE);
   });
 
   it('leaves the dock on its own after a short stop', () => {

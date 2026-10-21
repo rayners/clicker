@@ -23,48 +23,48 @@ export const ENGINES: readonly EngineDef[] = [
     name: 'CHEMICAL BOOSTER',
     short: 'BOOSTER',
     description: 'A strap-on hydrolox stage. Cheap, loud and thirsty. The union calls them "the kettles".',
-    baseCost: 120,
-    thrust: 1,
+    baseCost: 250,
+    thrust: 2,
   },
   {
     id: 'ion',
     name: 'ION DRIVE CLUSTER',
     short: 'ION',
     description: 'Twelve gridded thrusters on a common bus. Gentle, tireless, blue.',
-    baseCost: 1_500,
-    thrust: 12,
+    baseCost: 12_000,
+    thrust: 30,
   },
   {
     id: 'torch',
     name: 'FUSION TORCH',
     short: 'TORCH',
     description: 'A magnetic bottle with the lid off. Point it away from the cars.',
-    baseCost: 25_000,
-    thrust: 150,
+    baseCost: 4_000_000,
+    thrust: 500,
   },
   {
     id: 'twin',
     name: 'TWIN-BELL TORCH',
     short: 'TWIN',
     description: 'Two torches sharing one reactor. The reactor has opinions about this.',
-    baseCost: 400_000,
-    thrust: 2_000,
+    baseCost: 400_000_000,
+    thrust: 8_000,
   },
   {
     id: 'pulse',
     name: 'PULSE DRIVE',
     short: 'PULSE',
     description: 'Fusion pellets lit behind a pusher plate, four a second. You feel every one in your teeth.',
-    baseCost: 8_000_000,
-    thrust: 30_000,
+    baseCost: 40_000_000_000,
+    thrust: 130_000,
   },
   {
     id: 'lantern',
     name: 'LANTERN DRIVE',
     short: 'LANTERN',
     description: 'A Combine prototype, fitted at the last station by people who would not give their names.',
-    baseCost: 200_000_000,
-    thrust: 500_000,
+    baseCost: 4_000_000_000_000,
+    thrust: 2_000_000,
   },
 ];
 
@@ -80,7 +80,7 @@ export interface CarDef {
   mass: number;
 }
 
-/** Tow cars: freight value and mass. Better cars carry more value for their weight. */
+/** Tow cars: freight value and mass. Better cars carry a little more value for their weight (1 rising to 2.5). */
 export const CARS: readonly CarDef[] = [
   {
     id: 'hopper',
@@ -97,7 +97,7 @@ export const CARS: readonly CarDef[] = [
     short: 'TANKER',
     description: 'Pressurised deuterium and ammonia. The union rate for tanker duty is double.',
     baseCost: 600,
-    value: 15,
+    value: 8,
     mass: 6,
   },
   {
@@ -106,7 +106,7 @@ export const CARS: readonly CarDef[] = [
     short: 'REFINERY',
     description: 'A rolling smelter that works the ore on the way home. Pays for itself, the brochure says.',
     baseCost: 12_000,
-    value: 220,
+    value: 56,
     mass: 35,
   },
   {
@@ -115,7 +115,7 @@ export const CARS: readonly CarDef[] = [
     short: 'CRYO',
     description: 'Refrigerated freight: medical stock, seed banks, sealed Combine containers. Kept at 4 K.',
     baseCost: 300_000,
-    value: 4_000,
+    value: 500,
     mass: 250,
   },
   {
@@ -124,7 +124,7 @@ export const CARS: readonly CarDef[] = [
     short: 'VAULT',
     description: 'Armoured, insured, and logged at every station by a notary drone. Contents: classified.',
     baseCost: 9_000_000,
-    value: 90_000,
+    value: 5_000,
     mass: 2_000,
   },
 ];

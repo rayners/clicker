@@ -1,6 +1,6 @@
 import type { Store } from '../core/store';
 import { HAULAGE_UPGRADES } from '../data/haulage/upgrades';
-import { effectiveBurn, fuelForLeg, FUEL_PRICE, isAutopilotActive, isDocked, safeBurn } from '../mission/haulage/economy';
+import { effectiveBurn, fuelForLeg, fuelPrice, isAutopilotActive, isDocked, safeBurn } from '../mission/haulage/economy';
 import type { HaulageMission } from '../mission/state';
 import { formatNumber } from '../shared/format';
 import { h, setText } from '../shared/ui/dom';
@@ -18,7 +18,7 @@ export function createHelm(store: Store): { el: HTMLElement; render(m: HaulageMi
   const fuel = h('span', { class: 'split-figure', 'aria-label': 'Fuel' });
   const refuel = h('button', { class: 'buy', type: 'button', 'aria-label': 'Refuel for the next leg' }, 'REFUEL');
   refuel.addEventListener('click', () => store.dispatch({ type: 'refuel' }));
-  const auto = h('p', { class: 'alloc-auto' }, 'WARDEN AUTOPILOT · JUST HOT ENOUGH FOR THE WINDOW, NEVER PAST THE STRAIN LINE');
+  const auto = h('p', { class: 'alloc-auto' }, 'WARDEN AUTOPILOT · THE BURN THAT EARNS MOST, NEVER PAST THE STRAIN LINE');
   const handover = h('button', { class: 'alloc-handover', type: 'button' });
   handover.addEventListener('click', () => store.dispatch({ type: 'toggleAutopilot' }));
   const el = h(
@@ -47,9 +47,10 @@ export function createHelm(store: Store): { el: HTMLElement; render(m: HaulageMi
     setText(fuel, `${formatNumber(m.fuel)} / ${formatNumber(need)}`);
     el.dataset.dry = String(m.fuel < need);
     const docked = isDocked(m);
-    const cost = Math.max(0, need - m.fuel) * FUEL_PRICE;
-    refuel.disabled = !docked || cost <= 0 || m.credits <= 0;
-    setText(refuel, docked ? `REFUEL FOR THE NEXT LEG ${formatNumber(cost)} CR` : 'REFUEL AT THE NEXT STATION');
+    const cost = Math.max(0, need - m.fuel) * fuelPrice(m);
+    refuel.disabled = cost <= 0 || m.credits <= 0;
+    setText(refuel, docked ? `REFUEL FOR THE NEXT LEG ${formatNumber(cost)} CR` : `CALL A FUEL TENDER (×3 PRICE) ${formatNumber(cost)} CR`);
+    refuel.setAttribute('aria-label', docked ? 'Refuel for the next leg' : 'Call a fuel tender to refuel under way');
     auto.hidden = !automated;
     gentler.hidden = automated;
     hotter.hidden = automated;

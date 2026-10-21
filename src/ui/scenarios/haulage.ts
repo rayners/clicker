@@ -6,13 +6,13 @@ import {
   autoThrusterRate,
   availableHaulageUpgrades,
   carValue,
+  currentSpeed,
   effectiveBurn,
   engineThrust,
   fuelForLeg,
   incomeRate,
   isDocked,
   safeBurn,
-  speed,
   thrust,
   thrusterPower,
   trainValue,
@@ -75,7 +75,7 @@ export function createHaulageUi(store: Store): ScenarioUi {
       read: (mission) => {
         const m = s(mission);
         const burn = effectiveBurn(m);
-        const v = (m.fuel > 0 ? speed(m, burn) : 0) + autoThrusterRate(m) * thrusterPower(m);
+        const v = currentSpeed(m);
         const income = incomeRate(m);
         const base = {
           values: [v, trainValue(m), income] as [number, number, number],
@@ -89,7 +89,7 @@ export function createHaulageUi(store: Store): ScenarioUi {
           return { ...base, limit: 'thrust', highlight: 0, severe: false, note: 'NO MAIN ENGINES · FIRE THRUSTERS OR FIT ENGINES IN SYSTEMS' };
         }
         if (m.fuel <= 0) {
-          return { ...base, limit: 'fuel', highlight: 0, severe: true, note: 'TANKS DRY · COASTING ON THRUSTERS · REFUEL AT THE NEXT STATION' };
+          return { ...base, limit: 'fuel', highlight: 0, severe: true, note: 'TANKS DRY · COASTING ON THRUSTERS · CALL A FUEL TENDER OR REFUEL AT THE NEXT STATION' };
         }
         if (burn > safeBurn(m)) {
           return { ...base, limit: 'strain', highlight: 1, severe: true, note: `BURN ${burn} PAST THE STRAIN LINE (${safeBurn(m)}) · FREIGHT TAKING DAMAGE` };

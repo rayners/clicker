@@ -18,6 +18,8 @@ export interface HaulageFields {
   fuel: number;
   /** Condition of the freight aboard, 0-1. Burning past the strain line damages it; fresh freight loads at every station. */
   condition: number;
+  /** Credits the freight has earned so far this leg: the window bonus at delivery is a share of it. */
+  accrued: number;
   /** Delivery revenue banked: drives story progress. */
   delivered: number;
   /** Deliveries made inside their window. */

@@ -19,10 +19,12 @@ const SAFE_BURN = 6;
 /** Share of the freight's condition lost per leg for each notch past the strain line, squared. */
 const STRAIN = 0.02;
 /** Fuel burned per second per point of thrust at the nominal burn. Rises with the square of the burn. */
-const FUEL_PER_THRUST = 0.25;
-export const FUEL_PRICE = 1;
+const FUEL_PER_THRUST = 0.45;
+export const FUEL_PRICE = 0.6;
+/** A tender sent out to meet the train between stations charges this many times the station price. */
+const TENDER_MARKUP = 3;
 /** Credits per unit of freight value per unit of distance delivered. */
-const PAY = 1;
+const PAY = 0.6;
 const WINDOW_BONUS = 0.5;
 const LEG_BASE = 30;
 const LEG_GROWTH = 1.6;
@@ -30,9 +32,12 @@ const WINDOW_BASE = 60;
 const WINDOW_GROWTH = 1.3;
 export const DOCK_SECONDS = 10;
 const THRUSTER_PUSH = 1;
-// Same curve as extraction's shaft depth, so the shared story scale lines up (tuned by the pacing bot).
-const PROGRESS_SCALE = 0.0432;
-const PROGRESS_EXPONENT = 5.48;
+/** A dry train coasts on what it has: this share of the gentlest burn's speed, for nothing. */
+const COAST = 0.5;
+// Haulage's own fit to the shared story scale (1,000 at act 2, 3,200 at the discovery), tuned by the pacing bot:
+// freight revenue compounds faster than extraction's ore, so the curve is flatter.
+const PROGRESS_SCALE = 3.82;
+const PROGRESS_EXPONENT = 3.12;
 
 interface Multipliers {
   thrusters: number;
@@ -139,23 +144,48 @@ export function isCarRevealed(m: MissionState, index: number): boolean {
 
 // ---------- the train ----------
 
+/** Everything a tick needs about the train, worked out once: upgrades, crew and horror folded in. */
+interface Train {
+  mult: Multipliers;
+  thrust: number;
+  value: number;
+  mass: number;
+}
+
+function train(m: MissionState): Train {
+  const mult = multipliers(m);
+  let thrust = 0;
+  for (const e of ENGINES) thrust += (m.engines[e.id] ?? 0) * e.thrust * (mult.engine[e.id] ?? 1) * mult.thrust;
+  let value = TUG_VALUE;
+  let mass = TUG_MASS;
+  for (const c of CARS) {
+    const n = m.cars[c.id] ?? 0;
+    value += n * c.value * (mult.car[c.id] ?? 1);
+    mass += n * c.mass;
+  }
+  return { mult, thrust, value, mass };
+}
+
+const speedOf = (t: Train, burn: number) => (t.thrust * (burn / NOMINAL_BURN)) / t.mass;
+const fuelRateOf = (t: Train, burn: number) => (t.thrust * FUEL_PER_THRUST * (burn / NOMINAL_BURN) ** 2) / t.mult.fuelEfficiency;
+const windowOf = (t: Train, leg: number) => WINDOW_BASE * WINDOW_GROWTH ** leg * t.mult.window;
+const thrusterPowerOf = (t: Train) => (THRUSTER_PUSH * t.mult.thrusters) / t.mass;
+/** Credits per unit of distance the freight earns as it moves, at a given condition. */
+const earningOf = (t: Train, condition: number) => PAY * t.value * condition * t.mult.pay;
+
 export function engineThrust(m: MissionState, def: EngineDef): number {
   const mult = multipliers(m);
   return def.thrust * (mult.engine[def.id] ?? 1) * mult.thrust;
 }
 
-export function thrust(m: MissionState): number {
-  return ENGINES.reduce((s, e) => s + (m.engines[e.id] ?? 0) * engineThrust(m, e), 0);
-}
+export const thrust = (m: MissionState): number => train(m).thrust;
 
 export function carValue(m: MissionState, def: CarDef): number {
   return def.value * (multipliers(m).car[def.id] ?? 1);
 }
 
 /** Freight value per unit of distance: what the whole train earns as it moves. */
-export function trainValue(m: MissionState): number {
-  return CARS.reduce((s, c) => s + (m.cars[c.id] ?? 0) * carValue(m, c), TUG_VALUE);
-}
+export const trainValue = (m: MissionState): number => train(m).value;
 
 export function trainMass(m: MissionState): number {
   return CARS.reduce((s, c) => s + (m.cars[c.id] ?? 0) * c.mass, TUG_MASS);
@@ -169,45 +199,45 @@ export function setBurn<M extends MissionState>(m: M, burn: number): M {
 }
 
 /** Distance per second on the engines alone, at a given notch. */
-export function speed(m: MissionState, burn: number): number {
-  return (thrust(m) * (burn / NOMINAL_BURN)) / trainMass(m);
-}
+export const speed = (m: MissionState, burn: number): number => speedOf(train(m), burn);
 
-export function fuelRate(m: MissionState, burn: number): number {
-  return (thrust(m) * FUEL_PER_THRUST * (burn / NOMINAL_BURN) ** 2) / multipliers(m).fuelEfficiency;
-}
+export const fuelRate = (m: MissionState, burn: number): number => fuelRateOf(train(m), burn);
 
 // ---------- legs and windows ----------
 
 export const legDistance = (leg: number): number => LEG_BASE * LEG_GROWTH ** leg;
 
-export const legWindow = (m: MissionState, leg: number): number => WINDOW_BASE * WINDOW_GROWTH ** leg * multipliers(m).window;
+export const legWindow = (m: MissionState, leg: number): number => windowOf(train(m), leg);
 
 export const isDocked = (m: MissionState): boolean => m.docked > 0;
 
-/** Fuel for what is left of this leg (or all of the next one, at a dock), at the burn the tug will fly. */
-export function fuelForLeg(m: MissionState): number {
-  const burn = effectiveBurn(m);
-  const v = speed(m, burn);
+function fuelForLegOf(m: MissionState, t: Train): number {
+  const burn = burnOf(m, t);
+  const v = speedOf(t, burn);
   if (v <= 0) return 0;
-  const remaining = legDistance(m.leg) - m.travelled;
-  return (remaining / v) * fuelRate(m, burn);
+  return ((legDistance(m.leg) - m.travelled) / v) * fuelRateOf(t, burn);
 }
 
-/** Buy fuel for the next leg at a station, as far as the credits go. */
+/** Fuel for what is left of this leg (or all of the next one, at a dock), at the burn the tug will fly. */
+export const fuelForLeg = (m: MissionState): number => fuelForLegOf(m, train(m));
+
+/** Station price at a dock; under way, only a tender can bring fuel out, at a markup. */
+export const fuelPrice = (m: MissionState): number => (isDocked(m) ? FUEL_PRICE : FUEL_PRICE * TENDER_MARKUP);
+
+/** Fuel for the rest of the leg (the next one, at a dock), as far as the credits go. */
 export function refuel<M extends MissionState>(m: M): M {
-  if (!isDocked(m)) return m;
+  const price = fuelPrice(m);
   const want = Math.max(0, fuelForLeg(m) - m.fuel);
-  const bought = Math.min(want, m.credits / FUEL_PRICE);
+  const bought = Math.min(want, m.credits / price);
   if (bought <= 0) return m;
-  return { ...m, credits: m.credits - bought * FUEL_PRICE, fuel: m.fuel + bought };
+  return { ...m, credits: m.credits - bought * price, fuel: m.fuel + bought };
 }
 
 // ---------- the burn: player or autopilot ----------
 
-export function isAutopilotActive(m: MissionState): boolean {
-  return multipliers(m).autopilot && !m.autopilotOff;
-}
+const autopilotOn = (m: MissionState, t: Train) => t.mult.autopilot && !m.autopilotOff;
+
+export const isAutopilotActive = (m: MissionState): boolean => autopilotOn(m, train(m));
 
 /** Take the burn back from WARDEN, or hand it over again. Only once the autopilot is installed. */
 export function toggleAutopilot<M extends MissionState>(m: M): M {
@@ -215,91 +245,118 @@ export function toggleAutopilot<M extends MissionState>(m: M): M {
   return { ...m, autopilotOff: !m.autopilotOff };
 }
 
-/** Fuel spent per credit earned at a notch: the share of each delivery the tanks eat. */
-function fuelShare(m: MissionState, burn: number): number {
-  return ((FUEL_PRICE * FUEL_PER_THRUST * trainMass(m)) / (PAY * trainValue(m) * multipliers(m).fuelEfficiency)) * (burn / NOMINAL_BURN);
-}
-
 /**
- * WARDEN's choice: the gentlest notch that still makes the window, never past the strain line. With the window
- * lost, the notch that earns most once fuel is paid for.
+ * WARDEN's choice: the notch that earns most per second for the rest of the leg, with the window bonus, the fuel
+ * bill and the time all weighed. Never past the strain line.
  */
-function autopilotBurn(m: MissionState): number {
-  const safe = Math.min(MAX_BURN, safeBurn(m));
-  const thrustNow = thrust(m);
-  if (thrustNow <= 0) return safe;
-  const timeLeft = legWindow(m, m.leg) - m.legTime;
+function autopilotBurn(m: MissionState, t: Train): number {
+  const safe = Math.min(MAX_BURN, t.mult.safeBurn);
+  if (t.thrust <= 0) return safe;
   const remaining = legDistance(m.leg) - m.travelled;
-  if (timeLeft > 0) {
-    const needed = Math.ceil((remaining / timeLeft) * NOMINAL_BURN * (trainMass(m) / thrustNow));
-    if (needed <= safe) return Math.max(MIN_BURN, needed);
+  const window = windowOf(t, m.leg);
+  // Fuel spent per credit earned, per notch: the share of the freight's pay the tanks eat.
+  const share = (FUEL_PRICE * FUEL_PER_THRUST * t.mass) / (PAY * t.value * t.mult.fuelEfficiency * NOMINAL_BURN);
+  let best = safe;
+  let bestRate = -Infinity;
+  for (let burn = MIN_BURN; burn <= safe; burn++) {
+    const seconds = remaining / speedOf(t, burn);
+    const bonus = m.legTime + seconds <= window ? 1 + WINDOW_BONUS : 1;
+    const rate = (bonus - share * burn) / (seconds + DOCK_SECONDS);
+    if (rate > bestRate) {
+      best = burn;
+      bestRate = rate;
+    }
   }
-  // Net earnings per second scale with b(1 - share(b)); the best notch is where share(b) = 1/2.
-  const best = Math.round(NOMINAL_BURN / (2 * fuelShare(m, NOMINAL_BURN)));
-  return Math.max(MIN_BURN, Math.min(safe, best));
+  return best;
 }
 
-export function effectiveBurn(m: MissionState): number {
-  return isAutopilotActive(m) ? autopilotBurn(m) : m.burn;
-}
+const burnOf = (m: MissionState, t: Train) => (autopilotOn(m, t) ? autopilotBurn(m, t) : m.burn);
+
+export const effectiveBurn = (m: MissionState): number => burnOf(m, train(m));
 
 // ---------- manual bursts and the tick ----------
 
-export const thrusterPower = (m: MissionState): number => THRUSTER_PUSH * multipliers(m).thrusters;
+/** Distance one burst of the manoeuvring thrusters moves the train: the heavier the train, the less. */
+export const thrusterPower = (m: MissionState): number => thrusterPowerOf(train(m));
 export const autoThrusterRate = (m: MissionState): number => multipliers(m).autoThrusters;
 
-/** What a delivery of this leg pays, if it arrived now. */
+/** What this leg will have paid by the station: earned so far, the rest at today's train, and the bonus if inside the window now. */
 export function deliveryPay(m: MissionState): number {
-  const onTime = m.legTime <= legWindow(m, m.leg);
-  return PAY * trainValue(m) * legDistance(m.leg) * m.condition * (onTime ? 1 + WINDOW_BONUS : 1) * multipliers(m).pay;
+  const t = train(m);
+  const onTime = m.legTime <= windowOf(t, m.leg);
+  const leg = m.accrued + earningOf(t, m.condition) * (legDistance(m.leg) - m.travelled);
+  return leg * (onTime ? 1 + WINDOW_BONUS : 1);
 }
 
-/** Expected credits per second while under way: a delivery's pay spread over the time the leg takes. */
+function speedNow(m: MissionState, t: Train): number {
+  const engines = m.fuel > 0 ? speedOf(t, burnOf(m, t)) : speedOf(t, MIN_BURN) * COAST;
+  return engines + t.mult.autoThrusters * thrusterPowerOf(t);
+}
+
+/** How fast the train is going now: on the engines with fuel, coasting without, plus WARDEN's thruster bursts. */
+export const currentSpeed = (m: MissionState): number => speedNow(m, train(m));
+
+/** Expected credits per second: the freight earning as it moves, less the time spent at docks. */
 export function incomeRate(m: MissionState): number {
-  const burn = effectiveBurn(m);
-  const v = (m.fuel > 0 ? speed(m, burn) : 0) + autoThrusterRate(m) * thrusterPower(m);
+  const t = train(m);
+  const v = speedNow(m, t);
   if (v <= 0) return 0;
-  const legSeconds = legDistance(m.leg) / v + DOCK_SECONDS;
-  return deliveryPay(m) / legSeconds;
+  const moving = legDistance(m.leg) / v;
+  const onTime = m.legTime <= windowOf(t, m.leg);
+  const perSecond = earningOf(t, m.condition) * v * (onTime ? 1 + WINDOW_BONUS : 1);
+  return (perSecond * moving) / (moving + DOCK_SECONDS);
 }
 
-function arrive<M extends MissionState>(m: M): M {
-  const pay = deliveryPay(m);
-  const onTime = m.legTime <= legWindow(m, m.leg);
+function arrive<M extends MissionState>(m: M, t: Train): M {
+  const onTime = m.legTime <= windowOf(t, m.leg);
+  const bonus = onTime ? m.accrued * WINDOW_BONUS : 0;
   const station = stationName(m.leg);
   let next: M = {
     ...m,
-    credits: m.credits + pay,
-    lifetimeCredits: m.lifetimeCredits + pay,
-    delivered: m.delivered + pay,
+    credits: m.credits + bonus,
+    lifetimeCredits: m.lifetimeCredits + bonus,
+    delivered: m.delivered + bonus,
     onTime: m.onTime + (onTime ? 1 : 0),
     leg: m.leg + 1,
     travelled: 0,
+    accrued: 0,
     legTime: 0,
     condition: 1,
     docked: DOCK_SECONDS,
   };
   const damaged = m.condition < 1 ? ` FREIGHT CONDITION ${Math.round(m.condition * 100)}%.` : '';
-  next = appendLog(next, 'corp', `DELIVERED AT ${station}: ${formatNumber(pay)} CR${onTime ? ' (INSIDE THE WINDOW, +50%)' : ' (WINDOW MISSED)'}.${damaged}`);
-  if (multipliers(next).droneLoaders) next = refuel(next);
+  const paid = onTime ? ` ${formatNumber(m.accrued)} CR HAULED, +${formatNumber(bonus)} CR WINDOW BONUS.` : ` ${formatNumber(m.accrued)} CR HAULED. WINDOW MISSED: NO BONUS.`;
+  next = appendLog(next, 'corp', `DELIVERED AT ${station}.${paid}${damaged}`);
+  if (t.mult.droneLoaders) next = refuel(next);
   return next;
 }
 
 /** Push the train along the current leg, delivering if it gets there. */
-function travel<M extends MissionState>(m: M, distance: number, burn: number): M {
+function travel<M extends MissionState>(m: M, t: Train, distance: number, burn: number): M {
   if (distance <= 0) return m;
   const length = legDistance(m.leg);
   const covered = Math.min(distance, length - m.travelled);
-  const over = Math.max(0, burn - safeBurn(m));
+  const over = Math.max(0, burn - t.mult.safeBurn);
   const condition = Math.max(0, m.condition - STRAIN * over * over * (covered / length));
-  const next = { ...m, travelled: m.travelled + covered, condition };
-  return next.travelled >= length - 1e-9 ? arrive(next) : next;
+  // The freight earns as it goes, at the condition it is in.
+  const pay = covered * earningOf(t, condition);
+  const next = {
+    ...m,
+    travelled: m.travelled + covered,
+    condition,
+    accrued: m.accrued + pay,
+    credits: m.credits + pay,
+    lifetimeCredits: m.lifetimeCredits + pay,
+    delivered: m.delivered + pay,
+  };
+  return next.travelled >= length - 1e-9 ? arrive(next, t) : next;
 }
 
 /** A burst on the manoeuvring thrusters: a little distance, no fuel. Nothing to push against at a dock. */
 export function fireThrusters<M extends MissionState>(m: M): M {
   if (isDocked(m)) return m;
-  return travel(m, thrusterPower(m), MIN_BURN);
+  const t = train(m);
+  return travel(m, t, thrusterPowerOf(t), MIN_BURN);
 }
 
 export function tickHaulage<M extends MissionState>(m: M, dt: number): M {
@@ -307,13 +364,15 @@ export function tickHaulage<M extends MissionState>(m: M, dt: number): M {
     const docked = Math.max(0, m.docked - dt);
     return { ...m, docked };
   }
-  const burn = effectiveBurn(m);
-  const rate = fuelRate(m, burn);
-  // A dry tank leaves only the manoeuvring thrusters.
+  const t = train(m);
+  const burn = burnOf(m, t);
+  const rate = fuelRateOf(t, burn);
+  // Whatever share of the second the tank can't pay for, the train coasts.
   const share = rate > 0 ? Math.min(1, m.fuel / (rate * dt)) : 0;
-  const distance = speed(m, burn) * dt * share + autoThrusterRate(m) * thrusterPower(m) * dt;
+  const coasting = speedOf(t, MIN_BURN) * COAST * dt * (1 - share);
+  const distance = speedOf(t, burn) * dt * share + coasting + t.mult.autoThrusters * thrusterPowerOf(t) * dt;
   const fuelled = { ...m, fuel: Math.max(0, m.fuel - rate * dt * share), legTime: m.legTime + dt };
-  return travel(fuelled, distance, burn);
+  return travel(fuelled, t, distance, burn);
 }
 
 /** Haulage progress on the shared story scale (extraction's metres). */

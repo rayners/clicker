@@ -30,6 +30,7 @@ export const HAULAGE: ScenarioDef = {
     autopilotOff: false,
     fuel: 0,
     condition: 1,
+    accrued: 0,
     delivered: 0,
     onTime: 0,
   }),

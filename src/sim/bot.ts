@@ -42,6 +42,22 @@ import {
   trooperForce,
 } from '../mission/security/economy';
 import { held as heldCount } from '../shared/ground';
+import { CARS, ENGINES } from '../data/haulage/systems';
+import {
+  availableHaulageUpgrades,
+  carCost,
+  engineCost,
+  fuelForLeg,
+  fuelPrice,
+  isAutopilotActive,
+  isCarRevealed,
+  isDocked,
+  isEngineRevealed,
+  safeBurn,
+  thrust,
+  trainMass,
+  trainValue,
+} from '../mission/haulage/economy';
 import { SECTIONS } from '../data/security/systems';
 
 export interface SimOptions {
@@ -223,12 +239,55 @@ function decideSecurity(game: GameState): Action | null {
   return pick ? { type: 'buyTrooper', id: pick.id } : null;
 }
 
+type Haul = MissionOf<'haulage', 'organism'>;
+/** Trips' worth of fuel money the bot keeps back before buying anything else. */
+const FUEL_RESERVE_LEGS = 1.5;
+
+/** What the train earns as it moves, roughly: thrust carries value, mass holds it back. */
+const haulPower = (m: Haul) => (thrust(m) * trainValue(m)) / trainMass(m);
+
+/** Keep the tanks full and the burn at the strain line; buy whichever engine or car adds most earning power per credit. */
+function decideHaulage(game: GameState): Action | null {
+  const m = game.mission as Haul;
+  // Fill up at every station; a dry tank between stations is worth a tender's markup.
+  if ((isDocked(m) ? m.fuel < fuelForLeg(m) : m.fuel <= 0 && fuelForLeg(m) > 0) && m.credits > 0) return { type: 'refuel' };
+  if (!isAutopilotActive(m) && m.burn !== Math.min(10, safeBurn(m))) return { type: 'shiftBurn', step: m.burn < safeBurn(m) ? 1 : -1 };
+  const upgrade = availableHaulageUpgrades(m).find((u) => u.cost <= m.credits);
+  if (upgrade) return { type: 'buyUpgrade', id: upgrade.id };
+  const projects = decideProjects(game);
+  if (projects) return projects;
+
+  const now = haulPower(m);
+  let best: { action: Action; value: number } | null = null;
+  const consider = (action: Action, cost: number, after: Haul) => {
+    // Keep enough back to fuel the heavier train that the purchase makes.
+    if (cost + Math.max(0, fuelForLeg(after) * FUEL_RESERVE_LEGS - m.fuel) * fuelPrice(m) > m.credits) return;
+    // With no engines yet, an engine is the only thing worth having.
+    const gain = now === 0 ? thrust(after) : haulPower(after) - now;
+    const value = gain / cost;
+    if (gain > 0 && (!best || value > best.value)) best = { action, value };
+  };
+  ENGINES.forEach((e, i) => {
+    if (!isEngineRevealed(m, i)) return;
+    const cost = engineCost(e, m.engines[e.id] ?? 0);
+    consider({ type: 'buyEngine', id: e.id }, cost, { ...m, engines: { ...m.engines, [e.id]: (m.engines[e.id] ?? 0) + 1 } });
+  });
+  CARS.forEach((c, i) => {
+    if (!isCarRevealed(m, i)) return;
+    const cost = carCost(c, m.cars[c.id] ?? 0);
+    consider({ type: 'buyCar', id: c.id }, cost, { ...m, cars: { ...m.cars, [c.id]: (m.cars[c.id] ?? 0) + 1 } });
+  });
+  const pick = best as { action: Action; value: number } | null;
+  return pick ? pick.action : null;
+}
+
 /** A sensible, greedy player. Not optimal: idle-ish after the first stretch, checks in periodically. */
 function decide(game: GameState): Action | null {
   const shared = decideShared(game);
   if (shared) return shared;
   if (game.mission.scenario === 'terraform') return decideTerraform(game);
   if (game.mission.scenario === 'security') return decideSecurity(game);
+  if (game.mission.scenario === 'haulage') return decideHaulage(game);
   return decideExtraction(game);
 }
 

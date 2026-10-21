@@ -14,7 +14,7 @@ export type HaulageEffect =
   | { kind: 'fuelEfficiency'; value: number }
   /** Raises the burn the cars take without strain. */
   | { kind: 'safeBurn'; value: number }
-  /** WARDEN sets the burn: just fast enough for the window, never past the strain line. */
+  /** WARDEN sets the burn that earns most, never past the strain line. */
   | { kind: 'autopilot'; value: number }
   /** Station drones refuel the tug for the next leg without being asked. */
   | { kind: 'droneLoaders'; value: number }
@@ -66,7 +66,7 @@ const HANDCRAFTED: HaulageUpgradeDef[] = [
   {
     id: 'haul-autopilot',
     name: 'WARDEN AUTOPILOT',
-    description: 'WARDEN holds the burn: just hot enough to make the window, never past the strain line.',
+    description: 'WARDEN holds the burn that earns most: the window bonus, the fuel bill and the time all weighed, never past the strain line.',
     cost: 2_500,
     unlock: { delivered: 2_000 },
     effect: { kind: 'autopilot', value: 1 },
@@ -155,10 +155,10 @@ const ENGINE_TIERS: HaulageUpgradeDef[] = ENGINES.flatMap((e) =>
   TIERS.map((tier) => ({
     id: `${e.id}-${tier.count}`,
     name: `${e.name} ${tier.suffix}`,
-    description: `${tier.note} ${e.name} thrust x2.`,
+    description: `${tier.note} ${e.name} thrust x1.5.`,
     cost: e.baseCost * tier.costFactor,
     unlock: { engine: { id: e.id, count: tier.count } },
-    effect: { kind: 'engineMultiplier', engine: e.id, value: 2 } as const,
+    effect: { kind: 'engineMultiplier', engine: e.id, value: 1.5 } as const,
   })),
 );
 
@@ -166,10 +166,10 @@ const CAR_TIERS: HaulageUpgradeDef[] = CARS.flatMap((c) =>
   TIERS.map((tier) => ({
     id: `${c.id}-${tier.count}`,
     name: `${c.name} ${tier.suffix}`,
-    description: `${tier.note} ${c.name} freight value x2.`,
+    description: `${tier.note} ${c.name} freight value x1.5.`,
     cost: c.baseCost * tier.costFactor,
     unlock: { car: { id: c.id, count: tier.count } },
-    effect: { kind: 'carMultiplier', car: c.id, value: 2 } as const,
+    effect: { kind: 'carMultiplier', car: c.id, value: 1.5 } as const,
   })),
 );
 

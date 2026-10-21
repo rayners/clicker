@@ -82,13 +82,14 @@ describe('a haulage contract on screen', () => {
     expect(helm().getByLabelText('Burn').textContent).toBe(String(before));
   });
 
-  it('refuels at a station, and only there', async () => {
-    const user = setup({ ...powered, credits: 1_000 });
-    expect(helm().getByRole('button', { name: /refuel/i }).hasAttribute('disabled')).toBe(true);
-    const docked = setup({ ...powered, credits: 1_000, docked: 5 });
-    await docked.click(helm().getByRole('button', { name: /refuel/i }));
+  it('refuels at a station, or calls a fuel tender under way at a markup', async () => {
+    const user = setup({ ...powered, credits: 1_000, docked: 5 });
+    expect(helm().getByRole('button', { name: /refuel/i }).textContent).not.toMatch(/tender/i);
+    await user.click(helm().getByRole('button', { name: /refuel/i }));
     expect(mission().fuel).toBeCloseTo(fuelForLeg({ ...blank(), ...powered, docked: 5 }));
-    void user;
+    const under = setup({ ...powered, credits: 1_000 });
+    await under.click(helm().getByRole('button', { name: /call a fuel tender/i }));
+    expect(mission().fuel).toBeGreaterThan(0);
   });
 
   it('hands the burn to WARDEN once the autopilot is installed, and takes it back on request', async () => {
