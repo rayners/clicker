@@ -150,12 +150,31 @@ Strip a derelict hull section by section, using held ground again: sections are 
 - **Pacing (bot, seeds 1/7/42):** Act II 46m–1h, Act III 2h30–2h52, Act IV 2h52–3h57, terminus 4h07–5h12.
 - **Not built yet:** sappers (a Keep-only hand that lowers a floor's threat on the first assault), and the old lord as a presence beyond the story beats.
 
+**4. Haulage: done** (2026-10-21).
+- **Code:** `src/mission/haulage/`, `src/data/haulage/`, `src/ui/scenarios/haulage.ts`, `src/ui/helm.ts` (the burn dial, tanks and autopilot), `src/ui/route.ts` (the next station, the leg, the window and the freight's condition) and `src/ui/haulage-systems.ts`.
+- **How it plays:**
+  - Speed is thrust over the train's mass, at the burn notch (1–10). Engines add thrust; cars add freight value and mass. Better cars carry a little more value for their weight (1 rising to 2.5).
+  - Freight pays by the kilometre as it moves. A delivery inside its window adds 50% of the leg's earnings at the station.
+  - Fuel burns with the square of the burn, so a hot burn costs more per leg. Past the strain line (6, raised by upgrades and Kane) the freight takes damage and pays less.
+  - Fuel is bought at stations. Under way, a fuel tender costs three times as much. A dry train coasts at half the gentlest burn's speed, so it is never stranded.
+  - Legs lengthen by 1.6× and windows by 1.3×.
+- **Automation:** WARDEN's pulse timer fires the manoeuvring thrusters. Drone loaders refuel at every dock. The autopilot picks the notch that earns most per second (the window bonus, the fuel bill and the time all weighed), and the player can take it back.
+- **Deviations from the sketch:**
+  - Pay accrues continuously rather than as one payment per delivery. Lump deliveries left hour-long gaps with no income, and paid cars coupled just short of a station for the whole leg.
+  - Haulage has its own progress curve (`PROGRESS_SCALE` 3.82, exponent 3.12) instead of extraction's, because freight revenue compounds differently.
+  - Crew watches don't yet tire faster than in other missions.
+- **The beacon:** the leg to THE BEACON (the ninth station) is the obliged detour. Past it the story has deep access.
+- **Debug jumps:** `?debug=haulage` and `?debug=haul-act2`.
+- **Telemetry:** `leg_completed` (station, legs, onTime, minutes).
+- **Saves:** there is no saved-shape change for existing contracts, so no migration.
+- **Pacing (bot, seed 7):** Act II 55m, Act III 2h43, Act IV 2h52, terminus 4h07. An 8-hour catch-up takes about 0.3 s.
+
 ## Build order
 
 1. **Held ground** in `src/shared/ground.ts`, test-first, with no game attached.
 2. **Security detachment**, built on held ground. DEEP CONTRACT already supports scenarios, so this proves the engine with the least refactoring. It adds the `HorrorDef.pressure` hook.
 3. **Elderdark site split, then the Keep**, which reuses held ground in the other game. (Done.)
-4. **Haulage.**
+4. **Haulage.** (Done.)
 5. **Salvage.**
 
 Each mission ships with:

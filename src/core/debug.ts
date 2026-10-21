@@ -1,13 +1,14 @@
 import { GENERATORS } from '../data/extraction/generators';
 import { PROCESSORS, REACTORS } from '../data/terraform/systems';
 import { FABRICATORS, SECTIONS, TROOPERS } from '../data/security/systems';
+import { CARS, ENGINES } from '../data/haulage/systems';
 import { createMission } from '../mission/state';
 import { missionConfigFor } from './prestige';
 import type { MissionOf, MissionState } from '../mission/state';
 import type { GameState } from './game';
 
 /** Developer shortcuts (?debug=act3 etc.) for testing pacing and theming without hours of play. */
-export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus', 'terraform', 'tf-act2', 'security', 'sec-act2'] as const;
+export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus', 'terraform', 'tf-act2', 'security', 'sec-act2', 'haulage', 'haul-act2'] as const;
 
 const owned = (upTo: number, count: number) =>
   Object.fromEntries(GENERATORS.map((g, i) => [g.id, i < upTo ? count : 0]));
@@ -82,7 +83,26 @@ const SECURITY_PATCHES: Record<string, Partial<MissionOf<'security', 'organism'>
   },
 };
 
+const HAULAGE_PATCHES: Record<string, Partial<MissionOf<'haulage', 'organism'>>> = {
+  haulage: {},
+  'haul-act2': {
+    act: 2,
+    delivered: 1.2e6,
+    lifetimeCredits: 1.2e6,
+    credits: 5e4,
+    leg: 12,
+    fuel: 200_000,
+    engines: Object.fromEntries(ENGINES.map((e, i) => [e.id, i === 0 ? 50 : i === 1 ? 30 : i === 2 ? 5 : 0])),
+    cars: Object.fromEntries(CARS.map((c, i) => [c.id, i === 0 ? 40 : 0])),
+  },
+};
+
 export function applyScenario(game: GameState, name: string): GameState {
+  const haulage = HAULAGE_PATCHES[name];
+  if (haulage) {
+    const fresh = createMission(missionConfigFor(game.profile, 'haulage'), game.mission.seed);
+    return { ...game, assigning: false, mission: { ...fresh, ...haulage } as MissionState };
+  }
   const terraform = TERRAFORM_PATCHES[name];
   if (terraform) {
     const fresh = createMission(missionConfigFor(game.profile, 'terraform'), game.mission.seed);

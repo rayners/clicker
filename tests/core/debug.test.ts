@@ -1,3 +1,4 @@
+import { progress as haulageProgress } from '../../src/mission/haulage/economy';
 import type { MissionOf } from '../../src/mission/state';
 import { describe, it, expect } from 'vitest';
 import { createGame, newGame } from '../../src/core/game';
@@ -50,6 +51,22 @@ describe('debug scenarios', () => {
     expect(securityProgress(m)).toBeGreaterThanOrEqual(1000);
     expect(held(m.ground)).toBeGreaterThan(4);
     expect(Object.values(m.troopers).some((n) => n > 0)).toBe(true);
+  });
+
+  it('starts a fresh haulage contract', () => {
+    const g = applyScenario(base(), 'haulage');
+    expect(g.mission.scenario).toBe('haulage');
+    expect(g.mission.elapsed).toBe(0);
+  });
+
+  it('jumps a haulage contract into act 2 with a train under way', () => {
+    const m = applyScenario(base(), 'haul-act2').mission as MissionOf<'haulage', 'organism'>;
+    expect(m.scenario).toBe('haulage');
+    expect(m.act).toBe(2);
+    expect(haulageProgress(m)).toBeGreaterThanOrEqual(1000);
+    expect(Object.values(m.engines).some((n) => n > 0)).toBe(true);
+    expect(Object.values(m.cars).some((n) => n > 0)).toBe(true);
+    expect(m.fuel).toBeGreaterThan(0);
   });
 
   it('act3 opens special projects', () => {

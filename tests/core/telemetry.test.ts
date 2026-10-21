@@ -68,6 +68,15 @@ describe('DEEP CONTRACT play events', () => {
     ]);
   });
 
+  it('reports each station reached on a haulage contract, and whether the delivery made its window', () => {
+    const g = reduce(newGame(1, 0), { type: 'chooseAssignment', scenario: 'haulage', seed: 1 });
+    const before = withMission(g, { elapsed: 600 } as never);
+    const after = withMission(before, { leg: 1, onTime: 1 } as never);
+    expect(contractEvents(before, after)).toEqual([
+      { name: 'leg_completed', props: { station: 'KESTREL DEPOT', legs: 1, onTime: true, minutes: 10, horror: 'organism', cycle: 0 } },
+    ]);
+  });
+
   it('reports Special Order 0-77 accepted, and each time a WARDEN vents its decks on the creature', () => {
     const g = game();
     const hunting = startCreature(g, 5);

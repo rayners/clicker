@@ -2096,3 +2096,62 @@ button:focus-visible {
     column-gap: 24px;
   }
 }
+
+/* ---------- the helm and the route (haulage) ---------- */
+
+.helm[data-strain='true'] {
+  border-color: var(--danger);
+}
+
+.helm[data-strain='true'] .split-side:first-child .split-figure,
+.helm[data-dry='true'] .split-side-line .split-figure {
+  color: var(--danger);
+}
+
+.helm-refuel {
+  display: grid;
+  margin-top: 4px;
+}
+
+.helm-refuel .buy {
+  white-space: normal;
+}
+
+.route {
+  margin-top: 6px;
+  padding: 4px 6px;
+  border: 1px solid var(--phosphor-faint);
+  font-size: 0.78em;
+}
+
+.route-head,
+.route-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 8px;
+}
+
+.route-station {
+  color: var(--phosphor-hi);
+}
+
+.route-legs,
+.route-foot {
+  color: var(--phosphor-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.route-bar {
+  display: block;
+  margin: 2px 0;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  color: var(--phosphor);
+}
+
+.route[data-window='missed'] .route-window,
+.route[data-damaged='true'] .route-condition {
+  color: var(--danger);
+}
