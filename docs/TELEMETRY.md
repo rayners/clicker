@@ -11,6 +11,10 @@ with real players and to catch errors on devices we don't test on.
   (localStorage `clicker.telemetry`). It is checked when each event is sent, so turning it off takes effect immediately.
 - **Anonymous.** No cookies (PostHog persists a random id in localStorage), no person profiles, no autocapture, no
   pageview autocapture, no session replay, no remote scripts (`disable_external_dependency_loading`), no feature flags.
+- **What PostHog still sees.** The random id ties one browser's events together, so a single player's run can be
+  followed event by event (on purpose: that is how individual play is read). PostHog itself adds browser, OS, device
+  type, screen size, page URL, referrer and a GeoIP country and city to each event. The project discards IP addresses
+  ("Discard client IP data", on since 2026-10-21), so the IP itself is not stored.
 - **Out of the simulation.** Events are derived by diffing successive store states (`src/core/telemetry.ts`,
   `src/forest/telemetry.ts`, both pure). Nothing under `src/mission/` or the forest simulation calls PostHog.
 - **Never in the way.** The SDK is a lazily loaded chunk; events buffer (bounded) until it arrives; sink failures are
