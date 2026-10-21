@@ -1,11 +1,13 @@
 import { appendLog, type LogEntry } from '../shared/log';
 import type { CampFields } from './camp/state';
 import type { DrownedFields } from './drowned/state';
+import type { ClinicFields } from './clinic/state';
+import type { BurnedFields } from './burned/state';
 import type { KillerDef, VenueDef } from './kinds';
 import { KILLERS, VENUES } from './registry';
 
-export type VenueId = 'camp';
-export type KillerId = 'drowned';
+export type VenueId = 'camp' | 'clinic';
+export type KillerId = 'drowned' | 'burned';
 /** osd: the VCR's own text; news: the town and the owners; staff: your people; kill: the body count. */
 export type EntryKind = 'osd' | 'news' | 'staff' | 'kill';
 
@@ -26,6 +28,15 @@ export const CAMP_CONFIG = {
   venue: 'camp',
   killer: 'drowned',
   title: 'FRIDAY THE 12TH',
+  part: 1,
+  productionMultiplier: 1,
+  pressureBonus: 0,
+} satisfies RunConfig;
+
+export const CLINIC_CONFIG = {
+  venue: 'clinic',
+  killer: 'burned',
+  title: 'A NIGHTMARE ON SYCAMORE STREET',
   part: 1,
   productionMultiplier: 1,
   pressureBonus: 0,
@@ -54,11 +65,12 @@ export interface RunCore {
   nextLogId: number;
 }
 
-export type VenueFields = CampFields;
-export type KillerFields = DrownedFields;
+export type VenueFields = CampFields | ClinicFields;
+export type KillerFields = DrownedFields | BurnedFields;
 export type Run = RunCore & VenueFields & KillerFields;
 export type RunOf<V extends VenueId, K extends KillerId> = RunCore & Extract<VenueFields, { venue: V }> & Extract<KillerFields, { killer: K }>;
 export type CampRun = RunCore & CampFields & KillerFields;
+export type ClinicRun = RunCore & ClinicFields & KillerFields;
 
 export function composeRun(config: RunConfig, seed: number, venue: VenueDef, killer: KillerDef): Run {
   const core: RunCore = {

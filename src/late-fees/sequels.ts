@@ -1,4 +1,4 @@
-import { createRun, CAMP_CONFIG, type RunConfig, type VenueId } from './state';
+import { createRun, CAMP_CONFIG, CLINIC_CONFIG, type RunConfig, type VenueId } from './state';
 import type { Ending } from './kinds';
 import type { LateGame, LateProfile } from './game';
 
@@ -21,11 +21,11 @@ export interface TapeDef {
 /** The horror shelf at Late Fees Video. */
 export const TAPES: readonly TapeDef[] = [
   { venue: 'camp', title: 'FRIDAY THE 12TH', blurb: 'Camp Blackwater reopens twenty years after the drowning. Fill every bunk. Keep the lights on.', available: true },
-  { venue: 'clinic', title: 'A NIGHTMARE ON SYCAMORE STREET', blurb: 'A sleep study pays by the dreaming hour. Something else is in the dreams.', available: false },
+  { venue: 'clinic', title: 'A NIGHTMARE ON SYCAMORE STREET', blurb: 'A sleep study pays by the dreaming hour. Something else is in the dreams.', available: true },
   { venue: 'insurer', title: 'FINAL DEPARTURE', blurb: 'You insured every survivor of Flight 213. Death has a list, and it is very patient.', available: false },
 ];
 
-const BASE: Record<VenueId, RunConfig> = { camp: CAMP_CONFIG };
+const BASE: Record<VenueId, RunConfig> = { camp: CAMP_CONFIG, clinic: CLINIC_CONFIG };
 
 /** The genre's sequel ladder. Part numbers carry on forever; the subtitles run out. */
 export function sequelTitle(title: string, part: number): string {

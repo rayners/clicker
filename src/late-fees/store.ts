@@ -8,10 +8,19 @@ import {
   toggleHeadCounselor,
   whistle,
 } from './camp/economy';
+import {
+  buyBed,
+  buyClinicUpgrade,
+  buySuppressant,
+  hireStaff,
+  reading,
+  shiftRem,
+  toggleAutoDial,
+} from './clinic/economy';
 import { advance, newLateGame, type LateGame, type LateSettings } from './game';
 import { chooseTape, completeRun } from './sequels';
 import type { Ending } from './kinds';
-import type { CampRun, Run, VenueId } from './state';
+import type { CampRun, ClinicRun, Run, VenueId } from './state';
 
 export type LateAction =
   | { type: 'whistle' }
@@ -20,6 +29,12 @@ export type LateAction =
   | { type: 'buyTower' }
   | { type: 'shiftSplit'; step: 1 | -1 }
   | { type: 'toggleHead' }
+  | { type: 'reading' }
+  | { type: 'buyBed'; id: string }
+  | { type: 'hireStaff'; id: string }
+  | { type: 'shiftRem'; step: 1 | -1 }
+  | { type: 'buySuppressant' }
+  | { type: 'toggleDial' }
   | { type: 'buyUpgrade'; id: string }
   | { type: 'chooseTape'; venue: VenueId; seed: number }
   | { type: 'completeRun'; ending: Ending; seed: number }
@@ -29,12 +44,16 @@ export type LateAction =
 
 export type LateStore = Store<LateGame, LateAction>;
 
-/** Camp orders apply only to a camp run, and nothing happens while the shelf is open. */
-const camp = (game: LateGame, f: (r: CampRun) => Run): LateGame => {
-  if (game.shelf || game.run.venue !== 'camp') return game;
-  const next = f(game.run as CampRun);
-  return next === game.run ? game : { ...game, run: next };
-};
+/** Venue orders apply only to a run at that venue, and nothing happens while the shelf is open. */
+const at =
+  <R extends Run>(venue: VenueId) =>
+  (game: LateGame, f: (r: R) => Run): LateGame => {
+    if (game.shelf || game.run.venue !== venue) return game;
+    const next = f(game.run as R);
+    return next === game.run ? game : { ...game, run: next };
+  };
+const camp = at<CampRun>('camp');
+const clinic = at<ClinicRun>('clinic');
 
 export function reduce(game: LateGame, action: LateAction): LateGame {
   switch (action.type) {
@@ -50,8 +69,20 @@ export function reduce(game: LateGame, action: LateAction): LateGame {
       return camp(game, (r) => shiftSplit(r, action.step));
     case 'toggleHead':
       return camp(game, toggleHeadCounselor);
+    case 'reading':
+      return clinic(game, reading);
+    case 'buyBed':
+      return clinic(game, (r) => buyBed(r, action.id));
+    case 'hireStaff':
+      return clinic(game, (r) => hireStaff(r, action.id));
+    case 'shiftRem':
+      return clinic(game, (r) => shiftRem(r, action.step));
+    case 'buySuppressant':
+      return clinic(game, buySuppressant);
+    case 'toggleDial':
+      return clinic(game, toggleAutoDial);
     case 'buyUpgrade':
-      return camp(game, (r) => buyCampUpgrade(r, action.id));
+      return game.run.venue === 'clinic' ? clinic(game, (r) => buyClinicUpgrade(r, action.id)) : camp(game, (r) => buyCampUpgrade(r, action.id));
     case 'chooseTape':
       return chooseTape(game, action.venue, action.seed);
     case 'completeRun':

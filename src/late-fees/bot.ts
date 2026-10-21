@@ -13,9 +13,23 @@ import {
   towerCost,
   watchForce,
 } from './camp/economy';
+import { BEDS, STAFF } from '../late-fees-data/clinic';
+import {
+  availableClinicUpgrades,
+  bedCost,
+  bedRate,
+  isAutoDialActive,
+  isBedRevealed,
+  isStaffRevealed,
+  patients,
+  protectedCount,
+  staffCost,
+  suppressantCost,
+  watchCapacity,
+} from './clinic/economy';
 import { createLateGame, type LateGame } from './game';
 import { runConfigFor } from './sequels';
-import { createRun, type CampRun, type VenueId } from './state';
+import { createRun, type CampRun, type ClinicRun, type VenueId } from './state';
 import { reduce, type LateAction } from './store';
 import { tickRun } from './tick';
 
@@ -78,6 +92,47 @@ function decideCamp(game: LateGame): LateAction | null {
   return pick ? { type: 'hire', id: pick.id } : null;
 }
 
+/** How deep the bot wants its patients to sleep, when the watch can cover it. */
+const DEEP_TARGET = 0.6;
+
+/** Keep the watch ahead of the deep sleepers, set the dial as deep as it covers, fill beds with the rest. */
+function decideClinic(game: LateGame): LateAction | null {
+  const r = game.run as ClinicRun;
+  const upgrade = availableClinicUpgrades(r).find((u) => u.cost <= r.cash);
+  if (upgrade) return { type: 'buyUpgrade', id: upgrade.id };
+  const n = patients(r);
+  const cover = watchCapacity(r) + protectedCount(r);
+  if (!isAutoDialActive(r) && n > 0) {
+    const target = Math.max(3, Math.min(10, Math.floor((cover / n) * 10)));
+    if (r.remShare < target) return { type: 'shiftRem', step: 1 };
+    if (r.remShare > target) return { type: 'shiftRem', step: -1 };
+  }
+  if (cover < n * DEEP_TARGET) {
+    let best: { id: string; value: number } | null = null;
+    STAFF.forEach((s, i) => {
+      if (!isStaffRevealed(r, i)) return;
+      const cost = staffCost(s, r.staff[s.id] ?? 0);
+      if (cost > r.cash) return;
+      const value = s.watches / cost;
+      if (!best || value > best.value) best = { id: s.id, value };
+    });
+    const pick = best as { id: string; value: number } | null;
+    if (pick) return { type: 'hireStaff', id: pick.id };
+    if (cover < n * 0.3) return null;
+  }
+  if (n > 20 && suppressantCost(r) < r.cash * 0.3) return { type: 'buySuppressant' };
+  let best: { id: string; value: number } | null = null;
+  BEDS.forEach((b, i) => {
+    if (!isBedRevealed(r, i)) return;
+    const cost = bedCost(b, r.beds[b.id] ?? 0);
+    if (cost > r.cash) return;
+    const value = bedRate(r, b) / cost;
+    if (!best || value > best.value) best = { id: b.id, value };
+  });
+  const pick = best as { id: string; value: number } | null;
+  return pick ? { type: 'buyBed', id: pick.id } : null;
+}
+
 /** A sensible, greedy player: clicks for the first stretch, then checks in now and then. */
 export function simulateLate(options: LateSimOptions): LateSimResult {
   const { seed, maxSeconds, venue = 'camp', sequels = 0, activeClicks = 4, activeSeconds = 20 * 60, decisionInterval = 5 } = options;
@@ -88,10 +143,11 @@ export function simulateLate(options: LateSimOptions): LateSimResult {
   let terminusAt: number | undefined;
   for (let t = 1; t <= maxSeconds; t++) {
     const clicks = t <= activeSeconds ? activeClicks : t % 10 === 0 ? 1 : 0;
-    for (let c = 0; c < clicks; c++) game = reduce(game, { type: 'whistle' });
+    const press: LateAction = venue === 'clinic' ? { type: 'reading' } : { type: 'whistle' };
+    for (let c = 0; c < clicks; c++) game = reduce(game, press);
     if (t % decisionInterval === 0) {
       for (let i = 0; i < 20; i++) {
-        const action = decideCamp(game);
+        const action = game.run.venue === 'clinic' ? decideClinic(game) : decideCamp(game);
         if (!action) break;
         const next = reduce(game, action);
         if (next === game) break;

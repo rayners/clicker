@@ -19,9 +19,9 @@ describe('the shelf at Late Fees Video', () => {
     expect(newLateGame(1, NOW).shelf).toBe(true);
   });
 
-  it('stocks Friday the 12th, with the other tapes coming soon', () => {
+  it('stocks Friday the 12th and A Nightmare on Sycamore Street, with Final Departure coming soon', () => {
     const stocked = TAPES.filter((t) => t.available).map((t) => t.venue);
-    expect(stocked).toEqual(['camp']);
+    expect(stocked).toEqual(['camp', 'clinic']);
     expect(TAPES.length).toBeGreaterThanOrEqual(3);
   });
 
@@ -114,5 +114,40 @@ describe('player orders', () => {
     expect(camp(g).upgrades).toContain(head.id);
     g = reduce(g, { type: 'toggleHead' });
     expect(camp(g).headOff).toBe(true);
+  });
+});
+
+describe('clinic orders', () => {
+  it('routes readings, beds, staff, the dial, suppressant, automated monitoring and the store', async () => {
+    const { BEDS, STAFF } = await import('../../src/late-fees-data/clinic');
+    const { CLINIC_UPGRADES } = await import('../../src/late-fees-data/clinic-upgrades');
+    type K = import('../../src/late-fees/state').ClinicRun;
+    const k = (g: LateGame) => g.run as K;
+    let g = chooseTape(newLateGame(1, NOW), 'clinic', 4);
+    g = { ...g, run: { ...g.run, cash: 1e9, lifetimeCash: 1e9 } as LateGame['run'] };
+    const before = g.run.cash;
+    g = reduce(g, { type: 'reading' });
+    expect(g.run.cash).toBeGreaterThan(before);
+    g = reduce(g, { type: 'buyBed', id: BEDS[0]!.id });
+    expect(k(g).beds[BEDS[0]!.id]).toBe(1);
+    g = reduce(g, { type: 'hireStaff', id: STAFF[0]!.id });
+    expect(k(g).staff[STAFF[0]!.id]).toBe(1);
+    const share = k(g).remShare;
+    g = reduce(g, { type: 'shiftRem', step: 1 });
+    expect(k(g).remShare).toBe(share + 1);
+    g = reduce(g, { type: 'buySuppressant' });
+    expect(k(g).suppressant).toBe(1);
+    const auto = CLINIC_UPGRADES.find((u) => u.effect.kind === 'autoDial')!;
+    g = reduce(g, { type: 'buyUpgrade', id: auto.id });
+    expect(k(g).upgrades).toContain(auto.id);
+    g = reduce(g, { type: 'toggleDial' });
+    expect(k(g).dialOff).toBe(true);
+  });
+
+  it('ignores camp orders on a clinic tape, and clinic orders at the camp', () => {
+    const clinic = chooseTape(newLateGame(1, NOW), 'clinic', 4);
+    expect(reduce(clinic, { type: 'whistle' })).toBe(clinic);
+    const camp = createLateGame(1, NOW);
+    expect(reduce(camp, { type: 'reading' })).toBe(camp);
   });
 });
