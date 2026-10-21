@@ -232,7 +232,8 @@ function decide(game: GameState): Action | null {
   return decideExtraction(game);
 }
 
-const PRESS: Record<ScenarioId, Action> = { extraction: { type: 'drill' }, terraform: { type: 'surge' }, security: { type: 'fireSupport' } };
+const PRESS: Record<ScenarioId, Action> = { extraction: { type: 'drill' }, terraform: { type: 'surge' }, security: { type: 'fireSupport' },
+  haulage: { type: 'fireThrusters' } };
 
 const DEFEND_SECONDS = 5;
 const EARLY_TAPS = 4;

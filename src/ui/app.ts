@@ -8,6 +8,7 @@ import { createMonitor } from '../shared/ui/monitor';
 import { createExtractionUi } from './scenarios/extraction';
 import { createTerraformUi } from './scenarios/terraform';
 import { createSecurityUi } from './scenarios/security';
+import { createHaulageUi } from './scenarios/haulage';
 import type { ScenarioUi, StatSpec } from './scenarios/types';
 import { createCrewPanel } from './crew';
 import { createDirectivesPanel, hasDirectivesToShow } from './directives';
@@ -82,6 +83,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     extraction: scenarioView(createExtractionUi(store)),
     terraform: scenarioView(createTerraformUi(store)),
     security: scenarioView(createSecurityUi(store)),
+    haulage: scenarioView(createHaulageUi(store)),
   };
   let view = views.extraction;
   // Slots hold only the running scenario's elements, so nothing hidden lingers in the accessibility tree.

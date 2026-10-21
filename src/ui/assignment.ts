@@ -20,6 +20,11 @@ const BRIEFS: Record<ScenarioId, { title: string; name: string; brief: string }>
     name: 'security',
     brief: 'A colony has gone quiet. Take it back sector by sector with a Combine Security detachment, and hold what you take.',
   },
+  haulage: {
+    title: 'HAULAGE',
+    name: 'haulage',
+    brief: 'Tow a refinery train home station by station. Burn hot to make the delivery windows, but the fuel bill and the freight both feel it.',
+  },
 };
 
 /** Where WARDEN chooses its next contract: on a new game, after a terminus, or on request from CFG. */

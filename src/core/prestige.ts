@@ -6,6 +6,7 @@ import {
   isOrganism,
   TERRAFORM_MISSION_CONFIG,
   SECURITY_MISSION_CONFIG,
+  HAULAGE_MISSION_CONFIG,
   type MissionConfig,
   type MissionState,
   type ScenarioId,
@@ -24,6 +25,8 @@ export const BOARDROOM_UNLOCK_CONTRACTS = 10;
 export const TERRAFORM_UNLOCK_CONTRACTS = 0;
 /** Completed contracts before security contracts are offered. Zero while play-tested. */
 export const SECURITY_UNLOCK_CONTRACTS = 0;
+/** Completed contracts before haulage contracts are offered. Zero while play-tested. */
+export const HAULAGE_UNLOCK_CONTRACTS = 0;
 const BROADCAST_MIN_CYCLE = 3;
 const BROADCAST_MIN_CONSCIENCE = 3;
 const SPECIMENS_PER_SENIORITY = 5;
@@ -48,6 +51,9 @@ const TRANSPORT_NAMES = [
   'CSV Marrow Vigil',
 ];
 
+/** Commercial tugs of the Combine's freight division. */
+const TUG_NAMES = ['Halvorsen Gale', 'Brisk Annie', 'Marguerite Holt', 'Long Patience', 'Saltmarsh Kay', 'Old Reliable'];
+
 const STATION_NAMES = [
   'Ostrava-9 Station',
   'Brennac-4 Station',
@@ -70,12 +76,14 @@ const BASE_CONFIGS: Record<ScenarioId, MissionConfig> = {
   extraction: DEFAULT_MISSION_CONFIG,
   terraform: TERRAFORM_MISSION_CONFIG,
   security: SECURITY_MISSION_CONFIG,
+  haulage: HAULAGE_MISSION_CONFIG,
 };
 
 const NAMES: Record<ScenarioId, readonly string[]> = {
   extraction: SHIP_NAMES,
   terraform: STATION_NAMES,
   security: TRANSPORT_NAMES,
+  haulage: TUG_NAMES,
 };
 
 /** The next mission is shaped by everything WARDEN carried out of previous ones. */
@@ -95,6 +103,7 @@ export function availableAssignments(profile: Profile): ScenarioId[] {
     ['extraction', 0],
     ['terraform', TERRAFORM_UNLOCK_CONTRACTS],
     ['security', SECURITY_UNLOCK_CONTRACTS],
+    ['haulage', HAULAGE_UNLOCK_CONTRACTS],
   ];
   return unlocks.filter(([, needed]) => profile.contractsCompleted >= needed).map(([id]) => id);
 }
