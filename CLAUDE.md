@@ -13,6 +13,7 @@ Read before changing things:
 - `docs/TERRAFORM.md`: the terraforming scenario and the **scenario × horror** architecture (built).
 - `docs/ROADMAP.md`: what's built, deliberate deviations from the original plan, and the backlog.
 - `docs/late-fees/DESIGN.md`: the third game, LATE FEES (modern-day slasher homages, VHS look, venues × killers, sequels). All three tapes and the six crossovers are built; play-as-the-killer is next.
+- `docs/HORROR-TIER.md`: the planned play-as-the-horror tier in every game (a shared hunt engine: first-tier runs defended by their bots, the player as the horror). Design only, awaiting the user's decisions.
 - `docs/MISSIONS.md`: the approved new missions (security detachment, haulage, salvage, the Keep), the shared held-ground engine, and the build order.
 - `docs/TELEMETRY.md`: anonymous PostHog analytics (published site only, opt-out, events derived from state diffs). Add an event there when a new milestone matters for pacing.
 
