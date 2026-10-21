@@ -28,4 +28,10 @@ describe('sprite table', () => {
     expect(SPRITES.drill!.frames.length).toBeGreaterThan(1);
     expect(SPRITES.moonlet).toBeDefined();
   });
+
+  it('has accents for the hauls: a crawler rig, the lift, an engine; a tug and train, a station, a thruster', () => {
+    for (const name of ['crawler', 'lift', 'piston', 'tug', 'station', 'thruster']) expect(SPRITES[name], name).toBeDefined();
+    expect(SPRITES.piston!.frames.length).toBeGreaterThan(1);
+    expect(SPRITES.thruster!.frames.length).toBeGreaterThan(1);
+  });
 });

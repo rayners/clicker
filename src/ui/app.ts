@@ -25,7 +25,7 @@ import { createSound, cueForLog } from './sound';
 import { isSpecialProjectsUnlocked } from '../mission/organism/containment';
 import { isOrganism, type ScenarioId } from '../mission/state';
 import { crewNeedingAttention, isCrewUnlocked } from '../mission/crew';
-import { advanceFrame, paintAll, paintSprite, readPalette, spriteCanvas } from './sprites';
+import { advanceFrame, paintAll, paintSprite, readPalette, setSprite, spriteCanvas } from './sprites';
 
 const SPRITE_CORRUPTION: Record<number, number> = { 1: 0, 2: 0, 3: 0.15, 4: 0.45 };
 const GLITCH_INTERVAL = 1.5;
@@ -59,6 +59,8 @@ function scenarioView(ui: ScenarioUi) {
   return { ui, flow, monitor, stats, status };
 }
 
+const DEFAULT_SPRITES = { vessel: 'ship', target: 'moonlet', action: 'drill' };
+
 export function mountApp(root: HTMLElement, store: Store): void {
   const sound = createSound();
   const settings = createSettings(store);
@@ -67,6 +69,8 @@ export function mountApp(root: HTMLElement, store: Store): void {
   // iOS only allows audio to start inside a user gesture.
   root.addEventListener('pointerdown', () => sound.unlock(), { passive: true });
   const shipName = h('span', { class: 'mast-ship' });
+  const vesselBit = spriteCanvas('ship', 'mast-sprite');
+  const targetBit = spriteCanvas('moonlet', 'status-moon');
   const clock = h('span', { class: 'mast-clock' });
   const masthead = h(
     'header',
@@ -78,7 +82,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
       h('span', { class: 'brand-name' }, 'KESSLER-AMARI COMBINE'),
       settings.button,
     ),
-    h('div', { class: 'mast-line' }, h('span', { class: 'mast-ship-wrap' }, spriteCanvas('ship', 'mast-sprite'), shipName), clock),
+    h('div', { class: 'mast-line' }, h('span', { class: 'mast-ship-wrap' }, vesselBit, shipName), clock),
   );
 
   const views: Record<ScenarioId, ReturnType<typeof scenarioView>> = {
@@ -102,7 +106,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     'section',
     { class: 'status', 'aria-label': 'Ship status' },
     alerts.el,
-    h('div', { class: 'status-target' }, spriteCanvas('moonlet', 'status-moon'), h('span', { class: 'status-target-name' })),
+    h('div', { class: 'status-target' }, targetBit, h('span', { class: 'status-target-name' })),
     statusSlot,
     h('dl', { class: 'stats stats-horror' }, contacts.el),
   );
@@ -262,6 +266,11 @@ export function mountApp(root: HTMLElement, store: Store): void {
     upgradesSlot.replaceChildren(view.ui.upgrades.el);
     setText(drillLabel, view.ui.action.label);
     drill.setAttribute('aria-label', view.ui.action.aria);
+    const sprites = view.ui.sprites ?? DEFAULT_SPRITES;
+    setSprite(vesselBit, sprites.vessel);
+    setSprite(targetBit, sprites.target);
+    setSprite(drillBit, sprites.action);
+    paintAll(root);
     lastElapsed = null;
   }
 

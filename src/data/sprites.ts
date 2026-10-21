@@ -67,6 +67,139 @@ const moonlet = sprite([
   '.....bbbbbb.....',
 ]);
 
+// The hauls. Crawler rig with its trailer and exhaust stack (32x12), the lift rising from its planet (16x16),
+// an engine turning over (12x12, two frames); a tug and its train of freight modules (32x12), a ring station
+// (16x16), a thruster firing (12x12, two frames).
+const crawler = sprite([
+  '...........................e....',
+  '..........................ede...',
+  '..........................d.....',
+  '......................bbbbdbb...',
+  '......................bccccccb..',
+  '......................bcaacacb..',
+  '.bbbbbbbbbbbbbbbbbb..bbccccccbb.',
+  '.bccdccdccdccdccdcbbbbcccccccdb.',
+  '.bccccccccccccccccbbbbccccccccb.',
+  '.bbbbbbbbbbbbbbbbbb.bbbbbbbbbbbb',
+  '..bdbdb......bdbdb..bdbdbdbdbdb.',
+  '...bbb........bbb....bbbbbbbbb..',
+]);
+
+const lift = sprite([
+  '.......d........',
+  '.......d........',
+  '.......d........',
+  '.......d........',
+  '.......d........',
+  '......bdb.......',
+  '.......d........',
+  '.......d........',
+  '.......d........',
+  '......bdb.......',
+  '.......d........',
+  '......bcb.......',
+  '.....bcccb......',
+  'bbbbbbcccbbbbbbb',
+  'cccaacccccccaacc',
+  'ccccccccaacccccc',
+]);
+
+const piston = sprite(
+  [
+    '............',
+    '.....ee.....',
+    '....e..e....',
+    '.....dd.....',
+    '....bccb....',
+    '....bccb....',
+    '...bbddbb...',
+    '...bccccb...',
+    '...bccccb...',
+    '...bccccb...',
+    '...bbbbbb...',
+    '..bbbbbbbb..',
+  ],
+  [
+    '....e..e....',
+    '...e....e...',
+    '....eeee....',
+    '.....dd.....',
+    '....bccb....',
+    '...bbddbb...',
+    '...bccccb...',
+    '...bccccb...',
+    '...bccccb...',
+    '...bccccb...',
+    '...bbbbbb...',
+    '..bbbbbbbb..',
+  ],
+);
+
+const tug = sprite([
+  '................................',
+  '.......................bbbb.....',
+  '......................bccccb....',
+  '.bbbb.bbbb.bbbb.bbbb.bcaaccbb...',
+  '.bccb.bccb.bdcb.bccb.bcccccccbe.',
+  '.bcdbbbccbbbccbbbccbbbccccccccbe',
+  '.bccb.bcdb.bccb.bcdb.bcccccccbe.',
+  '.bbbb.bbbb.bbbb.bbbb.bbccccbb...',
+  '......................bbbbbb....',
+  '................................',
+  '................................',
+  '................................',
+]);
+
+const station = sprite([
+  '................',
+  '.....bbbbbb.....',
+  '...bbccccccbb...',
+  '..bcca....accb..',
+  '.bca........acb.',
+  '.bc....bb....cb.',
+  'bca...bddb...acb',
+  'bcccbbdeedbbcccb',
+  'bcccbbdeedbbcccb',
+  'bca...bddb...acb',
+  '.bc....bb....cb.',
+  '.bca........acb.',
+  '..bcca....accb..',
+  '...bbccccccbb...',
+  '.....bbbbbb.....',
+  '................',
+]);
+
+const thruster = sprite(
+  [
+    '..bbbbbbbb..',
+    '..bccccccb..',
+    '...bccccb...',
+    '...bcddcb...',
+    '..bccccccb..',
+    '.bccccccccb.',
+    '.bbbbbbbbbb.',
+    '....dddd....',
+    '.....ee.....',
+    '............',
+    '............',
+    '............',
+  ],
+  [
+    '..bbbbbbbb..',
+    '..bccccccb..',
+    '...bccccb...',
+    '...bcddcb...',
+    '..bccccccb..',
+    '.bccccccccb.',
+    '.bbbbbbbbbb.',
+    '...dddddd...',
+    '....eeee....',
+    '....e..e....',
+    '.....ee.....',
+    '............',
+  ],
+);
+
 // 12x12 crew portraits: d = hair, c = skin, a = eyes, b = mouth/uniform, e = insignia/glasses.
 const portraits: Record<string, string[]> = {
   okonkwo: [
@@ -173,5 +306,11 @@ export const SPRITES: Record<string, Sprite> = {
   ship,
   drill,
   moonlet,
+  crawler,
+  lift,
+  piston,
+  tug,
+  station,
+  thruster,
   ...Object.fromEntries(Object.entries(portraits).map(([id, rows]) => [`crew-${id}`, sprite(rows)])),
 };

@@ -5,7 +5,7 @@ const LOST_CORRUPTION = 0.9;
 
 export type { Palette };
 
-export const { readPalette, spriteCanvas, paintSprite, advanceFrame, paintAll } = createSpriteKit({
+export const { readPalette, spriteCanvas, setSprite, paintSprite, advanceFrame, paintAll } = createSpriteKit({
   sprites: SPRITES,
   paletteVars: { a: '--phosphor-faint', b: '--phosphor-dim', c: '--phosphor', d: '--phosphor-hi', e: '--corp' },
   fallback: '#5dff8f',

@@ -103,6 +103,7 @@ export function createHaulageUi(store: Store, profile: HaulProfile, words: HaulW
       },
     },
     monitor: monitorRows(profile, words),
+    sprites: words.sprites,
     stats: [
       { label: 'CREDITS', aria: 'Credits', read: (m) => formatNumber(m.credits) },
       { label: 'LEGS', aria: 'Legs delivered', read: (m) => String(s(m).leg) },

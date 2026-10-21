@@ -19,6 +19,8 @@ export interface HaulWords {
   couple: string;
   timer: string;
   noEngines: string;
+  /** The vessel, the target and the action button's sprite. */
+  sprites: { vessel: string; target: string; action: string };
 }
 
 export const SPACE_WORDS: HaulWords = {
@@ -37,6 +39,7 @@ export const SPACE_WORDS: HaulWords = {
   couple: 'Couple',
   timer: 'PULSE TMR',
   noEngines: 'NO MAIN ENGINES · FIRE THRUSTERS OR FIT ENGINES IN SYSTEMS',
+  sprites: { vessel: 'tug', target: 'station', action: 'thruster' },
 };
 
 export const LAND_WORDS: HaulWords = {
@@ -55,4 +58,5 @@ export const LAND_WORDS: HaulWords = {
   couple: 'Hitch',
   timer: 'GOVERNOR',
   noEngines: 'NO POWERTRAIN · GUN THE ENGINE OR FIT ONE IN SYSTEMS',
+  sprites: { vessel: 'crawler', target: 'lift', action: 'piston' },
 };

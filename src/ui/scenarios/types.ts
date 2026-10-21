@@ -41,6 +41,8 @@ export interface ScenarioUi {
   upgrades: Component & { hasAny(m: MissionState): boolean };
   /** Optional controls under the flow readout (e.g. power allocation). */
   controls?: Component;
+  /** The pixel accents: the vessel in the masthead, the target in the status area, the action button's sprite. Ship, moonlet and drill if not given. */
+  sprites?: { vessel: string; target: string; action: string };
   /** Called with the full game when needed (kept for symmetry with panels). */
   visible?(game: GameState): boolean;
 }

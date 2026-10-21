@@ -48,6 +48,17 @@ export function createSpriteKit(options: SpriteKitOptions) {
     }
   }
 
+  /** Point a canvas at another sprite (a different vessel, a different target), resized and back to frame 0. */
+  function setSprite(canvas: HTMLCanvasElement, name: string): void {
+    const s = sprites[name];
+    if (!s || canvas.dataset.sprite === name) return;
+    canvas.width = s.width;
+    canvas.height = s.height;
+    canvas.dataset.sprite = name;
+    canvas.dataset.frame = '0';
+    canvas.dataset.testid = `sprite-${name}`;
+  }
+
   function advanceFrame(canvas: HTMLCanvasElement): void {
     const s = sprites[canvas.dataset.sprite ?? ''];
     if (!s) return;
@@ -62,5 +73,5 @@ export function createSpriteKit(options: SpriteKitOptions) {
     });
   }
 
-  return { readPalette, spriteCanvas, paintSprite, advanceFrame, paintAll };
+  return { readPalette, spriteCanvas, setSprite, paintSprite, advanceFrame, paintAll };
 }
