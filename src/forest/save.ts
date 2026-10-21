@@ -1,5 +1,15 @@
 import { createSaveSystem } from '../shared/save';
 import { createForestGame, FOREST_VERSION, type ForestGame } from './game';
+import { KEEP } from './state';
+
+const inForest = (company: Record<string, unknown>) => ({
+  site: 'forest',
+  floors: [],
+  posted: [],
+  oil: 0,
+  ...company,
+  orders: { [KEEP]: { blade: 2, mender: 0, scout: 1, mystic: 0 }, ...(company.orders as Record<string, unknown>) },
+});
 
 export const FOREST_SAVE_KEY = 'elderdark.save';
 
@@ -28,6 +38,15 @@ export const forestSaves = createSaveSystem<ForestGame>({
     6: (save) => ({ ...save, company: { charter: { number: 1, renown: 0, grace: 0 }, ...(save.company as Record<string, unknown>) } }),
     // v7: the wood (play as the forest). Old saves are on the charter, with no hunt started and no push on the company.
     7: (save) => ({ ...save, mode: 'charter', wood: null, company: { woodPush: 0, ...(save.company as Record<string, unknown>) } }),
+    // v8: charters have a site (the forest or Morrowgate Keep). Every existing company, the wood's included, is in the forest.
+    8: (save) => {
+      const wood = save.wood as { hunt: { prey: { company: Record<string, unknown> }[] } } | null;
+      return {
+        ...save,
+        company: inForest(save.company as Record<string, unknown>),
+        wood: wood && { ...wood, hunt: { ...wood.hunt, prey: wood.hunt.prey.map((p) => ({ ...p, company: inForest(p.company) })) } },
+      };
+    },
   },
   label: 'ELDERDARK',
   required: ['profile', 'company'],

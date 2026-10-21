@@ -7,7 +7,11 @@ import { formatNumber } from '../shared/format';
 import { appendLog } from '../shared/log';
 import { runForestStory } from './story';
 import { sinceBeat } from '../shared/story';
-import { emptyComposition, type Company, type Composition, type EntryKind, type Party } from './state';
+import { emptyComposition, KEEP, type Company, type Composition, type EntryKind, type Party } from './state';
+import { FLOORS, type FloorDef } from '../forest-data/keep';
+import { assault, frontier as groundFrontier, setGarrison, tickGround } from '../shared/ground';
+
+export { KEEP };
 
 export const COST_GROWTH = 1.15;
 export const FORAGE_YIELD = 1;
@@ -27,6 +31,8 @@ const VAULT_BLIGHT = 0.01;
 const CHAPEL_EASE = 0.006;
 /** Above this blight, hands start to turn. */
 export const TURN_THRESHOLD = 40;
+/** How many times more readily a posted hand turns than one in the hall. */
+const POSTED_TURNING = 2;
 /** Chance per hand per second of turning, at full blight. */
 const TURN_RATE = 1 / 600;
 /** Each turned hand makes every region this much more dangerous. */
@@ -51,6 +57,16 @@ const HAUL_CAP = 1.5;
 const HAUL_VARIANCE = 0.25;
 /** Each scout along adds this share to the leagues a trip charts. */
 const SCOUT_CHARTING = 0.5;
+
+/** Thalers per flask of lamp oil. */
+export const OIL_PRICE = 1;
+/** Seconds of each Keep assault spent at the face: how far one party's return pushes the frontier floor. */
+const FACE_SECONDS = 15;
+/** Going without oil multiplies wounds by up to this much more, and adds this much to the chance of dying. */
+const DARK_WOUNDS = 2;
+const DARK_DEATH = 0.3;
+/** Blight at which the Keep presses twice as hard on its floors. */
+const KEEP_BLIGHT_PRESSURE = 40;
 
 const def = (id: ClassId) => CLASSES.find((k) => k.id === id)!;
 
@@ -208,8 +224,10 @@ function inField(c: Company, id: ClassId): number {
 
 /** Rested hands in the hall, free to be sent. */
 export function available(c: Company, id: ClassId): number {
-  return Math.max(0, c.hired[id] - c.wounded[id] - inField(c, id));
+  return Math.max(0, c.hired[id] - c.wounded[id] - inField(c, id) - (id === 'blade' ? postedBlades(c) : 0));
 }
+
+const postedBlades = (c: Company) => c.posted.reduce((s, n) => s + n, 0);
 
 function payWages(c: Company, dt: number): Company {
   const due = wages(c) * dt;
@@ -276,24 +294,42 @@ export function project(c: Company, region: RegionDef, comp: Composition): Proje
   };
 }
 
-export function dispatch(c: Company, regionId: string): Company {
+/** Whether a party could be sent there at all: forest regions for a forest charter, the frontier floor for the Keep. */
+function canSend(c: Company, regionId: string): boolean {
+  if (c.site === 'keep') return regionId === KEEP && frontierFloor(c) !== null;
   const region = REGIONS.find((r) => r.id === regionId);
+  return !!region && isRegionOpen(c, region);
+}
+
+/** Where a party is headed, as a region: the Keep's frontier floor stands in for one. */
+function regionFor(c: Company, regionId: string): RegionDef {
+  return regionId === KEEP ? keepRegion(frontierFloor(c) ?? FLOORS.at(-1)!) : REGIONS.find((r) => r.id === regionId)!;
+}
+
+export function dispatch(c: Company, regionId: string): Company {
   const order = c.orders[regionId];
-  if (!region || !order || !isRegionOpen(c, region) || size(order) === 0) return c;
+  if (!order || !canSend(c, regionId) || size(order) === 0) return c;
   if (CLASS_IDS.some((id) => available(c, id) < order[id])) return c;
   const party: Party = {
     id: c.nextPartyId,
     region: regionId,
     comp: { ...order },
     departedAt: c.elapsed,
-    returnsAt: c.elapsed + project(c, region, order).duration,
+    returnsAt: c.elapsed + project(c, regionFor(c, regionId), order).duration,
   };
-  return { ...c, parties: [...c.parties, party], nextPartyId: c.nextPartyId + 1 };
+  if (regionId !== KEEP) return { ...c, parties: [...c.parties, party], nextPartyId: c.nextPartyId + 1 };
+  // Down into the Keep: each hand carries oil for the trip, and whatever is missing they go without.
+  const need = oilPerTrip(c, order);
+  const burned = Math.min(c.oil, need);
+  const dark = need > 0 ? 1 - burned / need : 0;
+  return { ...c, oil: c.oil - burned, parties: [...c.parties, { ...party, dark }], nextPartyId: c.nextPartyId + 1 };
 }
 
 function resolve(c: Company, party: Party): Company {
-  const region = REGIONS.find((r) => r.id === party.region)!;
-  const p = project(c, region, party.comp);
+  const keep = party.region === KEEP;
+  const floor = keep ? frontierFloor(c) : null;
+  const region = regionFor(c, party.region);
+  const p = keep ? keepProject(c, party.comp, party.dark ?? 0) : project(c, region, party.comp);
   const r = roller(c);
   const wounded = emptyComposition();
   const dead = emptyComposition();
@@ -306,7 +342,8 @@ function resolve(c: Company, party: Party): Company {
   }
   const haul = Math.max(0, p.haul * (1 + HAUL_VARIANCE * (2 * r.roll() - 1)));
   const survivors = size(party.comp) - size(dead);
-  const fragment = survivors > 0 && c.keyFragments < KEY_FRAGMENTS && r.roll() < (FRAGMENT_CHANCE[region.id] ?? 0);
+  const chance = keep ? (floor?.fragment ?? 0) : (FRAGMENT_CHANCE[region.id] ?? 0);
+  const fragment = survivors > 0 && c.keyFragments < KEY_FRAGMENTS && r.roll() < chance;
   const blight = p.blightPerHand * size(party.comp);
   let next: Company = {
     ...c,
@@ -327,7 +364,7 @@ function resolve(c: Company, party: Party): Company {
   if (fragment) {
     next = log(next, 'omen', `AMONG THE HAUL: A FRAGMENT OF A KEY, ASH-GREY AND WARM. THE COMPANY HOLDS ${next.keyFragments} OF ${KEY_FRAGMENTS}.`);
   }
-  return chart(next, region, party.comp, survivors);
+  return keep ? press(next, p.strength * (survivors / size(party.comp))) : chart(next, region, party.comp, survivors);
 }
 
 // ---------- healing, appraisal, blight, buildings ----------
@@ -416,8 +453,7 @@ export function maxStandingRegions(c: Company): number {
 
 export function toggleStanding(c: Company, region: string): Company {
   if (c.standing.includes(region)) return { ...c, standing: c.standing.filter((r) => r !== region) };
-  const def = REGIONS.find((r) => r.id === region);
-  if (!def || !isRegionOpen(c, def) || c.standing.length >= maxStandingRegions(c)) return c;
+  if (!canSend(c, region) || c.standing.length >= maxStandingRegions(c)) return c;
   return { ...c, standing: [...c.standing, region] };
 }
 
@@ -425,7 +461,11 @@ export function toggleStanding(c: Company, region: string): Company {
 function muster(c: Company): Company {
   const deepestFirst = [...c.standing].sort((a, b) => REGIONS.findIndex((r) => r.id === b) - REGIONS.findIndex((r) => r.id === a));
   let next = c;
-  for (const region of deepestFirst) next = dispatch(next, region);
+  for (const region of deepestFirst) {
+    // The Quartermaster sends nobody into the Keep without a full lamp, if the strongbox can pay for it.
+    if (region === KEEP) next = buyOil(next, Math.max(0, oilPerTrip(next, next.orders[KEEP]!) - next.oil));
+    next = dispatch(next, region);
+  }
   return next;
 }
 
@@ -433,17 +473,28 @@ function muster(c: Company): Company {
 function turn(c: Company, dt: number): Company {
   if (c.blight <= TURN_THRESHOLD) return c.turning === 0 ? c : { ...c, turning: 0 };
   const rate = TURN_RATE * ((c.blight - TURN_THRESHOLD) / (MAX_BLIGHT - TURN_THRESHOLD));
-  const idle = CLASS_IDS.reduce((s, id) => s + available(c, id), 0);
+  // A floor garrisoned too long starts keeping its garrison: posted hands turn twice as readily.
+  const idle = CLASS_IDS.reduce((s, id) => s + available(c, id), 0) + POSTED_TURNING * postedBlades(c);
   let next: Company = { ...c, turning: c.turning + idle * rate * dt };
   const r = roller(next);
   while (next.turning >= 1) {
-    const pool = CLASS_IDS.flatMap((id) => Array<ClassId>(available(next, id)).fill(id));
+    const pool: (ClassId | 'posted')[] = [
+      ...CLASS_IDS.flatMap((id) => Array<ClassId>(available(next, id)).fill(id)),
+      ...Array<'posted'>(POSTED_TURNING * postedBlades(next)).fill('posted'),
+    ];
     if (pool.length === 0) {
       next = { ...next, turning: 0 };
       break;
     }
-    const id = pool[Math.floor(r.roll() * pool.length)]!;
+    const pick = pool[Math.floor(r.roll() * pool.length)]!;
+    const id: ClassId = pick === 'posted' ? 'blade' : pick;
     next = { ...next, turning: next.turning - 1, turned: next.turned + 1, hired: { ...next.hired, [id]: next.hired[id] - 1 } };
+    if (pick === 'posted') {
+      const floor = next.posted.indexOf(Math.max(...next.posted));
+      next = { ...next, posted: next.posted.map((n, i) => (i === floor ? n - 1 : n)) };
+      next = log(next, 'omen', `A BLADE POSTED IN ${FLOORS[floor]!.name} DID NOT ANSWER THE ROLL. HER LANTERN WAS STILL LIT. THE LEDGER COUNTS ${next.turned} TURNED.`);
+      continue;
+    }
     next = log(next, 'omen', `A ${def(id).name} WALKED INTO THE WOOD AT NIGHT. THE GATE WAS BARRED FROM INSIDE. THE LEDGER COUNTS ${next.turned} TURNED.`);
   }
   return { ...next, rng: r.state() };
@@ -456,6 +507,7 @@ export function tickCompany(c: Company, dt: number): Company {
   for (const party of next.parties.filter((p) => p.returnsAt <= next.elapsed)) next = resolve(next, party);
   const gleaned = autoForageRate(next) * FORAGE_YIELD * modifiers(next).forage * dt;
   if (gleaned > 0) next = gather(next, gleaned);
+  if (next.site === 'keep') next = tickKeep(next, dt);
   next = muster(next);
   next = mend(next, dt);
   next = appraise(next, dt);
@@ -467,11 +519,11 @@ export function tickCompany(c: Company, dt: number): Company {
 
 /** Expected relics per second from the parties now in the field. */
 export function gatherRate(c: Company): number {
-  return c.parties.reduce((s, party) => {
-    const region = REGIONS.find((r) => r.id === party.region)!;
-    const p = project(c, region, party.comp);
+  const parties = c.parties.reduce((s, party) => {
+    const p = party.region === KEEP ? keepProject(c, party.comp, party.dark ?? 0) : project(c, regionFor(c, party.region), party.comp);
     return s + p.haul / p.duration;
   }, 0);
+  return parties + floorStores(c);
 }
 
 /** Seconds over which the vault's stock is counted as selling down, for a steady (not momentary) income figure. */
@@ -484,4 +536,97 @@ export function incomeRate(c: Company): number {
 
 export function netRate(c: Company): number {
   return incomeRate(c) - wages(c);
+}
+
+// ---------- the Keep ----------
+
+/** The Keep's frontier floor, the one parties assault; null once every floor is held. */
+export function keepFrontier(c: Company): number {
+  return groundFrontier(c.floors);
+}
+
+export function frontierFloor(c: Company): FloorDef | null {
+  return c.site === 'keep' ? (FLOORS[keepFrontier(c)] ?? null) : null;
+}
+
+/** A floor seen as a region, so the forest's projection (strength, haul, wounds, blight) applies to it. */
+function keepRegion(floor: FloorDef): RegionDef {
+  return { ...floor, danger: floor.threat, chart: 0, opensAt: 0 };
+}
+
+/** The projected assault on the frontier floor; `dark` is the share of the trip's oil the party goes without. */
+export function keepProject(c: Company, comp: Composition, dark = 0): Projection {
+  const p = project(c, keepRegion(frontierFloor(c) ?? FLOORS.at(-1)!), comp);
+  return {
+    ...p,
+    woundRisk: Math.min(0.95, p.woundRisk * (1 + DARK_WOUNDS * dark)),
+    deathRisk: Math.min(0.9, p.deathRisk + DARK_DEATH * dark),
+  };
+}
+
+/** Flasks a party burns going down to the frontier floor and back. */
+export function oilPerTrip(c: Company, comp: Composition): number {
+  return size(comp) * (frontierFloor(c) ?? FLOORS.at(-1)!).oil;
+}
+
+export function buyOil(c: Company, flasks: number): Company {
+  const cost = flasks * OIL_PRICE;
+  if (flasks <= 0 || c.silver < cost) return c;
+  return { ...c, silver: c.silver - cost, oil: c.oil + flasks };
+}
+
+/** How hard the Keep presses on floors held short-handed: blight, and the wood once it wakes. */
+export function keepPressure(c: Company): number {
+  return 1 + c.blight / KEEP_BLIGHT_PRESSURE + (c.flags.includes('awake') ? 1 : 0);
+}
+
+/** Relics per second from the stores and tombs of every floor held. */
+export function floorStores(c: Company): number {
+  if (c.site !== 'keep') return 0;
+  return c.floors.reduce((s, f, i) => s + (f.secured ? FLOORS[i]!.stores : 0), 0) * modifiers(c).haul;
+}
+
+/** Garrison strength of one posted blade, in the same units as a floor's threat. */
+function postStrength(c: Company): number {
+  return (def('blade').strength * modifiers(c).strength.blade * ARMOURY_STRENGTH ** c.buildings.armoury) / dangerMultiplier(c);
+}
+
+/** Post a blade from the hall to a floor the company has entered, or call one back. */
+export function post(c: Company, floor: number, step: 1 | -1): Company {
+  const state = c.floors[floor];
+  if (c.site !== 'keep' || !state || state.control <= 0) return c;
+  if (step === 1 && available(c, 'blade') < 1) return c;
+  if (step === -1 && c.posted[floor]! < 1) return c;
+  return { ...c, posted: c.posted.map((n, i) => (i === floor ? n + step : n)) };
+}
+
+/** A returning assault pushes the frontier floor; taking one deepens the delve and is written up. */
+function press(c: Company, force: number): Company {
+  const before = keepFrontier(c);
+  const floor = FLOORS[before];
+  if (!floor || force <= 0) return c;
+  const { states } = assault(c.floors, FLOORS, force / dangerMultiplier(c), FACE_SECONDS);
+  const next = { ...c, floors: states };
+  if (!states[before]!.secured) {
+    return log(next, 'ledger', `${floor.name}: ${Math.round(states[before]!.control * 100)}% CLEARED.`);
+  }
+  const taken = { ...next, charted: Math.max(next.charted, floor.leagues) };
+  return log(taken, 'town', `${floor.name} IS TAKEN. POST BLADES THERE, OR THE KEEP WILL HAVE IT BACK.`);
+}
+
+function tickKeep(c: Company, dt: number): Company {
+  const strength = postStrength(c);
+  let floors = c.floors;
+  c.posted.forEach((n, i) => {
+    floors = setGarrison(floors, i, n * strength);
+  });
+  const wasHeld = floors.map((f) => f.secured);
+  floors = tickGround(floors, FLOORS, dt, keepPressure(c));
+  let next: Company = { ...c, floors };
+  const stores = floorStores(next) * dt;
+  if (stores > 0) next = gather(next, stores);
+  floors.forEach((f, i) => {
+    if (wasHeld[i] && !f.secured) next = log(next, 'omen', `${FLOORS[i]!.name} IS LOST. THE KEEP HAS IT BACK. THE HANDS WILL HAVE TO TAKE IT AGAIN.`);
+  });
+  return next;
 }
