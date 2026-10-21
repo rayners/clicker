@@ -1,4 +1,6 @@
-import { createGame, createProfile, tickGame, type GameState } from '../core/game';
+import { advance, createGame, createProfile, tickGame, type GameState } from '../core/game';
+import { creatureUpgradeCost, CREATURE_ADAPTER, isCreatureUpgradeAvailable, startCreature, type CreaturePrey } from '../core/creature';
+import { CREATURE_UPGRADES } from '../data/creature/upgrades';
 import { missionConfigFor } from '../core/prestige';
 import { reduce, type Action } from '../core/store';
 import { CREW } from '../data/crew';
@@ -7,7 +9,7 @@ import { generatorCost, generatorRate, oreRate, refineryCapacity, refineryCost }
 import { availableUpgrades } from '../mission/extraction/upgrades';
 import { crewStatus, isCrewUnlocked, maxAwake, awakeCount } from '../mission/crew';
 import { containmentLevelCost, isSpecialProjectsUnlocked, reinforceCost, rigCost, ventCost } from '../mission/organism/containment';
-import { createMission, type MissionOf, type ScenarioId } from '../mission/state';
+import { createMission, type MissionOf, type MissionState, type ScenarioId } from '../mission/state';
 import { LINES, PROCESSORS, REACTORS } from '../data/terraform/systems';
 import {
   allocate,
@@ -230,13 +232,85 @@ function decide(game: GameState): Action | null {
   return decideExtraction(game);
 }
 
+const PRESS: Record<ScenarioId, Action> = { extraction: { type: 'drill' }, terraform: { type: 'surge' }, security: { type: 'fireSupport' } };
+
+const DEFEND_SECONDS = 5;
+const EARLY_TAPS = 4;
+const LATE_TAPS = 0.1;
+const EARLY_SECONDS = 20 * 60;
+
+/** A contract's own WARDEN, played by the bot: taps early, then buys every few seconds. Prey for the creature. */
+export function defendMission<P extends { mission: MissionState; taps: number; decideIn: number }>(p: P, dt: number): P {
+  let game: GameState = { ...createGame(0, 0), mission: p.mission };
+  let taps = p.taps + dt * (p.mission.elapsed < EARLY_SECONDS ? EARLY_TAPS : LATE_TAPS);
+  while (taps >= 1) {
+    game = reduce(game, PRESS[p.mission.scenario]);
+    taps -= 1;
+  }
+  let decideIn = p.decideIn - dt;
+  if (decideIn <= 0) {
+    decideIn += DEFEND_SECONDS;
+    for (let i = 0; i < 20; i++) {
+      const action = decide(game);
+      if (!action) break;
+      const next = reduce(game, action);
+      if (next === game) break;
+      game = next;
+    }
+  }
+  return { ...p, mission: game.mission, taps, decideIn };
+}
+
+/** Ease off a ship before its WARDEN works it out; go back once it has mostly forgotten. */
+const EASE_OFF_AT = 0.8;
+const RETURN_AT = 0.4;
+
+/** A sensible creature: grows when it can, lies low when notorious, stalks the ship least likely to vent. */
+function decideCreature(game: GameState): Action | null {
+  const c = game.creature!;
+  const h = c.hunt;
+  const upgrade = CREATURE_UPGRADES.find((u) => isCreatureUpgradeAvailable(c, u.id) && creatureUpgradeCost(c, u.id) <= h.dread);
+  if (upgrade) return { type: 'buyCreatureUpgrade', id: upgrade.id };
+  if (!h.dormant && h.notoriety > 4) return { type: 'toggleCreatureDormant' };
+  if (h.dormant && h.notoriety < 1) return { type: 'toggleCreatureDormant' };
+  const alarm = (p: CreaturePrey) => CREATURE_ADAPTER.alarm(p);
+  const wary = h.prey.findIndex((p, i) => alarm(p) >= EASE_OFF_AT && h.split[i]! > 0);
+  if (wary >= 0) return { type: 'shiftCreaturePush', index: wary, step: -1 };
+  const used = h.split.reduce((a, b) => a + b, 0);
+  if (used < h.strength) {
+    const order = h.prey
+      .map((p, i) => ({ i, score: alarm(p) + h.split[i]! * 0.2, ready: h.split[i]! > 0 ? alarm(p) < EASE_OFF_AT : alarm(p) < RETURN_AT }))
+      .filter((x) => x.ready)
+      .sort((a, b) => a.score - b.score);
+    if (order[0]) return { type: 'shiftCreaturePush', index: order[0].i, step: 1 };
+  }
+  return null;
+}
+
+export function simulateCreature(options: { seed: number; maxSeconds: number; passive?: boolean }): { harvest: number; upgrades: number; beaten: number; final: GameState } {
+  let game = startCreature(createGame(options.seed, 0), options.seed);
+  for (let t = 1; t <= options.maxSeconds; t++) {
+    if (!options.passive && t % 5 === 0) {
+      for (let i = 0; i < 20; i++) {
+        const action = decideCreature(game);
+        if (!action) break;
+        const next = reduce(game, action);
+        if (next === game) break;
+        game = next;
+      }
+    }
+    game = advance(game, 1).game;
+  }
+  const h = game.creature!.hunt;
+  return { harvest: h.harvest, upgrades: Object.values(game.creature!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
+}
+
 export function simulateRun(options: SimOptions): SimResult {
   const { seed, maxSeconds, scenario = 'extraction', seniority = 0, activeClicks = 4, activeSeconds = 20 * 60, decisionInterval = 5 } =
     options;
   let game: GameState = createGame(seed, 0);
   const profile = seniority > 0 ? { ...createProfile(), seniority, contractsCompleted: 1, endingsSeen: ['deliver'] } : game.profile;
   game = { ...game, profile, mission: createMission(missionConfigFor(profile, scenario), seed) };
-  const PRESS: Record<ScenarioId, Action> = { extraction: { type: 'drill' }, terraform: { type: 'surge' }, security: { type: 'fireSupport' } };
   const press = PRESS[scenario];
   const actAt: Record<number, number> = { 1: 0 };
   let terminusAt: number | undefined;

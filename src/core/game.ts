@@ -3,6 +3,7 @@ import { tickMission } from '../mission/tick';
 import { appendLog } from '../mission/log';
 import { scenarioOf } from '../mission/registry';
 import { formatDuration, formatNumber } from '../shared/format';
+import { tickCreature, type CreatureHunt } from './creature';
 
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
 const CATCH_UP_STEP_SECONDS = 1;
@@ -49,11 +50,15 @@ export interface GameState {
   mission: MissionState;
   /** Waiting for the player to pick the next contract, and why; nothing runs meanwhile. */
   assigning: false | AssignmentReason;
+  /** Which side is open: the player's own contract, or Special Order 0-77 (the creature). */
+  mode: 'mission' | 'creature';
+  /** The creature's hunt, once accepted; kept while the player is back on their contract. */
+  creature: CreatureHunt | null;
   /** Reserved for the future Boardroom layer. */
   boardroom?: unknown;
 }
 
-export const GAME_VERSION = 5;
+export const GAME_VERSION = 6;
 
 export function createProfile(): Profile {
   return {
@@ -75,6 +80,8 @@ export function createGame(seed: number, now: number): GameState & { mission: Mi
     profile: createProfile(),
     mission: createMission(DEFAULT_MISSION_CONFIG, seed),
     assigning: false,
+    mode: 'mission',
+    creature: null,
   };
 }
 
@@ -84,6 +91,7 @@ export function newGame(seed: number, now: number): GameState {
 }
 
 export function tickGame(game: GameState, dt: number): GameState {
+  if (game.mode === 'creature') return tickCreature(game, dt);
   if (game.assigning) return game;
   const ctx = { cycle: game.profile.contractsCompleted, endings: game.profile.endingsSeen };
   return { ...game, mission: tickMission(game.mission, dt, ctx) };
@@ -101,10 +109,10 @@ function simulate(game: GameState, seconds: number): GameState {
 }
 
 function simulateAbsence(game: GameState, gapSeconds: number): { game: GameState; elapsed: number } {
-  if (game.assigning) return { game, elapsed: 0 };
+  if (game.assigning && game.mode !== 'creature') return { game, elapsed: 0 };
   const elapsed = Math.min(gapSeconds, OFFLINE_CAP_SECONDS);
   let g = simulate(game, elapsed);
-  if (elapsed >= ABSENCE_LOG_THRESHOLD) {
+  if (elapsed >= ABSENCE_LOG_THRESHOLD && game.mode === 'mission') {
     const before = scenarioOf(game.mission).outcome(game.mission);
     const after = scenarioOf(g.mission).outcome(g.mission);
     const credits = g.mission.credits - game.mission.credits;

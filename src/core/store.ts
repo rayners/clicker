@@ -27,6 +27,8 @@ import { advance, newGame, type GameState, type Settings } from './game';
 import { createReducerStore, type Listener as SharedListener, type Store as SharedStore } from '../shared/store';
 import { chooseAssignment, completeContract, type Ending } from './prestige';
 import type { ScenarioId } from '../mission/state';
+import { buyCreatureUpgrade, leaveCreature, startCreature } from './creature';
+import { shiftPush, toggleDormant } from '../shared/hunt';
 
 export type Action =
   | { type: 'drill' }
@@ -57,6 +59,11 @@ export type Action =
   | { type: 'cancelReassignment' }
   | { type: 'setSetting'; key: keyof Settings; value: boolean }
   | { type: 'hardReset'; seed: number; now: number }
+  | { type: 'startCreature'; seed: number }
+  | { type: 'leaveCreature' }
+  | { type: 'shiftCreaturePush'; index: number; step: 1 | -1 }
+  | { type: 'toggleCreatureDormant' }
+  | { type: 'buyCreatureUpgrade'; id: string }
   | { type: 'tick'; dt: number };
 
 /** Horror actions only apply to missions running that horror. */
@@ -134,6 +141,16 @@ export function reduce(game: GameState, action: Action): GameState {
       return game.assigning === 'reassign' ? { ...game, assigning: false } : game;
     case 'completeContract':
       return completeContract(game, action.ending, action.seed);
+    case 'startCreature':
+      return startCreature(game, action.seed);
+    case 'leaveCreature':
+      return leaveCreature(game);
+    case 'shiftCreaturePush':
+      return game.creature ? { ...game, creature: { ...game.creature, hunt: shiftPush(game.creature.hunt, action.index, action.step) } } : game;
+    case 'toggleCreatureDormant':
+      return game.creature ? { ...game, creature: { ...game.creature, hunt: toggleDormant(game.creature.hunt) } } : game;
+    case 'buyCreatureUpgrade':
+      return buyCreatureUpgrade(game, action.id);
     case 'tick':
       return advance(game, action.dt).game;
     default:

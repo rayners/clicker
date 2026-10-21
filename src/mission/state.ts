@@ -7,10 +7,11 @@ import type { TerraformFields } from './terraform/state';
 import type { SecurityFields } from './security/state';
 import type { OrganismFields } from './organism/state';
 import type { QuietFields } from './quiet/state';
+import type { CreatureFields } from './creature/state';
 import { HORRORS, SCENARIOS } from './registry';
 
 export type ScenarioId = 'extraction' | 'terraform' | 'security';
-export type HorrorId = 'organism' | 'quiet';
+export type HorrorId = 'organism' | 'quiet' | 'creature';
 
 /** Everything that varies between missions. Plain data so the future Boardroom layer can author it. */
 export interface MissionConfig {
@@ -81,7 +82,7 @@ export interface MissionCore {
 }
 
 export type ScenarioFields = ExtractionFields | TerraformFields | SecurityFields;
-export type HorrorFields = OrganismFields | QuietFields;
+export type HorrorFields = OrganismFields | QuietFields | CreatureFields;
 
 /** A single mission, fully self-contained and JSON-serializable. */
 export type MissionState = MissionCore & ScenarioFields & HorrorFields;
@@ -93,6 +94,7 @@ export type ExtractionMission = MissionCore & ExtractionFields & HorrorFields;
 export type TerraformMission = MissionCore & TerraformFields & HorrorFields;
 export type SecurityMission = MissionCore & SecurityFields & HorrorFields;
 export type OrganismMission = MissionCore & ScenarioFields & OrganismFields;
+export type CreatureMission = MissionCore & ScenarioFields & CreatureFields;
 
 export function isExtraction(m: MissionState): m is ExtractionMission {
   return m.scenario === 'extraction';
