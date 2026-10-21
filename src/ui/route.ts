@@ -24,7 +24,7 @@ export function createRoute(): { el: HTMLElement; render(m: HaulageMission): voi
   function render(m: HaulageMission) {
     setText(station, stationName(m.leg));
     setText(legs, `LEG ${m.leg + 1}`);
-    const progress = isDocked(m) ? 0 : m.travelled / legDistance(m.leg);
+    const progress = isDocked(m) ? 0 : m.travelled / legDistance(m);
     const filled = Math.floor(progress * BAR_CELLS);
     setText(bar, '▰'.repeat(filled) + '▱'.repeat(BAR_CELLS - filled));
     setAttr(bar, 'aria-valuenow', String(Math.round(progress * 100)));

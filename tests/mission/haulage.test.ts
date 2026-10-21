@@ -15,7 +15,6 @@ import {
   fireThrusters,
   fuelForLeg,
   fuelPrice,
-  FUEL_PRICE,
   isAutopilotActive,
   legDistance,
   legWindow,
@@ -29,6 +28,9 @@ import {
   trainMass,
   trainValue,
 } from '../../src/mission/haulage/economy';
+import { SPACE_HAUL } from '../../src/mission/haulage/profiles';
+
+const FUEL_PRICE = SPACE_HAUL.fuelPrice;
 
 type H = MissionOf<'haulage', 'organism'>;
 const fresh = (patch: Partial<H> = {}): H => ({ ...createMission(HAULAGE_MISSION_CONFIG, 1), ...patch });
@@ -110,7 +112,7 @@ describe('engines, cars and the burn', () => {
   });
 
   it('pays for the distance each car actually hauled: a car coupled just short of the station adds little', () => {
-    const nearly = underway({ travelled: legDistance(0) * 0.9, accrued: legDistance(0) * 0.9 * trainValue(underway()) });
+    const nearly = underway({ travelled: legDistance(fresh(), 0) * 0.9, accrued: legDistance(fresh(), 0) * 0.9 * trainValue(underway()) });
     const coupled = { ...nearly, cars: { ...nearly.cars, hopper: nearly.cars.hopper! + 10 } };
     expect(deliveryPay(coupled)).toBeLessThan(deliveryPay(nearly) * 2);
     expect(deliveryPay(coupled)).toBeGreaterThan(deliveryPay(nearly));
@@ -147,13 +149,13 @@ describe('engines, cars and the burn', () => {
 
 describe('stations and windows', () => {
   it('lengthens every leg, and gives each a delivery window', () => {
-    expect(legDistance(1)).toBeGreaterThan(legDistance(0));
+    expect(legDistance(fresh(), 1)).toBeGreaterThan(legDistance(fresh(), 0));
     expect(legWindow(fresh(), 3)).toBeGreaterThan(legWindow(fresh(), 0));
   });
 
   it('pays a bonus for arriving inside the window', () => {
     const quick = run(underway({ engines: { ...fresh().engines, booster: 30 } }), 120);
-    const slow = underway({ legTime: 10_000, travelled: legDistance(0) - 0.01 });
+    const slow = underway({ legTime: 10_000, travelled: legDistance(fresh(), 0) - 0.01 });
     const late = run(slow, 1);
     expect(quick.onTime).toBeGreaterThan(0);
     expect(late.onTime).toBe(0);

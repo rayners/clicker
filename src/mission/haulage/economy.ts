@@ -1,6 +1,6 @@
-import { BEACON_LEG, CARS, ENGINES, TUG_MASS, TUG_VALUE, stationName, type CarDef, type EngineDef } from '../../data/haulage/systems';
-import { HAULAGE_UPGRADES, type HaulageEffect } from '../../data/haulage/upgrades';
-import { HAULAGE_CREW_BOOSTS } from '../../data/haulage/crew-boosts';
+import type { CarDef, EngineDef } from '../../data/haulage/systems';
+import type { HaulageEffect } from '../../data/haulage/upgrades';
+import { profileOf, type HaulProfile } from './profiles';
 import { formatNumber } from '../../shared/format';
 import { isCrewEffective } from '../crew';
 import { horrorProductionMultiplier } from '../horrors';
@@ -12,32 +12,20 @@ export const COST_GROWTH = 1.15;
 export const CAR_COST_GROWTH = 1.18;
 export const MIN_BURN = 1;
 export const MAX_BURN = 10;
-/** The notch at which speed and fuel rate are quoted: thrust over mass, one unit of fuel per second per four of thrust. */
+/** The notch at which speed and fuel rate are quoted. */
 export const NOMINAL_BURN = 5;
 export const DEFAULT_BURN = 5;
 const SAFE_BURN = 6;
 /** Share of the freight's condition lost per leg for each notch past the strain line, squared. */
 const STRAIN = 0.02;
-/** Fuel burned per second per point of thrust at the nominal burn. Rises with the square of the burn. */
-const FUEL_PER_THRUST = 0.45;
-export const FUEL_PRICE = 0.6;
 /** A tender sent out to meet the train between stations charges this many times the station price. */
 const TENDER_MARKUP = 3;
-/** Credits per unit of freight value per unit of distance delivered. */
-const PAY = 0.6;
 const WINDOW_BONUS = 0.5;
-const LEG_BASE = 30;
-const LEG_GROWTH = 1.6;
-const WINDOW_BASE = 60;
-const WINDOW_GROWTH = 1.3;
 export const DOCK_SECONDS = 10;
 const THRUSTER_PUSH = 1;
 /** A dry train coasts on what it has: this share of the gentlest burn's speed, for nothing. */
 const COAST = 0.5;
-// Haulage's own fit to the shared story scale (1,000 at act 2, 3,200 at the discovery), tuned by the pacing bot:
-// freight revenue compounds faster than extraction's ore, so the curve is flatter.
-const PROGRESS_SCALE = 3.82;
-const PROGRESS_EXPONENT = 3.12;
+// Per-haul numbers (fleet, route, pay, fuel, the story curve) live in the haul's profile (./profiles.ts).
 
 interface Multipliers {
   thrusters: number;
@@ -105,8 +93,9 @@ function multipliers(m: MissionState): Multipliers {
     droneLoaders: false,
     window: 1,
   };
-  for (const u of HAULAGE_UPGRADES) if (m.upgrades.includes(u.id)) applyEffect(r, u.effect);
-  for (const [id, boost] of Object.entries(HAULAGE_CREW_BOOSTS)) if (isCrewEffective(m, id)) applyEffect(r, boost.effect);
+  const p = profileOf(m);
+  for (const u of p.upgrades) if (m.upgrades.includes(u.id)) applyEffect(r, u.effect);
+  for (const [id, boost] of Object.entries(p.crewBoosts)) if (isCrewEffective(m, id)) applyEffect(r, boost.effect);
   return r;
 }
 
@@ -116,7 +105,7 @@ export const engineCost = (def: EngineDef, owned: number): number => Math.ceil(d
 export const carCost = (def: CarDef, owned: number): number => Math.ceil(def.baseCost * CAR_COST_GROWTH ** owned);
 
 export function buyEngine<M extends MissionState>(m: M, id: string): M {
-  const def = ENGINES.find((e) => e.id === id);
+  const def = profileOf(m).engines.find((e) => e.id === id);
   if (!def) return m;
   const owned = m.engines[id] ?? 0;
   const cost = engineCost(def, owned);
@@ -125,7 +114,7 @@ export function buyEngine<M extends MissionState>(m: M, id: string): M {
 }
 
 export function buyCar<M extends MissionState>(m: M, id: string): M {
-  const def = CARS.find((c) => c.id === id);
+  const def = profileOf(m).cars.find((c) => c.id === id);
   if (!def) return m;
   const owned = m.cars[id] ?? 0;
   const cost = carCost(def, owned);
@@ -135,17 +124,18 @@ export function buyCar<M extends MissionState>(m: M, id: string): M {
 
 /** The first tier is always visible; each further one once the one before it is owned. */
 export function isEngineRevealed(m: MissionState, index: number): boolean {
-  return index === 0 || ENGINES.slice(index - 1).some((e) => (m.engines[e.id] ?? 0) > 0);
+  return index === 0 || profileOf(m).engines.slice(index - 1).some((e) => (m.engines[e.id] ?? 0) > 0);
 }
 
 export function isCarRevealed(m: MissionState, index: number): boolean {
-  return index === 0 || CARS.slice(index - 1).some((c) => (m.cars[c.id] ?? 0) > 0);
+  return index === 0 || profileOf(m).cars.slice(index - 1).some((c) => (m.cars[c.id] ?? 0) > 0);
 }
 
 // ---------- the train ----------
 
 /** Everything a tick needs about the train, worked out once: upgrades, crew and horror folded in. */
 interface Train {
+  profile: HaulProfile;
   mult: Multipliers;
   thrust: number;
   value: number;
@@ -153,25 +143,26 @@ interface Train {
 }
 
 function train(m: MissionState): Train {
+  const profile = profileOf(m);
   const mult = multipliers(m);
   let thrust = 0;
-  for (const e of ENGINES) thrust += (m.engines[e.id] ?? 0) * e.thrust * (mult.engine[e.id] ?? 1) * mult.thrust;
-  let value = TUG_VALUE;
-  let mass = TUG_MASS;
-  for (const c of CARS) {
+  for (const e of profile.engines) thrust += (m.engines[e.id] ?? 0) * e.thrust * (mult.engine[e.id] ?? 1) * mult.thrust;
+  let value = profile.tugValue;
+  let mass = profile.tugMass;
+  for (const c of profile.cars) {
     const n = m.cars[c.id] ?? 0;
     value += n * c.value * (mult.car[c.id] ?? 1);
     mass += n * c.mass;
   }
-  return { mult, thrust, value, mass };
+  return { profile, mult, thrust, value, mass };
 }
 
 const speedOf = (t: Train, burn: number) => (t.thrust * (burn / NOMINAL_BURN)) / t.mass;
-const fuelRateOf = (t: Train, burn: number) => (t.thrust * FUEL_PER_THRUST * (burn / NOMINAL_BURN) ** 2) / t.mult.fuelEfficiency;
-const windowOf = (t: Train, leg: number) => WINDOW_BASE * WINDOW_GROWTH ** leg * t.mult.window;
+const fuelRateOf = (t: Train, burn: number) => (t.thrust * t.profile.fuelPerThrust * (burn / NOMINAL_BURN) ** 2) / t.mult.fuelEfficiency;
+const windowOf = (t: Train, leg: number) => t.profile.windowBase * t.profile.windowGrowth ** leg * t.mult.window;
 const thrusterPowerOf = (t: Train) => (THRUSTER_PUSH * t.mult.thrusters) / t.mass;
 /** Credits per unit of distance the freight earns as it moves, at a given condition. */
-const earningOf = (t: Train, condition: number) => PAY * t.value * condition * t.mult.pay;
+const earningOf = (t: Train, condition: number) => t.profile.pay * t.value * condition * t.mult.pay;
 
 export function engineThrust(m: MissionState, def: EngineDef): number {
   const mult = multipliers(m);
@@ -187,9 +178,7 @@ export function carValue(m: MissionState, def: CarDef): number {
 /** Freight value per unit of distance: what the whole train earns as it moves. */
 export const trainValue = (m: MissionState): number => train(m).value;
 
-export function trainMass(m: MissionState): number {
-  return CARS.reduce((s, c) => s + (m.cars[c.id] ?? 0) * c.mass, TUG_MASS);
-}
+export const trainMass = (m: MissionState): number => train(m).mass;
 
 export const safeBurn = (m: MissionState): number => multipliers(m).safeBurn;
 
@@ -205,7 +194,10 @@ export const fuelRate = (m: MissionState, burn: number): number => fuelRateOf(tr
 
 // ---------- legs and windows ----------
 
-export const legDistance = (leg: number): number => LEG_BASE * LEG_GROWTH ** leg;
+const distanceOf = (p: HaulProfile, leg: number) => p.legBase * p.legGrowth ** leg;
+
+/** How long a leg is: the current one unless another is asked for. */
+export const legDistance = (m: MissionState, leg: number = m.leg): number => distanceOf(profileOf(m), leg);
 
 export const legWindow = (m: MissionState, leg: number): number => windowOf(train(m), leg);
 
@@ -215,14 +207,14 @@ function fuelForLegOf(m: MissionState, t: Train): number {
   const burn = burnOf(m, t);
   const v = speedOf(t, burn);
   if (v <= 0) return 0;
-  return ((legDistance(m.leg) - m.travelled) / v) * fuelRateOf(t, burn);
+  return ((legDistance(m) - m.travelled) / v) * fuelRateOf(t, burn);
 }
 
 /** Fuel for what is left of this leg (or all of the next one, at a dock), at the burn the tug will fly. */
 export const fuelForLeg = (m: MissionState): number => fuelForLegOf(m, train(m));
 
 /** Station price at a dock; under way, only a tender can bring fuel out, at a markup. */
-export const fuelPrice = (m: MissionState): number => (isDocked(m) ? FUEL_PRICE : FUEL_PRICE * TENDER_MARKUP);
+export const fuelPrice = (m: MissionState): number => profileOf(m).fuelPrice * (isDocked(m) ? 1 : TENDER_MARKUP);
 
 /** Fuel for the rest of the leg (the next one, at a dock), as far as the credits go. */
 export function refuel<M extends MissionState>(m: M): M {
@@ -252,10 +244,10 @@ export function toggleAutopilot<M extends MissionState>(m: M): M {
 function autopilotBurn(m: MissionState, t: Train): number {
   const safe = Math.min(MAX_BURN, t.mult.safeBurn);
   if (t.thrust <= 0) return safe;
-  const remaining = legDistance(m.leg) - m.travelled;
+  const remaining = legDistance(m) - m.travelled;
   const window = windowOf(t, m.leg);
   // Fuel spent per credit earned, per notch: the share of the freight's pay the tanks eat.
-  const share = (FUEL_PRICE * FUEL_PER_THRUST * t.mass) / (PAY * t.value * t.mult.fuelEfficiency * NOMINAL_BURN);
+  const share = (t.profile.fuelPrice * t.profile.fuelPerThrust * t.mass) / (t.profile.pay * t.value * t.mult.fuelEfficiency * NOMINAL_BURN);
   let best = safe;
   let bestRate = -Infinity;
   for (let burn = MIN_BURN; burn <= safe; burn++) {
@@ -284,7 +276,7 @@ export const autoThrusterRate = (m: MissionState): number => multipliers(m).auto
 export function deliveryPay(m: MissionState): number {
   const t = train(m);
   const onTime = m.legTime <= windowOf(t, m.leg);
-  const leg = m.accrued + earningOf(t, m.condition) * (legDistance(m.leg) - m.travelled);
+  const leg = m.accrued + earningOf(t, m.condition) * (legDistance(m) - m.travelled);
   return leg * (onTime ? 1 + WINDOW_BONUS : 1);
 }
 
@@ -301,7 +293,7 @@ export function incomeRate(m: MissionState): number {
   const t = train(m);
   const v = speedNow(m, t);
   if (v <= 0) return 0;
-  const moving = legDistance(m.leg) / v;
+  const moving = legDistance(m) / v;
   const onTime = m.legTime <= windowOf(t, m.leg);
   const perSecond = earningOf(t, m.condition) * v * (onTime ? 1 + WINDOW_BONUS : 1);
   return (perSecond * moving) / (moving + DOCK_SECONDS);
@@ -310,7 +302,7 @@ export function incomeRate(m: MissionState): number {
 function arrive<M extends MissionState>(m: M, t: Train): M {
   const onTime = m.legTime <= windowOf(t, m.leg);
   const bonus = onTime ? m.accrued * WINDOW_BONUS : 0;
-  const station = stationName(m.leg);
+  const station = t.profile.station(m.leg);
   let next: M = {
     ...m,
     credits: m.credits + bonus,
@@ -334,7 +326,7 @@ function arrive<M extends MissionState>(m: M, t: Train): M {
 /** Push the train along the current leg, delivering if it gets there. */
 function travel<M extends MissionState>(m: M, t: Train, distance: number, burn: number): M {
   if (distance <= 0) return m;
-  const length = legDistance(m.leg);
+  const length = legDistance(m);
   const covered = Math.min(distance, length - m.travelled);
   const over = Math.max(0, burn - t.mult.safeBurn);
   const condition = Math.max(0, m.condition - STRAIN * over * over * (covered / length));
@@ -377,15 +369,19 @@ export function tickHaulage<M extends MissionState>(m: M, dt: number): M {
 
 /** Haulage progress on the shared story scale (extraction's metres). */
 export function progress(m: MissionState): number {
-  return Math.floor(PROGRESS_SCALE * Math.log10(1 + m.delivered) ** PROGRESS_EXPONENT);
+  const p = profileOf(m);
+  return Math.floor(p.progressScale * Math.log10(1 + m.delivered) ** p.progressExponent);
 }
 
-export const answeredBeacon = (m: MissionState): boolean => m.leg > BEACON_LEG;
+export function answeredBeacon(m: MissionState): boolean {
+  const beacon = profileOf(m).beaconLeg;
+  return beacon !== null && m.leg > beacon;
+}
 
 // ---------- requisitions ----------
 
 export function isHaulageUpgradeUnlocked(m: MissionState, id: string): boolean {
-  const u = HAULAGE_UPGRADES.find((x) => x.id === id);
+  const u = profileOf(m).upgrades.find((x) => x.id === id);
   if (!u) return false;
   if (u.unlock.delivered !== undefined && m.delivered < u.unlock.delivered) return false;
   if (u.unlock.engine && (m.engines[u.unlock.engine.id] ?? 0) < u.unlock.engine.count) return false;
@@ -394,11 +390,11 @@ export function isHaulageUpgradeUnlocked(m: MissionState, id: string): boolean {
 }
 
 export function availableHaulageUpgrades(m: MissionState) {
-  return HAULAGE_UPGRADES.filter((u) => !m.upgrades.includes(u.id) && isHaulageUpgradeUnlocked(m, u.id)).sort((a, b) => a.cost - b.cost);
+  return profileOf(m).upgrades.filter((u) => !m.upgrades.includes(u.id) && isHaulageUpgradeUnlocked(m, u.id)).sort((a, b) => a.cost - b.cost);
 }
 
 export function buyHaulageUpgrade<M extends MissionState>(m: M, id: string): M {
-  const u = HAULAGE_UPGRADES.find((x) => x.id === id);
+  const u = profileOf(m).upgrades.find((x) => x.id === id);
   if (!u || m.upgrades.includes(id) || !isHaulageUpgradeUnlocked(m, id) || m.credits < u.cost) return m;
   return { ...m, credits: m.credits - u.cost, upgrades: [...m.upgrades, id] };
 }

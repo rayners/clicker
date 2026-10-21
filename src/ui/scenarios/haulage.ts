@@ -79,7 +79,7 @@ export function createHaulageUi(store: Store): ScenarioUi {
         const income = incomeRate(m);
         const base = {
           values: [v, trainValue(m), income] as [number, number, number],
-          meter: isDocked(m) ? 0 : (m.travelled / legDistance(m.leg)) * 100,
+          meter: isDocked(m) ? 0 : (m.travelled / legDistance(m)) * 100,
           rate: income,
         };
         if (isDocked(m)) {
