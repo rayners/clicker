@@ -36,7 +36,8 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 | Elderdark | `charter_completed` | ending, minutes, relics, dead |
 | LATE FEES | `film_started` | venue, killer, part |
 | LATE FEES | `act_reached` | act, venue, killer, part, minutes |
-| LATE FEES | `zone_opened` | zone, zones, minutes, part |
+| LATE FEES | `zone_opened` | zone, zones, minutes, part (Camp Blackwater) |
+| LATE FEES | `bed_opened` | bed, minutes, part (the first of each kind of bed at the sleep clinic) |
 | LATE FEES | `film_completed` | ending, venue, bodyCount, minutes, part |
 
 Useful PostHog insights: a funnel `act_reached` (act = 2, 3, 4) → `contract_completed`, broken down by scenario; the

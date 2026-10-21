@@ -124,7 +124,20 @@ After enough sequels, the franchise "goes in a new direction": you play **the ki
   - the credits 75 minutes after that.
 - **Pacing (bot):** act 2 at 59m, the final girl at 2h27m, the confrontation at 2h52m, credits at 4h07m (`npm run simulate:late`, `tests/late-fees/pacing.test.ts`).
 - **Sequels:** Box Office (+25% takings each), Lore (takes back some of the killer's sequel strength), and pressure +15% per part. *Burn it down* unlocks after three films.
-- **Out of stock** on the shelf for now: *A Nightmare on Sycamore Street* and *Final Departure*.
+**Step 3 is done: the Sycamore Street Sleep Clinic with the Burned Man.**
+- **Beds earn grant money.** They use the mining tier ladder, and patient counts stay in the hundreds.
+- **The deep-sleep dial.** Deep sleep earns 1.8× light sleep, but only for deep sleepers someone is watching.
+  - Night staff tiers (cost growth 1.2) are the brake.
+  - Unwatched deep sleepers die at 0.2% per second at pressure 1. Each death costs 3% reputation.
+  - Sleep debt builds while the dial sits below 30% deep. Past 100%, patients nod off unwatched.
+  - Dream suppressant allocations (×3 cost each) protect 6 patients each.
+  - Lucid-dreaming training halves the death rate, three times over.
+  - Automated monitoring sets the dial as deep as the watch allows, never below what patients need, and can be overruled.
+- **The Burned Man's text** uses only placeholders the camp also supplies, so a crossover is already possible (a test checks this).
+- **Pacing (bot):** act 2 at 1h05m, the final girl at 2h34m, the confrontation at 2h59m, credits at 4h14m.
+- **The interface** now takes a per-venue UI (`src/late-fees-ui/venues.ts`, `clinic.ts`), the same pattern as DEEP CONTRACT's `ScenarioUi`.
+- **Telemetry:** adds `bed_opened`.
+- **Out of stock** on the shelf for now: *Final Departure*.
 
 ## Build order
 

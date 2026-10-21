@@ -1,7 +1,8 @@
 import type { TelemetryEvent, TelemetryProps } from '../shared/telemetry';
 import { ZONES } from '../late-fees-data/camp';
+import { BEDS } from '../late-fees-data/clinic';
 import type { LateGame } from './game';
-import type { CampRun } from './state';
+import type { CampRun, ClinicRun } from './state';
 
 const minutes = (seconds: number) => Math.round(seconds / 60);
 
@@ -11,7 +12,7 @@ export function filmProperties(game: LateGame): TelemetryProps {
   return { game: 'late-fees', venue: r.venue, killer: r.killer, part: r.config.part, act: r.act, sequels: game.profile.sequels };
 }
 
-/** Milestones between two successive states: tapes rented, acts, zones opened, films finished. */
+/** Milestones between two successive states: tapes rented, acts, camp zones and clinic beds opened, films finished. */
 export function filmEvents(prev: LateGame, next: LateGame): TelemetryEvent[] {
   if (next.profile.sequels > prev.profile.sequels) {
     const record = next.profile.history.at(-1)!;
@@ -28,8 +29,16 @@ export function filmEvents(prev: LateGame, next: LateGame): TelemetryEvent[] {
   const events: TelemetryEvent[] = [];
   const at = { minutes: minutes(r.elapsed), part: r.config.part };
   if (r.act > prev.run.act) events.push({ name: 'act_reached', props: { act: r.act, venue: r.venue, killer: r.killer, ...at } });
-  const was = prev.run as CampRun;
-  const now = r as CampRun;
-  if (now.deepest > was.deepest) events.push({ name: 'zone_opened', props: { zone: ZONES[now.deepest - 1]!.id, zones: now.deepest, ...at } });
+  if (r.venue === 'camp') {
+    const was = prev.run as CampRun;
+    const now = r as CampRun;
+    if (now.deepest > was.deepest) events.push({ name: 'zone_opened', props: { zone: ZONES[now.deepest - 1]!.id, zones: now.deepest, ...at } });
+  } else if (r.venue === 'clinic') {
+    const was = prev.run as ClinicRun;
+    const now = r as ClinicRun;
+    for (const b of BEDS) {
+      if ((now.beds[b.id] ?? 0) > 0 && (was.beds[b.id] ?? 0) === 0) events.push({ name: 'bed_opened', props: { bed: b.id, ...at } });
+    }
+  }
   return events;
 }

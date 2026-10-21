@@ -6,8 +6,8 @@ Three idle games that run entirely in the browser. **Play: https://rayners.githu
   Kessler-Amari Combine ore hauler orbiting a remote moonlet. It is a cheerful corporate mining game, until it isn't.
 - **CHARTER OF THE ELDERDARK** (`/forest/`): dark-fantasy company management. Keep the ledger of a treasure-hunting
   company on the edge of a corrupting forest, and count who comes back.
-- **LATE FEES** (`/late-fees/`): slasher homages on a 1988 video store shelf. Run Camp Blackwater while the body
-  count climbs; every film gets a sequel.
+- **LATE FEES** (`/late-fees/`): slasher homages on a 1988 video store shelf. Run Camp Blackwater or the Sycamore
+  Street Sleep Clinic while the body count climbs; every film gets a sequel.
 
 State lives in `localStorage`; the site is a static, installable, offline-capable PWA (each game installs as its own
 app). Pushes to `main` are tested and deployed to GitHub Pages.

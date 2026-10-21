@@ -129,6 +129,15 @@ button:disabled {
   min-width: 0;
 }
 
+/* Only the title gives way when the bar is tight. */
+.osd-left {
+  flex: 1 1 0;
+}
+
+.osd-right {
+  flex: none;
+}
+
 .osd-play {
   flex: none;
   color: var(--cyan);
@@ -501,6 +510,50 @@ button:disabled {
 
 .zones {
   margin-top: 6px;
+}
+
+/* ---------- the deep-sleep dial (clinic) ---------- */
+
+.debt {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 8px;
+  margin-top: 6px;
+}
+
+.debt-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.debt-bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  border: 1px solid var(--faint);
+}
+
+.debt-fill {
+  display: block;
+  height: 100%;
+  background: var(--cyan);
+  transition: width 0.5s ease;
+}
+
+.dial[data-debt='high'] .debt-value {
+  color: var(--rec);
+  animation: blink 1s steps(2, end) infinite;
+}
+
+.dial[data-debt='high'] .debt-fill {
+  background: var(--rec);
+}
+
+/* The clinic is a night business: the REC light stays on, and the screen sits a shade colder. */
+.vhs-shell[data-venue='clinic'] {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(43, 240, 255, 0.06), transparent 60%),
+    radial-gradient(ellipse at 50% 120%, rgba(0, 0, 0, 0.8), transparent 60%),
+    #05040b;
 }
 
 .zone-list {
@@ -898,8 +951,13 @@ button:disabled {
     gap: 6px;
   }
 
-  .osd-sp {
+  .osd-sp,
+  .osd-rec-text {
     display: none;
+  }
+
+  .osd-rec {
+    white-space: nowrap;
   }
 
   .setup-open {
