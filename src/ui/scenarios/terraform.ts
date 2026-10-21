@@ -96,6 +96,7 @@ export function createTerraformUi(store: Store): ScenarioUi {
       { label: 'COLONISTS', aria: 'Colonists alive', read: (m) => formatNumber(t(m).colonists) },
       { label: 'SPEC', aria: 'Spec revision', read: (m) => `REV ${specRevision(t(m))}` },
     ],
+    sprites: { vessel: 'platform', target: 'planet', action: 'coil' },
     action: {
       label: 'FIRE PROCESSOR SURGE',
       aria: 'Fire processor surge',

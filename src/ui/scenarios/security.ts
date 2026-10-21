@@ -118,6 +118,7 @@ export function createSecurityUi(store: Store): ScenarioUi {
       { label: 'SECTORS', aria: 'Sectors held', read: (m) => `${held(s(m).ground)}/${SECTIONS.length}` },
       { label: 'FORCE', aria: 'Total force', read: (m) => formatNumber(force(s(m))) },
     ],
+    sprites: { vessel: 'transport', target: 'colony', action: 'reticle' },
     action: {
       label: 'CALL FIRE SUPPORT',
       aria: 'Call fire support',

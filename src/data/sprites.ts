@@ -200,6 +200,139 @@ const thruster = sprite(
   ],
 );
 
+// Terraforming: the processing station venting its stacks (32x12), the planet under its new clouds (16x16), a
+// surge coil arcing (12x12, two frames). Security: the transport with its dropship (32x12), the colony's domes
+// under the atmosphere processor (16x16), a fire-support reticle closing in (12x12, two frames).
+const platform = sprite([
+  '..........a.a.......a.a.........',
+  '.........a.a.a.....a.a.a........',
+  '..........dd........dd..........',
+  '..........cc........cc..........',
+  '.........bccb......bccb.........',
+  '.........bccb......bccb.........',
+  '....bbbbbbccbbbbbbbbccbbbbbb....',
+  '...bcccccccccccccccccccccccccb..',
+  '..bccdcdcdcccccccccccdcdcdcccb..',
+  '..bcccccccccccccccccccccccccccb.',
+  '.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+  '..bcb....bcb....bcb....bcb..bcb.',
+]);
+
+const planet = sprite([
+  '.....aaaaaa.....',
+  '...aabbbbbbaa...',
+  '..abbccccccbba..',
+  '.abccddccccccba.',
+  '.bccccccccddccb.',
+  'abcaaaccccccccba',
+  'abcccccaaaacccba',
+  'abccccccccccccba',
+  'abcddcccccccddba',
+  'abccccaaaaccccba',
+  'abccccccccccccba',
+  '.bccaaacccccccb.',
+  '.abccccccccccba.',
+  '..abbccccccbba..',
+  '...aabbbbbbaa...',
+  '.....aaaaaa.....',
+]);
+
+const coil = sprite(
+  [
+    '.....dd.....',
+    '....dccd....',
+    '.....cc.....',
+    '....bccb....',
+    '.....cc.....',
+    '....bccb....',
+    '.....cc.....',
+    '....bccb....',
+    '...bccccb...',
+    '..bccccccb..',
+    '..bbbbbbbb..',
+    '............',
+  ],
+  [
+    '.e..dd..e...',
+    '..edccde....',
+    '.e...cc..e..',
+    '....bccb....',
+    '.....cc.....',
+    '....bccb....',
+    '.....cc.....',
+    '....bccb....',
+    '...bccccb...',
+    '..bccccccb..',
+    '..bbbbbbbb..',
+    '............',
+  ],
+);
+
+const transport = sprite([
+  '................................',
+  '.........bbbbbbbbbbbbbb.........',
+  '.......bbccccccccccccccbbb......',
+  '....bbbccdcdcdcdccccccccccbb....',
+  '..ebccccccccccccccccccccccccbbb.',
+  '.eebccccccccccccccccccccccccccdb',
+  '..ebccccccccccccccccccccccccbbb.',
+  '....bbbbbbbbccccccccbbbbbbbb....',
+  '...........bbccccccbb...........',
+  '..........bccaccaccccb..........',
+  '...........bbbbbbbbbb...........',
+  '................................',
+]);
+
+const colony = sprite([
+  '........d.......',
+  '........d.......',
+  '.......bcb......',
+  '.......bcb......',
+  '.......bcb......',
+  '......bcccb.....',
+  '......bcccb.....',
+  '..bbb.bcccb.bbb.',
+  '.bcccbbcccbbcccb',
+  'bccaccbcccbcaccb',
+  'bcccccbcccbccccb',
+  'bbbbbbbbbbbbbbbb',
+  'ccaaccccccccaacc',
+  'cccccccaaacccccc',
+  'cccccccccccccccc',
+  'aaaaaaaaaaaaaaaa',
+]);
+
+const reticle = sprite(
+  [
+    '.....dd.....',
+    '.....dd.....',
+    '..bb....bb..',
+    '..b......b..',
+    '............',
+    'dd...ee...dd',
+    'dd...ee...dd',
+    '............',
+    '..b......b..',
+    '..bb....bb..',
+    '.....dd.....',
+    '.....dd.....',
+  ],
+  [
+    '............',
+    '.....dd.....',
+    '...bb..bb...',
+    '...b....b...',
+    '.....ee.....',
+    '.d..eeee..d.',
+    '.d..eeee..d.',
+    '.....ee.....',
+    '...b....b...',
+    '...bb..bb...',
+    '.....dd.....',
+    '............',
+  ],
+);
+
 // 12x12 crew portraits: d = hair, c = skin, a = eyes, b = mouth/uniform, e = insignia/glasses.
 const portraits: Record<string, string[]> = {
   okonkwo: [
@@ -312,5 +445,11 @@ export const SPRITES: Record<string, Sprite> = {
   tug,
   station,
   thruster,
+  platform,
+  planet,
+  coil,
+  transport,
+  colony,
+  reticle,
   ...Object.fromEntries(Object.entries(portraits).map(([id, rows]) => [`crew-${id}`, sprite(rows)])),
 };

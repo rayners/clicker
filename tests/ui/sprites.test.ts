@@ -6,7 +6,7 @@ import { createGame } from '../../src/core/game';
 import { createStore } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
 import { SPRITES } from '../../src/data/sprites';
-import { createMission, HAULAGE_MISSION_CONFIG, OVERLAND_MISSION_CONFIG, type MissionConfig } from '../../src/mission/state';
+import { createMission, HAULAGE_MISSION_CONFIG, OVERLAND_MISSION_CONFIG, SECURITY_MISSION_CONFIG, TERRAFORM_MISSION_CONFIG, type MissionConfig } from '../../src/mission/state';
 import type { Store } from '../../src/core/store';
 
 function contract(config: MissionConfig): Store {
@@ -67,5 +67,19 @@ describe('pixel accents', () => {
     store.replace({ ...store.getState(), mission: createMission({ ...OVERLAND_MISSION_CONFIG, scenario: 'extraction', horror: 'organism' }, 2) });
     expect(within(screen.getByRole('banner')).getByTestId('sprite-ship')).toBeTruthy();
     expect(screen.queryByTestId('sprite-crawler')).toBeNull();
+  });
+
+  it('shows the processing station, the planet it is remaking, and a coil for each surge on a terraforming contract', () => {
+    contract(TERRAFORM_MISSION_CONFIG);
+    expect(within(screen.getByRole('banner')).getByTestId('sprite-platform')).toBeTruthy();
+    expect(within(screen.getByRole('region', { name: /ship status/i })).getByTestId('sprite-planet')).toBeTruthy();
+    expect(within(screen.getByRole('button', { name: /surge/i })).getByTestId('sprite-coil')).toBeTruthy();
+  });
+
+  it('shows the transport, the silent colony, and a reticle for fire support on a security contract', () => {
+    contract(SECURITY_MISSION_CONFIG);
+    expect(within(screen.getByRole('banner')).getByTestId('sprite-transport')).toBeTruthy();
+    expect(within(screen.getByRole('region', { name: /ship status/i })).getByTestId('sprite-colony')).toBeTruthy();
+    expect(within(screen.getByRole('button', { name: /call fire support/i })).getByTestId('sprite-reticle')).toBeTruthy();
   });
 });

@@ -34,4 +34,10 @@ describe('sprite table', () => {
     expect(SPRITES.piston!.frames.length).toBeGreaterThan(1);
     expect(SPRITES.thruster!.frames.length).toBeGreaterThan(1);
   });
+
+  it('has accents for terraforming and security: a station, its planet, a coil; a transport, the colony, a reticle', () => {
+    for (const name of ['platform', 'planet', 'coil', 'transport', 'colony', 'reticle']) expect(SPRITES[name], name).toBeDefined();
+    expect(SPRITES.coil!.frames.length).toBeGreaterThan(1);
+    expect(SPRITES.reticle!.frames.length).toBeGreaterThan(1);
+  });
 });

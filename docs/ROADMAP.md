@@ -63,7 +63,7 @@ Requested 2026-10-19. Tracked in `docs/forest/DESIGN.md`. A playable first slice
 - An optional first-load boot sequence animation.
 - **Raise `TERRAFORM_UNLOCK_CONTRACTS`** (currently 0 so it can be play-tested) once the user is happy with it.
 - **A second horror.** The architecture is ready: add `src/mission/<horror>/`, a `HorrorDef`, lexicon keys each scenario must supply, and optional pairings. Choosing a horror per contract (random or cycled from the profile) is still to be designed.
-- Terraform polish: collapse the allocation controls to a one-line summary once WARDEN auto-balances (it frees phone space); terraform-specific sprites (station masthead and planet instead of ship and moonlet).
+- Terraform polish: collapse the allocation controls to a one-line summary once WARDEN auto-balances (it frees phone space). (Every scenario now has its own vessel, target and action sprites.)
 - More flow feedback: show each purchase's effect on *income* (not just ore/s) on the buy buttons.
 - The **Boardroom** layer (`docs/BOARDROOM.md`).
 
