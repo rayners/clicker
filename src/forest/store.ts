@@ -3,7 +3,8 @@ import type { BuildingId } from '../forest-data/buildings';
 import { createReducerStore, type Store } from '../shared/store';
 import { adjustOrder, buyBuilding, buyUpgrade, dispatch, forage, hire, penance, toggleStanding } from './company';
 import { advance, createForestGame, type ForestGame, type ForestSettings } from './game';
-import { completeCharter, type Ending } from './charter';
+import { completeCharter, rewriteCharter, type Ending } from './charter';
+import type { SiteId } from './state';
 import { buyWoodUpgrade, leaveWood, startWood } from './wood';
 import { shiftPush, toggleDormant } from '../shared/hunt';
 
@@ -16,7 +17,8 @@ export type ForestAction =
   | { type: 'penance' }
   | { type: 'buyUpgrade'; id: string }
   | { type: 'toggleStanding'; region: string }
-  | { type: 'completeCharter'; ending: Ending; seed: number }
+  | { type: 'completeCharter'; ending: Ending; seed: number; site?: SiteId }
+  | { type: 'rewriteCharter'; site: SiteId; seed: number }
   | { type: 'startWood'; seed: number }
   | { type: 'shiftWoodPush'; index: number; step: 1 | -1 }
   | { type: 'toggleWoodDormant' }
@@ -51,7 +53,9 @@ export function reduce(game: ForestGame, action: ForestAction): ForestGame {
     case 'toggleStanding':
       return company(game, toggleStanding(c, action.region));
     case 'completeCharter':
-      return completeCharter(game, action.ending, action.seed);
+      return completeCharter(game, action.ending, action.seed, action.site);
+    case 'rewriteCharter':
+      return game.mode === 'wood' ? game : rewriteCharter(game, action.site, action.seed);
     case 'startWood':
       return startWood(game, action.seed);
     case 'shiftWoodPush':

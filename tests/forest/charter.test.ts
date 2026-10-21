@@ -43,7 +43,7 @@ describe('the reckoning', () => {
     const next = completeCharter(g, 'sell', 9);
     expect(next.profile.chartersCompleted).toBe(1);
     expect(next.profile.renown).toBe(endingRewards(g).sell.renown);
-    expect(next.profile.history).toEqual([{ ending: 'sell', relics: 1e7, dead: 12, duration: 15_000 }]);
+    expect(next.profile.history).toEqual([{ ending: 'sell', relics: 1e7, dead: 12, duration: 15_000, site: 'forest' }]);
     expect(next.company.elapsed).toBe(0);
     expect(next.company.seed).toBe(9);
     expect(next.company.charter).toEqual({ number: 2, renown: next.profile.renown, grace: 0 });
@@ -82,5 +82,25 @@ describe('what a charter carries forward', () => {
     let c = { ...createCompany(1, { number: 2, renown: 1, grace: 0 }), lifetimeRelics: 50 };
     for (let i = 0; i < 10; i++) c = runForestStory({ ...c, elapsed: c.elapsed + FOREST_STORY_GAP + 1 });
     expect(c.log.some((e) => /factor's own/i.test(e.text))).toBe(true);
+  });
+});
+
+describe('choosing where the charter delves', () => {
+  it('writes the next charter for the forest or for Morrowgate Keep, as the Factor chooses', () => {
+    expect(completeCharter(due(), 'sell', 2).company.site).toBe('forest');
+    const keep = reduce(due(), { type: 'completeCharter', ending: 'sell', seed: 2, site: 'keep' });
+    expect(keep.company.site).toBe('keep');
+    expect(keep.company.charter.number).toBe(2);
+    expect(keep.profile.history.at(-1)!.site).toBe('forest');
+  });
+
+  it('can tear up the current charter for one at the other site, keeping what earlier charters earned but earning nothing', () => {
+    const g = { ...createForestGame(1, NOW), profile: { ...createForestGame(1, NOW).profile, renown: 2, chartersCompleted: 1 } };
+    const started = { ...g, company: createCompany(1, { number: 2, renown: 2, grace: 0 }) };
+    const moved = reduce(started, { type: 'rewriteCharter', site: 'keep', seed: 5 });
+    expect(moved.company.site).toBe('keep');
+    expect(moved.company.charter).toEqual(started.company.charter);
+    expect(moved.profile).toEqual(started.profile);
+    expect(reduce(moved, { type: 'rewriteCharter', site: 'keep', seed: 6 })).toBe(moved);
   });
 });

@@ -1,5 +1,5 @@
 import { CLASS_IDS } from '../forest-data/classes';
-import { createCompany } from './state';
+import { createCompany, type SiteId } from './state';
 import type { ForestGame, ForestProfile } from './game';
 
 export type Ending = 'sell' | 'return' | 'burn';
@@ -33,7 +33,7 @@ export function endingRewards(game: ForestGame): Record<Ending, Reward> {
 }
 
 /** Closes the charter with the Factor's choice and opens the next one, shaped by everything before it. */
-export function completeCharter(game: ForestGame, ending: Ending, seed: number): ForestGame {
+export function completeCharter(game: ForestGame, ending: Ending, seed: number, site: SiteId = 'forest'): ForestGame {
   if (!availableEndings(game).includes(ending)) return game;
   const reward = endingRewards(game)[ending];
   const c = game.company;
@@ -42,8 +42,14 @@ export function completeCharter(game: ForestGame, ending: Ending, seed: number):
     renown: game.profile.renown + reward.renown,
     grace: game.profile.grace + reward.grace,
     chartersCompleted: game.profile.chartersCompleted + 1,
-    history: [...game.profile.history, { ending, relics: c.lifetimeRelics, dead: c.lifetimeDead, duration: c.elapsed }],
+    history: [...game.profile.history, { ending, relics: c.lifetimeRelics, dead: c.lifetimeDead, duration: c.elapsed, site: c.site }],
   };
-  const company = createCompany(seed, { number: profile.chartersCompleted + 1, renown: profile.renown, grace: profile.grace });
+  const company = createCompany(seed, { number: profile.chartersCompleted + 1, renown: profile.renown, grace: profile.grace }, site);
   return { ...game, profile, company };
+}
+
+/** Tears up the charter in hand for a fresh one at another site: the same terms, nothing earned for the one abandoned. */
+export function rewriteCharter(game: ForestGame, site: SiteId, seed: number): ForestGame {
+  if (game.company.site === site) return game;
+  return { ...game, company: createCompany(seed, game.company.charter, site) };
 }

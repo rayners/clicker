@@ -21,6 +21,8 @@ export interface CharterRecord {
   relics: number;
   dead: number;
   duration: number;
+  /** Where the charter delved; absent on records from before the Keep. */
+  site?: string;
 }
 
 /** What survives a charter. */
