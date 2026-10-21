@@ -548,6 +548,61 @@ button:disabled {
   background: var(--rec);
 }
 
+/* ---------- the list (insurer) ---------- */
+
+.death-list {
+  margin-top: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--faint);
+  background: var(--bg-raise);
+}
+
+.list-next {
+  margin: 0;
+  font-size: 1.25em;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+.death-list[data-danger='high'] .list-next,
+.death-list[data-danger='high'] .debt-value {
+  color: var(--rec);
+  animation: blink 1s steps(2, end) infinite;
+}
+
+.death-list[data-danger='high'] .debt-fill {
+  background: var(--rec);
+}
+
+.list-clock,
+.list-left {
+  margin: 4px 0 0;
+  font-size: 0.85em;
+  color: var(--dim);
+}
+
+.list-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85em;
+  color: var(--dim);
+}
+
+.list-names li::after {
+  content: ' ·';
+}
+
+.vhs-shell[data-venue='insurer'] {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255, 210, 63, 0.05), transparent 60%),
+    radial-gradient(ellipse at 50% 120%, rgba(0, 0, 0, 0.8), transparent 60%),
+    #06050a;
+}
+
 /* The clinic is a night business: the REC light stays on, and the screen sits a shade colder. */
 .vhs-shell[data-venue='clinic'] {
   background:

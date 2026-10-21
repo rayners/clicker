@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createLateGame, newLateGame, type LateGame } from '../../src/late-fees/game';
 import { reduce } from '../../src/late-fees/store';
 import { filmEvents, filmProperties } from '../../src/late-fees/telemetry';
-import type { CampRun, ClinicRun } from '../../src/late-fees/state';
+import type { CampRun, ClinicRun, InsurerRun } from '../../src/late-fees/state';
 import { chooseTape } from '../../src/late-fees/sequels';
 
 const withRun = (g: LateGame, patch: Partial<CampRun>): LateGame => ({ ...g, run: { ...g.run, ...patch } as LateGame['run'] });
@@ -33,6 +33,14 @@ describe('LATE FEES play events', () => {
     expect(filmEvents(before, after)).toEqual([{ name: 'bed_opened', props: { bed: 'cot', minutes: 10, part: 1 } }]);
     const more = { ...after, run: { ...(after.run as ClinicRun), beds: { ...k.beds, cot: 2 } } as LateGame['run'] };
     expect(filmEvents(after, more)).toEqual([]);
+  });
+
+  it('reports each survivor the design crosses off the list', () => {
+    const g = chooseTape(newLateGame(1, 0), 'insurer', 2);
+    const i = g.run as InsurerRun;
+    const before = { ...g, run: { ...i, elapsed: 1_800 } as LateGame['run'] };
+    const after = { ...before, run: { ...(before.run as InsurerRun), list: i.list.slice(1), bodyCount: 1 } as LateGame['run'] };
+    expect(filmEvents(before, after)).toEqual([{ name: 'survivor_lost', props: { survivor: i.list[0], left: i.list.length - 1, minutes: 30, part: 1 } }]);
   });
 
   it('reports a film finished, with its ending and body count', () => {

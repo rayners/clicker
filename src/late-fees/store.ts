@@ -17,10 +17,18 @@ import {
   shiftRem,
   toggleAutoDial,
 } from './clinic/economy';
+import {
+  buyInsurerUpgrade,
+  buyPolicy,
+  hireAgent,
+  sellPolicy,
+  shiftAppetite,
+  toggleActuary,
+} from './insurer/economy';
 import { advance, newLateGame, type LateGame, type LateSettings } from './game';
 import { chooseTape, completeRun } from './sequels';
 import type { Ending } from './kinds';
-import type { CampRun, ClinicRun, Run, VenueId } from './state';
+import type { CampRun, ClinicRun, InsurerRun, Run, VenueId } from './state';
 
 export type LateAction =
   | { type: 'whistle' }
@@ -35,6 +43,11 @@ export type LateAction =
   | { type: 'shiftRem'; step: 1 | -1 }
   | { type: 'buySuppressant' }
   | { type: 'toggleDial' }
+  | { type: 'sell' }
+  | { type: 'buyPolicy'; id: string }
+  | { type: 'hireAgent'; id: string }
+  | { type: 'shiftAppetite'; step: 1 | -1 }
+  | { type: 'toggleActuary' }
   | { type: 'buyUpgrade'; id: string }
   | { type: 'chooseTape'; venue: VenueId; seed: number }
   | { type: 'completeRun'; ending: Ending; seed: number }
@@ -54,6 +67,7 @@ const at =
   };
 const camp = at<CampRun>('camp');
 const clinic = at<ClinicRun>('clinic');
+const insurer = at<InsurerRun>('insurer');
 
 export function reduce(game: LateGame, action: LateAction): LateGame {
   switch (action.type) {
@@ -81,8 +95,20 @@ export function reduce(game: LateGame, action: LateAction): LateGame {
       return clinic(game, buySuppressant);
     case 'toggleDial':
       return clinic(game, toggleAutoDial);
+    case 'sell':
+      return insurer(game, sellPolicy);
+    case 'buyPolicy':
+      return insurer(game, (r) => buyPolicy(r, action.id));
+    case 'hireAgent':
+      return insurer(game, (r) => hireAgent(r, action.id));
+    case 'shiftAppetite':
+      return insurer(game, (r) => shiftAppetite(r, action.step));
+    case 'toggleActuary':
+      return insurer(game, toggleActuary);
     case 'buyUpgrade':
-      return game.run.venue === 'clinic' ? clinic(game, (r) => buyClinicUpgrade(r, action.id)) : camp(game, (r) => buyCampUpgrade(r, action.id));
+      if (game.run.venue === 'clinic') return clinic(game, (r) => buyClinicUpgrade(r, action.id));
+      if (game.run.venue === 'insurer') return insurer(game, (r) => buyInsurerUpgrade(r, action.id));
+      return camp(game, (r) => buyCampUpgrade(r, action.id));
     case 'chooseTape':
       return chooseTape(game, action.venue, action.seed);
     case 'completeRun':

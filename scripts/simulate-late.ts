@@ -5,7 +5,7 @@ import { held } from '../src/shared/ground';
 import type { CampRun } from '../src/late-fees/state';
 
 const trace = process.argv.includes('--trace');
-const venue = (process.argv.find((a) => a === 'camp' || a === 'clinic') ?? 'camp') as 'camp' | 'clinic';
+const venue = (process.argv.find((a) => a === 'camp' || a === 'clinic' || a === 'insurer') ?? 'camp') as 'camp' | 'clinic' | 'insurer';
 for (const seed of [1, 7, 42]) {
   const started = performance.now();
   const run = simulateLate({

@@ -2,7 +2,7 @@ import type { TelemetryEvent, TelemetryProps } from '../shared/telemetry';
 import { ZONES } from '../late-fees-data/camp';
 import { BEDS } from '../late-fees-data/clinic';
 import type { LateGame } from './game';
-import type { CampRun, ClinicRun } from './state';
+import type { CampRun, ClinicRun, InsurerRun } from './state';
 
 const minutes = (seconds: number) => Math.round(seconds / 60);
 
@@ -12,7 +12,7 @@ export function filmProperties(game: LateGame): TelemetryProps {
   return { game: 'late-fees', venue: r.venue, killer: r.killer, part: r.config.part, act: r.act, sequels: game.profile.sequels };
 }
 
-/** Milestones between two successive states: tapes rented, acts, camp zones and clinic beds opened, films finished. */
+/** Milestones between two successive states: tapes rented, acts, camp zones and clinic beds opened, survivors lost, films finished. */
 export function filmEvents(prev: LateGame, next: LateGame): TelemetryEvent[] {
   if (next.profile.sequels > prev.profile.sequels) {
     const record = next.profile.history.at(-1)!;
@@ -38,6 +38,14 @@ export function filmEvents(prev: LateGame, next: LateGame): TelemetryEvent[] {
     const now = r as ClinicRun;
     for (const b of BEDS) {
       if ((now.beds[b.id] ?? 0) > 0 && (was.beds[b.id] ?? 0) === 0) events.push({ name: 'bed_opened', props: { bed: b.id, ...at } });
+    }
+  } else if (r.venue === 'insurer') {
+    const was = prev.run as InsurerRun;
+    const now = r as InsurerRun;
+    // Skips rotate the list without shortening it; only a death shortens it.
+    if (now.list.length < was.list.length) {
+      const lost = was.list.find((n) => !now.list.includes(n));
+      if (lost) events.push({ name: 'survivor_lost', props: { survivor: lost, left: now.list.length, ...at } });
     }
   }
   return events;

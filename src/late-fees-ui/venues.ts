@@ -20,6 +20,7 @@ import type { CampRun, Run } from '../late-fees/state';
 import type { LateAction, LateStore } from '../late-fees/store';
 import { createSplit, createStaffPanel, createStorePanel, createZones } from './camp';
 import { createClinicUi } from './clinic';
+import { createInsurerUi } from './insurer';
 
 export interface Component {
   el: HTMLElement;
@@ -102,5 +103,5 @@ export function createCampUi(store: LateStore): VenueUi {
 }
 
 export function createVenueUis(store: LateStore): Record<Run['venue'], VenueUi> {
-  return { camp: createCampUi(store), clinic: createClinicUi(store) };
+  return { camp: createCampUi(store), clinic: createClinicUi(store), insurer: createInsurerUi(store) };
 }

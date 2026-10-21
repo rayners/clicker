@@ -46,7 +46,7 @@ export const GAMES: GameDoor[] = [
     icon: './late-fees/icons/icon-192.png',
     overline: 'LATE FEES VIDEO · HORROR SECTION',
     title: 'LATE FEES',
-    blurb: 'Run the summer camp at Blackwater Lake, or a sleep clinic where the patients must not dream. Keep the doors open while the body count climbs. Every film gets a sequel.',
+    blurb: 'Run a summer camp, a sleep clinic where nobody may dream, or the insurer who covered every survivor of Flight 213. Keep the doors open while the body count climbs. Every film gets a sequel.',
     motto: 'Be kind. Rewind.',
     begin: 'PRESS PLAY',
     resume: 'RESUME TAPE',

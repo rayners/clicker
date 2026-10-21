@@ -1,4 +1,4 @@
-import { createRun, CAMP_CONFIG, CLINIC_CONFIG, type RunConfig, type VenueId } from './state';
+import { createRun, CAMP_CONFIG, CLINIC_CONFIG, INSURER_CONFIG, type RunConfig, type VenueId } from './state';
 import type { Ending } from './kinds';
 import type { LateGame, LateProfile } from './game';
 
@@ -12,7 +12,7 @@ const SEQUEL_PRESSURE = 0.15;
 const LORE_PRESSURE = 0.03;
 
 export interface TapeDef {
-  venue: VenueId | 'clinic' | 'insurer';
+  venue: VenueId;
   title: string;
   blurb: string;
   available: boolean;
@@ -22,10 +22,10 @@ export interface TapeDef {
 export const TAPES: readonly TapeDef[] = [
   { venue: 'camp', title: 'FRIDAY THE 12TH', blurb: 'Camp Blackwater reopens twenty years after the drowning. Fill every bunk. Keep the lights on.', available: true },
   { venue: 'clinic', title: 'A NIGHTMARE ON SYCAMORE STREET', blurb: 'A sleep study pays by the dreaming hour. Something else is in the dreams.', available: true },
-  { venue: 'insurer', title: 'PENULTIMATE DEPARTURE', blurb: 'You insured every survivor of Flight 213. Death has a list, and it is very patient.', available: false },
+  { venue: 'insurer', title: 'PENULTIMATE DESTINATION', blurb: 'You insured every survivor of Flight 213. Death has a list, and it is very patient.', available: true },
 ];
 
-const BASE: Record<VenueId, RunConfig> = { camp: CAMP_CONFIG, clinic: CLINIC_CONFIG };
+const BASE: Record<VenueId, RunConfig> = { camp: CAMP_CONFIG, clinic: CLINIC_CONFIG, insurer: INSURER_CONFIG };
 
 /** The genre's sequel ladder. Part numbers carry on forever; the subtitles run out. */
 export function sequelTitle(title: string, part: number): string {

@@ -19,9 +19,9 @@ describe('the shelf at Late Fees Video', () => {
     expect(newLateGame(1, NOW).shelf).toBe(true);
   });
 
-  it('stocks Friday the 12th and A Nightmare on Sycamore Street, with Penultimate Departure coming soon', () => {
+  it('stocks all three tapes: Friday the 12th, A Nightmare on Sycamore Street and Penultimate Destination', () => {
     const stocked = TAPES.filter((t) => t.available).map((t) => t.venue);
-    expect(stocked).toEqual(['camp', 'clinic']);
+    expect(stocked).toEqual(['camp', 'clinic', 'insurer']);
     expect(TAPES.length).toBeGreaterThanOrEqual(3);
   });
 
@@ -149,5 +149,31 @@ describe('clinic orders', () => {
     expect(reduce(clinic, { type: 'whistle' })).toBe(clinic);
     const camp = createLateGame(1, NOW);
     expect(reduce(camp, { type: 'reading' })).toBe(camp);
+  });
+});
+
+describe('insurer orders', () => {
+  it('routes sales, policies, prevention, the appetite dial, the mainframe and the store', async () => {
+    const { POLICIES, AGENTS } = await import('../../src/late-fees-data/insurer');
+    const { INSURER_UPGRADES } = await import('../../src/late-fees-data/insurer-upgrades');
+    type I = import('../../src/late-fees/state').InsurerRun;
+    const i = (g: LateGame) => g.run as I;
+    let g = chooseTape(newLateGame(1, NOW), 'insurer', 4);
+    g = { ...g, run: { ...g.run, cash: 1e9, lifetimeCash: 1e9 } as LateGame['run'] };
+    const before = g.run.cash;
+    g = reduce(g, { type: 'sell' });
+    expect(g.run.cash).toBeGreaterThan(before);
+    g = reduce(g, { type: 'buyPolicy', id: POLICIES[0]!.id });
+    expect(i(g).policies[POLICIES[0]!.id]).toBe(1);
+    g = reduce(g, { type: 'hireAgent', id: AGENTS[0]!.id });
+    expect(i(g).agents[AGENTS[0]!.id]).toBe(1);
+    const appetite = i(g).appetite;
+    g = reduce(g, { type: 'shiftAppetite', step: -1 });
+    expect(i(g).appetite).toBe(appetite - 1);
+    const mainframe = INSURER_UPGRADES.find((u) => u.effect.kind === 'actuary')!;
+    g = reduce(g, { type: 'buyUpgrade', id: mainframe.id });
+    expect(i(g).upgrades).toContain(mainframe.id);
+    g = reduce(g, { type: 'toggleActuary' });
+    expect(i(g).actuaryOff).toBe(true);
   });
 });

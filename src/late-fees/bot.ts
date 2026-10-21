@@ -27,9 +27,22 @@ import {
   suppressantCost,
   watchCapacity,
 } from './clinic/economy';
+import { AGENTS, POLICIES } from '../late-fees-data/insurer';
+import {
+  agentCost,
+  availableInsurerUpgrades,
+  isActuaryActive,
+  isAgentRevealed,
+  isPolicyRevealed,
+  omenRate,
+  policyCost,
+  policyRate,
+  prevention,
+  shiftAppetite,
+} from './insurer/economy';
 import { createLateGame, type LateGame } from './game';
 import { runConfigFor } from './sequels';
-import { createRun, type CampRun, type ClinicRun, type VenueId } from './state';
+import { createRun, type CampRun, type ClinicRun, type InsurerRun, type VenueId } from './state';
 import { reduce, type LateAction } from './store';
 import { tickRun } from './tick';
 
@@ -133,6 +146,43 @@ function decideClinic(game: LateGame): LateAction | null {
   return pick ? { type: 'buyBed', id: pick.id } : null;
 }
 
+/** Keep prevention ahead of the design, push the appetite as far as prevention allows, write policies with the rest. */
+function decideInsurer(game: LateGame): LateAction | null {
+  const r = game.run as InsurerRun;
+  const upgrade = availableInsurerUpgrades(r).find((u) => u.cost <= r.cash);
+  if (upgrade) return { type: 'buyUpgrade', id: upgrade.id };
+  const p = prevention(r);
+  if (!isActuaryActive(r)) {
+    if (omenRate(r) > p && r.appetite > 0) return { type: 'shiftAppetite', step: -1 };
+    if (r.appetite < 10 && omenRate(shiftAppetite(r, 1)) <= p) return { type: 'shiftAppetite', step: 1 };
+  }
+  if (r.list.length > 0 && omenRate(r) > p * 0.9) {
+    let best: { id: string; value: number } | null = null;
+    AGENTS.forEach((a, i) => {
+      if (!isAgentRevealed(r, i)) return;
+      const cost = agentCost(a, r.agents[a.id] ?? 0);
+      if (cost > r.cash) return;
+      const value = a.power / cost;
+      if (!best || value > best.value) best = { id: a.id, value };
+    });
+    const pick = best as { id: string; value: number } | null;
+    if (pick) return { type: 'hireAgent', id: pick.id };
+  }
+  let best: { id: string; value: number } | null = null;
+  POLICIES.forEach((pol, i) => {
+    if (!isPolicyRevealed(r, i)) return;
+    const cost = policyCost(pol, r.policies[pol.id] ?? 0);
+    if (cost > r.cash) return;
+    const value = policyRate(r, pol) / cost;
+    if (!best || value > best.value) best = { id: pol.id, value };
+  });
+  const pick = best as { id: string; value: number } | null;
+  return pick ? { type: 'buyPolicy', id: pick.id } : null;
+}
+
+const DECIDE: Record<VenueId, (game: LateGame) => LateAction | null> = { camp: decideCamp, clinic: decideClinic, insurer: decideInsurer };
+const PRESS: Record<VenueId, LateAction> = { camp: { type: 'whistle' }, clinic: { type: 'reading' }, insurer: { type: 'sell' } };
+
 /** A sensible, greedy player: clicks for the first stretch, then checks in now and then. */
 export function simulateLate(options: LateSimOptions): LateSimResult {
   const { seed, maxSeconds, venue = 'camp', sequels = 0, activeClicks = 4, activeSeconds = 20 * 60, decisionInterval = 5 } = options;
@@ -143,11 +193,10 @@ export function simulateLate(options: LateSimOptions): LateSimResult {
   let terminusAt: number | undefined;
   for (let t = 1; t <= maxSeconds; t++) {
     const clicks = t <= activeSeconds ? activeClicks : t % 10 === 0 ? 1 : 0;
-    const press: LateAction = venue === 'clinic' ? { type: 'reading' } : { type: 'whistle' };
-    for (let c = 0; c < clicks; c++) game = reduce(game, press);
+    for (let c = 0; c < clicks; c++) game = reduce(game, PRESS[venue]);
     if (t % decisionInterval === 0) {
       for (let i = 0; i < 20; i++) {
-        const action = game.run.venue === 'clinic' ? decideClinic(game) : decideCamp(game);
+        const action = DECIDE[game.run.venue](game);
         if (!action) break;
         const next = reduce(game, action);
         if (next === game) break;

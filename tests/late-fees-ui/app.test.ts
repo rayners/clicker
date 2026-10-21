@@ -34,7 +34,8 @@ describe('the shelf', () => {
   it('greets a new player with the horror shelf, and renting Friday the 12th starts it', async () => {
     const user = setup(newLateGame(1, 0));
     const shelf = within(screen.getByRole('dialog', { name: /horror/i }));
-    expect(shelf.getAllByText(/OUT OF STOCK/i).length).toBeGreaterThan(0);
+    expect(shelf.getByRole('button', { name: /rent a nightmare on sycamore street/i })).toBeTruthy();
+    expect(shelf.getByRole('button', { name: /rent penultimate destination/i })).toBeTruthy();
     await user.click(shelf.getByRole('button', { name: /rent friday the 12th/i }));
     expect(store.getState().shelf).toBe(false);
     expect(screen.queryByRole('dialog', { name: /horror/i })).toBeNull();

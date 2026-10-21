@@ -59,3 +59,24 @@ describe('A Nightmare on Sycamore Street pacing', () => {
     expect(run.final.run.bodyCount).toBeGreaterThan(20);
   });
 });
+
+describe('Penultimate Destination pacing', () => {
+  const run = simulateLate({ seed: 7, venue: 'insurer', maxSeconds: 9 * 3600 });
+
+  it('reaches the body count (act 2) at roughly 40-75 minutes', () => {
+    expect(hours(run.actAt[2])).toBeGreaterThan(40 / 60);
+    expect(hours(run.actAt[2])).toBeLessThan(75 / 60);
+  });
+
+  it('brings in the final girl (act 3) at roughly 2-3 hours', () => {
+    expect(hours(run.actAt[3])).toBeGreaterThan(2);
+    expect(hours(run.actAt[3])).toBeLessThan(3);
+  });
+
+  it('rolls credits within about 4-6 hours, with names crossed off along the way but not the whole list', () => {
+    expect(hours(run.terminusAt)).toBeGreaterThan(4);
+    expect(hours(run.terminusAt)).toBeLessThan(6);
+    expect(run.final.run.bodyCount).toBeGreaterThan(5);
+    expect((run.final.run as import('../../src/late-fees/state').InsurerRun).list.length).toBeGreaterThan(0);
+  });
+});

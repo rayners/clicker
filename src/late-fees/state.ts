@@ -3,11 +3,13 @@ import type { CampFields } from './camp/state';
 import type { DrownedFields } from './drowned/state';
 import type { ClinicFields } from './clinic/state';
 import type { BurnedFields } from './burned/state';
+import type { InsurerFields } from './insurer/state';
+import type { DesignFields } from './design/state';
 import type { KillerDef, VenueDef } from './kinds';
 import { KILLERS, VENUES } from './registry';
 
-export type VenueId = 'camp' | 'clinic';
-export type KillerId = 'drowned' | 'burned';
+export type VenueId = 'camp' | 'clinic' | 'insurer';
+export type KillerId = 'drowned' | 'burned' | 'design';
 /** osd: the VCR's own text; news: the town and the owners; staff: your people; kill: the body count. */
 export type EntryKind = 'osd' | 'news' | 'staff' | 'kill';
 
@@ -42,6 +44,15 @@ export const CLINIC_CONFIG = {
   pressureBonus: 0,
 } satisfies RunConfig;
 
+export const INSURER_CONFIG = {
+  venue: 'insurer',
+  killer: 'design',
+  title: 'PENULTIMATE DESTINATION',
+  part: 1,
+  productionMultiplier: 1,
+  pressureBonus: 0,
+} satisfies RunConfig;
+
 /** State every run has, whatever the venue and killer. */
 export interface RunCore {
   config: RunConfig;
@@ -65,12 +76,13 @@ export interface RunCore {
   nextLogId: number;
 }
 
-export type VenueFields = CampFields | ClinicFields;
-export type KillerFields = DrownedFields | BurnedFields;
+export type VenueFields = CampFields | ClinicFields | InsurerFields;
+export type KillerFields = DrownedFields | BurnedFields | DesignFields;
 export type Run = RunCore & VenueFields & KillerFields;
 export type RunOf<V extends VenueId, K extends KillerId> = RunCore & Extract<VenueFields, { venue: V }> & Extract<KillerFields, { killer: K }>;
 export type CampRun = RunCore & CampFields & KillerFields;
 export type ClinicRun = RunCore & ClinicFields & KillerFields;
+export type InsurerRun = RunCore & InsurerFields & KillerFields;
 
 export function composeRun(config: RunConfig, seed: number, venue: VenueDef, killer: KillerDef): Run {
   const core: RunCore = {

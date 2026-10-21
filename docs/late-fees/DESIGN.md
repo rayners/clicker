@@ -60,7 +60,7 @@ Code layout, following Elderdark:
 - **The balance:** sleep against wake against exhaustion. It is the most Paperclips-like tape, with a dial, a stockpile and a decay.
 - **Click:** WAKE THEM UP. It shakes the patients nearest the danger out of REM.
 
-### PENULTIMATE DEPARTURE: Providence Mutual
+### PENULTIMATE DESTINATION: Providence Mutual (built)
 
 **You:** the claims manager at Providence Mutual Life, the morning after a teenager's premonition pulled forty people off **Flight 213** before it fell.
 
@@ -137,7 +137,18 @@ After enough sequels, the franchise "goes in a new direction": you play **the ki
 - **Pacing (bot):** act 2 at 1h05m, the final girl at 2h34m, the confrontation at 2h59m, credits at 4h14m.
 - **The interface** now takes a per-venue UI (`src/late-fees-ui/venues.ts`, `clinic.ts`), the same pattern as DEEP CONTRACT's `ScenarioUi`.
 - **Telemetry:** adds `bed_opened`.
-- **Out of stock** on the shelf for now: *Penultimate Departure*.
+**Step 4 is done: Providence Mutual with Death's design (*Penultimate Destination*, renamed by the user from "Final Departure").**
+- **Policies earn premiums.** They use the mining tier ladder, scaled ×1.2 because prevention takes a steady cut.
+- **The list:** Flight 213's 40 survivors, in seat order.
+  - Omens build on the name at the top at 0.014 × premium^0.6, scaled by risk appetite² and by anger.
+  - Prevention staff (cost growth 1.2) break omens.
+  - If the omens fill: an accident, a death, and a claim (120 seconds of premium, plus a reputation hit).
+  - If prevention holds the name for 120 seconds, the design skips them to the back of the list. Each skip makes it angrier by 15% × log2(1 + skips). The first version used 15% per skip, and it ran away.
+- **The risk-appetite dial** trades premium (0.5× to 1.5×) against danger (its square). The actuarial mainframe sets it as high as prevention allows.
+- **Death's design** adds accidents away from the list every 15 minutes or so. Its text works at the camp and the clinic too (a test checks this).
+- **Pacing (bot):** act 2 at 1h09m, the final girl at 2h30m, the confrontation at 2h55m, credits at 4h10m, with about 27 dead and the list never emptied.
+- **Telemetry:** adds `survivor_lost`.
+- **All three tapes are now in stock.** Next: crossovers.
 
 ## Build order
 
