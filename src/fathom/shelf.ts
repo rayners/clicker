@@ -2,7 +2,7 @@ import { BUOY_BASE_COST, BUOY_COST_GROWTH, BUOY_REACH, SHELF_OPENS_AT, SHELF_TAK
 import { appendLog } from '../shared/log';
 import { nextRandom } from '../shared/rng';
 import { depth } from './depth';
-import type { EntryKind, Outfit } from './state';
+import { incomeMultiplier, type EntryKind, type Outfit } from './state';
 
 export const TRAWLER_COST_GROWTH = 1.15;
 const DIAL_STEPS = 10;
@@ -52,7 +52,7 @@ export const coveredRange = (o: Outfit): number => Math.min(DIAL_STEPS, HARBOUR_
 export const blindShare = (o: Outfit): number => (o.range <= coveredRange(o) ? 0 : (o.range - coveredRange(o)) / o.range);
 
 export const catchRate = (o: Outfit): number =>
-  TRAWLERS.reduce((s, t) => s + (o.trawlers[t.id] ?? 0) * t.rate, 0) * (NEAR_SHARE + RANGE_SHARE * o.range);
+  TRAWLERS.reduce((s, t) => s + (o.trawlers[t.id] ?? 0) * t.rate, 0) * (NEAR_SHARE + RANGE_SHARE * o.range) * incomeMultiplier(o);
 
 const log = (o: Outfit, kind: EntryKind, text: string) => appendLog<EntryKind, Outfit>(o, kind, text);
 

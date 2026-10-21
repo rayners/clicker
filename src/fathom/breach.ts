@@ -16,7 +16,7 @@ import {
 } from '../fathom-data/breach';
 import { assault, frontier, held, isSecured, tickGround, type SectionDef, type SectionState } from '../shared/ground';
 import { appendLog } from '../shared/log';
-import type { EntryKind, Outfit } from './state';
+import { incomeMultiplier, type EntryKind, type Outfit } from './state';
 
 /** The story opens the Breach (act 4) by setting this flag. */
 export const BREACH_FLAG = 'breach';
@@ -47,7 +47,8 @@ const threatened = (o: Outfit): SectionDef[] => CITIES.map((c) => ({ ...c, threa
 
 export const citiesHeld = (o: Outfit): number => held(o.cities);
 
-export const levyRate = (o: Outfit): number => o.cities.reduce((s, c, i) => (isSecured(c) ? s + CITIES[i]!.threat * LEVY_PER_THREAT : s), 0);
+export const levyRate = (o: Outfit): number =>
+  o.cities.reduce((s, c, i) => (isSecured(c) ? s + CITIES[i]!.threat * LEVY_PER_THREAT : s), 0) * incomeMultiplier(o);
 
 /** Defence posted city by city from the nearest out; whatever is left over goes back on the attack. */
 function post(cities: SectionState[], defs: SectionDef[], pool: number): { cities: SectionState[]; spare: number } {

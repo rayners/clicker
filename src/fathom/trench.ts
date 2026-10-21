@@ -2,7 +2,7 @@ import { CREW_BASE_COST, CREW_COST_GROWTH, CREW_PER_MODULE, FLOOD_LINES, MODULE_
 import { appendLog } from '../shared/log';
 import { nextRandom } from '../shared/rng';
 import { depth } from './depth';
-import type { EntryKind, Outfit } from './state';
+import { incomeMultiplier, type EntryKind, type Outfit } from './state';
 
 const DIAL_STEPS = 10;
 /** Each notch deeper pays this share more for samples. */
@@ -36,7 +36,7 @@ export function shiftStation(o: Outfit, step: 1 | -1): Outfit {
   return stationDepth === o.stationDepth ? o : { ...o, stationDepth };
 }
 
-export const sampleRate = (o: Outfit): number => o.modules * MODULE_RATE * (1 + DEPTH_PAY * (o.stationDepth - 1));
+export const sampleRate = (o: Outfit): number => o.modules * MODULE_RATE * (1 + DEPTH_PAY * (o.stationDepth - 1)) * incomeMultiplier(o);
 
 /** Change in hull integrity per second: the depth crushing every module, the crews patching it. */
 export function hullRate(o: Outfit): number {

@@ -7,8 +7,24 @@ import { SPECIMENS } from '../fathom-data/open-water';
 /** sonar: the outfit's own instruments; town: Harrow Point and its council; crew: your people; attack: what the water takes. */
 export type EntryKind = 'sonar' | 'town' | 'crew' | 'attack';
 
+/** What a season starts with from the ones before it. */
+export interface SeasonTerms {
+  /** 1 for the first season. */
+  season: number;
+  /** Contracts pay more for an outfit with a name. */
+  standing: number;
+  /** Field notes from earlier seasons: every guard knows what to look for. */
+  notes: number;
+}
+
+export const FIRST_SEASON: SeasonTerms = { season: 1, standing: 0, notes: 0 };
+
+const STANDING_INCOME = 0.25;
+const NOTES_COVER = 0.2;
+
 /** One season of Harrow Point Marine Safety. Pure JSON: no DOM, clock or Math.random(). */
 export interface Outfit {
+  terms: SeasonTerms;
   seed: number;
   rng: number;
   elapsed: number;
@@ -66,10 +82,16 @@ export const DEFAULT_RANGE = 2;
 export const DEFAULT_ENHANCE = 0;
 export const DEFAULT_STATION_DEPTH = 1;
 
+/** Every zone's income scales with the standing earlier seasons earned. */
+export const incomeMultiplier = (o: Outfit): number => 1 + STANDING_INCOME * o.terms.standing;
+/** Every guard's watch stretches with the field notes earlier seasons left. */
+export const coverMultiplier = (o: Outfit): number => 1 + NOTES_COVER * o.terms.notes;
+
 const zeroes = (ids: readonly { id: string }[]) => Object.fromEntries(ids.map((x) => [x.id, 0]));
 
-export function createOutfit(seed: number): Outfit {
+export function createOutfit(seed: number, terms: SeasonTerms = FIRST_SEASON): Outfit {
   const blank: Outfit = {
+    terms: { ...terms },
     seed,
     rng: seed,
     elapsed: 0,

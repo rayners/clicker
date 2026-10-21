@@ -1,7 +1,7 @@
 import { ATTRACTIONS, GUARDS, SWIMMERS, type AttractionDef, type GuardDef } from '../fathom-data/shallows';
 import { appendLog } from '../shared/log';
 import { nextRandom } from '../shared/rng';
-import type { EntryKind, Outfit } from './state';
+import { coverMultiplier, incomeMultiplier, type EntryKind, type Outfit } from './state';
 
 export const COST_GROWTH = 1.15;
 export const GUARD_COST_GROWTH = 1.2;
@@ -46,7 +46,7 @@ export const isGuardRevealed = (o: Outfit, index: number): boolean => index === 
 /** Everyone the attractions bring down to the water. */
 export const swimmers = (o: Outfit): number => ATTRACTIONS.reduce((n, a) => n + (o.attractions[a.id] ?? 0), 0);
 
-export const watch = (o: Outfit): number => GUARDS.reduce((n, g) => n + (o.guards[g.id] ?? 0) * g.covers, 0);
+export const watch = (o: Outfit): number => GUARDS.reduce((n, g) => n + (o.guards[g.id] ?? 0) * g.covers, 0) * coverMultiplier(o);
 
 export const openShare = (o: Outfit): number => o.open / DIAL_STEPS;
 
@@ -74,7 +74,7 @@ export const tourism = (o: Outfit): number => ATTRACTIONS.reduce((s, a) => s + (
 export function incomeRate(o: Outfit): number {
   const open = openShare(o);
   const reputation = REPUTATION_FLOOR + (1 - REPUTATION_FLOOR) * o.reputation;
-  return tourism(o) * (CLOSED_INCOME + (1 - CLOSED_INCOME) * open) * reputation;
+  return tourism(o) * (CLOSED_INCOME + (1 - CLOSED_INCOME) * open) * reputation * incomeMultiplier(o);
 }
 
 /** Sell a beach pass at the hut by hand. */

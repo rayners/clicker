@@ -2,7 +2,7 @@ import { ESCAPE_LINES, OPEN_WATER_AT, PEN_BASE_COST, PEN_COST_GROWTH, PEN_HOLDS,
 import { appendLog } from '../shared/log';
 import { nextRandom } from '../shared/rng';
 import { depth } from './depth';
-import type { EntryKind, Outfit } from './state';
+import { incomeMultiplier, type EntryKind, type Outfit } from './state';
 
 export const SPECIMEN_COST_GROWTH = 1.15;
 const DIAL_STEPS = 10;
@@ -52,7 +52,7 @@ export const contained = (o: Outfit): number => (o.pens * PEN_HOLDS) / (1 + (ENH
 export const uncontained = (o: Outfit): number => Math.max(0, specimens(o) - contained(o));
 
 export const researchRate = (o: Outfit): number =>
-  SPECIMENS.reduce((s, sp) => s + (o.specimens[sp.id] ?? 0) * sp.rate, 0) * (1 + (ENHANCED_PAY - 1) * enhancement(o));
+  SPECIMENS.reduce((s, sp) => s + (o.specimens[sp.id] ?? 0) * sp.rate, 0) * (1 + (ENHANCED_PAY - 1) * enhancement(o)) * incomeMultiplier(o);
 
 /** How hard the water pushes on the beach: the season, plus whatever the lab let out. */
 export const beachPressure = (o: Outfit): number => 1 + LOOSE_PRESSURE * o.loose;
