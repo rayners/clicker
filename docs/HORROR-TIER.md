@@ -1,4 +1,4 @@
-# Play as the horror (design, 2026-10-20)
+# Play as the horror (design approved 2026-10-20)
 
 An unlockable higher tier in every game, requested by the user on 2026-10-20: reverse the roles and play the thing that hunts. It is the counterpart of DEEP CONTRACT's Boardroom, which the user pointed out is already a horror tier: the company is the monster. This doc covers the creature and killer tiers, how they share one engine, and what to build first. Nothing here is built yet.
 
@@ -102,9 +102,9 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
 5. **The hunter and the dragon**, as second horrors in their games.
 6. **The Boardroom**, reusing the multi-prey core.
 
-## Decisions for the user
+## Decisions (user, 2026-10-20)
 
-1. **Build order.** LATE FEES first (smallest step, proves the engine), then Elderdark, then DEEP CONTRACT?
-2. **First horror per game:** the creature or the hunter for DEEP CONTRACT; the wood or the dragon for Elderdark.
-3. **The prey play themselves** (bots defend), rather than being scripted opponents. This is the central bet of the design.
-4. **A second mode inside each game,** rather than separate pages.
+1. **Build order:** LATE FEES first, then Elderdark, then DEEP CONTRACT.
+2. **First horrors:** the creature for DEEP CONTRACT, and the wood for Elderdark. The hunter and the dragon come later.
+3. **The prey play themselves**, defended by bots, not scripted opponents.
+4. **A second mode inside each game** (proposed; not objected to).
