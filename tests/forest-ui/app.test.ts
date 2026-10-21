@@ -209,7 +209,8 @@ describe('configuration', () => {
     const code = (await import('../../src/forest/save')).forestSaves.exportSave({ ...store.getState(), company: { ...company(), silver: 4242 } });
     await user.click(screen.getByRole('button', { name: /configuration/i }));
     const dialog = within(screen.getByRole('dialog', { name: /configuration/i }));
-    await user.type(dialog.getByRole('textbox', { name: /save code/i }), code);
+    await user.click(dialog.getByRole('textbox', { name: /save code/i }));
+    await user.paste(code);
     await user.click(dialog.getByRole('button', { name: /import/i }));
     expect(company().silver).toBe(4242);
   });
