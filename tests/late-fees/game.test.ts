@@ -19,9 +19,9 @@ describe('the shelf at Late Fees Video', () => {
     expect(newLateGame(1, NOW).shelf).toBe(true);
   });
 
-  it('stocks all three originals: Friday the 12th, A Nightmare on Sycamore Street and Penultimate Destination', () => {
+  it('stocks all four originals: Friday the 12th, A Nightmare on Sycamore Street, Penultimate Destination and Candy Corn Day', () => {
     const originals = TAPES.filter((t) => t.available && !t.crossover).map((t) => t.venue);
-    expect(originals).toEqual(['camp', 'clinic', 'insurer']);
+    expect(originals).toEqual(['camp', 'clinic', 'insurer', 'asylum']);
     expect(TAPES.length).toBeGreaterThanOrEqual(3);
   });
 

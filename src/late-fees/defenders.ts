@@ -40,8 +40,20 @@ import {
   prevention,
   shiftAppetite,
 } from './insurer/economy';
+import { ASYLUM_STAFF, WARDS } from '../late-fees-data/asylum';
+import {
+  availableAsylumUpgrades,
+  coverage,
+  doorCost,
+  isAutoSedationActive,
+  isStaffRevealed as isAsylumStaffRevealed,
+  isWardRevealed,
+  staffCost as asylumStaffCost,
+  wardCost,
+  wardRate,
+} from './asylum/economy';
 import type { LateGame } from './game';
-import type { CampRun, ClinicRun, InsurerRun, Run, VenueId } from './state';
+import type { AsylumRun, CampRun, ClinicRun, InsurerRun, Run, VenueId } from './state';
 import { reduce, type LateAction } from './store';
 
 const MIN_PREP_SHARE = 3;
@@ -160,8 +172,54 @@ function decideInsurer(game: LateGame): LateAction | null {
   return pick ? { type: 'buyPolicy', id: pick.id } : null;
 }
 
-export const DECIDE: Record<VenueId, (game: LateGame) => LateAction | null> = { camp: decideCamp, clinic: decideClinic, insurer: decideInsurer };
-export const PRESS: Record<VenueId, LateAction> = { camp: { type: 'whistle' }, clinic: { type: 'reading' }, insurer: { type: 'sell' } };
+/** The dose the bot will give before the inspector's marks start to bite. */
+const SEDATION_CEILING = 3;
+const DOORS_KEPT = 2;
+
+/** Keep the staff ahead of the beds at a light dose, keep a couple of doors standing, fill beds with the rest. */
+function decideAsylum(game: LateGame): LateAction | null {
+  const r = game.run as AsylumRun;
+  const upgrade = availableAsylumUpgrades(r).find((u) => u.cost <= r.cash);
+  if (upgrade) return { type: 'buyUpgrade', id: upgrade.id };
+  if (!isAutoSedationActive(r)) {
+    // The lightest dose that keeps every ward calm, up to what the inspector will put up with.
+    let target = SEDATION_CEILING;
+    for (let notch = 0; notch <= SEDATION_CEILING; notch++) {
+      if (coverage({ ...r, sedation: notch }) >= 1) {
+        target = notch;
+        break;
+      }
+    }
+    if (r.sedation !== target) return { type: 'shiftSedation', step: r.sedation < target ? 1 : -1 };
+  }
+  if (r.doors < DOORS_KEPT && doorCost(r) < r.cash * 0.3) return { type: 'buyDoor' };
+  if (coverage({ ...r, sedation: SEDATION_CEILING, dialOff: true }) < 1) {
+    let best: { id: string; value: number } | null = null;
+    ASYLUM_STAFF.forEach((st, i) => {
+      if (!isAsylumStaffRevealed(r, i)) return;
+      const cost = asylumStaffCost(st, r.staff[st.id] ?? 0);
+      if (cost > r.cash) return;
+      const value = st.calms / cost;
+      if (!best || value > best.value) best = { id: st.id, value };
+    });
+    const pick = best as { id: string; value: number } | null;
+    if (pick) return { type: 'hireAsylumStaff', id: pick.id };
+    if (coverage({ ...r, sedation: SEDATION_CEILING, dialOff: true }) < 0.8) return null;
+  }
+  let best: { id: string; value: number } | null = null;
+  WARDS.forEach((w, i) => {
+    if (!isWardRevealed(r, i)) return;
+    const cost = wardCost(w, r.wards[w.id] ?? 0);
+    if (cost > r.cash) return;
+    const value = wardRate(r, w) / cost;
+    if (!best || value > best.value) best = { id: w.id, value };
+  });
+  const pick = best as { id: string; value: number } | null;
+  return pick ? { type: 'buyWard', id: pick.id } : null;
+}
+
+export const DECIDE: Record<VenueId, (game: LateGame) => LateAction | null> = { camp: decideCamp, clinic: decideClinic, insurer: decideInsurer, asylum: decideAsylum };
+export const PRESS: Record<VenueId, LateAction> = { camp: { type: 'whistle' }, clinic: { type: 'reading' }, insurer: { type: 'sell' }, asylum: { type: 'rounds' } };
 
 
 /** Seconds between a defender's check-ins, and its presses per second while it is still clicking hard. */

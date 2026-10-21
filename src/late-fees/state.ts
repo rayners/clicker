@@ -5,11 +5,13 @@ import type { ClinicFields } from './clinic/state';
 import type { BurnedFields } from './burned/state';
 import type { InsurerFields } from './insurer/state';
 import type { DesignFields } from './design/state';
+import type { AsylumFields } from './asylum/state';
+import type { PatientFields } from './patient/state';
 import type { KillerDef, VenueDef } from './kinds';
 import { KILLERS, VENUES } from './registry';
 
-export type VenueId = 'camp' | 'clinic' | 'insurer';
-export type KillerId = 'drowned' | 'burned' | 'design';
+export type VenueId = 'camp' | 'clinic' | 'insurer' | 'asylum';
+export type KillerId = 'drowned' | 'burned' | 'design' | 'patient';
 /** osd: the VCR's own text; news: the town and the owners; staff: your people; kill: the body count. */
 export type EntryKind = 'osd' | 'news' | 'staff' | 'kill';
 
@@ -53,6 +55,15 @@ export const INSURER_CONFIG = {
   pressureBonus: 0,
 } satisfies RunConfig;
 
+export const ASYLUM_CONFIG = {
+  venue: 'asylum',
+  killer: 'patient',
+  title: 'CANDY CORN DAY',
+  part: 1,
+  productionMultiplier: 1,
+  pressureBonus: 0,
+} satisfies RunConfig;
+
 /** State every run has, whatever the venue and killer. */
 export interface RunCore {
   config: RunConfig;
@@ -76,13 +87,14 @@ export interface RunCore {
   nextLogId: number;
 }
 
-export type VenueFields = CampFields | ClinicFields | InsurerFields;
-export type KillerFields = DrownedFields | BurnedFields | DesignFields;
+export type VenueFields = CampFields | ClinicFields | InsurerFields | AsylumFields;
+export type KillerFields = DrownedFields | BurnedFields | DesignFields | PatientFields;
 export type Run = RunCore & VenueFields & KillerFields;
 export type RunOf<V extends VenueId, K extends KillerId> = RunCore & Extract<VenueFields, { venue: V }> & Extract<KillerFields, { killer: K }>;
 export type CampRun = RunCore & CampFields & KillerFields;
 export type ClinicRun = RunCore & ClinicFields & KillerFields;
 export type InsurerRun = RunCore & InsurerFields & KillerFields;
+export type AsylumRun = RunCore & AsylumFields & KillerFields;
 
 export function composeRun(config: RunConfig, seed: number, venue: VenueDef, killer: KillerDef): Run {
   const core: RunCore = {

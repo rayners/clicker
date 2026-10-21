@@ -1,4 +1,4 @@
-import { createRun, CAMP_CONFIG, CLINIC_CONFIG, INSURER_CONFIG, type KillerId, type Run, type RunConfig, type VenueId } from './state';
+import { createRun, ASYLUM_CONFIG, CAMP_CONFIG, CLINIC_CONFIG, INSURER_CONFIG, type KillerId, type Run, type RunConfig, type VenueId } from './state';
 import { KILLERS, VENUES } from './registry';
 import type { Ending, EndingText } from './kinds';
 import type { LateGame, LateProfile } from './game';
@@ -19,6 +19,7 @@ const CROSSOVER_PRESSURE: Record<string, number> = {
   'clinic:drowned': -0.4,
   'insurer:drowned': -0.72,
   'insurer:burned': -0.6,
+  'insurer:patient': -0.6,
 };
 
 export interface TapeDef {
@@ -40,6 +41,7 @@ export const ORIGINALS: readonly TapeDef[] = [
   { venue: 'camp', killer: 'drowned', title: 'FRIDAY THE 12TH', blurb: 'Camp Blackwater reopens twenty years after the drowning. Fill every bunk. Keep the lights on.', available: true },
   { venue: 'clinic', killer: 'burned', title: 'A NIGHTMARE ON SYCAMORE STREET', blurb: 'A sleep study pays by the dreaming hour. Something else is in the dreams.', available: true },
   { venue: 'insurer', killer: 'design', title: 'PENULTIMATE DESTINATION', blurb: 'You insured every survivor of Flight 213. Death has a list, and it is very patient.', available: true },
+  { venue: 'asylum', killer: 'patient', title: 'CANDY CORN DAY', blurb: 'Run the asylum on the hill above Millbrook. Fill the beds, mind the dose, and keep Ward Ten locked until National Candy Corn Day.', available: true },
 ];
 
 /** Every killer in every other killer's place, as the genre eventually always does. */
@@ -50,13 +52,19 @@ export const CROSSOVERS: readonly TapeDef[] = [
   { venue: 'clinic', killer: 'design', title: 'PENULTIMATE DREAM', blurb: 'A sleep study of people who should have died. The design comes for them in their beds, in order.' },
   { venue: 'insurer', killer: 'drowned', title: 'FRIDAY THE 12TH: CLAIMS PENDING', blurb: 'Providence Mutual insured the camp. Now its policyholders keep turning up in the water.' },
   { venue: 'insurer', killer: 'burned', title: 'SYCAMORE STREET 4: THE ADJUSTER', blurb: 'Every claims adjuster on the floor has the same dream about a man with a burned face.' },
+  { venue: 'asylum', killer: 'drowned', title: 'FRIDAY THE 12TH: COMMITTED', blurb: 'Something climbs out of the hydrotherapy tubs at Grayhaven. The patients say it has been down there since the lake was drained.' },
+  { venue: 'asylum', killer: 'burned', title: 'A NIGHTMARE ON THE HILL', blurb: 'Every sedated patient at Grayhaven is asleep. Every one of them dreams of a boiler room.' },
+  { venue: 'asylum', killer: 'design', title: 'PENULTIMATE DESTINATION: INVOLUNTARY', blurb: 'The survivors of Flight 213 are committed for their own safety. Death has visiting hours.' },
+  { venue: 'camp', killer: 'patient', title: 'CANDY CORN DAY AT CAMP BLACKWATER', blurb: 'The camp reopens for a late-October session. A man in a white mask walks out of the lake fog and does not hurry.' },
+  { venue: 'clinic', killer: 'patient', title: 'CANDY CORN DAY: LIGHTS OUT', blurb: 'He escaped on Candy Corn Day and came to the one house on Sycamore Street where everyone is asleep.' },
+  { venue: 'insurer', killer: 'patient', title: 'CANDY CORN DAY: TOTAL LOSS', blurb: 'Providence Mutual insured the hospital. Now he is working through the policyholders, one by one, in no hurry at all.' },
 ].map((t) => ({ ...t, available: true, crossover: true, pressureBonus: CROSSOVER_PRESSURE[`${t.venue}:${t.killer}`] ?? 0 })) as TapeDef[];
 
 /** The horror shelf at Late Fees Video. */
 export const TAPES: readonly TapeDef[] = [...ORIGINALS, ...CROSSOVERS];
 
-const BASE: Record<VenueId, RunConfig> = { camp: CAMP_CONFIG, clinic: CLINIC_CONFIG, insurer: INSURER_CONFIG };
-const HOME: Record<VenueId, KillerId> = { camp: 'drowned', clinic: 'burned', insurer: 'design' };
+const BASE: Record<VenueId, RunConfig> = { camp: CAMP_CONFIG, clinic: CLINIC_CONFIG, insurer: INSURER_CONFIG, asylum: ASYLUM_CONFIG };
+const HOME: Record<VenueId, KillerId> = { camp: 'drowned', clinic: 'burned', insurer: 'design', asylum: 'patient' };
 
 export const tapeFor = (venue: VenueId, killer: KillerId = HOME[venue]): TapeDef =>
   TAPES.find((t) => t.venue === venue && t.killer === killer) ?? ORIGINALS.find((t) => t.venue === venue)!;

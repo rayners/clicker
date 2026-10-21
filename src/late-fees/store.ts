@@ -25,12 +25,21 @@ import {
   shiftAppetite,
   toggleActuary,
 } from './insurer/economy';
+import {
+  buyAsylumUpgrade,
+  buyDoor,
+  buyWard,
+  hireAsylumStaff,
+  rounds,
+  shiftSedation,
+  toggleAutoSedation,
+} from './asylum/economy';
 import { advance, newLateGame, type LateGame, type LateSettings } from './game';
 import { chooseTape, completeRun } from './sequels';
 import { buyCutUpgrade, leaveCut, startCut } from './cut';
 import { shiftPush, toggleDormant } from '../shared/hunt';
 import type { Ending } from './kinds';
-import type { CampRun, ClinicRun, InsurerRun, KillerId, Run, VenueId } from './state';
+import type { AsylumRun, CampRun, ClinicRun, InsurerRun, KillerId, Run, VenueId } from './state';
 
 export type LateAction =
   | { type: 'whistle' }
@@ -50,6 +59,12 @@ export type LateAction =
   | { type: 'hireAgent'; id: string }
   | { type: 'shiftAppetite'; step: 1 | -1 }
   | { type: 'toggleActuary' }
+  | { type: 'rounds' }
+  | { type: 'buyWard'; id: string }
+  | { type: 'hireAsylumStaff'; id: string }
+  | { type: 'shiftSedation'; step: 1 | -1 }
+  | { type: 'buyDoor' }
+  | { type: 'toggleSedation' }
   | { type: 'buyUpgrade'; id: string }
   | { type: 'chooseTape'; venue: VenueId; seed: number; killer?: KillerId }
   | { type: 'completeRun'; ending: Ending; seed: number }
@@ -75,6 +90,7 @@ const at =
 const camp = at<CampRun>('camp');
 const clinic = at<ClinicRun>('clinic');
 const insurer = at<InsurerRun>('insurer');
+const asylum = at<AsylumRun>('asylum');
 
 export function reduce(game: LateGame, action: LateAction): LateGame {
   switch (action.type) {
@@ -112,9 +128,22 @@ export function reduce(game: LateGame, action: LateAction): LateGame {
       return insurer(game, (r) => shiftAppetite(r, action.step));
     case 'toggleActuary':
       return insurer(game, toggleActuary);
+    case 'rounds':
+      return asylum(game, rounds);
+    case 'buyWard':
+      return asylum(game, (r) => buyWard(r, action.id));
+    case 'hireAsylumStaff':
+      return asylum(game, (r) => hireAsylumStaff(r, action.id));
+    case 'shiftSedation':
+      return asylum(game, (r) => shiftSedation(r, action.step));
+    case 'buyDoor':
+      return asylum(game, buyDoor);
+    case 'toggleSedation':
+      return asylum(game, toggleAutoSedation);
     case 'buyUpgrade':
       if (game.run.venue === 'clinic') return clinic(game, (r) => buyClinicUpgrade(r, action.id));
       if (game.run.venue === 'insurer') return insurer(game, (r) => buyInsurerUpgrade(r, action.id));
+      if (game.run.venue === 'asylum') return asylum(game, (r) => buyAsylumUpgrade(r, action.id));
       return camp(game, (r) => buyCampUpgrade(r, action.id));
     case 'chooseTape':
       return chooseTape(game, action.venue, action.seed, action.killer);

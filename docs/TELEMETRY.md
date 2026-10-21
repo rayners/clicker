@@ -52,6 +52,8 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 | LATE FEES | `act_reached` | act, venue, killer, part, minutes |
 | LATE FEES | `zone_opened` | zone, zones, minutes, part (Camp Blackwater) |
 | LATE FEES | `bed_opened` | bed, minutes, part (the first of each kind of bed at the sleep clinic) |
+| LATE FEES | `ward_opened` | ward, minutes, part (the first of each kind of ward at Grayhaven) |
+| LATE FEES | `patient_escaped` | escapes (so far), loose (still out), minutes, part (Grayhaven) |
 | LATE FEES | `cut_started` | killer (the tape flipped to the Killer's Cut) |
 | LATE FEES | `cut_beaten` | killer, beaten (times put down), harvest |
 | LATE FEES | `survivor_lost` | survivor, left (names still on the list), minutes, part (Providence Mutual) |

@@ -9,7 +9,7 @@ import type { Ending } from '../../src/late-fees/kinds';
 import type { KillerId, VenueId } from '../../src/late-fees/state';
 
 const NOW = 1_000_000;
-const HOME: Record<VenueId, KillerId> = { camp: 'drowned', clinic: 'burned', insurer: 'design' };
+const HOME: Record<VenueId, KillerId> = { camp: 'drowned', clinic: 'burned', insurer: 'design', asylum: 'patient' };
 const venues = Object.keys(VENUES) as VenueId[];
 const killers = Object.keys(KILLERS) as KillerId[];
 

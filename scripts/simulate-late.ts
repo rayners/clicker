@@ -5,12 +5,14 @@ import { held } from '../src/shared/ground';
 import type { CampRun } from '../src/late-fees/state';
 
 const trace = process.argv.includes('--trace');
-const venue = (process.argv.find((a) => a === 'camp' || a === 'clinic' || a === 'insurer') ?? 'camp') as 'camp' | 'clinic' | 'insurer';
+const venue = (process.argv.find((a) => a === 'camp' || a === 'clinic' || a === 'insurer' || a === 'asylum') ?? 'camp') as 'camp' | 'clinic' | 'insurer' | 'asylum';
+const killer = process.argv.find((a) => a === 'drowned' || a === 'burned' || a === 'design' || a === 'patient') as 'drowned' | 'burned' | 'design' | 'patient' | undefined;
 for (const seed of [1, 7, 42]) {
   const started = performance.now();
   const run = simulateLate({
     seed,
     venue,
+    killer,
     maxSeconds: 10 * 3600,
     trace: trace && seed === 7 && venue === 'camp'
       ? (g, t) => {
@@ -24,6 +26,6 @@ for (const seed of [1, 7, 42]) {
   const at = (s?: number) => (s === undefined ? 'never' : formatDuration(s));
   const r = run.final.run;
   console.log(
-    `${venue} seed ${seed}: act2 ${at(run.actAt[2])} | act3 ${at(run.actAt[3])} | act4 ${at(run.actAt[4])} | credits ${at(run.terminusAt)} | dead ${r.bodyCount} | ${Math.round(performance.now() - started)}ms`,
+    `${venue}${killer ? `/${killer}` : ''} seed ${seed}: act2 ${at(run.actAt[2])} | act3 ${at(run.actAt[3])} | act4 ${at(run.actAt[4])} | credits ${at(run.terminusAt)} | dead ${r.bodyCount} | ${Math.round(performance.now() - started)}ms`,
   );
 }

@@ -17,7 +17,7 @@ const MIN_PUSH = 0.1;
 /** Defenders get this much richer per point of notoriety: the county believes you now. */
 const DEFENDER_PER_NOTORIETY = 0.3;
 /** Dread per body, by place: a death at the insurer is rarer and costs the design more effort than one at camp. */
-const HARVEST_WEIGHT: Record<VenueId, number> = { camp: 1, clinic: 1.5, insurer: 8 };
+const HARVEST_WEIGHT: Record<VenueId, number> = { camp: 1, clinic: 1.5, insurer: 8, asylum: 1.5 };
 const BASE_RULES: HuntRules = {
   pushPerStep: 1,
   hungerPerStep: 0.015,

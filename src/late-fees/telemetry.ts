@@ -1,8 +1,9 @@
 import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../shared/telemetry';
 import { ZONES } from '../late-fees-data/camp';
 import { BEDS } from '../late-fees-data/clinic';
+import { WARDS } from '../late-fees-data/asylum';
 import type { LateGame } from './game';
-import type { CampRun, ClinicRun, InsurerRun } from './state';
+import type { AsylumRun, CampRun, ClinicRun, InsurerRun } from './state';
 
 const minutes = (seconds: number) => Math.round(seconds / 60);
 
@@ -45,6 +46,13 @@ export function filmEvents(prev: LateGame, next: LateGame): TelemetryEvent[] {
     for (const b of BEDS) {
       if ((now.beds[b.id] ?? 0) > 0 && (was.beds[b.id] ?? 0) === 0) events.push({ name: 'bed_opened', props: { bed: b.id, ...at } });
     }
+  } else if (r.venue === 'asylum') {
+    const was = prev.run as AsylumRun;
+    const now = r as AsylumRun;
+    for (const w of WARDS) {
+      if ((now.wards[w.id] ?? 0) > 0 && (was.wards[w.id] ?? 0) === 0) events.push({ name: 'ward_opened', props: { ward: w.id, ...at } });
+    }
+    if (now.escapes > was.escapes) events.push({ name: 'patient_escaped', props: { escapes: now.escapes, loose: now.loose, ...at } });
   } else if (r.venue === 'insurer') {
     const was = prev.run as InsurerRun;
     const now = r as InsurerRun;

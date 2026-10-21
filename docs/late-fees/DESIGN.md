@@ -74,7 +74,7 @@ Code layout, following Elderdark:
 - **The balance:** premiums against payouts against the intervention budget, under fate pressure that rises with every cheat.
 - **Click:** CHECK THE LIST. It reveals the next omen chain and breaks the weakest link.
 
-### CANDY CORN DAY: Grayhaven State Hospital (approved 2026-10-21, next to build)
+### CANDY CORN DAY: Grayhaven State Hospital (built 2026-10-21)
 
 A *Halloween* homage. The user's decisions: you run the hospital, and the date matters. The film is set on **National Candy Corn Day**, a real day (October 30th, the eve of Halloween), so everyone in town is in costume and escapees blend into the crowd.
 
@@ -94,6 +94,18 @@ A *Halloween* homage. The user's decisions: you run the hospital, and the date m
 - His mechanic is **inevitability**. Pressure never resets: locks, orderlies and search teams only delay him. He always comes back for the one who got away, his chosen survivor, across sequels too.
 - **Crossovers** follow the existing rules: Patient 10-30 at the camp, the clinic and Providence Mutual, and the Drowned Boy and the Burned Man at Grayhaven. He also joins the Killer's Cut (play as the killer).
 - **Sequels:** *Part II*, *III: Season of the…*, *H-20 (Candy Corn Day)*, and so on.
+
+**As built (2026-10-21)**
+- **Code:** `src/late-fees/asylum/` and `src/late-fees/patient/`; content in `src/late-fees-data/asylum*.ts` and `patient.ts`; screen in `src/late-fees-ui/asylum.ts`.
+- **The dial:** sedation stretches each member of staff further and also calms patients directly. The inspector's rating moves toward `1 − 0.7 × dose`, and funding scales with it. The pharmacy protocol sets the lowest dose that keeps every ward calm.
+- **Doors are consumables:** a security door absorbs one incident (two or four with deadbolts and steel doors) and is then replaced. That is the upkeep economy, in place of a maintenance bill.
+- **Escapes:** at full agitation a patient gets out unless a door holds. An escape can leave a body in Millbrook (scaled by the killer's pressure), and the town doesn't forgive the hill while anyone is still loose. Search teams find escapees at a quarter of the pace once Candy Corn Day arrives.
+- **Candy Corn Day:** act 3. The countdown on screen runs with the story scale. After that, Patient 10-30 also claims townsfolk in costume.
+- **Patient 10-30's pressure** is `1 + 0.25 per act`, whatever the time of day. He keeps walking even where nobody is asleep.
+- **A per-diem (×1.8)** on every bed is the counterpart of the clinic's deep-sleep premium. It was tuned by the pacing bot.
+- **Crossovers:** six. The insurer pairing is tuned −0.6, like the other killers there.
+- **Telemetry:** `ward_opened` and `patient_escaped`.
+- **Pacing (bot):** Act II 1h05, Act III 2h30, Act IV 2h55, credits 4h10.
 
 ## 4. Acts (all tapes)
 

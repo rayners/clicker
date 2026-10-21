@@ -80,3 +80,23 @@ describe('Penultimate Destination pacing', () => {
     expect((run.final.run as import('../../src/late-fees/state').InsurerRun).list.length).toBeGreaterThan(0);
   });
 });
+
+describe('Candy Corn Day pacing', () => {
+  const run = simulateLate({ seed: 7, venue: 'asylum', maxSeconds: 9 * 3600 });
+
+  it('reaches the body count (act 2) at roughly 40-75 minutes', () => {
+    expect(hours(run.actAt[2])).toBeGreaterThan(40 / 60);
+    expect(hours(run.actAt[2])).toBeLessThan(75 / 60);
+  });
+
+  it('reaches Candy Corn Day itself (act 3) at roughly 2-3 hours', () => {
+    expect(hours(run.actAt[3])).toBeGreaterThan(2);
+    expect(hours(run.actAt[3])).toBeLessThan(3);
+  });
+
+  it('rolls credits within about 4-6 hours, with escapes and deaths along the way', () => {
+    expect(hours(run.terminusAt)).toBeGreaterThan(4);
+    expect(hours(run.terminusAt)).toBeLessThan(6);
+    expect(run.final.run.bodyCount).toBeGreaterThan(20);
+  });
+});
