@@ -105,6 +105,18 @@ export function creditRate(m: MissionState): number {
   return Math.min(m.ore + oreRate(m), refineryCapacity(m)) * ORE_PRICE;
 }
 
+/** Credits per second once the hopper has drained: the slower of extraction and the refinery. */
+const steadyIncome = (m: MissionState): number => Math.min(oreRate(m), refineryCapacity(m)) * ORE_PRICE;
+
+/** How much steady income one more generator, or one more refinery level, would add. Zero when the other end limits. */
+export function incomeGain(m: MissionState, purchase: { generator: string } | { refinery: true }): number {
+  const after =
+    'generator' in purchase
+      ? { ...m, generators: { ...m.generators, [purchase.generator]: (m.generators[purchase.generator] ?? 0) + 1 } }
+      : { ...m, refineryLevel: m.refineryLevel + 1 };
+  return Math.max(0, steadyIncome(after) - steadyIncome(m));
+}
+
 export function bottleneck(m: MissionState): 'extraction' | 'refinery' {
   return oreRate(m) >= refineryCapacity(m) ? 'refinery' : 'extraction';
 }

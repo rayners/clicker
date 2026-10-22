@@ -84,6 +84,14 @@ describe('systems panel', () => {
     expect(acquire(GENERATORS[1]!.name)).toBeTruthy();
   });
 
+  it('shows what each purchase would add to income, and when the refinery would swallow it', () => {
+    setup();
+    expect(screen.getByLabelText(`${GENERATORS[0]!.name} income`).textContent).toMatch(/^\+[\d.]+ CR\/S$/);
+    setup((g) => ({ ...g, mission: { ...g.mission, generators: { ...ext(g.mission).generators, [GENERATORS[0]!.id]: 10_000 } } as typeof g.mission }));
+    expect(screen.getByLabelText(`${GENERATORS[0]!.name} income`).textContent).toBe('+0 CR/S · REFINERY FULL');
+    expect(screen.getByLabelText('Refinery income').textContent).toMatch(/^\+[\d.kM]+ CR\/S$/);
+  });
+
   it('upgrades the refinery', async () => {
     const user = setup((g) => ({ ...g, mission: { ...g.mission, credits: 1000 } }));
     await user.click(screen.getByRole('button', { name: /upgrade refinery/i }));

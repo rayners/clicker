@@ -796,6 +796,23 @@ button:focus-visible {
   font-size: 0.85em;
 }
 
+.sys-rates {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* What the purchase adds to income; dimmed and flagged when the other end of the line would swallow it. */
+.sys-gain {
+  font-size: 0.85em;
+  color: var(--phosphor-hi);
+}
+
+.sys-gain[data-wasted='true'] {
+  color: var(--danger);
+}
+
 .buy {
   min-height: 44px;
   min-width: 132px;

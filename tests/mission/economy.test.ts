@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { createMission, DEFAULT_MISSION_CONFIG } from '../../src/mission/state';
 import {
+  incomeGain,
+  generatorRate,
   drill,
   generatorCost,
   buyGenerator,
@@ -193,5 +195,18 @@ describe('income (credits per second)', () => {
   it('matches what a tick actually earns', () => {
     const m = withDrones(200);
     expect(tickMission(m, 1).credits - m.credits).toBeCloseTo(creditRate(m));
+  });
+});
+
+describe('what a purchase does to income', () => {
+  const drone = GENERATORS[0]!;
+  it('shows a generator adding income while the refinery has room', () => {
+    expect(incomeGain(fresh(), { generator: drone.id })).toBeCloseTo(generatorRate(fresh(), drone));
+  });
+
+  it('shows a generator adding nothing once the refinery is full, and the refinery adding it back', () => {
+    const full = { ...fresh(), generators: { ...fresh().generators, [drone.id]: 10_000 } };
+    expect(incomeGain(full, { generator: drone.id })).toBe(0);
+    expect(incomeGain(full, { refinery: true })).toBeGreaterThan(0);
   });
 });

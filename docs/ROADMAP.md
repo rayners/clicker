@@ -95,7 +95,7 @@ In order. Each item has its design written down first, so nothing lives only in 
 - **Raise `TERRAFORM_UNLOCK_CONTRACTS`** (currently 0 so it can be play-tested) once the user is happy with it.
 - **A second horror.** The architecture is ready: add `src/mission/<horror>/`, a `HorrorDef`, lexicon keys each scenario must supply, and optional pairings. Choosing a horror per contract (random or cycled from the profile) is still to be designed.
 - (Done 2026-10-22) Terraform polish: while WARDEN balances, the three allocation lines fold into a one-line power split (e.g. `ATMO 40% · HEAT 30% · WATER 30%`). Taking control back restores the steps. (Every scenario now has its own vessel, target and action sprites.)
-- More flow feedback: show each purchase's effect on *income* (not just ore/s) on the buy buttons.
+- (Done 2026-10-22, extraction) **More flow feedback:** every generator and the refinery show what one more would add to income. It reads "+0 CR/S · REFINERY FULL" (or "NEEDS MORE ORE") in red when the other end of the line would swallow it. **Still open:** the same for the other scenarios' buy buttons.
 - The **Boardroom** layer (`docs/BOARDROOM.md`).
 
 ## Balance notes
