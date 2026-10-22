@@ -85,6 +85,7 @@ In order. Each item has its design written down first, so nothing lives only in 
    - **Designed** in `docs/OUTBREAK.md` (2026-10-22): Strain KA-11, "the Pallor": a flu in Act II that everyone recovers from, the discovery in Act III (Bioproducts wants samples), the turned working against the company in Act IV. A SICK BAY tab with a quarantine dial, screening, wards, cultures and lockdown.
    - **Which horror:** from 6 completed contracts, each new contract draws organism or outbreak from its seed (at most two in a row), hidden from the assignment screen.
    - Build order is in the design doc (eight pieces).
+   - **Built:** piece 1, the spread model (`src/mission/outbreak/`): workforce shares (exposed, sick, turned, recovered), the quarantine dial, a flu that everyone recovers from before the discovery, turning in Act IV, output, pressure on held ground and sabotage through the scenario. Registered as a horror, but no contract gets it yet.
 8. **(User, 2026-10-22: "go ahead with the boardroom layer when it comes up") The Boardroom** (`docs/BOARDROOM.md`).
 
 ## Backlog / ideas

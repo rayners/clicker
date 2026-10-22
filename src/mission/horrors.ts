@@ -4,8 +4,9 @@ import { ORGANISM } from './organism';
 import { QUIET } from './quiet';
 import { CREATURE } from './creature';
 import { HUNTER } from './hunter';
+import { OUTBREAK } from './outbreak';
 
-export const HORRORS: Readonly<Record<HorrorId, HorrorDef>> = { organism: ORGANISM, quiet: QUIET, creature: CREATURE, hunter: HUNTER };
+export const HORRORS: Readonly<Record<HorrorId, HorrorDef>> = { organism: ORGANISM, quiet: QUIET, creature: CREATURE, hunter: HUNTER, outbreak: OUTBREAK };
 
 /** How the mission's horror scales scenario output. Scenarios call this instead of knowing any horror. */
 export function horrorProductionMultiplier(m: MissionState): number {

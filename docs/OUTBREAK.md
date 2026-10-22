@@ -18,7 +18,7 @@ The horror is the workforce itself. The organism's horror is something you broug
 
 ## The model (pure, under `src/mission/outbreak/`)
 
-The horror keeps its own **workforce**: the contract staff around the named crew. These are fractions of a headcount that grows with `signals.progress`, so the outbreak is the same size of problem in every scenario and needs no scenario state.
+The horror keeps its own **workforce**: the contract staff around the named crew, held as shares of the whole, so the outbreak is the same size of problem in every scenario and needs no scenario state. Its phases follow the act the story has reached (a horror's tick sees the mission, not the signals).
 
 | Field | Meaning |
 |---|---|

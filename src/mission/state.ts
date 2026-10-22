@@ -11,10 +11,11 @@ import type { OrganismFields } from './organism/state';
 import type { QuietFields } from './quiet/state';
 import type { CreatureFields } from './creature/state';
 import type { HunterFields } from './hunter/state';
+import type { OutbreakFields } from './outbreak/state';
 import { HORRORS, SCENARIOS } from './registry';
 
 export type ScenarioId = 'extraction' | 'terraform' | 'security' | 'haulage' | 'overland' | 'salvage';
-export type HorrorId = 'organism' | 'quiet' | 'creature' | 'hunter';
+export type HorrorId = 'organism' | 'quiet' | 'creature' | 'hunter' | 'outbreak';
 
 /** Everything that varies between missions. Plain data so the future Boardroom layer can author it. */
 export interface MissionConfig {
@@ -110,7 +111,7 @@ export interface MissionCore {
 }
 
 export type ScenarioFields = ExtractionFields | TerraformFields | SecurityFields | HaulageFields<'haulage'> | HaulageFields<'overland'> | SalvageFields;
-export type HorrorFields = OrganismFields | QuietFields | CreatureFields | HunterFields;
+export type HorrorFields = OrganismFields | QuietFields | CreatureFields | HunterFields | OutbreakFields;
 
 /** A single mission, fully self-contained and JSON-serializable. */
 export type MissionState = MissionCore & ScenarioFields & HorrorFields;
@@ -126,6 +127,7 @@ export type HaulageMission = MissionCore & HaulageFields & HorrorFields;
 export type OrganismMission = MissionCore & ScenarioFields & OrganismFields;
 export type CreatureMission = MissionCore & ScenarioFields & CreatureFields;
 export type HunterMission = MissionCore & ScenarioFields & HunterFields;
+export type OutbreakMission = MissionCore & ScenarioFields & OutbreakFields;
 
 export function isExtraction(m: MissionState): m is ExtractionMission {
   return m.scenario === 'extraction';
