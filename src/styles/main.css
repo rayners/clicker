@@ -2573,3 +2573,267 @@ button:focus-visible {
   margin: 0;
   line-height: 1.35;
 }
+
+/* ---------- the Boardroom: headquarters, in letterhead cream and oxblood (docs/BOARDROOM.md) ---------- */
+
+.br {
+  --paper: #efe6d2;
+  --paper-dim: #d9ccb0;
+  --ink: #2a1c14;
+  --ink-dim: #6d5848;
+  --oxblood: #6e1a1f;
+  --gilt: #9a7a3a;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overflow: hidden;
+  font-family: var(--font-term);
+  font-size: 1.15rem;
+  color: var(--ink);
+  text-shadow: none;
+  background: linear-gradient(180deg, var(--paper), var(--paper-dim));
+}
+
+.br[hidden] {
+  display: none;
+}
+
+.br-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px var(--gutter);
+  border-bottom: 3px double var(--oxblood);
+}
+
+.br-name {
+  margin: 0;
+  font-family: var(--font-corp);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--oxblood);
+}
+
+.br-term {
+  display: block;
+  font-size: 0.85em;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+}
+
+.br button {
+  min-height: 44px;
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--ink-dim);
+  touch-action: manipulation;
+}
+
+.br button:disabled {
+  opacity: 0.45;
+}
+
+.br button:active:not(:disabled) {
+  background: rgba(110, 26, 31, 0.12);
+}
+
+.br-back {
+  flex: none;
+  padding: 0 10px;
+  letter-spacing: 0.1em;
+}
+
+.br-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px var(--gutter) 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.br-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.br-stat {
+  padding: 4px 6px;
+  border: 1px solid var(--paper-dim);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.br-stat dt {
+  font-size: 0.75em;
+  letter-spacing: 0.15em;
+  color: var(--ink-dim);
+}
+
+.br-value {
+  margin: 0;
+  font-size: 1.3em;
+  color: var(--oxblood);
+}
+
+.br-frozen {
+  margin: 0 0 8px;
+  padding: 4px 8px;
+  border: 1px solid var(--oxblood);
+  color: var(--oxblood);
+  letter-spacing: 0.1em;
+}
+
+.br-frozen[hidden] {
+  display: none;
+}
+
+.br-sub {
+  margin: 12px 0 4px;
+  font-family: var(--font-corp);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--gilt);
+  border-bottom: 1px solid var(--paper-dim);
+}
+
+.br-charters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.br-buy {
+  width: 100%;
+  padding: 0 8px;
+  letter-spacing: 0.08em;
+}
+
+.br-buy[hidden] {
+  display: none;
+}
+
+.br-charters .br-buy {
+  padding: 4px 8px;
+  white-space: pre-line;
+  line-height: 1.15;
+}
+
+.br-contracts {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.br-contract {
+  padding: 6px 8px;
+  border-left: 4px solid var(--gilt);
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.br-contract[data-act='3'] {
+  border-left-color: var(--oxblood);
+}
+
+.br-contract[data-act='4'] {
+  border-left-color: var(--oxblood);
+  background: rgba(110, 26, 31, 0.08);
+}
+
+.br-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.br-ship {
+  letter-spacing: 0.08em;
+}
+
+.br-kind,
+.br-owned {
+  color: var(--ink-dim);
+}
+
+.br-horror {
+  color: var(--oxblood);
+}
+
+.br-dial {
+  display: grid;
+  grid-template-columns: 1fr 44px 4.5rem 44px;
+  align-items: center;
+  gap: 6px;
+}
+
+.br-dial-name {
+  letter-spacing: 0.1em;
+}
+
+.br-dial-value {
+  text-align: center;
+  font-size: 1.3em;
+  color: var(--oxblood);
+}
+
+.br-policy {
+  width: 100%;
+  margin-top: 6px;
+  letter-spacing: 0.1em;
+}
+
+.br-divisions {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.br-division {
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.br-desc {
+  margin: 2px 0 6px;
+  font-size: 0.9em;
+  line-height: 1.2;
+  color: var(--ink-dim);
+}
+
+.br-minutes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.br-minute {
+  padding: 3px 0;
+  border-bottom: 1px dotted var(--paper-dim);
+  line-height: 1.25;
+}
+
+.br-when {
+  color: var(--ink-dim);
+}
+
+.br-memo {
+  color: var(--oxblood);
+}
+
+@media (min-width: 900px) and (min-height: 500px) {
+  .br-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}

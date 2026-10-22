@@ -25,6 +25,7 @@ import { createTerminusPanel } from './terminus';
 import { createSettings } from './settings';
 import { createCreatureView } from './creature';
 import { createHunterView } from './hunter';
+import { createBoardroomView } from './boardroom';
 import { createAssignment } from './assignment';
 import { createAlerts } from './alerts';
 import { createSound, cueForLog, MAX_PRINTED_LINES, PRINT_SECONDS, PRINT_STAGGER } from './sound';
@@ -78,6 +79,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const settings = createSettings(store);
   const creatureView = createCreatureView(store);
   const hunterView = createHunterView(store);
+  const boardroomView = createBoardroomView(store);
   const assignment = createAssignment(store);
   // iOS only allows audio to start inside a user gesture.
   root.addEventListener('pointerdown', () => sound.unlock(), { passive: true });
@@ -278,7 +280,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
   }
 
   root.classList.add('shell');
-  root.replaceChildren(masthead, status, ...panels.map((p) => p.el), drillBay, tabbar, settings.dialog, assignment.el, creatureView.el, hunterView.el, guide.rulesDialog);
+  root.replaceChildren(masthead, status, ...panels.map((p) => p.el), drillBay, tabbar, settings.dialog, assignment.el, creatureView.el, hunterView.el, boardroomView.el, guide.rulesDialog);
   selectTab('ops');
   let palette = readPalette(root);
   paintAll(root);
@@ -310,6 +312,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     creatureView.render(game);
     guide.render(game);
     hunterView.render(game);
+    boardroomView.render(game);
     if (root.dataset.mode !== game.mode) root.dataset.mode = game.mode;
     const m = game.mission;
     if (root.dataset.scenario !== m.scenario) showScenario(m.scenario);

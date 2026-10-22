@@ -1,8 +1,8 @@
 import type { GameState } from '../core/game';
-import { CREATURE_UNLOCK_CONTRACTS, HUNTER_UNLOCK_CONTRACTS, isCreatureUnlocked, isHunterUnlocked } from '../core/prestige';
+import { BOARDROOM_UNLOCK_CONTRACTS, CREATURE_UNLOCK_CONTRACTS, HUNTER_UNLOCK_CONTRACTS, isBoardroomUnlocked, isCreatureUnlocked, isHunterUnlocked } from '../core/prestige';
 import { exportSave, importSave } from '../core/save';
 import type { Store } from '../core/store';
-import { h, setText } from '../shared/ui/dom';
+import { h, setAttr, setText } from '../shared/ui/dom';
 import { createOptOut } from '../shared/telemetry';
 
 const CONFIRM_TIMEOUT_MS = 5000;
@@ -26,6 +26,8 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
   const specialOrder = h('button', { class: 'buy cfg-danger', type: 'button', 'aria-label': 'Accept Special Order 0-77' }, 'SPECIAL ORDER 0-77: ACCEPT');
   // Play as the hunter: a second horror tier, beside the creature.
   const theHunt = h('button', { class: 'buy cfg-danger', type: 'button', 'aria-label': 'Accept the hunt' }, 'THE HUNT: ACCEPT');
+  // The second tier: WARDEN promoted to headquarters (docs/BOARDROOM.md).
+  const promotion = h('button', { class: 'buy', type: 'button' }, 'ACCEPT PROMOTION');
 
   const dialog = h(
     'div',
@@ -47,6 +49,7 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
       h('h3', { class: 'panel-subtitle' }, 'RESTRICTED'),
       specialOrder,
       theHunt,
+      promotion,
       h('h3', { class: 'panel-subtitle' }, 'DANGER'),
       resetButton,
     ),
@@ -147,7 +150,17 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
     show(false);
   });
 
+  promotion.addEventListener('click', () => {
+    store.dispatch({ type: 'enterBoardroom', seed: (Math.random() * 2 ** 31) | 0 });
+    show(false);
+  });
+
   function render(game: GameState) {
+    const promoted = !!game.boardroom || isBoardroomUnlocked(game.profile);
+    promotion.disabled = !promoted;
+    const promotionText = game.boardroom ? 'THE BOARDROOM: RETURN' : promoted ? 'THE BOARDROOM: ACCEPT PROMOTION' : `THE BOARDROOM · AFTER ${BOARDROOM_UNLOCK_CONTRACTS} CONTRACTS`;
+    setText(promotion, promotionText);
+    setAttr(promotion, 'aria-label', game.boardroom ? 'Return to the Boardroom' : promoted ? 'Accept promotion' : promotionText.toLowerCase());
     const huntOpen = !!game.hunter || isHunterUnlocked(game.profile);
     theHunt.disabled = !huntOpen;
     setText(theHunt, game.hunter ? 'THE HUNT: RESUME' : huntOpen ? 'THE HUNT: ACCEPT' : `THE HUNT · AFTER ${HUNTER_UNLOCK_CONTRACTS} CONTRACTS`);
