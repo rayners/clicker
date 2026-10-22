@@ -95,6 +95,7 @@ In order. Each item has its design written down first, so nothing lives only in 
    - **Built:** piece 6, Calder's Landing (`src/data/outbreak/calders-landing.ts`), the outbreak's pairing for security: empty dormitories and a colds note in Act II, swabs dated before the colony went dark, the missing forty among the turned, and the tunnels they built.
    - **Done (2026-10-22).**
 8. **(User, 2026-10-22: "go ahead with the boardroom layer when it comes up") The Boardroom** (`docs/BOARDROOM.md`).
+   - **Designed** (2026-10-22): a layer beside the player's contract, from 10 contracts. Commission real first-tier contracts into office slots, each run headless by its own WARDEN; a safety budget dial, scrutiny and inquiries, divisions, a COO; a slow burn in which the company is the monster (recycled crews from the player's own history, WARDEN's reconditioning signed in this office); three endings to a term. Eight build pieces.
 
 ## Backlog / ideas
 
