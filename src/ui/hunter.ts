@@ -7,11 +7,25 @@ import { formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
 import { createConfirmButton } from '../shared/ui/confirm';
 import { legendEarned } from '../shared/hunt';
+import { createGuideView } from '../shared/ui/guide';
+import { createGuideProgress } from '../shared/guide';
+import { huntGuide } from '../shared/hunt-guide';
 
 const KIND: Record<ScenarioId, string> = { extraction: 'EXTRACTION', terraform: 'TERRAFORM', security: 'SECURITY', haulage: 'HAULAGE', overland: 'OVERLAND', salvage: 'SALVAGE' };
 /** How each crew reads to the hunter, act by act. */
 const ACT_NAMES = ['', 'UNAWARE', 'ARMED', 'HUNTING YOU', 'DROVE YOU OFF'];
 const FEED = 8;
+const GUIDE_KEY = 'deep-contract.hunter.guide';
+const GUIDE = huntGuide<GameState>((g) => (g.mode === 'hunter' ? (g.hunter?.hunt ?? null) : null), {
+  title: 'THE HUNT',
+  prey: 'ship',
+  harvest: 'TROPHIES',
+  notoriety: 'STORIES',
+  root: '.xeno[data-horror="hunter"]',
+  push: '[aria-label^="Stalk "][aria-label$=" closer"]',
+  rest: 'WITHDRAW',
+  growth: 'WHAT IT CARRIES',
+});
 
 function createCrewStrip(store: Store, index: number) {
   const title = h('span', { class: 'xeno-title' });
@@ -65,6 +79,7 @@ function createCrewStrip(store: Store, index: number) {
 export function createHunterView(store: Store): { el: HTMLElement; render(game: GameState): void } {
   const back = h('button', { class: 'xeno-back', type: 'button', 'aria-label': 'Return to the contract' }, 'RETURN TO CONTRACT');
   back.addEventListener('click', () => store.dispatch({ type: 'leaveHunter' }));
+  const guide = createGuideView<GameState>({ ...GUIDE, progress: createGuideProgress(window.localStorage, GUIDE_KEY) });
   const name = h('h2', { class: 'xeno-name' }, 'THE HUNT');
   const stat = (label: string, aria: string) => {
     const value = h('dd', { class: 'xeno-value', 'aria-label': aria }, '0');
@@ -85,13 +100,14 @@ export function createHunterView(store: Store): { el: HTMLElement; render(game: 
   const el = h(
     'section',
     { class: 'xeno', 'data-horror': 'hunter', 'aria-label': 'The hunt', hidden: true },
-    h('header', { class: 'xeno-head' }, name, back),
+    h('header', { class: 'xeno-head' }, name, guide.rulesButton, back),
     h(
       'div',
       { class: 'xeno-body' },
       h(
         'div',
         { class: 'xeno-col' },
+        guide.el,
         h('dl', { class: 'xeno-stats' }, trophies.el, hunger.el, stories.el, free.el),
         note,
         ...crews.map((c) => c.el),
@@ -102,6 +118,7 @@ export function createHunterView(store: Store): { el: HTMLElement; render(game: 
       ),
       h('div', { class: 'xeno-col' }, h('h3', { class: 'xeno-sub' }, 'WHAT IT CARRIES'), upgrades),
     ),
+    guide.rulesDialog,
   );
   let shownUpgrades = '';
   let shownFeed = '';
@@ -109,7 +126,7 @@ export function createHunterView(store: Store): { el: HTMLElement; render(game: 
   function render(game: GameState) {
     el.hidden = game.mode !== 'hunter' || !game.hunter;
     const c = game.hunter;
-    if (el.hidden || !c) return;
+    if (el.hidden || !c) return guide.render(game);
     const hunt = c.hunt;
     setText(trophies.value, formatNumber(hunt.dread));
     setText(hunger.value, `${Math.round(hunt.hunger)}%`);
@@ -165,6 +182,8 @@ export function createHunterView(store: Store): { el: HTMLElement; render(game: 
       shownFeed = feedKey;
       feed.replaceChildren(...entries.map((e) => h('li', { class: 'xeno-entry' }, h('span', { class: 'xeno-when' }, e.who), ' ', e.text)));
     }
+    // Last, so the controls it points at are labelled.
+    guide.render(game);
   }
 
   return { el, render };

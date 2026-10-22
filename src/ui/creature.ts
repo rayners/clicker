@@ -7,11 +7,25 @@ import { formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
 import { createConfirmButton } from '../shared/ui/confirm';
 import { legendEarned } from '../shared/hunt';
+import { createGuideView } from '../shared/ui/guide';
+import { createGuideProgress } from '../shared/guide';
+import { huntGuide } from '../shared/hunt-guide';
 
 const KIND: Record<ScenarioId, string> = { extraction: 'EXTRACTION', terraform: 'TERRAFORM', security: 'SECURITY', haulage: 'HAULAGE', overland: 'OVERLAND', salvage: 'SALVAGE' };
 /** How each WARDEN's thinking reads from inside the walls. */
 const ACT_NAMES = ['', 'ROUTINE', 'NOTICED', 'HUNTED', 'VENTED'];
 const FEED = 8;
+const GUIDE_KEY = 'deep-contract.creature.guide';
+const GUIDE = huntGuide<GameState>((g) => (g.mode === 'creature' ? (g.creature?.hunt ?? null) : null), {
+  title: 'SPECIAL ORDER 0-77',
+  prey: 'ship',
+  harvest: 'BIOMASS',
+  notoriety: 'WHISPERS',
+  root: '.xeno:not([data-horror])',
+  push: '[aria-label^="Stalk "][aria-label$=" harder"]',
+  rest: 'GO DORMANT',
+  growth: 'WHAT IT BECOMES',
+});
 
 function createShipStrip(store: Store, index: number) {
   const title = h('span', { class: 'xeno-title' });
@@ -65,6 +79,7 @@ function createShipStrip(store: Store, index: number) {
 export function createCreatureView(store: Store): { el: HTMLElement; render(game: GameState): void } {
   const back = h('button', { class: 'xeno-back', type: 'button', 'aria-label': 'Return to the contract' }, 'RETURN TO CONTRACT');
   back.addEventListener('click', () => store.dispatch({ type: 'leaveCreature' }));
+  const guide = createGuideView<GameState>({ ...GUIDE, progress: createGuideProgress(window.localStorage, GUIDE_KEY) });
   const stat = (label: string, aria: string) => {
     const value = h('dd', { class: 'xeno-value', 'aria-label': aria }, '0');
     return { value, el: h('div', { class: 'xeno-stat' }, h('dt', {}, label), value) };
@@ -86,13 +101,14 @@ export function createCreatureView(store: Store): { el: HTMLElement; render(game
   const el = h(
     'section',
     { class: 'xeno', 'aria-label': 'Special Order 0-77', hidden: true },
-    h('header', { class: 'xeno-head' }, title, back),
+    h('header', { class: 'xeno-head' }, title, guide.rulesButton, back),
     h(
       'div',
       { class: 'xeno-body' },
       h(
         'div',
         { class: 'xeno-col' },
+        guide.el,
         h('dl', { class: 'xeno-stats' }, biomass.el, hunger.el, whispers.el, free.el),
         note,
         ...ships.map((s) => s.el),
@@ -103,6 +119,7 @@ export function createCreatureView(store: Store): { el: HTMLElement; render(game
       ),
       h('div', { class: 'xeno-col' }, h('h3', { class: 'xeno-sub' }, 'WHAT IT BECOMES'), upgrades),
     ),
+    guide.rulesDialog,
   );
   let shownUpgrades = '';
   let shownFeed = '';
@@ -112,7 +129,7 @@ export function createCreatureView(store: Store): { el: HTMLElement; render(game
     const c = game.creature;
     const carried = game.profile.legend.creature ?? 0;
     setText(title, el.hidden ? '' : carried > 0 ? `SPECIAL ORDER 0-77 · LEGEND ${carried}` : 'SPECIAL ORDER 0-77');
-    if (el.hidden || !c) return;
+    if (el.hidden || !c) return guide.render(game);
     const hunt = c.hunt;
     setText(biomass.value, formatNumber(hunt.dread));
     setText(hunger.value, `${Math.round(hunt.hunger)}%`);
@@ -166,6 +183,8 @@ export function createCreatureView(store: Store): { el: HTMLElement; render(game
       shownFeed = feedKey;
       feed.replaceChildren(...entries.map((e) => h('li', { class: 'xeno-entry' }, h('span', { class: 'xeno-when' }, e.who), ' ', e.text)));
     }
+    // Last, so the controls it points at are labelled.
+    guide.render(game);
   }
 
   return { el, render };

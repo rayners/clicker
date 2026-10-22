@@ -12,6 +12,7 @@ import { HUNTER_UPGRADES } from '../../src/data/hunter/upgrades';
 let store: Store;
 
 function setup(game: GameState) {
+  localStorage.clear();
   document.body.innerHTML = '<div id="app"></div>';
   store = createStore(game);
   mountApp(document.getElementById('app')!, store);
@@ -91,5 +92,20 @@ describe('the hunter on screen', () => {
     expect(hunt.disabled).toBe(true);
     expect(hunt.textContent).toMatch(/AFTER 5 CONTRACTS/);
     expect((screen.getByRole('button', { name: /accept special order 0-77/i }) as HTMLButtonElement).textContent).toMatch(/AFTER 3 CONTRACTS/);
+  });
+
+  it('has its own guide: it starts by pointing at the first ship, and moves on once pushed', async () => {
+    const user = setup(hunting());
+    const push = view().getAllByRole('button', { name: /^stalk .* closer$/i })[0]!;
+    expect(within(view().getByRole('region', { name: /guide/i })).getByText('PUSH')).toBeTruthy();
+    expect(push.classList.contains('guide-target')).toBe(true);
+    await user.click(push);
+    expect(within(view().getByRole('region', { name: /guide/i })).getByText('HUNGER')).toBeTruthy();
+  });
+
+  it('keeps its rules one tap away in its header', async () => {
+    const user = setup(hunting());
+    await user.click(view().getByRole('button', { name: /how this works/i }));
+    expect(screen.getByRole('dialog', { name: /how the hunt works/i })).toBeTruthy();
   });
 });
