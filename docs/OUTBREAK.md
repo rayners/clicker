@@ -88,11 +88,7 @@ This is a rule in `src/core/prestige.ts` (`horrorFor(profile, scenario, seed)`),
 ## UI, guide and telemetry
 
 - **SICK BAY** tab with a `visible()` predicate from Act II and an `attention()` predicate when the turned are rising.
-- **Monitor rows:** off sick, quarantined, turned.
-- **Flow readout callouts:**
-  - "STAFF OFF SICK";
-  - "QUARANTINE COSTING OUTPUT";
-  - "THE TURNED HOLD {section}".
+- **Status figures:** OFF SICK from Act II and TURNED from Act IV, beside the organism's CONTACTS in the status area. (The flow readout and monitor belong to the scenario, and a scenario may not know the horror, so the outbreak's figures sit with the horror's own.) The quarantine row shows what the dial costs in output.
 - **Guide steps** (`src/data/guide.ts`): sick days; then the quarantine dial and wards once the discovery lands; then lockdown. The rules page gets an OUTBREAK section in Act III or later.
 - **Telemetry:**
   - `contract_started` already carries `horror`.

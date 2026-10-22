@@ -1,7 +1,7 @@
 import type { GuideRules, GuideStep } from '../shared/guide';
 import type { GameState } from '../core/game';
 import { isCrewUnlocked } from '../mission/crew';
-import type { MissionState, ScenarioId } from '../mission/state';
+import { isOutbreak, type MissionState, type OutbreakMission, type ScenarioId } from '../mission/state';
 
 /**
  * DEEP CONTRACT's walkthrough (docs/ROADMAP.md, item 6b): a few steps per contract that introduce its levers in the
@@ -196,6 +196,44 @@ const SHARED: Step[] = [
   },
 ];
 
+/** The outbreak's levers, whichever contract it turns up on (docs/OUTBREAK.md). Nothing in act II says what it is. */
+const outbreak = (test: (o: OutbreakMission) => boolean) => (g: GameState) => g.mode === 'mission' && !g.assigning && isOutbreak(g.mission) && test(g.mission);
+const discovered = (o: OutbreakMission) => o.act >= 3 && o.flags.includes('outbreak');
+const OUTBREAK: Step[] = [
+  {
+    id: 'sick-bay',
+    title: 'SICK BAY',
+    text: 'Something is going round. SICK BAY shows who is off shift; the Wellness programme gets them back sooner.',
+    target: '#tab-sickbay',
+    show: outbreak((o) => o.act >= 2),
+    done: outbreak((o) => o.wellness > 0),
+  },
+  {
+    id: 'quarantine',
+    title: 'QUARANTINE',
+    text: 'Staff kept apart do not spread it, and do not work. Turn the dial up while it is going round, down when it is not.',
+    target: '[aria-label="Quarantine dial"]',
+    show: outbreak(discovered),
+    done: outbreak((o) => o.quarantine > 0 || o.officer),
+  },
+  {
+    id: 'wards',
+    title: 'WARD BEDS',
+    text: 'The sick on a ward bed do not turn. Screening makes every tenth of quarantine count for more.',
+    target: '#tab-sickbay',
+    show: outbreak((o) => discovered(o) && o.quarantine > 0),
+    done: outbreak((o) => o.wards > 0),
+  },
+  {
+    id: 'lockdown',
+    title: 'LOCKDOWN',
+    text: 'The turned are working against the company. Lockdown seals a section with half of them inside, and costs output while it lasts.',
+    target: '#tab-sickbay',
+    show: outbreak((o) => o.act >= 4 && o.turned > 0),
+    done: outbreak((o) => o.lockdowns > 0),
+  },
+];
+
 const BY_SCENARIO: Record<ScenarioId, Step[]> = {
   overland: HAUL,
   haulage: HAUL,
@@ -206,7 +244,7 @@ const BY_SCENARIO: Record<ScenarioId, Step[]> = {
 };
 
 export function guideSteps(g: GameState): readonly Step[] {
-  return [...BY_SCENARIO[g.mission.scenario], ...SHARED];
+  return [...BY_SCENARIO[g.mission.scenario], ...OUTBREAK, ...SHARED];
 }
 
 const RULES: Record<ScenarioId, GuideRules> = {
@@ -263,4 +301,12 @@ const RULES: Record<ScenarioId, GuideRules> = {
   },
 };
 
-export const guideRules = (g: GameState): GuideRules => RULES[g.mission.scenario];
+const OUTBREAK_RULE = {
+  heading: 'THE OUTBREAK',
+  text: 'Strain KA-11 spreads between staff. The sick stop working; after the discovery they stop getting better, and in time they turn and work against the company. Quarantine slows it at a cost in output; screening sharpens quarantine; ward beds keep the sick from turning. Culture tanks pay Bioproducts and make it spread faster. Lockdown seals the turned away for a while.',
+};
+
+export function guideRules(g: GameState): GuideRules {
+  const rules = RULES[g.mission.scenario];
+  return isOutbreak(g.mission) && discovered(g.mission) ? { ...rules, sections: [...rules.sections, OUTBREAK_RULE] } : rules;
+}

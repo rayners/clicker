@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { guideRules, guideSteps } from '../../src/data/guide';
 import { createGame } from '../../src/core/game';
-import { createMission, type ScenarioId } from '../../src/mission/state';
+import { createMission, type MissionState, type ScenarioId } from '../../src/mission/state';
 import { missionConfigFor } from '../../src/core/prestige';
 
 const SCENARIOS: ScenarioId[] = ['overland', 'extraction', 'haulage', 'terraform', 'security', 'salvage'];
@@ -26,4 +26,17 @@ describe('the DEEP CONTRACT guide', () => {
       expect(rules.title).toMatch(/^HOW /);
     });
   }
+
+  it('introduces the sick bay on an outbreak contract, and adds the outbreak to the rules after the discovery', () => {
+    const g = createGame(1, 0);
+    const mission = (patch: object) => ({ ...createMission({ ...missionConfigFor(g.profile, 'extraction'), horror: 'outbreak' }, 1), ...patch }) as MissionState;
+    const at = (patch: object) => ({ ...g, mission: mission(patch) });
+    const showing = (s: ReturnType<typeof at>) => guideSteps(s).filter((st) => st.show(s) && !st.done(s)).map((st) => st.id);
+    expect(showing(at({}))).not.toContain('sick-bay');
+    expect(showing(at({ act: 2 }))).toContain('sick-bay');
+    expect(showing(at({ act: 3, flags: ['outbreak'] }))).toContain('quarantine');
+    expect(showing(at({ act: 4, flags: ['outbreak'], turned: 0.1 }))).toContain('lockdown');
+    expect(guideRules(at({ act: 2 })).sections.map((x) => x.heading)).not.toContain('THE OUTBREAK');
+    expect(guideRules(at({ act: 3, flags: ['outbreak'] })).sections.map((x) => x.heading)).toContain('THE OUTBREAK');
+  });
 });

@@ -19,6 +19,7 @@ import type { ScenarioUi, StatSpec } from './scenarios/types';
 import { createCrewPanel } from './crew';
 import { createDirectivesPanel, hasDirectivesToShow } from './directives';
 import { createProjectsPanel } from './projects';
+import { createSickBayPanel } from './sick-bay';
 import { createArchivePanel, hasArchiveToShow } from './archive';
 import { createTerminusPanel } from './terminus';
 import { createSettings } from './settings';
@@ -28,7 +29,7 @@ import { createAssignment } from './assignment';
 import { createAlerts } from './alerts';
 import { createSound, cueForLog, MAX_PRINTED_LINES, PRINT_SECONDS, PRINT_STAGGER } from './sound';
 import { isSpecialProjectsUnlocked } from '../mission/organism/containment';
-import { isOrganism, type ScenarioId } from '../mission/state';
+import { isOrganism, isOutbreak, type ScenarioId } from '../mission/state';
 import { crewNeedingAttention, isCrewUnlocked } from '../mission/crew';
 import { advanceFrame, paintAll, paintSprite, readPalette, setSprite, spriteCanvas } from './sprites';
 
@@ -68,6 +69,9 @@ const DEFAULT_SPRITES = { vessel: 'ship', target: 'moonlet', action: 'drill' };
 
 /** The guide's progress is a per-device convenience, kept apart from the save. */
 const GUIDE_KEY = 'deep-contract.guide';
+
+/** The SICK BAY tab is marked once this share of the workforce is off sick. */
+const SICK_ATTENTION = 0.1;
 
 export function mountApp(root: HTMLElement, store: Store): void {
   const sound = createSound();
@@ -113,6 +117,9 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const upgradesSlot = h('div', { class: 'panel-slot' });
   const contacts = stat('CONTACTS', 'Unknown contacts');
   contacts.el.classList.add('stat-alert');
+  const offSick = stat('OFF SICK', 'Off sick');
+  const turned = stat('TURNED', 'Turned');
+  turned.el.classList.add('stat-alert');
   // selectTab is declared below; alerts only call it on a tap, long after mounting.
   const alerts = createAlerts((panel) => selectTab(panel));
   const status = h(
@@ -121,7 +128,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     alerts.el,
     h('div', { class: 'status-target' }, targetBit, h('span', { class: 'status-target-name' })),
     statusSlot,
-    h('dl', { class: 'stats stats-horror' }, contacts.el),
+    h('dl', { class: 'stats stats-horror' }, contacts.el, offSick.el, turned.el),
   );
   const targetName = status.querySelector('.status-target-name')!;
 
@@ -153,6 +160,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const crew = createCrewPanel(store);
   const directives = createDirectivesPanel();
   const projects = createProjectsPanel(store);
+  const sickBay = createSickBayPanel(store);
   const archive = createArchivePanel();
   const terminus = createTerminusPanel(store);
   const panels: Panel[] = [
@@ -215,6 +223,15 @@ export function mountApp(root: HTMLElement, store: Store): void {
       el: projects.el,
       render: (g) => isOrganism(g.mission) && projects.render(g.mission),
       visible: (g) => isOrganism(g.mission) && isSpecialProjectsUnlocked(g.mission),
+    },
+    {
+      id: 'sickbay',
+      label: 'SICK BAY',
+      short: 'MED',
+      el: sickBay.el,
+      render: (g) => isOutbreak(g.mission) && sickBay.render(g.mission),
+      visible: (g) => isOutbreak(g.mission) && g.mission.act >= 2,
+      attention: (g) => (!isOutbreak(g.mission) ? null : g.mission.turned > 0 ? 'alert' : g.mission.sick >= SICK_ATTENTION ? 'active' : null),
     },
     {
       id: 'archive',
@@ -312,7 +329,14 @@ export function mountApp(root: HTMLElement, store: Store): void {
     assignment.render(game);
     const tracking = m.flags.includes('tracker');
     contacts.el.hidden = !tracking;
-    contacts.el.parentElement!.hidden = !tracking;
+    // The outbreak's figures: staff off sick from act II (a flu), the turned from act IV.
+    offSick.el.hidden = !isOutbreak(m) || m.act < 2;
+    turned.el.hidden = !isOutbreak(m) || m.act < 4;
+    if (isOutbreak(m)) {
+      setText(offSick.value, `${Math.round(m.sick * 100)}%`);
+      setText(turned.value, `${Math.round(m.turned * 100)}%`);
+    }
+    contacts.el.parentElement!.hidden = contacts.el.hidden && offSick.el.hidden && turned.el.hidden;
     const loose = isOrganism(m) ? m.contacts : 0;
     setText(contacts.value, String(loose));
     const alert = String(loose > 0);

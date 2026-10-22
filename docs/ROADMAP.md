@@ -88,6 +88,7 @@ In order. Each item has its design written down first, so nothing lives only in 
    - **Built:** piece 1, the spread model (`src/mission/outbreak/`): workforce shares (exposed, sick, turned, recovered), the quarantine dial, a flu that everyone recovers from before the discovery, turning in Act IV, output, pressure on held ground and sabotage through the scenario. Registered as a horror, but no contract gets it yet.
    - **Built:** piece 2, the story (`src/data/outbreak/`): Act II's flu (sick days, a Wellness memo, a cough, everyone back on shift, swabs kept for the records, a cold patient, a quiet mess hall), the discovery, Bioproducts, the sick bay doors opening, named crew turning, Directive 11 in the archive, and three endings (ship the samples, burn the cultures, broadcast Directive 11).
    - **Built:** piece 3, the levers (`src/mission/outbreak/levers.ts`, store actions): Wellness (Act II), screening, ward beds, culture tanks and samples (Bioproducts funding, a more infectious strain), lockdown (Act IV), and the Infection Control Officer.
+   - **Built:** piece 4, on screen: the SICK BAY tab (`src/ui/sick-bay.ts`) from Act II, the quarantine dial and the rest after the discovery, OFF SICK and TURNED in the status area, guide steps (sick bay, quarantine, wards, lockdown) and an OUTBREAK section on the rules page after the discovery.
 8. **(User, 2026-10-22: "go ahead with the boardroom layer when it comes up") The Boardroom** (`docs/BOARDROOM.md`).
 
 ## Backlog / ideas
