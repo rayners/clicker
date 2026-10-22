@@ -117,6 +117,32 @@ describe('first haulage contract pacing', () => {
   });
 });
 
+/** And on a salvage contract, where progress is salvage stripped from the derelict. */
+describe('first salvage contract pacing', () => {
+  const run = simulateRun({ seed: 7, scenario: 'salvage', maxSeconds: 9 * 3600 });
+  const hours = (s: number | undefined) => (s === undefined ? Infinity : s / 3600);
+
+  it('reaches act 2 at roughly 40-75 minutes', () => {
+    expect(hours(run.actAt[2])).toBeGreaterThan(40 / 60);
+    expect(hours(run.actAt[2])).toBeLessThan(75 / 60);
+  });
+
+  it('reaches act 3 at roughly 2-3 hours, once the sealed hold is open', () => {
+    expect(hours(run.actAt[3])).toBeGreaterThan(2);
+    expect(hours(run.actAt[3])).toBeLessThan(3);
+  });
+
+  it('reaches act 4 after act 3, within 4 hours', () => {
+    expect(hours(run.actAt[4])).toBeGreaterThan(hours(run.actAt[3]));
+    expect(hours(run.actAt[4])).toBeLessThan(4);
+  });
+
+  it('opens the terminus within about 4-6 hours', () => {
+    expect(hours(run.terminusAt)).toBeGreaterThan(4);
+    expect(hours(run.terminusAt)).toBeLessThan(6);
+  });
+});
+
 /** The overland haul is the short way in: about an hour, one act, and the lift at the end. */
 describe('first overland haul pacing', () => {
   const run = simulateRun({ seed: 7, scenario: 'overland', maxSeconds: 3 * 3600 });

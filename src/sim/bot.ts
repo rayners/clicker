@@ -42,6 +42,20 @@ import {
   trooperForce,
 } from '../mission/security/economy';
 import { held as heldCount } from '../shared/ground';
+import { COMPARTMENTS, CUTTERS, SHORING } from '../data/salvage/systems';
+import {
+  availableSalvageUpgrades,
+  cutterCost,
+  cutterForce,
+  holdNeeded as salvageHoldNeeded,
+  isCutterRevealed,
+  isGovernorActive,
+  isShoringRevealed,
+  safeLine,
+  shoringCost,
+  shoringHold,
+} from '../mission/salvage/economy';
+import { frontier } from '../shared/ground';
 import { profileOf } from '../mission/haulage/profiles';
 import {
   availableHaulageUpgrades,
@@ -239,6 +253,44 @@ function decideSecurity(game: GameState): Action | null {
   return pick ? { type: 'buyTrooper', id: pick.id } : null;
 }
 
+type Salv = MissionOf<'salvage', 'organism'>;
+
+/** Keep the torch at the safe line, keep enough shoring for the next compartment too, then buy cutting. */
+function decideSalvage(game: GameState): Action | null {
+  const m = game.mission as Salv;
+  if (!isGovernorActive(m) && m.notch !== safeLine(m)) return { type: 'shiftNotch', step: m.notch < safeLine(m) ? 1 : -1 };
+  const upgrade = availableSalvageUpgrades(m).find((u) => u.cost <= m.credits);
+  if (upgrade) return { type: 'buyUpgrade', id: upgrade.id };
+  const projects = decideProjects(game);
+  if (projects) return projects;
+
+  const line = frontier(m.ground);
+  const need = salvageHoldNeeded(m) + (COMPARTMENTS[line]?.threat ?? 0);
+  if (shoringHold(m) < need) {
+    let best: { id: string; value: number } | null = null;
+    SHORING.forEach((x, i) => {
+      if (!isShoringRevealed(m, i)) return;
+      const cost = shoringCost(x, m.shoring[x.id] ?? 0);
+      if (cost > m.credits) return;
+      const value = x.hold / cost;
+      if (!best || value > best.value) best = { id: x.id, value };
+    });
+    const pick = best as { id: string; value: number } | null;
+    if (pick) return { type: 'buyShoring', id: pick.id };
+    if (shoringHold(m) < salvageHoldNeeded(m)) return null;
+  }
+  let best: { id: string; value: number } | null = null;
+  CUTTERS.forEach((c, i) => {
+    if (!isCutterRevealed(m, i)) return;
+    const cost = cutterCost(c, m.cutters[c.id] ?? 0);
+    if (cost > m.credits) return;
+    const value = cutterForce(m, c) / cost;
+    if (!best || value > best.value) best = { id: c.id, value };
+  });
+  const pick = best as { id: string; value: number } | null;
+  return pick ? { type: 'buyCutter', id: pick.id } : null;
+}
+
 type Haul = HaulageMission;
 /** Trips' worth of fuel money the bot keeps back before buying anything else. */
 const FUEL_RESERVE_LEGS = 1.5;
@@ -288,6 +340,7 @@ function decide(game: GameState): Action | null {
   if (shared) return shared;
   if (game.mission.scenario === 'terraform') return decideTerraform(game);
   if (game.mission.scenario === 'security') return decideSecurity(game);
+  if (game.mission.scenario === 'salvage') return decideSalvage(game);
   if (game.mission.scenario === 'haulage' || game.mission.scenario === 'overland') return decideHaulage(game);
   return decideExtraction(game);
 }

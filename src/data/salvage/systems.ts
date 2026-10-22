@@ -80,7 +80,7 @@ export const SHORING: readonly ShoringDef[] = [
     short: 'FRAMES',
     description: 'Telescoping steel props, wedged deck to deckhead. Rated for thirty years ago.',
     baseCost: 30,
-    hold: 0.15,
+    hold: 0.1,
   },
   {
     id: 'jacks',
@@ -96,7 +96,7 @@ export const SHORING: readonly ShoringDef[] = [
     short: 'FOAM',
     description: 'Sprayed into the voids, sets like bone in ninety seconds. Smells faintly of oranges.',
     baseCost: 25_000,
-    hold: 60,
+    hold: 80,
   },
   {
     id: 'truss',
@@ -104,7 +104,7 @@ export const SHORING: readonly ShoringDef[] = [
     short: 'TRUSS',
     description: 'A second keel threaded through the derelict from bow to stern. She is ours now.',
     baseCost: 1_000_000,
-    hold: 1_600,
+    hold: 3_000,
   },
   {
     id: 'clamps',
@@ -112,17 +112,21 @@ export const SHORING: readonly ShoringDef[] = [
     short: 'CLAMPS',
     description: 'The tug\'s docking cradle, rebuilt around the whole wreck. It holds her very tightly.',
     baseCost: 60_000_000,
-    hold: 50_000,
+    hold: 150_000,
   },
 ];
 
 export interface Compartment extends SectionDef {
   /** Past the sealed hold: opening it gives the story deep access. */
   deep?: boolean;
+  /** What it strips for, per second at the standard rate; aft of the hold the load is mostly structure, not salvage. */
+  value: number;
 }
 
 /** Load triples aft, so the cutting has to grow by orders of magnitude to reach the drive core. */
 const LOAD_GROWTH = 3;
+/** Aft of the hold the frames carry the drive's mass as well: load climbs faster again. */
+const DEEP_LOAD_GROWTH = 1.5;
 const NAMES: { id: string; name: string; deep?: boolean }[] = [
   { id: 'airlock', name: 'BOW AIRLOCK' },
   { id: 'bridge', name: 'BRIDGE' },
@@ -140,14 +144,17 @@ const NAMES: { id: string; name: string; deep?: boolean }[] = [
   { id: 'core', name: 'THE DRIVE CORE', deep: true },
 ];
 
+const HOLD = NAMES.findIndex((n) => n.deep);
+
 export const COMPARTMENTS: readonly Compartment[] = NAMES.map((n, i) => ({
   ...n,
-  threat: LOAD_GROWTH ** i,
+  threat: LOAD_GROWTH ** i * (i >= HOLD ? DEEP_LOAD_GROWTH ** (i - HOLD + 1) : 1),
+  value: LOAD_GROWTH ** i,
   // Forward compartments sag slowly when unbraced; aft of the hold they fold almost at once.
   reclaim: n.deep ? 0.01 : 0.003,
 }));
 
-/** Credits per second per point of an open compartment's load, as it is stripped. */
-export const STRIP_PER_LOAD = 0.75;
+/** Credits per second per point of an open compartment's value, as it is stripped. */
+export const STRIP_PER_LOAD = 0.5;
 /** Salvage cut free on the way into a compartment the first time, in seconds of its strip rate. */
-export const SALVAGE_SECONDS = 60;
+export const SALVAGE_SECONDS = 30;

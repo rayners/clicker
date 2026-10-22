@@ -22,9 +22,9 @@ export const SEAL_SECONDS = 60;
 /** The hull governor backs off before stress would cross this. */
 const GOVERNOR_LINE = 0.8;
 const BASE_CUT = 1;
-// Same curve as extraction's shaft depth, so the shared story scale lines up (tuned by the pacing bot).
-const PROGRESS_SCALE = 0.0432;
-const PROGRESS_EXPONENT = 5.48;
+// Salvage compounds faster in the middle than extraction does, so it has its own story curve (tuned by the pacing bot).
+const PROGRESS_SCALE = 0.777;
+const PROGRESS_EXPONENT = 3.9;
 
 interface Multipliers {
   cutPower: number;
@@ -195,7 +195,7 @@ export function garrisons(m: MissionState): number[] {
 
 export function stripRate(m: MissionState): number {
   const mult = multipliers(m).strip;
-  return m.ground.reduce((s, sec, i) => (isSecured(sec) ? s + COMPARTMENTS[i]!.threat * STRIP_PER_LOAD * mult : s), 0);
+  return m.ground.reduce((s, sec, i) => (isSecured(sec) ? s + COMPARTMENTS[i]!.value * STRIP_PER_LOAD * mult : s), 0);
 }
 
 /** Salvage per second from cutting into a fresh compartment at the current force. */
@@ -204,7 +204,7 @@ export function cutPayRate(m: MissionState): number {
   if (line >= COMPARTMENTS.length || line < m.deepest) return 0;
   const def = COMPARTMENTS[line]!;
   const ratio = Math.min(4, frontierForce(m) / def.threat);
-  return (ratio / 60) * def.threat * STRIP_PER_LOAD * SALVAGE_SECONDS * multipliers(m).strip;
+  return (ratio / 60) * def.value * STRIP_PER_LOAD * SALVAGE_SECONDS * multipliers(m).strip;
 }
 
 export const incomeRate = (m: MissionState): number => stripRate(m) + cutPayRate(m);
@@ -221,7 +221,7 @@ function cutInto<M extends MissionState>(m: M, pushing: number, seconds: number)
   let next = { ...m, ground };
   if (line < m.deepest) return next;
   const control = ground[line]!.control;
-  next = earn(next, Math.max(0, control - m.paidTo) * def.threat * STRIP_PER_LOAD * SALVAGE_SECONDS * multipliers(m).strip);
+  next = earn(next, Math.max(0, control - m.paidTo) * def.value * STRIP_PER_LOAD * SALVAGE_SECONDS * multipliers(m).strip);
   next = { ...next, paidTo: Math.max(m.paidTo, control) };
   if (isSecured(ground[line]!)) {
     next = { ...next, deepest: line + 1, paidTo: 0 };
