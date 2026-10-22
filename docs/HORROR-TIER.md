@@ -242,3 +242,7 @@ Legend works the same way in every game, with the engine part in `src/shared/hun
 2. **First horrors:** the creature for DEEP CONTRACT, and the wood for Elderdark. The hunter and the dragon come later.
 3. **The prey play themselves**, defended by bots, not scripted opponents.
 4. **A second mode inside each game** (proposed; not objected to).
+
+## Walkthrough
+
+Every tier shows the shared hunt guide (`src/shared/hunt-guide.ts`): push, hunger, the harvest, notoriety and Legend as each comes up, plus a rules page, all in the tier's own words (`HuntWords`). **A new tier supplies its words and mounts the guide in its view.**

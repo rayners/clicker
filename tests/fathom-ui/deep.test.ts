@@ -12,6 +12,7 @@ import { DEEP_UPGRADES } from '../../src/fathom-data/deep-upgrades';
 let store: FathomStore;
 
 function setup(game: FathomGame) {
+  localStorage.clear();
   document.body.innerHTML = '<div id="app"></div>';
   store = createFathomStore(game);
   mountFathom(document.getElementById('app')!, store);
@@ -99,5 +100,20 @@ describe('the Source on screen', () => {
     const answer = screen.getByRole('button', { name: /answer the source/i }) as HTMLButtonElement;
     expect(answer.disabled).toBe(true);
     expect(answer.textContent).toMatch(/AFTER 2 SEASONS/);
+  });
+
+  it('has its own guide: it starts by pointing at the first town, and moves on once pushed', async () => {
+    const user = setup(inDeep());
+    const push = source().getAllByRole('button', { name: /^rise under/i })[0]!;
+    expect(within(source().getByRole('region', { name: /guide/i })).getByText('PUSH')).toBeTruthy();
+    expect(push.classList.contains('guide-target')).toBe(true);
+    await user.click(push);
+    expect(within(source().getByRole('region', { name: /guide/i })).getByText('HUNGER')).toBeTruthy();
+  });
+
+  it('keeps its rules one tap away in its header', async () => {
+    const user = setup(inDeep());
+    await user.click(source().getByRole('button', { name: /how this works/i }));
+    expect(screen.getByRole('dialog', { name: /how the source works/i })).toBeTruthy();
   });
 });

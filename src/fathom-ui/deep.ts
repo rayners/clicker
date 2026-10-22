@@ -7,9 +7,23 @@ import { createConfirmButton } from '../shared/ui/confirm';
 import type { FathomGame } from '../fathom/game';
 import type { FathomStore } from '../fathom/store';
 import { seasonClock } from './app';
+import { createGuideView } from '../shared/ui/guide';
+import { createGuideProgress } from '../shared/guide';
+import { huntGuide } from '../shared/hunt-guide';
 
 const ACT_NAMES = ['', 'THE SEASON', 'SIGHTINGS', 'THE SOURCE', 'LANDFALL'];
 const FEED = 8;
+const GUIDE_KEY = 'fathom.deep.guide';
+const GUIDE = huntGuide<FathomGame>((g) => (g.mode === 'deep' ? (g.deep?.hunt ?? null) : null), {
+  title: 'THE SOURCE',
+  prey: 'town',
+  harvest: 'THE DROWNED',
+  notoriety: 'SIGHTINGS',
+  root: '.deep',
+  push: '[aria-label^="Rise under"]',
+  rest: 'SINK',
+  growth: 'WHAT THE SOURCE BECOMES',
+});
 
 function createTownStrip(store: FathomStore, index: number, town: string) {
   const title = h('span', { class: 'deep-title' });
@@ -52,6 +66,7 @@ export function createDeepView(store: FathomStore): { el: HTMLElement; render(ga
   const name = h('h2', { class: 'deep-name' }, 'THE SOURCE');
   const back = h('button', { class: 'deep-back', type: 'button', 'aria-label': 'Return to the surface' }, 'RETURN TO THE SURFACE');
   back.addEventListener('click', () => store.dispatch({ type: 'leaveDeep' }));
+  const guide = createGuideView<FathomGame>({ ...GUIDE, progress: createGuideProgress(window.localStorage, GUIDE_KEY) });
   const stat = (label: string, aria: string) => {
     const value = h('dd', { class: 'stat-value', 'aria-label': aria }, '0');
     return { value, el: h('div', { class: 'stat' }, h('dt', { class: 'stat-label' }, label), value) };
@@ -72,13 +87,14 @@ export function createDeepView(store: FathomStore): { el: HTMLElement; render(ga
   const el = h(
     'section',
     { class: 'deep', 'aria-label': 'The Source', hidden: true },
-    h('header', { class: 'deep-head' }, name, back),
+    h('header', { class: 'deep-head' }, name, guide.rulesButton, back),
     h(
       'div',
       { class: 'deep-body' },
       h(
         'div',
         { class: 'deep-col' },
+        guide.el,
         h('dl', { class: 'stats' }, drowned.el, hunger.el, sightings.el, free.el),
         note,
         townList,
@@ -89,6 +105,7 @@ export function createDeepView(store: FathomStore): { el: HTMLElement; render(ga
       ),
       h('div', { class: 'deep-col' }, h('h3', { class: 'panel-sub' }, 'WHAT THE SOURCE BECOMES'), upgrades),
     ),
+    guide.rulesDialog,
   );
   let shownUpgrades = '';
   let shownFeed = '';
@@ -96,7 +113,7 @@ export function createDeepView(store: FathomStore): { el: HTMLElement; render(ga
   function render(game: FathomGame) {
     el.hidden = game.mode !== 'deep' || !game.deep;
     const d = game.deep;
-    if (el.hidden || !d) return;
+    if (el.hidden || !d) return guide.render(game);
     const hunt = d.hunt;
     if (towns.length !== hunt.prey.length) {
       towns = hunt.prey.map((p, i) => createTownStrip(store, i, p.town));
@@ -152,6 +169,8 @@ export function createDeepView(store: FathomStore): { el: HTMLElement; render(ga
       shownFeed = feedKey;
       feed.replaceChildren(...entries.map((e) => h('li', { class: 'deep-entry' }, h('span', { class: 'deep-when' }, `${seasonClock(e.t)} · ${e.who}`), ' ', e.text)));
     }
+    // Last, so the controls it points at are labelled.
+    guide.render(game);
   }
 
   return { el, render };
