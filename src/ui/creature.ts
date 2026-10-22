@@ -5,6 +5,8 @@ import { CREATURE_UPGRADES } from '../data/creature/upgrades';
 import type { CreatureMission, ScenarioId } from '../mission/state';
 import { formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
+import { createConfirmButton } from '../shared/ui/confirm';
+import { legendEarned } from '../shared/hunt';
 
 const KIND: Record<ScenarioId, string> = { extraction: 'EXTRACTION', terraform: 'TERRAFORM', security: 'SECURITY', haulage: 'HAULAGE', overland: 'OVERLAND', salvage: 'SALVAGE' };
 /** How each WARDEN's thinking reads from inside the walls. */
@@ -72,6 +74,8 @@ export function createCreatureView(store: Store): { el: HTMLElement; render(game
   const whispers = stat('WHISPERS', 'Whispers');
   const free = stat('STRENGTH', 'Strength free');
   const note = h('p', { class: 'xeno-note' });
+  // Ending the hunt is for good, so it takes a second tap.
+  const end = createConfirmButton({ className: 'xeno-sleep xeno-end', onConfirm: () => store.dispatch({ type: 'endCreature' }) });
   const sleep = h('button', { class: 'xeno-sleep', type: 'button' });
   sleep.addEventListener('click', () => store.dispatch({ type: 'toggleCreatureDormant' }));
   const ships = [0, 1, 2].map((i) => createShipStrip(store, i));
@@ -93,6 +97,7 @@ export function createCreatureView(store: Store): { el: HTMLElement; render(game
         note,
         ...ships.map((s) => s.el),
         sleep,
+        end.el,
         h('h3', { class: 'xeno-sub' }, 'WHAT IT TOOK'),
         feed,
       ),
@@ -105,7 +110,8 @@ export function createCreatureView(store: Store): { el: HTMLElement; render(game
   function render(game: GameState) {
     el.hidden = game.mode !== 'creature' || !game.creature;
     const c = game.creature;
-    setText(title, el.hidden ? '' : 'SPECIAL ORDER 0-77');
+    const carried = game.profile.legend.creature ?? 0;
+    setText(title, el.hidden ? '' : carried > 0 ? `SPECIAL ORDER 0-77 · LEGEND ${carried}` : 'SPECIAL ORDER 0-77');
     if (el.hidden || !c) return;
     const hunt = c.hunt;
     setText(biomass.value, formatNumber(hunt.dread));
@@ -128,6 +134,8 @@ export function createCreatureView(store: Store): { el: HTMLElement; render(game
     el.dataset.state = hunt.beatenFor > 0 ? 'beaten' : hunt.dormant ? 'dormant' : 'hunting';
     setText(sleep, hunt.dormant ? 'WAKE' : 'GO DORMANT');
     setAttr(sleep, 'aria-label', hunt.dormant ? 'Wake' : 'Go dormant');
+    const earned = legendEarned(hunt.harvest);
+    end.label(`End the hunt for ${earned} Legend`, `END THE HUNT · +${earned} LEGEND`);
     for (const s of ships) s.render(c);
 
     const key = CREATURE_UPGRADES.map((u) => `${u.id}:${c.bought[u.id] ?? 0}`).join(',');

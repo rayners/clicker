@@ -72,6 +72,8 @@ const MIGRATIONS: Record<number, Migration> = {
   6: (save) => ({ mode: 'mission', creature: null, ...save }),
   // v7: the hunt (the hunter) can be accepted too.
   7: (save) => ({ hunter: null, ...save }),
+  // v8: Legend, carried out of finished hunts. Nobody has finished one yet.
+  8: (save) => ({ ...save, profile: { legend: {}, ...(save.profile as Record<string, unknown>) } }),
 };
 
 const saves = createSaveSystem<GameState>({

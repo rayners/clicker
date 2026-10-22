@@ -39,6 +39,8 @@ export interface Profile {
   deliveries: number;
   endingsSeen: string[];
   history: ContractRecord[];
+  /** Legend each horror has carried out of finished hunts (see docs/HORROR-TIER.md). */
+  legend: Record<string, number>;
 }
 
 /** A new player, a finished contract, or a mid-contract request (the only one that can be cancelled). */
@@ -61,7 +63,7 @@ export interface GameState {
   boardroom?: unknown;
 }
 
-export const GAME_VERSION = 7;
+export const GAME_VERSION = 8;
 
 export function createProfile(): Profile {
   return {
@@ -72,6 +74,7 @@ export function createProfile(): Profile {
     deliveries: 0,
     endingsSeen: [],
     history: [],
+    legend: {},
   };
 }
 

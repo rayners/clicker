@@ -33,8 +33,8 @@ import { chooseAssignment, completeContract, type Ending } from './prestige';
 import type { ScenarioId } from '../mission/state';
 import { buyCutter, buySalvageUpgrade, buyShoring, cut, shiftNotch, toggleGovernor } from '../mission/salvage/economy';
 import { buyCar, buyEngine, buyHaulageUpgrade, fireThrusters, refuel, setBurn, toggleAutopilot } from '../mission/haulage/economy';
-import { buyCreatureUpgrade, leaveCreature, startCreature } from './creature';
-import { buyHunterUpgrade, leaveHunter, startHunter } from './hunter';
+import { buyCreatureUpgrade, endCreature, leaveCreature, startCreature } from './creature';
+import { buyHunterUpgrade, endHunter, leaveHunter, startHunter } from './hunter';
 import { shiftPush, toggleDormant } from '../shared/hunt';
 
 export type Action =
@@ -84,6 +84,8 @@ export type Action =
   | { type: 'buyCreatureUpgrade'; id: string }
   | { type: 'startHunter'; seed: number }
   | { type: 'leaveHunter' }
+  | { type: 'endHunter' }
+  | { type: 'endCreature' }
   | { type: 'shiftHunterPush'; index: number; step: 1 | -1 }
   | { type: 'toggleHunterDormant' }
   | { type: 'buyHunterUpgrade'; id: string }
@@ -208,6 +210,10 @@ export function reduce(game: GameState, action: Action): GameState {
       return startHunter(game, action.seed);
     case 'leaveHunter':
       return leaveHunter(game);
+    case 'endHunter':
+      return endHunter(game);
+    case 'endCreature':
+      return endCreature(game);
     case 'shiftHunterPush':
       return game.hunter ? { ...game, hunter: { ...game.hunter, hunt: shiftPush(game.hunter.hunt, action.index, action.step) } } : game;
     case 'toggleHunterDormant':

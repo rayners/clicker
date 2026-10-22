@@ -54,11 +54,11 @@ describe('the hunter on screen', () => {
     expect(view().getByLabelText('Strength free').textContent).toBe('3 / 3');
   });
 
-  it('shows trophies, hunger and its legend', () => {
+  it('shows trophies, hunger and the stories the crews tell', () => {
     setup(hunting({ dread: 9, hunger: 55, notoriety: 1.25 }));
     expect(view().getByLabelText('Trophies').textContent).toBe('9');
     expect(view().getByLabelText('Hunger').textContent).toBe('55%');
-    expect(view().getByLabelText('Legend').textContent).toBe('1.25');
+    expect(view().getByLabelText('Stories').textContent).toBe('1.25');
   });
 
   it('withdraws and returns, grows with trophies, and goes back to the contract', async () => {
@@ -72,5 +72,14 @@ describe('the hunter on screen', () => {
     expect(store.getState().hunter!.bought[first.id]).toBe(1);
     await user.click(view().getByRole('button', { name: /return to the contract/i }));
     expect(store.getState().mode).toBe('mission');
+  });
+
+  it('ends the hunt for Legend, after a confirming second tap', async () => {
+    const user = setup(hunting({ harvest: 400 }));
+    await user.click(view().getByRole('button', { name: /end the hunt for 4 legend/i }));
+    expect(store.getState().hunter).not.toBeNull();
+    await user.click(view().getByRole('button', { name: /^confirm/i }));
+    expect(store.getState().hunter).toBeNull();
+    expect(store.getState().profile.legend.hunter).toBe(4);
   });
 });

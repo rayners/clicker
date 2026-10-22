@@ -5,6 +5,8 @@ import { HUNTER_UPGRADES } from '../data/hunter/upgrades';
 import type { HunterMission, ScenarioId } from '../mission/state';
 import { formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
+import { createConfirmButton } from '../shared/ui/confirm';
+import { legendEarned } from '../shared/hunt';
 
 const KIND: Record<ScenarioId, string> = { extraction: 'EXTRACTION', terraform: 'TERRAFORM', security: 'SECURITY', haulage: 'HAULAGE', overland: 'OVERLAND', salvage: 'SALVAGE' };
 /** How each crew reads to the hunter, act by act. */
@@ -63,15 +65,18 @@ function createCrewStrip(store: Store, index: number) {
 export function createHunterView(store: Store): { el: HTMLElement; render(game: GameState): void } {
   const back = h('button', { class: 'xeno-back', type: 'button', 'aria-label': 'Return to the contract' }, 'RETURN TO CONTRACT');
   back.addEventListener('click', () => store.dispatch({ type: 'leaveHunter' }));
+  const name = h('h2', { class: 'xeno-name' }, 'THE HUNT');
   const stat = (label: string, aria: string) => {
     const value = h('dd', { class: 'xeno-value', 'aria-label': aria }, '0');
     return { value, el: h('div', { class: 'xeno-stat' }, h('dt', {}, label), value) };
   };
   const trophies = stat('TROPHIES', 'Trophies');
   const hunger = stat('HUNGER', 'Hunger');
-  const legend = stat('LEGEND', 'Legend');
+  const stories = stat('STORIES', 'Stories');
   const free = stat('STRENGTH', 'Strength free');
   const note = h('p', { class: 'xeno-note' });
+  // Ending the hunt is for good, so it takes a second tap.
+  const end = createConfirmButton({ className: 'xeno-sleep xeno-end', onConfirm: () => store.dispatch({ type: 'endHunter' }) });
   const withdraw = h('button', { class: 'xeno-sleep', type: 'button' });
   withdraw.addEventListener('click', () => store.dispatch({ type: 'toggleHunterDormant' }));
   const crews = [0, 1, 2].map((i) => createCrewStrip(store, i));
@@ -80,17 +85,18 @@ export function createHunterView(store: Store): { el: HTMLElement; render(game: 
   const el = h(
     'section',
     { class: 'xeno', 'data-horror': 'hunter', 'aria-label': 'The hunt', hidden: true },
-    h('header', { class: 'xeno-head' }, h('h2', { class: 'xeno-name' }, 'THE HUNT'), back),
+    h('header', { class: 'xeno-head' }, name, back),
     h(
       'div',
       { class: 'xeno-body' },
       h(
         'div',
         { class: 'xeno-col' },
-        h('dl', { class: 'xeno-stats' }, trophies.el, hunger.el, legend.el, free.el),
+        h('dl', { class: 'xeno-stats' }, trophies.el, hunger.el, stories.el, free.el),
         note,
         ...crews.map((c) => c.el),
         withdraw,
+        end.el,
         h('h3', { class: 'xeno-sub' }, 'TROPHIES TAKEN'),
         feed,
       ),
@@ -107,7 +113,7 @@ export function createHunterView(store: Store): { el: HTMLElement; render(game: 
     const hunt = c.hunt;
     setText(trophies.value, formatNumber(hunt.dread));
     setText(hunger.value, `${Math.round(hunt.hunger)}%`);
-    setText(legend.value, hunt.notoriety.toFixed(2));
+    setText(stories.value, hunt.notoriety.toFixed(2));
     const used = hunt.split.reduce((a, b) => a + b, 0);
     setText(free.value, `${hunt.strength - used} / ${hunt.strength}`);
     setText(
@@ -125,6 +131,10 @@ export function createHunterView(store: Store): { el: HTMLElement; render(game: 
     el.dataset.state = hunt.beatenFor > 0 ? 'beaten' : hunt.dormant ? 'dormant' : 'hunting';
     setText(withdraw, hunt.dormant ? 'RETURN TO THE HUNT' : 'WITHDRAW');
     setAttr(withdraw, 'aria-label', hunt.dormant ? 'Return to the hunt' : 'Withdraw');
+    const carried = game.profile.legend.hunter ?? 0;
+    setText(name, carried > 0 ? `THE HUNT · LEGEND ${carried}` : 'THE HUNT');
+    const earned = legendEarned(hunt.harvest);
+    end.label(`End the hunt for ${earned} Legend`, `END THE HUNT · +${earned} LEGEND`);
     for (const s of crews) s.render(c);
 
     const key = HUNTER_UPGRADES.map((u) => `${u.id}:${c.bought[u.id] ?? 0}`).join(',');

@@ -1,4 +1,4 @@
-import { createHunt, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../shared/hunt';
+import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../shared/hunt';
 import { nextRandom } from '../shared/rng';
 import { CREATURE_UPGRADES, type CreatureEffect } from '../data/creature/upgrades';
 import { CREATURE_ALARM_AT } from '../mission/creature';
@@ -12,6 +12,8 @@ import { missionConfigFor } from './prestige';
 export const CREATURE_SHIPS = 3;
 const SCENARIOS: readonly ScenarioId[] = ['extraction', 'terraform', 'security'];
 
+/** Where this horror's Legend is kept in the profile. */
+export const LEGEND_KEY = 'creature';
 const START_STRENGTH = 3;
 const START_HUNGER = 60;
 /** Output bonus each ship gets per point of notoriety: the Combine pays for armed, better-run crews. */
@@ -95,7 +97,14 @@ export const CREATURE_ADAPTER: PreyAdapter<CreaturePrey> = {
 export function startCreature(game: GameState, seed: number): GameState {
   if (game.creature) return { ...game, mode: 'creature' };
   const prey = SCENARIOS.slice(0, CREATURE_SHIPS).map((s, i) => ship(s, seed + i, 1));
-  return { ...game, mode: 'creature', creature: { hunt: createHunt(prey, { strength: START_STRENGTH, hunger: START_HUNGER }), bought: {} } };
+  return { ...game, mode: 'creature', creature: { hunt: createHunt(prey, { strength: START_STRENGTH, hunger: START_HUNGER, legend: game.profile.legend[LEGEND_KEY] ?? 0 }), bought: {} } };
+}
+
+/** End the hunt: the harvest becomes Legend for the next one, and the contract is back. */
+export function endCreature(game: GameState): GameState {
+  if (!game.creature) return game;
+  const legend = { ...game.profile.legend, [LEGEND_KEY]: (game.profile.legend[LEGEND_KEY] ?? 0) + legendEarned(game.creature.hunt.harvest) };
+  return { ...game, mode: 'mission', creature: null, profile: { ...game.profile, legend } };
 }
 
 export function leaveCreature(game: GameState): GameState {

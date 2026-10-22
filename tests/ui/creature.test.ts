@@ -82,4 +82,13 @@ describe('the creature on screen', () => {
     expect(store.getState().mode).toBe('mission');
     expect(screen.queryByRole('region', { name: /special order 0-77/i })).toBeNull();
   });
+
+  it('ends the hunt for Legend, after a confirming second tap', async () => {
+    const user = setup(hunting({ harvest: 400 }));
+    await user.click(view().getByRole('button', { name: /end the hunt for 4 legend/i }));
+    expect(store.getState().creature).not.toBeNull();
+    await user.click(view().getByRole('button', { name: /^confirm/i }));
+    expect(store.getState().creature).toBeNull();
+    expect(store.getState().profile.legend.creature).toBe(4);
+  });
 });
