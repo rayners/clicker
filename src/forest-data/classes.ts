@@ -1,4 +1,4 @@
-export type ClassId = 'blade' | 'mender' | 'scout' | 'mystic';
+export type ClassId = 'blade' | 'mender' | 'scout' | 'mystic' | 'sapper';
 
 export interface ClassDef {
   id: ClassId;
@@ -12,6 +12,8 @@ export interface ClassDef {
   wage: number;
   /** Contribution to a party's strength against a region's danger. */
   strength: number;
+  /** Hired only for a charter at this site. */
+  site?: 'keep';
 }
 
 export const CLASSES: readonly ClassDef[] = [
@@ -54,6 +56,17 @@ export const CLASSES: readonly ClassDef[] = [
     baseCost: 60,
     wage: 0.1,
     strength: 2,
+  },
+  {
+    id: 'sapper',
+    name: 'SAPPER',
+    plural: 'SAPPERS',
+    short: 'SAP',
+    description: 'Miners from the drowned pits, with picks, powder and no fear of the dark. They bring down a floor\'s barricades on the first assault; after that, one more pair of hands.',
+    baseCost: 80,
+    wage: 0.08,
+    strength: 1,
+    site: 'keep',
   },
 ];
 

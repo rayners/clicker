@@ -16,6 +16,7 @@ import {
   tickCompany,
   toggleStanding,
   KEEP,
+  hire,
 } from '../../src/forest/company';
 import { held } from '../../src/shared/ground';
 import { createForestGame } from '../../src/forest/game';
@@ -29,7 +30,7 @@ const run = (c: Company, seconds: number) => {
   for (let t = 0; t < seconds; t++) next = tickCompany(next, 1);
   return next;
 };
-const blades = (n: number, extra: Partial<Company> = {}) => keep({ hired: { blade: n, mender: 1, scout: 1, mystic: 0 }, silver: 10_000, ...extra });
+const blades = (n: number, extra: Partial<Company> = {}) => keep({ hired: { blade: n, mender: 1, scout: 1, mystic: 0, sapper: 0 }, silver: 10_000, ...extra });
 const secured = (n: number) => FLOORS.map((_, i) => ({ control: i < n ? 1 : 0, garrison: 0, secured: i < n }));
 
 describe('a charter for Morrowgate Keep', () => {
@@ -69,7 +70,7 @@ describe('a charter for Morrowgate Keep', () => {
 
   it('sends a party short of oil into the dark, where far more of them are hurt', () => {
     let c = blades(20, { floors: secured(2) });
-    c = { ...c, orders: { ...c.orders, [KEEP]: { blade: 15, mender: 0, scout: 0, mystic: 0 } } };
+    c = { ...c, orders: { ...c.orders, [KEEP]: { blade: 15, mender: 0, scout: 0, mystic: 0, sapper: 0 } } };
     const order = c.orders[KEEP]!;
     expect(keepProject(c, order, 1).woundRisk).toBeGreaterThan(keepProject(c, order, 0).woundRisk * 1.5);
     expect(dispatch(c, KEEP).parties[0]!.dark).toBe(1);
@@ -78,7 +79,7 @@ describe('a charter for Morrowgate Keep', () => {
 
   it('takes the frontier floor with returning parties, and counts the delve from the deepest floor taken', () => {
     let c = blades(20, { oil: 1000 });
-    c = { ...c, orders: { ...c.orders, [KEEP]: { blade: 6, mender: 1, scout: 1, mystic: 0 } } };
+    c = { ...c, orders: { ...c.orders, [KEEP]: { blade: 6, mender: 1, scout: 1, mystic: 0, sapper: 0 } } };
     for (let i = 0; i < 6; i++) c = run(dispatch(c, KEEP), 40);
     expect(c.floors[0]!.secured).toBe(true);
     expect(keepFrontier(c)).toBeGreaterThan(0);
@@ -121,8 +122,8 @@ describe('a charter for Morrowgate Keep', () => {
 
   it('finds the Key in the undercroft: deep assaults can bring back a fragment', () => {
     const deep = FLOORS.findIndex((f) => f.fragment > 0);
-    let c = blades(400, { hired: { blade: 400, mender: 20, scout: 20, mystic: 0 }, floors: secured(deep), oil: 1e6, silver: 1e9, buildings: { appraisal: 0, armoury: 10, hospice: 0, chapel: 0 } });
-    c = { ...c, orders: { ...c.orders, [KEEP]: { blade: 60, mender: 1, scout: 1, mystic: 0 } } };
+    let c = blades(400, { hired: { blade: 400, mender: 20, scout: 20, mystic: 0, sapper: 0 }, floors: secured(deep), oil: 1e6, silver: 1e9, buildings: { appraisal: 0, armoury: 10, hospice: 0, chapel: 0 } });
+    c = { ...c, orders: { ...c.orders, [KEEP]: { blade: 60, mender: 1, scout: 1, mystic: 0, sapper: 0 } } };
     // Holding the floors above is another test's business: keep them held, so every trip is to the deep floor.
     for (let i = 0; i < 20 && c.keyFragments === 0; i++) {
       c = dispatch({ ...c, floors: secured(deep) }, KEEP);
@@ -160,6 +161,8 @@ describe('a charter for Morrowgate Keep', () => {
       expect(c.posted).toEqual([]);
       expect(c.oil).toBe(0);
       expect(c.orders[KEEP]).toBeDefined();
+      expect(c.hired.sapper).toBe(0);
+      expect(c.orders[KEEP]!.sapper).toBe(0);
     }
   });
 
@@ -170,5 +173,36 @@ describe('a charter for Morrowgate Keep', () => {
     const posted = reduce(oiled, { type: 'post', floor: 0, step: 1 });
     expect(posted.company.posted[0]).toBe(1);
     expect(reduce(posted, { type: 'post', floor: 0, step: -1 }).company.posted[0]).toBe(0);
+  });
+});
+
+describe('sappers', () => {
+  const party = (comp: Company['hired']) => {
+    let c = keep({ hired: { ...comp }, silver: 10_000, oil: 1_000 });
+    c = { ...c, orders: { ...c.orders, [KEEP]: comp } };
+    return run(dispatch(c, KEEP), 60);
+  };
+
+  it('are hired only for a Keep charter: the wood has no walls to bring down', () => {
+    expect(hire(keep({ silver: 1_000 }), 'sapper').hired.sapper).toBe(1);
+    const forest = { ...createCompany(1), silver: 1_000 };
+    expect(hire(forest, 'sapper')).toBe(forest);
+  });
+
+  it('bring down a floor nobody has broken into: the first assault with them goes much further', () => {
+    const sapped = party({ blade: 4, mender: 0, scout: 0, mystic: 0, sapper: 1 });
+    const plain = party({ blade: 4, mender: 1, scout: 0, mystic: 0, sapper: 0 });
+    expect(sapped.floors[0]!.control).toBeGreaterThan(plain.floors[0]!.control * 1.5);
+  });
+
+  it('only on the first assault: once a floor is entered, a sapper is one more pair of hands', () => {
+    const entered = (comp: Company['hired']) => {
+      let c = keep({ hired: { ...comp }, silver: 10_000, oil: 1_000, floors: FLOORS.map((_, i) => ({ control: i === 0 ? 0.2 : 0, garrison: 0, secured: false })) });
+      c = { ...c, orders: { ...c.orders, [KEEP]: comp } };
+      return run(dispatch(c, KEEP), 60).floors[0]!.control;
+    };
+    const sapped = entered({ blade: 4, mender: 0, scout: 0, mystic: 0, sapper: 1 });
+    const plain = entered({ blade: 4, mender: 1, scout: 0, mystic: 0, sapper: 0 });
+    expect(sapped).toBeLessThan(plain * 1.2);
   });
 });

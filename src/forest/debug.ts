@@ -24,14 +24,14 @@ function keepDeep(seed: number): Company {
   const per = postStrength(base);
   const posted = FLOORS.map((f, i) => (i < KEEP_DEEP_FLOORS ? Math.ceil(f.threat / per) : 0));
   const garrison = posted.reduce((a, b) => a + b, 0);
-  return { ...base, posted, hired: { blade: garrison + 12, mender: 2, scout: 2, mystic: 1 } };
+  return { ...base, posted, hired: { blade: garrison + 12, mender: 2, scout: 2, mystic: 1, sapper: 0 } };
 }
 
 export function applyForestScenario(game: ForestGame, name: string): ForestGame {
   const seed = game.company.seed;
   switch (name) {
     case 'keep':
-      return { ...game, company: { ...createCompany(seed, undefined, 'keep'), silver: 400, hired: { blade: 6, mender: 1, scout: 1, mystic: 0 } } };
+      return { ...game, company: { ...createCompany(seed, undefined, 'keep'), silver: 400, hired: { blade: 6, mender: 1, scout: 1, mystic: 0, sapper: 0 } } };
     case 'keep-deep':
       return { ...game, company: keepDeep(seed) };
     default:

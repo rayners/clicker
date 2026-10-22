@@ -19,7 +19,7 @@ function setup(patch: Partial<Company> = {}, site: 'forest' | 'keep' = 'keep', g
   return userEvent.setup();
 }
 const company = () => store.getState().company;
-const crew = { blade: 12, mender: 2, scout: 2, mystic: 0 };
+const crew = { blade: 12, mender: 2, scout: 2, mystic: 0, sapper: 0 };
 const taken = (n: number) => FLOORS.map((_, i) => ({ control: i < n ? 1 : 0, garrison: 0, secured: i < n }));
 const assault = () => within(screen.getByRole('article', { name: /assault/i }));
 const floors = () => within(screen.getByRole('region', { name: /floors of the keep/i }));
@@ -99,5 +99,15 @@ describe('Morrowgate Keep on screen', () => {
     await user.click(panel.getByRole('button', { name: /confirm/i }));
     expect(company().site).toBe('keep');
     expect(company().charter.number).toBe(2);
+  });
+
+  it('hires sappers for the Keep and sends them with the assault', async () => {
+    const user = setup({ silver: 1_000 });
+    await user.click(screen.getByRole('tab', { name: /roster/i }));
+    await user.click(screen.getByRole('button', { name: /hire a sapper/i }));
+    expect(company().hired.sapper).toBe(1);
+    await user.click(screen.getByRole('tab', { name: /expeditions/i }));
+    await user.click(assault().getByRole('button', { name: /one more sapper/i }));
+    expect(company().orders[KEEP]!.sapper).toBe(1);
   });
 });

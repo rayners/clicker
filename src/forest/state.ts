@@ -93,7 +93,7 @@ export const STARTING_SILVER = 30;
 
 export const emptyComposition = (): Composition => Object.fromEntries(CLASS_IDS.map((id) => [id, 0])) as Composition;
 
-const DEFAULT_ORDER: Composition = { blade: 2, mender: 0, scout: 1, mystic: 0 };
+const DEFAULT_ORDER: Composition = { blade: 2, mender: 0, scout: 1, mystic: 0, sapper: 0 };
 
 export function createCompany(seed: number, charter: CharterTerms = FIRST_CHARTER, site: SiteId = 'forest'): Company {
   const keep = site === 'keep';

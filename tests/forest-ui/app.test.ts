@@ -84,6 +84,16 @@ describe('the roster', () => {
   });
 });
 
+describe('sappers', () => {
+  it('are not on a forest charter\'s roster, nor in its standing orders', async () => {
+    const user = setup({ silver: 1_000 });
+    await user.click(tab(/roster/i));
+    expect(screen.queryByRole('article', { name: /sappers/i })).toBeNull();
+    await user.click(tab(/expeditions/i));
+    expect(screen.queryByRole('button', { name: /sapper/i })).toBeNull();
+  });
+});
+
 describe('expeditions', () => {
   it('lists only the regions the company dares enter', async () => {
     const user = setup();

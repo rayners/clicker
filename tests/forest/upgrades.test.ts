@@ -33,8 +33,8 @@ const run = (c: Company, seconds: number) => {
 const staffed = (patch: Partial<Company> = {}) =>
   fresh({
     silver: 1e9,
-    hired: { blade: 12, mender: 2, scout: 4, mystic: 0 },
-    orders: { ...fresh().orders, [eaves.id]: { blade: 3, mender: 0, scout: 1, mystic: 0 } },
+    hired: { blade: 12, mender: 2, scout: 4, mystic: 0, sapper: 0 },
+    orders: { ...fresh().orders, [eaves.id]: { blade: 3, mender: 0, scout: 1, mystic: 0, sapper: 0 } },
     ...patch,
   });
 
@@ -75,22 +75,22 @@ describe('upgrade effects', () => {
   it('class strength upgrades make parties of that class stronger', () => {
     const u = first('classStrength');
     if (u.effect.kind !== 'classStrength') throw new Error('fixture');
-    const comp = { blade: 0, mender: 0, scout: 0, mystic: 0, [u.effect.id]: 3 };
+    const comp = { blade: 0, mender: 0, scout: 0, mystic: 0, sapper: 0, [u.effect.id]: 3 };
     expect(project(own(fresh(), 'classStrength'), eaves, comp).strength).toBeCloseTo(project(fresh(), eaves, comp).strength * u.effect.value);
   });
 
   it('haul, wound, blight and wage upgrades do what they say', () => {
-    const comp = { blade: 3, mender: 0, scout: 1, mystic: 0 };
+    const comp = { blade: 3, mender: 0, scout: 1, mystic: 0, sapper: 0 };
     const base = project(fresh(), eaves, comp);
     expect(project(own(fresh(), 'haulMultiplier'), eaves, comp).haul).toBeGreaterThan(base.haul);
     expect(project(own(fresh(), 'woundMultiplier'), eaves, comp).woundRisk).toBeLessThan(base.woundRisk);
     expect(project(own(fresh(), 'blightMultiplier'), eaves, comp).blightPerHand).toBeLessThan(base.blightPerHand);
-    const crew = fresh({ hired: { blade: 10, mender: 0, scout: 0, mystic: 0 } });
+    const crew = fresh({ hired: { blade: 10, mender: 0, scout: 0, mystic: 0, sapper: 0 } });
     expect(wages(own(crew, 'wageMultiplier'))).toBeLessThan(wages(crew));
   });
 
   it('charting upgrades chart the way faster', () => {
-    const comp = { blade: 3, mender: 0, scout: 1, mystic: 0 };
+    const comp = { blade: 3, mender: 0, scout: 1, mystic: 0, sapper: 0 };
     expect(chartingPerTrip(own(fresh(), 'chartMultiplier'), eaves, comp)).toBeGreaterThan(chartingPerTrip(fresh(), eaves, comp));
   });
 
@@ -155,8 +155,8 @@ describe('Quartermaster priorities', () => {
       silver: 1e9,
       charted: 99,
       upgrades: ['quartermaster', 'quartermasters-clerk'],
-      hired: { blade: 4, mender: 0, scout: 1, mystic: 0 },
-      orders: { ...fresh().orders, [eaves.id]: { blade: 4, mender: 0, scout: 1, mystic: 0 }, [hollows.id]: { blade: 4, mender: 0, scout: 1, mystic: 0 } },
+      hired: { blade: 4, mender: 0, scout: 1, mystic: 0, sapper: 0 },
+      orders: { ...fresh().orders, [eaves.id]: { blade: 4, mender: 0, scout: 1, mystic: 0, sapper: 0 }, [hollows.id]: { blade: 4, mender: 0, scout: 1, mystic: 0, sapper: 0 } },
     });
     c = toggleStanding(toggleStanding(c, eaves.id), hollows.id);
     const next = tickCompany(c, 1);

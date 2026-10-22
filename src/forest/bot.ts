@@ -63,8 +63,8 @@ const strengthOf = (id: ClassId) => CLASSES.find((k) => k.id === id)!.strength;
 /** A party that beats the region: a mender and a scout or two, then blades to reach the target. */
 function idealOrder(c: Company, regionIndex: number): Composition {
   const region = REGIONS[regionIndex]!;
-  const order: Composition = { blade: 0, mender: 1, scout: regionIndex === 0 ? 1 : 2, mystic: regionIndex >= 2 ? 1 : 0 };
-  const per = project(c, region, { blade: 1, mender: 0, scout: 0, mystic: 0 }).strength || strengthOf('blade');
+  const order: Composition = { blade: 0, mender: 1, scout: regionIndex === 0 ? 1 : 2, mystic: regionIndex >= 2 ? 1 : 0, sapper: 0 };
+  const per = project(c, region, { blade: 1, mender: 0, scout: 0, mystic: 0, sapper: 0 }).strength || strengthOf('blade');
   const rest = project(c, region, order).strength;
   order.blade = Math.max(1, Math.ceil((TARGET_RATIO * region.danger - rest) / per));
   return order;
@@ -140,12 +140,14 @@ const VAULT_LIMIT = 200;
 /** Trips' worth of oil the bot keeps in the stores. */
 const OIL_TRIPS = 3;
 
-/** An assault party for the frontier floor: a mender, a scout, a mystic once the floors run deep, blades for the rest. */
+/** An assault party for the frontier floor: a mender, a scout, a mystic once the floors run deep, a sapper for an unbroken floor, blades for the rest. */
 function keepOrder(c: Company): Composition {
   const floor = frontierFloor(c) ?? FLOORS.at(-1)!;
   const depth = FLOORS.indexOf(floor);
-  const order: Composition = { blade: 0, mender: 1, scout: 1, mystic: depth >= 7 ? 2 : depth >= 4 ? 1 : 0 };
-  const per = keepProject(c, { blade: 1, mender: 0, scout: 0, mystic: 0 }).strength || strengthOf('blade');
+  // A sapper goes along whenever the next floor is still unbroken and one is in the hall.
+  const unbroken = (c.floors[depth]?.control ?? 1) <= 0 && available(c, 'sapper') > 0;
+  const order: Composition = { blade: 0, mender: 1, scout: 1, mystic: depth >= 7 ? 2 : depth >= 4 ? 1 : 0, sapper: unbroken ? 1 : 0 };
+  const per = keepProject(c, { blade: 1, mender: 0, scout: 0, mystic: 0, sapper: 0 }).strength || strengthOf('blade');
   const rest = keepProject(c, order).strength;
   order.blade = Math.max(1, Math.ceil((KEEP_TARGET_RATIO * floor.threat - rest) / per));
   return order;
@@ -207,7 +209,9 @@ function decideKeep(c: Company): ForestAction | null {
   if (c.oil < trip * OIL_TRIPS && c.silver >= trip) return { type: 'buyOil', flasks: Math.ceil(trip) };
 
   const affordableWages = Math.max(incomeRate(c) * WAGE_SHARE, 0.4, c.silver / 600);
+  if (c.hired.sapper < 1 && c.silver >= hireCost(c, 'sapper') * 2) return { type: 'hire', id: 'sapper' };
   for (const id of CLASS_IDS) {
+    if (id === 'sapper') continue;
     const needed = want[id] * KEEP_PARTIES + (id === 'blade' ? garrison : 0);
     if (c.hired[id] < needed && wages(c) + CLASSES.find((k) => k.id === id)!.wage <= affordableWages && c.silver >= hireCost(c, id)) {
       return { type: 'hire', id };

@@ -68,6 +68,8 @@ const DARK_DEATH = 0.3;
 /** Blight at which the Keep presses twice as hard on its floors. */
 const KEEP_BLIGHT_PRESSURE = 40;
 const KEEP_FRAGMENT_DECAY = 0.8;
+/** How much each sapper multiplies the first assault on an unbroken floor. */
+const SAPPING = 1.5;
 
 const def = (id: ClassId) => CLASSES.find((k) => k.id === id)!;
 
@@ -209,9 +211,12 @@ export function hireCost(c: Company, id: ClassId): number {
   return Math.ceil(def(id).baseCost * COST_GROWTH ** c.hired[id]);
 }
 
+/** Whether this charter can hire the class at all: sappers only go where there are walls. */
+export const isHireable = (c: Company, id: ClassId): boolean => (def(id).site ?? c.site) === c.site;
+
 export function hire(c: Company, id: ClassId): Company {
   const cost = hireCost(c, id);
-  if (c.silver < cost) return c;
+  if (c.silver < cost || !isHireable(c, id)) return c;
   return { ...c, silver: c.silver - cost, hired: { ...c.hired, [id]: c.hired[id] + 1 } };
 }
 
@@ -248,7 +253,7 @@ function payWages(c: Company, dt: number): Company {
 
 export function adjustOrder(c: Company, region: string, id: ClassId, step: 1 | -1): Company {
   const order = c.orders[region];
-  if (!order) return c;
+  if (!order || !isHireable(c, id)) return c;
   const value = Math.max(0, order[id] + step);
   if (value === order[id]) return c;
   return { ...c, orders: { ...c.orders, [region]: { ...order, [id]: value } } };
@@ -366,7 +371,8 @@ function resolve(c: Company, party: Party): Company {
   if (fragment) {
     next = log(next, 'omen', `AMONG THE HAUL: A FRAGMENT OF A KEY, ASH-GREY AND WARM. THE COMPANY HOLDS ${next.keyFragments} OF ${KEY_FRAGMENTS}.`);
   }
-  return keep ? press(next, p.strength * (survivors / size(party.comp))) : chart(next, region, party.comp, survivors);
+  const share = survivors / size(party.comp);
+  return keep ? press(next, p.strength * share, party.comp.sapper * share) : chart(next, region, party.comp, survivors);
 }
 
 // ---------- healing, appraisal, blight, buildings ----------
@@ -602,12 +608,16 @@ export function post(c: Company, floor: number, step: 1 | -1): Company {
   return { ...c, posted: c.posted.map((n, i) => (i === floor ? n + step : n)) };
 }
 
-/** A returning assault pushes the frontier floor; taking one deepens the delve and is written up. */
-function press(c: Company, force: number): Company {
+/**
+ * A returning assault pushes the frontier floor; taking one deepens the delve and is written up. Sappers bring down
+ * the barricades of a floor nobody has broken into yet, which multiplies that first assault.
+ */
+function press(c: Company, force: number, sappers = 0): Company {
   const before = keepFrontier(c);
   const floor = FLOORS[before];
   if (!floor || force <= 0) return c;
-  const { states } = assault(c.floors, FLOORS, force / dangerMultiplier(c), FACE_SECONDS);
+  const breaching = c.floors[before]!.control <= 0 ? 1 + SAPPING * sappers : 1;
+  const { states } = assault(c.floors, FLOORS, (force * breaching) / dangerMultiplier(c), FACE_SECONDS);
   const next = { ...c, floors: states };
   if (!states[before]!.secured) {
     return log(next, 'ledger', `${floor.name}: ${Math.round(states[before]!.control * 100)}% CLEARED.`);

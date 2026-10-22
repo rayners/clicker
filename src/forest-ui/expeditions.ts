@@ -13,7 +13,8 @@ const pct = (x: number) => `${Math.round(x * 100)}%`;
 export function createExpeditions(store: ForestStore): { el: HTMLElement; render(c: Company): void } {
   const cards = REGIONS.map((region) => {
     const lower = region.name.toLowerCase();
-    const counts = CLASSES.map((k) => {
+    // Keep-only hands (sappers) have no place in a forest order.
+    const counts = CLASSES.filter((k) => !k.site).map((k) => {
       const value = h('span', { class: 'order-count', 'aria-label': `${k.plural} for ${lower}` }, '0');
       const less = h('button', { class: 'order-step', type: 'button', 'aria-label': `One fewer ${k.name.toLowerCase()} for ${lower}` }, '−');
       const more = h('button', { class: 'order-step', type: 'button', 'aria-label': `One more ${k.name.toLowerCase()} for ${lower}` }, '+');

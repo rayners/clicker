@@ -169,7 +169,14 @@ The core trade-off is identical in both games and is the point of sharing it: **
 - **Telemetry:** `floor_secured`, and `site` on every Elderdark event.
 - **Saves:** Elderdark save v8.
 - **Pacing (bot, seeds 1/7/42):** Act II 46m–1h, Act III 2h30–2h52, Act IV 2h52–3h57, terminus 4h07–5h12.
-- **Not built yet:** sappers (a Keep-only hand that lowers a floor's threat on the first assault), and the old lord as a presence beyond the story beats.
+- **Sappers (built 2026-10-21):**
+  - A fifth class of hand, hired only for a Keep charter (`ClassDef.site`). They cost 80 thalers, earn 0.08 in wages and have strength 1.
+  - A sapper who comes back from an assault on a floor nobody has broken into multiplies that push by 1 + 1.5 per sapper. Once the floor is entered, a sapper is one more pair of hands.
+  - Forest charters never see them in the roster or the standing orders.
+  - The Keep bot hires one and sends it whenever the next floor is unbroken.
+  - Elderdark save v9 gives every head count, order and party zero sappers.
+  - **Pacing (bot, seeds 1/7/42):** Act III 2h28–2h58, terminus 3h57–4h32.
+- **Not built yet:** the old lord as a presence beyond the story beats.
 
 **4. Haulage: done** (2026-10-21).
 - **Code:** `src/mission/haulage/`, `src/data/haulage/`, `src/ui/scenarios/haulage.ts`, `src/ui/helm.ts` (the burn dial, tanks and autopilot), `src/ui/route.ts` (the next station, the leg, the window and the freight's condition) and `src/ui/haulage-systems.ts`.

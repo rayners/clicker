@@ -14,7 +14,7 @@ const undercity = REGIONS.find((r) => r.id === 'undercity')!;
 const eaves = REGIONS[0]!;
 
 describe('turning (blight with teeth)', () => {
-  const crowded = (blight: number) => fresh({ silver: 1e9, blight, hired: { blade: 30, mender: 5, scout: 5, mystic: 5 } });
+  const crowded = (blight: number) => fresh({ silver: 1e9, blight, hired: { blade: 30, mender: 5, scout: 5, mystic: 5, sapper: 0 } });
 
   it('leaves hands alone below the threshold', () => {
     expect(sum(run(crowded(TURN_THRESHOLD - 5), 300).hired)).toBe(45);
@@ -30,7 +30,7 @@ describe('turning (blight with teeth)', () => {
   });
 
   it('makes the whole wood more dangerous for every hand it has taken', () => {
-    const comp = { blade: 4, mender: 1, scout: 1, mystic: 0 };
+    const comp = { blade: 4, mender: 1, scout: 1, mystic: 0, sapper: 0 };
     expect(project(fresh({ turned: 10 }), eaves, comp).danger).toBeCloseTo(project(fresh(), eaves, comp).danger * dangerMultiplier(fresh({ turned: 10 })));
     expect(dangerMultiplier(fresh({ turned: 10 }))).toBeGreaterThan(1);
   });
@@ -43,8 +43,8 @@ describe('the Ashen Key', () => {
       silver: 1e12,
       charted: undercity.opensAt,
       buildings: { appraisal: 0, armoury: 20, hospice: 0, chapel: 0 },
-      hired: { blade: 10, mender: 2, scout: 2, mystic: 2 },
-      orders: { ...fresh().orders, undercity: { blade: 6, mender: 1, scout: 1, mystic: 1 } },
+      hired: { blade: 10, mender: 2, scout: 2, mystic: 2, sapper: 0 },
+      orders: { ...fresh().orders, undercity: { blade: 6, mender: 1, scout: 1, mystic: 1, sapper: 0 } },
     });
 
   it('has fragments to find in the deepest regions only', () => {
@@ -52,7 +52,7 @@ describe('the Ashen Key', () => {
     let found = 0;
     for (let seed = 1; seed <= 20; seed++) found += run(dispatch(deep(seed), 'undercity'), 400).keyFragments;
     expect(found).toBeGreaterThan(0);
-    const shallow = run(dispatch(fresh({ silver: 1e9, hired: { blade: 5, mender: 0, scout: 1, mystic: 0 } }), eaves.id), 200);
+    const shallow = run(dispatch(fresh({ silver: 1e9, hired: { blade: 5, mender: 0, scout: 1, mystic: 0, sapper: 0 } }), eaves.id), 200);
     expect(shallow.keyFragments).toBe(0);
   });
 

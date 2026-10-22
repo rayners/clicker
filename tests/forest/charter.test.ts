@@ -13,7 +13,7 @@ const due = (patch: Partial<ForestGame['company']> = {}, profile: Partial<Forest
   return {
     ...g,
     profile: { ...g.profile, ...profile },
-    company: { ...g.company, flags: ['terminus'], keyFragments: 5, lifetimeRelics: 1e7, lifetimeDead: 12, elapsed: 15_000, hired: { blade: 20, mender: 3, scout: 4, mystic: 3 }, ...patch },
+    company: { ...g.company, flags: ['terminus'], keyFragments: 5, lifetimeRelics: 1e7, lifetimeDead: 12, elapsed: 15_000, hired: { blade: 20, mender: 3, scout: 4, mystic: 3, sapper: 0 }, ...patch },
   };
 };
 
@@ -33,7 +33,7 @@ describe('the reckoning', () => {
     expect(r.sell.grace).toBe(0);
     expect(r.return.grace).toBeGreaterThan(0);
     expect(endingRewards(due({ keyFragments: 7 })).sell.renown).toBeGreaterThan(r.sell.renown);
-    expect(endingRewards(due({ hired: { blade: 60, mender: 3, scout: 4, mystic: 3 } })).return.grace).toBeGreaterThan(r.return.grace);
+    expect(endingRewards(due({ hired: { blade: 60, mender: 3, scout: 4, mystic: 3, sapper: 0 } })).return.grace).toBeGreaterThan(r.return.grace);
     expect(r.burn.renown).toBeGreaterThan(0);
     expect(r.burn.grace).toBeGreaterThan(0);
   });
@@ -63,7 +63,7 @@ describe('the reckoning', () => {
 
 describe('what a charter carries forward', () => {
   const eaves = REGIONS[0]!;
-  const comp = { blade: 3, mender: 1, scout: 1, mystic: 0 };
+  const comp = { blade: 3, mender: 1, scout: 1, mystic: 0, sapper: 0 };
 
   it('Renown brings bigger hauls', () => {
     const plain = createCompany(1);

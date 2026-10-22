@@ -22,7 +22,7 @@ const lost = (g: ForestGame, i: number) => {
   return c.lifetimeDead + c.turned;
 };
 const eaves = REGIONS[0]!;
-const party = { blade: 4, mender: 1, scout: 1, mystic: 0 };
+const party = { blade: 4, mender: 1, scout: 1, mystic: 0, sapper: 0 };
 
 describe('the wood pushing on a company', () => {
   it('makes every region more dangerous and more corrupting, and does nothing in an ordinary charter', () => {

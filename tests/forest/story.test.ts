@@ -20,7 +20,7 @@ describe('the Elderdark story', () => {
   it('writes Act I into the ledger as the company finds its feet', () => {
     const c = play(
       fresh({
-        hired: { blade: 3, mender: 1, scout: 1, mystic: 0 },
+        hired: { blade: 3, mender: 1, scout: 1, mystic: 0, sapper: 0 },
         lifetimeRelics: 5_000,
         lifetimeSilver: 5_000,
         lifetimeDead: 1,
@@ -45,7 +45,7 @@ describe('the Elderdark story', () => {
   });
 
   it('runs as part of the company tick', () => {
-    const c = fresh({ hired: { blade: 1, mender: 0, scout: 0, mystic: 0 }, silver: 1e6 });
+    const c = fresh({ hired: { blade: 1, mender: 0, scout: 0, mystic: 0, sapper: 0 }, silver: 1e6 });
     let next = c;
     for (let i = 0; i < 30; i++) next = tickCompany(next, 1);
     expect(Object.keys(next.beats).length).toBeGreaterThan(0);
@@ -76,7 +76,7 @@ describe('later acts', () => {
 
   it('writes a Keep charter its own entries, and never sends its hands past the forest\'s landmarks', () => {
     let c = createCompany(1, undefined, 'keep');
-    c = { ...c, silver: 1e9, lifetimeRelics: 1e9, lifetimeSilver: 1e9, lifetimeDead: 10, blight: 30, hired: { blade: 9, mender: 1, scout: 1, mystic: 0 } };
+    c = { ...c, silver: 1e9, lifetimeRelics: 1e9, lifetimeSilver: 1e9, lifetimeDead: 10, blight: 30, hired: { blade: 9, mender: 1, scout: 1, mystic: 0, sapper: 0 } };
     const step = (patch: Partial<Company>, times = 40) => {
       for (let i = 0; i < times; i++) c = runForestStory({ ...c, ...patch, elapsed: c.elapsed + FOREST_STORY_GAP + 61 });
     };

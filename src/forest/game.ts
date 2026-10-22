@@ -4,7 +4,7 @@ import { tickCompany } from './company';
 import { createCompany, type Company, type EntryKind } from './state';
 import { tickWood, type WoodHunt } from './wood';
 
-export const FOREST_VERSION = 8;
+export const FOREST_VERSION = 9;
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
 const CATCH_UP_STEP_SECONDS = 1;
 /** Frame gaps longer than this are treated as the player having been away. */

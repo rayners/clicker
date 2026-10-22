@@ -11,6 +11,20 @@ const inForest = (company: Record<string, unknown>) => ({
   orders: { [KEEP]: { blade: 2, mender: 0, scout: 1, mystic: 0 }, ...(company.orders as Record<string, unknown>) },
 });
 
+const noSappers = (comp: Record<string, number>) => ({ sapper: 0, ...comp });
+function withSappers(company: Record<string, unknown>) {
+  const orders = company.orders as Record<string, Record<string, number>>;
+  const parties = company.parties as { comp: Record<string, number> }[];
+  return {
+    ...company,
+    hired: noSappers(company.hired as Record<string, number>),
+    wounded: noSappers(company.wounded as Record<string, number>),
+    mending: noSappers(company.mending as Record<string, number>),
+    orders: Object.fromEntries(Object.entries(orders).map(([k, v]) => [k, noSappers(v)])),
+    parties: parties.map((p) => ({ ...p, comp: noSappers(p.comp) })),
+  };
+}
+
 export const FOREST_SAVE_KEY = 'elderdark.save';
 
 export const forestSaves = createSaveSystem<ForestGame>({
@@ -45,6 +59,15 @@ export const forestSaves = createSaveSystem<ForestGame>({
         ...save,
         company: inForest(save.company as Record<string, unknown>),
         wood: wood && { ...wood, hunt: { ...wood.hunt, prey: wood.hunt.prey.map((p) => ({ ...p, company: inForest(p.company) })) } },
+      };
+    },
+    // v9: sappers (Keep-only hands). Every head count, order and party gains none.
+    9: (save) => {
+      const wood = save.wood as { hunt: { prey: { company: Record<string, unknown> }[] } } | null;
+      return {
+        ...save,
+        company: withSappers(save.company as Record<string, unknown>),
+        wood: wood && { ...wood, hunt: { ...wood.hunt, prey: wood.hunt.prey.map((p) => ({ ...p, company: withSappers(p.company) })) } },
       };
     },
   },

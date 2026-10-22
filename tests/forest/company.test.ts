@@ -81,7 +81,7 @@ describe('recruiting', () => {
   });
 
   it('pays every hand a wage, every second', () => {
-    const c = fresh({ silver: 100, hired: hands({ blade: 4, mystic: 1 }) });
+    const c = fresh({ silver: 100, hired: hands({ blade: 4, mystic: 1, sapper: 0 }) });
     expect(wages(c)).toBeCloseTo(4 * CLASSES.find((k) => k.id === 'blade')!.wage + CLASSES.find((k) => k.id === 'mystic')!.wage);
     expect(run(c, 10).silver).toBeCloseTo(100 - wages(c) * 10);
   });
@@ -103,20 +103,20 @@ describe('standing orders (party composition)', () => {
   });
 
   it('projects the outcome of a composition against the region before sending it', () => {
-    const weak = project(fresh(), eaves, { blade: 1, mender: 0, scout: 0, mystic: 0 });
-    const strong = project(fresh(), eaves, { blade: 4, mender: 1, scout: 1, mystic: 0 });
+    const weak = project(fresh(), eaves, { blade: 1, mender: 0, scout: 0, mystic: 0, sapper: 0 });
+    const strong = project(fresh(), eaves, { blade: 4, mender: 1, scout: 1, mystic: 0, sapper: 0 });
     expect(strong.ratio).toBeGreaterThan(weak.ratio);
     expect(strong.woundRisk).toBeLessThan(weak.woundRisk);
     expect(strong.haul).toBeGreaterThan(weak.haul);
   });
 
   it('lets menders cut wounds, scouts speed the trip and add haul, mystics cut blight', () => {
-    const base = { blade: 3, mender: 0, scout: 0, mystic: 0 };
+    const base = { blade: 3, mender: 0, scout: 0, mystic: 0, sapper: 0 };
     const p = project(fresh(), eaves, base);
     expect(project(fresh(), eaves, { ...base, mender: 2 }).woundRisk).toBeLessThan(p.woundRisk);
     expect(project(fresh(), eaves, { ...base, scout: 2 }).duration).toBeLessThan(p.duration);
     expect(project(fresh(), eaves, { ...base, scout: 2 }).haul).toBeGreaterThan(p.haul);
-    expect(project(fresh(), eaves, { ...base, mystic: 2 }).blightPerHand).toBeLessThan(p.blightPerHand);
+    expect(project(fresh(), eaves, { ...base, mystic: 2, sapper: 0 }).blightPerHand).toBeLessThan(p.blightPerHand);
   });
 });
 
@@ -124,8 +124,8 @@ describe('expeditions', () => {
   const ready = () =>
     fresh({
       silver: 1e6,
-      hired: hands({ blade: 6, mender: 2, scout: 2, mystic: 0 }),
-      orders: { ...fresh().orders, [eaves.id]: { blade: 3, mender: 1, scout: 1, mystic: 0 } },
+      hired: hands({ blade: 6, mender: 2, scout: 2, mystic: 0, sapper: 0 }),
+      orders: { ...fresh().orders, [eaves.id]: { blade: 3, mender: 1, scout: 1, mystic: 0, sapper: 0 } },
     });
 
   it('sends a party on its standing order, taking those hands out of the hall', () => {
@@ -139,7 +139,7 @@ describe('expeditions', () => {
     const c = dispatch(dispatch(ready(), eaves.id), eaves.id);
     expect(c.parties).toHaveLength(2);
     expect(dispatch(c, eaves.id)).toBe(c);
-    const empty = fresh({ hired: hands({ blade: 5 }), orders: { ...fresh().orders, [eaves.id]: { blade: 0, mender: 0, scout: 0, mystic: 0 } } });
+    const empty = fresh({ hired: hands({ blade: 5 }), orders: { ...fresh().orders, [eaves.id]: { blade: 0, mender: 0, scout: 0, mystic: 0, sapper: 0 } } });
     expect(dispatch(empty, eaves.id)).toBe(empty);
   });
 
@@ -170,7 +170,7 @@ describe('expeditions', () => {
     let strongLosses = 0;
     for (let seed = 1; seed <= 40; seed++) {
       const base = { ...ready(), rng: seed, hired: hands({ blade: 3, mender: 1, scout: 1 }) };
-      const weak = dispatch({ ...base, orders: { ...base.orders, [eaves.id]: { blade: 1, mender: 0, scout: 0, mystic: 0 } } }, eaves.id);
+      const weak = dispatch({ ...base, orders: { ...base.orders, [eaves.id]: { blade: 1, mender: 0, scout: 0, mystic: 0, sapper: 0 } } }, eaves.id);
       const strong = dispatch(base, eaves.id);
       const after = (c: Company) => run(c, 200);
       weakLosses += 1 - sum(after(weak).hired) / sum(base.hired) + sum(after(weak).wounded) / sum(base.hired);
@@ -252,7 +252,7 @@ describe('buildings', () => {
 
 describe('charting the way deeper (the delve)', () => {
   const party = (region: string, comp: Partial<Company['hired']>, patch: Partial<Company> = {}) => {
-    const order = { blade: 0, mender: 0, scout: 0, mystic: 0, ...comp };
+    const order = { blade: 0, mender: 0, scout: 0, mystic: 0, sapper: 0, ...comp };
     const c = fresh({ silver: 1e6, hired: hands({ blade: 20, scout: 10, mender: 5 }), orders: { ...fresh().orders, [region]: order }, ...patch });
     return dispatch(c, region);
   };
@@ -278,7 +278,7 @@ describe('charting the way deeper (the delve)', () => {
   it('only charts as far as the next region: to go deeper, work the frontier', () => {
     const hollows = REGIONS[1]!;
     const nearly = fresh({ charted: hollows.opensAt - 0.01 });
-    const back = run(dispatch({ ...nearly, silver: 1e6, hired: hands({ blade: 20, scout: 10 }), orders: { ...nearly.orders, [eaves.id]: { blade: 6, mender: 0, scout: 3, mystic: 0 } } }, eaves.id), 200);
+    const back = run(dispatch({ ...nearly, silver: 1e6, hired: hands({ blade: 20, scout: 10 }), orders: { ...nearly.orders, [eaves.id]: { blade: 6, mender: 0, scout: 3, mystic: 0, sapper: 0 } } }, eaves.id), 200);
     expect(delve(back)).toBe(hollows.opensAt);
     // Already at the Hollows threshold, the Eaves teach nothing more.
     const again = run(dispatch({ ...back, parties: [] }, eaves.id), 200);
@@ -299,14 +299,14 @@ describe('charting the way deeper (the delve)', () => {
 
 describe('self-containment', () => {
   it('is plain JSON so it can be saved', () => {
-    const c = run(dispatch({ ...fresh({ silver: 1e6, hired: hands({ blade: 5 }) }), orders: { ...fresh().orders, [eaves.id]: { blade: 3, mender: 0, scout: 0, mystic: 0 } } }, eaves.id), 10);
+    const c = run(dispatch({ ...fresh({ silver: 1e6, hired: hands({ blade: 5 }) }), orders: { ...fresh().orders, [eaves.id]: { blade: 3, mender: 0, scout: 0, mystic: 0, sapper: 0 } } }, eaves.id), 10);
     expect(JSON.parse(JSON.stringify(c))).toEqual(c);
   });
 });
 
 describe('rates for the flow readout', () => {
   const inField = () => {
-    const c = fresh({ silver: 1e6, hired: hands({ blade: 6, scout: 2 }), orders: { ...fresh().orders, [eaves.id]: { blade: 3, mender: 0, scout: 1, mystic: 0 } } });
+    const c = fresh({ silver: 1e6, hired: hands({ blade: 6, scout: 2 }), orders: { ...fresh().orders, [eaves.id]: { blade: 3, mender: 0, scout: 1, mystic: 0, sapper: 0 } } });
     return dispatch(dispatch(c, eaves.id), eaves.id);
   };
 
@@ -328,7 +328,7 @@ describe('rates for the flow readout', () => {
 
 describe('the armoury (strength scales by equipment, not headcount)', () => {
   it('makes every hand fight harder at each level', () => {
-    const comp = { blade: 3, mender: 1, scout: 1, mystic: 0 };
+    const comp = { blade: 3, mender: 1, scout: 1, mystic: 0, sapper: 0 };
     const armed = fresh({ buildings: { ...fresh().buildings, armoury: 2 } });
     expect(project(armed, eaves, comp).strength).toBeCloseTo(project(fresh(), eaves, comp).strength * 1.5 ** 2);
   });

@@ -1,7 +1,7 @@
 import { formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
 import { CLASSES } from '../forest-data/classes';
-import { available, hireCost } from '../forest/company';
+import { available, hireCost, isHireable } from '../forest/company';
 import type { Company } from '../forest/state';
 import type { ForestStore } from '../forest/store';
 
@@ -30,6 +30,8 @@ export function createRoster(store: ForestStore): { el: HTMLElement; render(c: C
   function render(c: Company) {
     for (const r of rows) {
       const id = r.k.id;
+      r.el.hidden = !isHireable(c, id) && c.hired[id] === 0;
+      if (r.el.hidden) continue;
       const ready = available(c, id);
       const wounded = c.wounded[id];
       const out = c.hired[id] - ready - wounded;
