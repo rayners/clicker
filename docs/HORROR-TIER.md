@@ -100,6 +100,30 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
 - **Telemetry:** `hunter_started` and `hunter_driven`.
 - **Balance (bot):** 75 trophies in an hour, 193 in two and 355 in four, never driven off. A passive hunter takes nothing.
 
+### CHARTER OF THE ELDERDARK: the dragon (design, 2026-10-21)
+
+**What you are.** The dragon under the Heartwood, which wants what the companies dig up.
+
+**Prey.** Three companies under charter, each defended by its Factor's bot, as for the wood.
+
+**The raid** is the push. Each step of strength brings a raid nearer, one every 90 seconds at push 1. A raid:
+- takes a fifth of the company's unsold relics from its vault;
+- burns one idle hand.
+
+**The hoard** is the harvest. Each raid adds 1, plus one more for every tenfold of relics taken (1 + log10 of the haul), so the hoard stays bounded as companies grow rich.
+
+**Slayers** are the notoriety. They add Renown to every company, which brings more haul and a better-armed company, as fear does for the wood.
+
+**Dormancy** is sleeping on the hoard.
+
+**A charter reaching its reckoning** drives the dragon back to its lair for 10 minutes. That company's next charter replaces it.
+
+**The raid state lives on the prey, not the company.** The company's shape doesn't change. The game gains `mode: 'dragon'` and a `dragon` hunt: Elderdark save v10.
+
+**Entry.** "Wake the dragon" in the configuration.
+
+**Screen.** The ledger as the dragon keeps it: an inventory of the hoard, in gold on soot.
+
 ### The kaiju game (working title FATHOM): the Source
 
 Added 2026-10-21 with the fourth game.

@@ -1,4 +1,6 @@
 import { CLASSES, CLASS_IDS, type ClassId } from '../forest-data/classes';
+import { DRAGON_UPGRADES } from '../forest-data/dragon-upgrades';
+import { DRAGON_ADAPTER, dragonUpgradeCost, isDragonUpgradeAvailable, wakeDragon } from './dragon';
 import { REGIONS } from '../forest-data/regions';
 import {
   appraisalRate,
@@ -331,6 +333,40 @@ function decideWood(game: ForestGame): ForestAction | null {
     return { type: 'shiftWoodPush', index: order[0]!.i, step: 1 };
   }
   return null;
+}
+
+/** The dragon bot: grow, sleep on the hoard when the slayers gather, raid the companies with the fullest vaults. */
+function decideDragon(game: ForestGame): ForestAction | null {
+  const d = game.dragon!;
+  const h = d.hunt;
+  const upgrade = DRAGON_UPGRADES.find((u) => isDragonUpgradeAvailable(d, u.id) && dragonUpgradeCost(d, u.id) <= h.dread);
+  if (upgrade) return { type: 'buyDragonUpgrade', id: upgrade.id };
+  if (!h.dormant && h.notoriety > 4) return { type: 'toggleDragonDormant' };
+  if (h.dormant && h.notoriety < 1) return { type: 'toggleDragonDormant' };
+  const used = h.split.reduce((a, b) => a + b, 0);
+  if (used < h.strength) {
+    const order = h.prey.map((p, i) => ({ i, score: DRAGON_ADAPTER.alarm(p) + h.split[i]! * 0.2 })).sort((a, b) => a.score - b.score);
+    return { type: 'shiftDragonPush', index: order[0]!.i, step: 1 };
+  }
+  return null;
+}
+
+export function simulateDragon(options: WoodSimOptions): { harvest: number; upgrades: number; beaten: number; final: ForestGame } {
+  let game = wakeDragon(createForestGame(options.seed, 0), options.seed);
+  for (let t = 1; t <= options.maxSeconds; t++) {
+    if (!options.passive && t % 5 === 0) {
+      for (let i = 0; i < 20; i++) {
+        const action = decideDragon(game);
+        if (!action) break;
+        const next = reduce(game, action);
+        if (next === game) break;
+        game = next;
+      }
+    }
+    game = advance(game, 1);
+  }
+  const h = game.dragon!.hunt;
+  return { harvest: h.harvest, upgrades: Object.values(game.dragon!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
 }
 
 export function simulateWood(options: WoodSimOptions): { harvest: number; upgrades: number; beaten: number; final: ForestGame } {

@@ -70,6 +70,8 @@ export const forestSaves = createSaveSystem<ForestGame>({
         wood: wood && { ...wood, hunt: { ...wood.hunt, prey: wood.hunt.prey.map((p) => ({ ...p, company: withSappers(p.company) })) } },
       };
     },
+    // v10: the dragon (a second way to play the horror). Nobody has woken it yet.
+    10: (save) => ({ dragon: null, ...save }),
   },
   label: 'ELDERDARK',
   required: ['profile', 'company'],
