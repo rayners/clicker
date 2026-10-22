@@ -11,7 +11,7 @@ for (const path of ['/contract/', '/forest/', '/late-fees/', '/down-there/']) {
     await page.reload();
   await skipBoot(page);
     const assign = page.getByRole('dialog', { name: /contract assignment/i });
-    if (await assign.isVisible().catch(() => false)) await assign.getByRole('button', { name: /accept extraction contract/i }).click();
+    if (await assign.isVisible().catch(() => false)) await assign.getByRole('button', { name: /accept overland contract/i }).click();
     await expect(page.getByRole('tab').first()).toBeInViewport();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   });

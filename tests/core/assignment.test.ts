@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
+import { veteran } from '../helpers';
 import { createGame, newGame, tickGame, GAME_VERSION } from '../../src/core/game';
 import { reduce } from '../../src/core/store';
-import { availableAssignments, TERRAFORM_UNLOCK_CONTRACTS } from '../../src/core/prestige';
+import { assignmentUnlock, availableAssignments, TERRAFORM_UNLOCK_CONTRACTS } from '../../src/core/prestige';
 import { deserialize, serialize } from '../../src/core/save';
 import { loadGame } from '../../src/core/save';
 
@@ -15,16 +16,32 @@ describe('choosing a contract assignment', () => {
   });
 
   it('starts the chosen contract, shaped by the profile, and stops asking', () => {
-    const g = reduce(newGame(1, NOW), { type: 'chooseAssignment', scenario: 'terraform', seed: 5 });
+    const g = reduce(veteran(newGame(1, NOW)), { type: 'chooseAssignment', scenario: 'terraform', seed: 5 });
     expect(g.assigning).toBe(false);
     expect(g.mission.scenario).toBe('terraform');
     expect(g.mission.seed).toBe(5);
     expect(g.mission.config.shipName).toMatch(/station/i);
   });
 
-  it('offers terraforming from the start for now (unlock threshold is zero)', () => {
-    expect(TERRAFORM_UNLOCK_CONTRACTS).toBe(0);
-    expect(availableAssignments(createGame(1, NOW).profile)).toEqual(expect.arrayContaining(['extraction', 'terraform']));
+  it('offers a new player only the short overland haul, and opens the rest contract by contract', () => {
+    const after = (n: number) => availableAssignments({ ...createGame(1, NOW).profile, contractsCompleted: n });
+    expect(after(0)).toEqual(['overland']);
+    expect(after(1)).toEqual(['overland', 'extraction', 'haulage']);
+    expect(after(2)).toContain('terraform');
+    expect(after(2)).not.toContain('security');
+    expect(after(3)).toContain('security');
+    expect(after(4)).toContain('salvage');
+    expect(TERRAFORM_UNLOCK_CONTRACTS).toBe(2);
+  });
+
+  it('says how many contracts unlock each one that is still closed', () => {
+    expect(assignmentUnlock('salvage')).toBe(4);
+    expect(assignmentUnlock('overland')).toBe(0);
+  });
+
+  it('refuses a contract that has not been unlocked yet', () => {
+    const g = newGame(1, NOW);
+    expect(reduce(g, { type: 'chooseAssignment', scenario: 'salvage', seed: 5 })).toBe(g);
   });
 
   it('refuses an assignment that is not available', () => {
@@ -45,7 +62,7 @@ describe('choosing a contract assignment', () => {
 
   it('abandoning a contract by reassignment grants nothing and does not count as completed', () => {
     const playing = { ...createGame(1, NOW), assigning: 'reassign' as const };
-    const next = reduce(playing, { type: 'chooseAssignment', scenario: 'extraction', seed: 9 });
+    const next = reduce(playing, { type: 'chooseAssignment', scenario: 'overland', seed: 9 });
     expect(next.profile).toEqual(playing.profile);
     expect(next.mission.seed).toBe(9);
   });

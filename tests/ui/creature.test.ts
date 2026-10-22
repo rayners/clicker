@@ -6,6 +6,7 @@ import { createGame, type GameState } from '../../src/core/game';
 import { startCreature } from '../../src/core/creature';
 import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
+import { veteran } from '../helpers';
 import { CREATURE_UPGRADES } from '../../src/data/creature/upgrades';
 
 let store: Store;
@@ -28,7 +29,7 @@ beforeEach(() => {
 
 describe('the creature on screen', () => {
   it('is reached from the configuration: accept Special Order 0-77', async () => {
-    const user = setup(createGame(1, 0));
+    const user = setup(veteran(createGame(1, 0)));
     await user.click(screen.getByRole('button', { name: /system configuration/i }));
     await user.click(screen.getByRole('button', { name: /accept special order 0-77/i }));
     expect(store.getState().mode).toBe('creature');

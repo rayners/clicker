@@ -19,7 +19,7 @@ test('export a save, wipe the game, and import it back', async ({ page }) => {
 
   await dialog.getByRole('button', { name: /hard reset/i }).click();
   await dialog.getByRole('button', { name: /confirm/i }).click();
-  await acceptContract(page);
+  await acceptContract(page, 'overland');
   await expect(status.getByLabel('Credits')).toHaveText('0');
 
   await page.getByRole('button', { name: /system configuration/i }).click();

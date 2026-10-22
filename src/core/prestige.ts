@@ -23,14 +23,18 @@ export interface Reward {
 }
 
 export const BOARDROOM_UNLOCK_CONTRACTS = 10;
-/** Completed contracts before terraforming is offered. Zero while it is being play-tested; meant to rise. */
-export const TERRAFORM_UNLOCK_CONTRACTS = 0;
-/** Completed contracts before security contracts are offered. Zero while play-tested. */
-export const SECURITY_UNLOCK_CONTRACTS = 0;
-/** Completed contracts before haulage contracts are offered. Zero while play-tested. */
-export const HAULAGE_UNLOCK_CONTRACTS = 0;
-/** Completed contracts before salvage contracts are offered. Zero while play-tested. */
-export const SALVAGE_UNLOCK_CONTRACTS = 0;
+/**
+ * Completed contracts before each kind of contract is offered (user, 2026-10-22: one to start, the rest unlocked).
+ * The overland haul is the way in; finishing it is the promotion to the long haul, and to extraction.
+ */
+export const EXTRACTION_UNLOCK_CONTRACTS = 1;
+export const HAULAGE_UNLOCK_CONTRACTS = 1;
+export const TERRAFORM_UNLOCK_CONTRACTS = 2;
+export const SECURITY_UNLOCK_CONTRACTS = 3;
+export const SALVAGE_UNLOCK_CONTRACTS = 4;
+/** Completed contracts before each play-as-the-horror tier is offered. */
+export const CREATURE_UNLOCK_CONTRACTS = 3;
+export const HUNTER_UNLOCK_CONTRACTS = 5;
 const BROADCAST_MIN_CYCLE = 3;
 const BROADCAST_MIN_CONSCIENCE = 3;
 const SPECIMENS_PER_SENIORITY = 5;
@@ -112,18 +116,25 @@ export function missionConfigFor(profile: Profile, scenario: ScenarioId = 'extra
   };
 }
 
+const UNLOCKS: readonly [ScenarioId, number][] = [
+  // The short way in comes first.
+  ['overland', 0],
+  ['extraction', EXTRACTION_UNLOCK_CONTRACTS],
+  ['haulage', HAULAGE_UNLOCK_CONTRACTS],
+  ['terraform', TERRAFORM_UNLOCK_CONTRACTS],
+  ['security', SECURITY_UNLOCK_CONTRACTS],
+  ['salvage', SALVAGE_UNLOCK_CONTRACTS],
+];
+
+/** Completed contracts before this kind of contract is offered. */
+export const assignmentUnlock = (scenario: ScenarioId): number => UNLOCKS.find(([id]) => id === scenario)?.[1] ?? 0;
+
 export function availableAssignments(profile: Profile): ScenarioId[] {
-  const unlocks: [ScenarioId, number][] = [
-    // The short way in comes first.
-    ['overland', 0],
-    ['extraction', 0],
-    ['terraform', TERRAFORM_UNLOCK_CONTRACTS],
-    ['security', SECURITY_UNLOCK_CONTRACTS],
-    ['haulage', HAULAGE_UNLOCK_CONTRACTS],
-    ['salvage', SALVAGE_UNLOCK_CONTRACTS],
-  ];
-  return unlocks.filter(([, needed]) => profile.contractsCompleted >= needed).map(([id]) => id);
+  return UNLOCKS.filter(([, needed]) => profile.contractsCompleted >= needed).map(([id]) => id);
 }
+
+export const isCreatureUnlocked = (profile: Profile): boolean => profile.contractsCompleted >= CREATURE_UNLOCK_CONTRACTS;
+export const isHunterUnlocked = (profile: Profile): boolean => profile.contractsCompleted >= HUNTER_UNLOCK_CONTRACTS;
 
 /** Starts the chosen contract. Whatever was running is abandoned without reward. */
 export function chooseAssignment(game: GameState, scenario: ScenarioId, seed: number): GameState {

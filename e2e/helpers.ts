@@ -11,10 +11,15 @@ export async function skipBoot(page: Page) {
   if (await skip.isVisible().catch(() => false)) await skip.click();
 }
 
+/**
+ * A new contract of this kind. New players are offered only the overland haul, so this starts from the dev-only
+ * veteran jump (every contract unlocked), then drops the jump so later reloads keep the contract.
+ */
 export async function freshGame(page: Page, kind: 'extraction' | 'terraforming' | 'security' | 'haulage' | 'overland' | 'salvage' = 'extraction') {
   await page.goto('/contract/');
   await page.evaluate(() => localStorage.clear());
-  await page.reload();
+  await page.goto('/contract/?debug=veteran');
   await skipBoot(page);
   await acceptContract(page, kind);
+  await page.goto('/contract/');
 }

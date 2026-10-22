@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { createGame, newGame, type GameState } from '../../src/core/game';
 import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
+import { veteran } from '../helpers';
 
 let store: Store;
 
@@ -22,16 +23,18 @@ beforeEach(() => {
 });
 
 describe('assignment screen', () => {
-  it('greets a new player with the contracts on offer', () => {
+  it('greets a new player with the one contract on offer, and shows what unlocks the rest', () => {
     setup(newGame(1, 0));
     const d = within(dialog()!);
-    expect(d.getByRole('button', { name: /accept extraction contract/i })).toBeTruthy();
-    expect(d.getByRole('button', { name: /accept terraforming contract/i })).toBeTruthy();
+    expect(d.getByRole('button', { name: /accept overland contract/i })).toBeTruthy();
+    expect(d.queryByRole('button', { name: /accept extraction contract/i })).toBeNull();
+    expect(within(d.getByRole('region', { name: /salvage/i })).getByText(/UNLOCKS AFTER 4 CONTRACTS/)).toBeTruthy();
+    expect(within(d.getByRole('region', { name: /mineral extraction/i })).getByText(/UNLOCKS AFTER 1 CONTRACT$/)).toBeTruthy();
     expect(d.queryByRole('button', { name: /cancel/i })).toBeNull();
   });
 
   it('starts the chosen contract and gets out of the way', async () => {
-    const user = setup(newGame(1, 0));
+    const user = setup(veteran(newGame(1, 0)));
     await user.click(within(dialog()!).getByRole('button', { name: /accept terraforming contract/i }));
     expect(store.getState().mission.scenario).toBe('terraform');
     expect(dialog()).toBeNull();

@@ -56,6 +56,21 @@ In order. Each item has its design written down first, so nothing lives only in 
    - its play-as-the-horror tier, the Source, on the shared hunt engine (`docs/HORROR-TIER.md`): built 2026-10-21.
 5. **Then the backlog below**, in order: (done 2026-10-21) the Keep's sappers and haulage's tiring crew watches, then the hunter and dragon horror tiers and Legend.
 
+6. **(User, 2026-10-22) One scenario per game at the start; the rest unlock.** Debug jumps stay as the testing route. The ladders:
+   - **DEEP CONTRACT** (contracts finished):
+     - overland at the start;
+     - extraction and the long haul at 1 (overland's ending is the promotion to it);
+     - terraforming at 2, security at 3, salvage at 4;
+     - the creature at 3, the hunter at 5, the Boardroom at 10 (unchanged).
+   - **Elderdark** (charters finished): the forest at the start, the Keep at 1, the wood at 2, the dragon at 4.
+   - **LATE FEES** (films finished): the camp at the start, the clinic at 1, the insurer at 2, the asylum at 3, crossovers at 4, the Killer's Cut at 2.
+   - **DOWN THERE** (seasons finished): one season to start; the Source at 2.
+   - Locked content shows what unlocks it, rather than vanishing.
+7. **(User, 2026-10-22) A second first-tier horror: the outbreak.** A novel disease spreading through the workforce and turning them against the company (zombie/pandemic homage, original IP).
+   - It needs a design doc first (`docs/OUTBREAK.md`). It stays decoupled from scenarios through signals, lexicon and hooks.
+   - It also needs a rule for which horror a contract gets.
+8. **(User, 2026-10-22: "go ahead with the boardroom layer when it comes up") The Boardroom** (`docs/BOARDROOM.md`).
+
 ## Backlog / ideas
 
 - **Play as the horror, in every game (user, 2026-10-20).** It reverses the roles as an unlockable higher tier, the way LATE FEES unlocks playing the killer.

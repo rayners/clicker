@@ -1204,6 +1204,22 @@ button:focus-visible {
   border: 1px solid var(--phosphor-dim);
 }
 
+.assign-card[data-locked='true'] {
+  border-style: dashed;
+  border-color: var(--phosphor-faint);
+  opacity: 0.6;
+}
+
+.assign-locked {
+  margin: 6px 0 0;
+  letter-spacing: 0.12em;
+  color: var(--phosphor-dim);
+}
+
+.assign-locked[hidden] {
+  display: none;
+}
+
 .assign-card[hidden] {
   display: none;
 }

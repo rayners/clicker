@@ -156,4 +156,10 @@ describe('debug extras', () => {
     expect(applyScenario(hunting, 'salvage').mode).toBe('mission');
     expect(applyScenario(hunting, 'act2').mode).toBe('mission');
   });
+
+  it('has a veteran jump: every contract unlocked, waiting at the assignment screen', () => {
+    const g = applyScenario(base(), 'veteran');
+    expect(g.profile.contractsCompleted).toBeGreaterThanOrEqual(10);
+    expect(g.assigning).toBe('start');
+  });
 });

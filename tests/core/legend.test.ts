@@ -39,3 +39,16 @@ describe('Legend in DEEP CONTRACT', () => {
     expect(deserialize(JSON.stringify({ ...old, version: 7, profile })).profile.legend).toEqual({});
   });
 });
+
+describe('the horror tiers unlock with finished contracts', () => {
+  it('keeps Special Order 0-77 sealed for 3 contracts and the hunt for 5', () => {
+    const g = createGame(1, NOW);
+    expect(reduce(g, { type: 'startCreature', seed: 1 })).toBe(g);
+    expect(reduce(g, { type: 'startHunter', seed: 1 })).toBe(g);
+    const three = { ...g, profile: { ...g.profile, contractsCompleted: 3 } };
+    expect(reduce(three, { type: 'startCreature', seed: 1 }).mode).toBe('creature');
+    expect(reduce(three, { type: 'startHunter', seed: 1 })).toBe(three);
+    const five = { ...g, profile: { ...g.profile, contractsCompleted: 5 } };
+    expect(reduce(five, { type: 'startHunter', seed: 1 }).mode).toBe('hunter');
+  });
+});

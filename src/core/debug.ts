@@ -9,7 +9,7 @@ import type { MissionOf, MissionState } from '../mission/state';
 import type { GameState } from './game';
 
 /** Developer shortcuts (?debug=act3 etc.) for testing pacing and theming without hours of play. */
-export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus', 'terraform', 'tf-act2', 'security', 'sec-act2', 'haulage', 'haul-act2', 'overland', 'salvage', 'sal-act2'] as const;
+export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus', 'terraform', 'tf-act2', 'security', 'sec-act2', 'haulage', 'haul-act2', 'overland', 'salvage', 'sal-act2', 'veteran'] as const;
 
 const owned = (upTo: number, count: number) =>
   Object.fromEntries(GENERATORS.map((g, i) => [g.id, i < upTo ? count : 0]));
@@ -119,6 +119,8 @@ export function applyScenario(game: GameState, name: string): GameState {
 }
 
 function jump(game: GameState, name: string): GameState {
+  // Every contract and tier unlocked, choosing the next contract: for testing what new players cannot reach yet.
+  if (name === 'veteran') return { ...game, assigning: 'start', profile: { ...game.profile, contractsCompleted: Math.max(10, game.profile.contractsCompleted) } };
   if (name === 'overland') return { ...game, assigning: false, mission: createMission(missionConfigFor(game.profile, 'overland'), game.mission.seed) };
   const haulage = HAULAGE_PATCHES[name];
   if (haulage) {

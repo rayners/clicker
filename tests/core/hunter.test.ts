@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { veteran } from '../helpers';
 import { advance, createGame, type GameState } from '../../src/core/game';
 import { reduce } from '../../src/core/store';
 import { deserialize, serialize } from '../../src/core/save';
@@ -84,7 +85,7 @@ describe('accepting the hunt', () => {
   });
 
   it('takes orders: accept, stalk, withdraw, grow, and return to the contract', () => {
-    let g = reduce(createGame(1, NOW), { type: 'startHunter', seed: 3 });
+    let g = reduce(veteran(createGame(1, NOW)), { type: 'startHunter', seed: 3 });
     expect(g.mode).toBe('hunter');
     g = reduce(g, { type: 'shiftHunterPush', index: 1, step: 1 });
     expect(g.hunter!.hunt.split[1]).toBe(1);

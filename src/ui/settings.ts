@@ -1,4 +1,5 @@
 import type { GameState } from '../core/game';
+import { CREATURE_UNLOCK_CONTRACTS, HUNTER_UNLOCK_CONTRACTS, isCreatureUnlocked, isHunterUnlocked } from '../core/prestige';
 import { exportSave, importSave } from '../core/save';
 import type { Store } from '../core/store';
 import { h, setText } from '../shared/ui/dom';
@@ -147,8 +148,13 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
   });
 
   function render(game: GameState) {
-    setText(theHunt, game.hunter ? 'THE HUNT: RESUME' : 'THE HUNT: ACCEPT');
-    setText(specialOrder, game.creature ? 'SPECIAL ORDER 0-77: RESUME' : 'SPECIAL ORDER 0-77: ACCEPT');
+    const huntOpen = !!game.hunter || isHunterUnlocked(game.profile);
+    theHunt.disabled = !huntOpen;
+    setText(theHunt, game.hunter ? 'THE HUNT: RESUME' : huntOpen ? 'THE HUNT: ACCEPT' : `THE HUNT · AFTER ${HUNTER_UNLOCK_CONTRACTS} CONTRACTS`);
+    // Closed tiers say what opens them.
+    const creatureOpen = !!game.creature || isCreatureUnlocked(game.profile);
+    specialOrder.disabled = !creatureOpen;
+    setText(specialOrder, game.creature ? 'SPECIAL ORDER 0-77: RESUME' : creatureOpen ? 'SPECIAL ORDER 0-77: ACCEPT' : `SPECIAL ORDER 0-77 · AFTER ${CREATURE_UNLOCK_CONTRACTS} CONTRACTS`);
     sound.checked = game.profile.settings.sound;
     motion.checked = game.profile.settings.reducedMotion;
   }

@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { veteran } from '../helpers';
 import { createGame, createProfile, newGame, type GameState } from '../../src/core/game';
 import { availableAssignments, missionConfigFor } from '../../src/core/prestige';
 import { reduce } from '../../src/core/store';
@@ -7,14 +8,15 @@ import { FABRICATORS, TROOPERS } from '../../src/data/security/systems';
 import type { SecurityMission } from '../../src/mission/state';
 
 const security = (patch: Partial<SecurityMission> = {}): GameState => {
-  const g = reduce(newGame(1, 0), { type: 'chooseAssignment', scenario: 'security', seed: 1 });
+  const g = reduce(veteran(newGame(1, 0)), { type: 'chooseAssignment', scenario: 'security', seed: 1 });
   return { ...g, mission: { ...g.mission, ...patch } as GameState['mission'] };
 };
 const m = (g: GameState) => g.mission as SecurityMission;
 
 describe('security contracts in the game', () => {
-  it('are offered from the start while they are being play-tested', () => {
-    expect(availableAssignments(createProfile())).toContain('security');
+  it('are offered once 3 contracts have been finished', () => {
+    expect(availableAssignments(createProfile())).not.toContain('security');
+    expect(availableAssignments({ ...createProfile(), contractsCompleted: 3 })).toContain('security');
   });
 
   it('run aboard a security transport, named for the cycle', () => {

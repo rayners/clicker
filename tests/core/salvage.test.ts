@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { veteran } from '../helpers';
 import { createGame, createProfile, newGame, type GameState } from '../../src/core/game';
 import { availableAssignments, missionConfigFor } from '../../src/core/prestige';
 import { reduce } from '../../src/core/store';
@@ -7,14 +8,15 @@ import { CUTTERS, SHORING } from '../../src/data/salvage/systems';
 import type { SalvageMission } from '../../src/mission/state';
 
 const salvage = (patch: Partial<SalvageMission> = {}): GameState => {
-  const g = reduce(newGame(1, 0), { type: 'chooseAssignment', scenario: 'salvage', seed: 1 });
+  const g = reduce(veteran(newGame(1, 0)), { type: 'chooseAssignment', scenario: 'salvage', seed: 1 });
   return { ...g, mission: { ...g.mission, ...patch } as GameState['mission'] };
 };
 const m = (g: GameState) => g.mission as SalvageMission;
 
 describe('salvage contracts in the game', () => {
-  it('are offered from the start while they are being play-tested', () => {
-    expect(availableAssignments(createProfile())).toContain('salvage');
+  it('are offered once 4 contracts have been finished', () => {
+    expect(availableAssignments(createProfile())).not.toContain('salvage');
+    expect(availableAssignments({ ...createProfile(), contractsCompleted: 4 })).toContain('salvage');
   });
 
   it('run aboard a salvage tug, named for the cycle', () => {

@@ -12,7 +12,7 @@ test('a brand-new player sees WARDEN boot up once, and can skip it', async ({ pa
   await expect(boot).toBeVisible();
   await page.getByRole('button', { name: /skip the boot sequence/i }).click();
   await expect(boot).toBeHidden();
-  await page.getByRole('dialog', { name: /contract assignment/i }).getByRole('button', { name: /accept extraction contract/i }).click();
+  await page.getByRole('dialog', { name: /contract assignment/i }).getByRole('button', { name: /accept overland contract/i }).click();
   await page.reload();
   await expect(boot).toBeHidden();
 });

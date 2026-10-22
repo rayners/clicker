@@ -29,7 +29,7 @@ import { allocate, buyProcessor, buyReactor, buyTerraformUpgrade, surge, thawWav
 import type { Line } from '../data/terraform/systems';
 import { advance, newGame, type GameState, type Settings } from './game';
 import { createReducerStore, type Listener as SharedListener, type Store as SharedStore } from '../shared/store';
-import { chooseAssignment, completeContract, type Ending } from './prestige';
+import { chooseAssignment, completeContract, isCreatureUnlocked, isHunterUnlocked, type Ending } from './prestige';
 import type { ScenarioId } from '../mission/state';
 import { buyCutter, buySalvageUpgrade, buyShoring, cut, shiftNotch, toggleGovernor } from '../mission/salvage/economy';
 import { buyCar, buyEngine, buyHaulageUpgrade, fireThrusters, refuel, setBurn, toggleAutopilot } from '../mission/haulage/economy';
@@ -197,7 +197,7 @@ export function reduce(game: GameState, action: Action): GameState {
     case 'completeContract':
       return completeContract(game, action.ending, action.seed);
     case 'startCreature':
-      return startCreature(game, action.seed);
+      return game.creature || isCreatureUnlocked(game.profile) ? startCreature(game, action.seed) : game;
     case 'leaveCreature':
       return leaveCreature(game);
     case 'shiftCreaturePush':
@@ -207,7 +207,7 @@ export function reduce(game: GameState, action: Action): GameState {
     case 'buyCreatureUpgrade':
       return buyCreatureUpgrade(game, action.id);
     case 'startHunter':
-      return startHunter(game, action.seed);
+      return game.hunter || isHunterUnlocked(game.profile) ? startHunter(game, action.seed) : game;
     case 'leaveHunter':
       return leaveHunter(game);
     case 'endHunter':

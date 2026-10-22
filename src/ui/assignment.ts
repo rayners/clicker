@@ -1,5 +1,5 @@
 import type { GameState } from '../core/game';
-import { availableAssignments, missionConfigFor } from '../core/prestige';
+import { assignmentUnlock, availableAssignments, missionConfigFor } from '../core/prestige';
 import type { Store } from '../core/store';
 import type { ScenarioId } from '../mission/state';
 import { h, setText } from '../shared/ui/dom';
@@ -42,6 +42,7 @@ export function createAssignment(store: Store): { el: HTMLElement; render(game: 
   const cards = (Object.keys(BRIEFS) as ScenarioId[]).map((id) => {
     const def = BRIEFS[id];
     const where = h('p', { class: 'assign-where' });
+    const locked = h('p', { class: 'assign-locked' });
     const accept = h('button', { class: 'buy assign-go', type: 'button', 'aria-label': `Accept ${def.name} contract` }, 'ACCEPT ASSIGNMENT');
     accept.addEventListener('click', () => store.dispatch({ type: 'chooseAssignment', scenario: id, seed: (Math.random() * 2 ** 31) | 0 }));
     const el = h(
@@ -50,9 +51,10 @@ export function createAssignment(store: Store): { el: HTMLElement; render(game: 
       h('h3', { class: 'term-title' }, def.title),
       where,
       h('p', { class: 'sys-desc' }, def.brief),
+      locked,
       accept,
     );
-    return { id, el, where };
+    return { id, el, where, locked, accept };
   });
   const warning = h('p', { class: 'assign-warning' }, 'ABANDONING THE CURRENT CONTRACT EARNS NOTHING. IT WILL NOT BE RECORDED.');
   const cancel = h('button', { class: 'buy', type: 'button' }, 'CANCEL');
@@ -80,7 +82,13 @@ export function createAssignment(store: Store): { el: HTMLElement; render(game: 
     warning.hidden = !abandoning;
     cancel.hidden = !abandoning;
     for (const c of cards) {
-      c.el.hidden = !offered.includes(c.id);
+      // Closed contracts stay on the list, saying what opens them.
+      const open = offered.includes(c.id);
+      c.el.dataset.locked = String(!open);
+      c.accept.hidden = !open;
+      c.locked.hidden = open;
+      const needed = assignmentUnlock(c.id);
+      setText(c.locked, `UNLOCKS AFTER ${needed} CONTRACT${needed === 1 ? '' : 'S'}`);
       const config = missionConfigFor(game.profile, c.id);
       setText(c.where, `${config.shipName.toUpperCase()} // ${config.targetBody.toUpperCase()}`);
     }

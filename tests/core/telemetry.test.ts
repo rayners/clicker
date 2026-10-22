@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { veteran } from '../helpers';
 import { createGame, newGame, type GameState } from '../../src/core/game';
 import { reduce } from '../../src/core/store';
 import { contractEvents, contractProperties } from '../../src/core/telemetry';
@@ -8,6 +9,12 @@ import { startHunter } from '../../src/core/hunter';
 const game = (patch: Partial<GameState> = {}): GameState => ({ ...createGame(1, 0), ...patch });
 const withMission = (g: GameState, patch: Partial<GameState['mission']>): GameState => ({ ...g, mission: { ...g.mission, ...patch } as GameState['mission'] });
 const names = (prev: GameState, next: GameState) => contractEvents(prev, next).map((e) => e.name);
+
+/** A contract of this kind, on a first-contract profile (so every event reports cycle 0). */
+const onContract = (scenario: 'security' | 'haulage' | 'salvage' | 'overland') => {
+  const fresh = newGame(1, 0);
+  return { ...reduce(veteran(fresh), { type: 'chooseAssignment', scenario, seed: 1 }), profile: fresh.profile };
+};
 
 describe('DEEP CONTRACT play events', () => {
   it('reports upgrades bought and story beats seen on the way to the first act', () => {
@@ -23,9 +30,9 @@ describe('DEEP CONTRACT play events', () => {
 
   it('reports a contract starting, with its scenario, horror and why it started', () => {
     const fresh = newGame(1, 0);
-    const started = reduce(fresh, { type: 'chooseAssignment', scenario: 'terraform', seed: 2 });
+    const started = reduce(fresh, { type: 'chooseAssignment', scenario: 'overland', seed: 2 });
     expect(contractEvents(fresh, started)).toEqual([
-      { name: 'contract_started', props: { scenario: 'terraform', horror: started.mission.horror, reason: 'start', cycle: 0 } },
+      { name: 'contract_started', props: { scenario: 'overland', horror: started.mission.horror, reason: 'start', cycle: 0 } },
     ]);
   });
 
@@ -48,10 +55,10 @@ describe('DEEP CONTRACT play events', () => {
     const playing = withMission(game(), { act: 2, elapsed: 600 });
     const asking = reduce(playing, { type: 'requestReassignment' });
     expect(names(playing, asking)).toEqual([]);
-    const moved = reduce(asking, { type: 'chooseAssignment', scenario: 'terraform', seed: 3 });
+    const moved = reduce(asking, { type: 'chooseAssignment', scenario: 'overland', seed: 3 });
     expect(contractEvents(asking, moved)).toEqual([
       { name: 'contract_abandoned', props: { scenario: 'extraction', horror: 'organism', act: 2, minutes: 10, cycle: 0 } },
-      { name: 'contract_started', props: { scenario: 'terraform', horror: moved.mission.horror, reason: 'reassign', cycle: 0 } },
+      { name: 'contract_started', props: { scenario: 'overland', horror: moved.mission.horror, reason: 'reassign', cycle: 0 } },
     ]);
   });
 
@@ -61,7 +68,7 @@ describe('DEEP CONTRACT play events', () => {
   });
 
   it('reports each colony sector secured for the first time on a security contract', () => {
-    const g = reduce(newGame(1, 0), { type: 'chooseAssignment', scenario: 'security', seed: 1 });
+    const g = onContract('security');
     const before = withMission(g, { elapsed: 600 } as never);
     const after = withMission(before, { deepest: 1 } as never);
     expect(contractEvents(before, after)).toEqual([
@@ -70,7 +77,7 @@ describe('DEEP CONTRACT play events', () => {
   });
 
   it('reports each station reached on a haulage contract, and whether the delivery made its window', () => {
-    const g = reduce(newGame(1, 0), { type: 'chooseAssignment', scenario: 'haulage', seed: 1 });
+    const g = onContract('haulage');
     const before = withMission(g, { elapsed: 600 } as never);
     const after = withMission(before, { leg: 1, onTime: 1 } as never);
     expect(contractEvents(before, after)).toEqual([
@@ -79,7 +86,7 @@ describe('DEEP CONTRACT play events', () => {
   });
 
   it('reports each compartment opened on a salvage contract, and the breaches so far', () => {
-    const g = reduce(newGame(1, 0), { type: 'chooseAssignment', scenario: 'salvage', seed: 1 });
+    const g = onContract('salvage');
     const before = withMission(g, { elapsed: 600 } as never);
     const after = withMission(before, { deepest: 1, breaches: 2 } as never);
     expect(contractEvents(before, after)).toEqual([
@@ -88,7 +95,7 @@ describe('DEEP CONTRACT play events', () => {
   });
 
   it('names the depot on the overland road', () => {
-    const g = reduce(newGame(1, 0), { type: 'chooseAssignment', scenario: 'overland', seed: 1 });
+    const g = onContract('overland');
     const after = withMission(g, { leg: 1, onTime: 0 } as never);
     expect(contractEvents(g, after)[0]).toMatchObject({ name: 'leg_completed', props: { station: 'PIT 4 LOADOUT', onTime: false } });
   });

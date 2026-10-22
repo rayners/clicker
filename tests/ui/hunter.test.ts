@@ -6,6 +6,7 @@ import { createGame, type GameState } from '../../src/core/game';
 import { startHunter } from '../../src/core/hunter';
 import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
+import { veteran } from '../helpers';
 import { HUNTER_UPGRADES } from '../../src/data/hunter/upgrades';
 
 let store: Store;
@@ -28,7 +29,7 @@ beforeEach(() => {
 
 describe('the hunter on screen', () => {
   it('is reached from the configuration: accept the hunt', async () => {
-    const user = setup(createGame(1, 0));
+    const user = setup(veteran(createGame(1, 0)));
     await user.click(screen.getByRole('button', { name: /system configuration/i }));
     await user.click(screen.getByRole('button', { name: /accept the hunt/i }));
     expect(store.getState().mode).toBe('hunter');
@@ -81,5 +82,14 @@ describe('the hunter on screen', () => {
     await user.click(view().getByRole('button', { name: /^confirm/i }));
     expect(store.getState().hunter).toBeNull();
     expect(store.getState().profile.legend.hunter).toBe(4);
+  });
+
+  it('says how many contracts unlock the restricted orders before they open', async () => {
+    const user = setup(createGame(1, 0));
+    await user.click(screen.getByRole('button', { name: /system configuration/i }));
+    const hunt = screen.getByRole('button', { name: /accept the hunt/i }) as HTMLButtonElement;
+    expect(hunt.disabled).toBe(true);
+    expect(hunt.textContent).toMatch(/AFTER 5 CONTRACTS/);
+    expect((screen.getByRole('button', { name: /accept special order 0-77/i }) as HTMLButtonElement).textContent).toMatch(/AFTER 3 CONTRACTS/);
   });
 });
