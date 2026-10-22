@@ -1,5 +1,6 @@
 import { nextStep, type GuideRules, type GuideStep, type createGuideProgress } from '../guide';
 import { h, setText } from './dom';
+import { announce } from '../telemetry';
 
 const TARGET_CLASS = 'guide-target';
 /** A page can hold more than one guide (a game and its horror tier); each rules page needs its own title id. */
@@ -43,12 +44,17 @@ export function createGuideView<S>(options: {
     marked = next;
   };
 
+  const guide = options.progress.key;
   ok.addEventListener('click', () => {
-    if (current) options.progress.see(current.id);
+    if (current) {
+      options.progress.see(current.id);
+      announce({ name: 'guide_step', props: { guide, step: current.id, how: 'dismissed' } });
+    }
     if (last) render(last);
   });
   skip.addEventListener('click', () => {
     options.progress.skip();
+    announce({ name: 'guide_skipped', props: { guide, step: current?.id ?? '' } });
     if (last) render(last);
   });
   let shownRules = '';
@@ -70,7 +76,10 @@ export function createGuideView<S>(options: {
       rulesBody.replaceChildren(...rules.sections.flatMap((x) => [h('h3', { class: 'guide-rules-heading' }, x.heading), h('p', { class: 'guide-rules-text' }, x.text)]));
     }
     // A step the player has just done counts as seen, so it never comes back.
-    if (current && current.done(s)) options.progress.see(current.id);
+    if (current && current.done(s) && !options.progress.seen().includes(current.id)) {
+      options.progress.see(current.id);
+      announce({ name: 'guide_step', props: { guide, step: current.id, how: 'done' } });
+    }
     current = options.progress.skipped() ? null : nextStep(options.steps(s), s, options.progress.seen());
     el.hidden = !current;
     mark(current?.target);

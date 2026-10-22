@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createReducerStore } from '../../src/shared/store';
-import type { OptOut, TelemetryEvent } from '../../src/shared/telemetry';
+import { announce, type OptOut, type TelemetryEvent } from '../../src/shared/telemetry';
 
 const posthog = vi.hoisted(() => ({
   init: vi.fn(),
@@ -129,6 +129,16 @@ describe('starting analytics for a game', () => {
     await flush();
     expect(posthog.capture).toHaveBeenCalledWith('sitting_ended', { level: 0, seconds: 95 });
     expect(posthog.capture).toHaveBeenCalledWith('sitting_ended', { level: 0, seconds: 30 });
+  });
+
+  it('sends events the screen announces (the walkthrough), through the same opt-out gate', async () => {
+    const { optOut } = setup(true);
+    announce({ name: 'guide_step', props: { guide: 'latefees.guide', step: 'camp-whistle', how: 'done' } });
+    await flush();
+    expect(posthog.capture).toHaveBeenCalledWith('guide_step', { level: 0, guide: 'latefees.guide', step: 'camp-whistle', how: 'done' });
+    optOut.setSharing(false);
+    announce({ name: 'guide_skipped', props: { guide: 'latefees.guide', step: 'flow' } });
+    expect(posthog.capture).not.toHaveBeenCalledWith('guide_skipped', expect.anything());
   });
 
   it('stops sending the moment the player opts out', async () => {

@@ -46,6 +46,8 @@ export function createGuideProgress(storage: Storage, key: string) {
     }
   };
   return {
+    /** Also the guide's name in telemetry. */
+    key,
     seen: (): readonly string[] => state.seen,
     skipped: () => state.skipped,
     see(id: string) {

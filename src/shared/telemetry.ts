@@ -12,6 +12,12 @@ export interface TelemetrySink {
 }
 
 const OPT_OUT_KEY = 'clicker.telemetry';
+/** Screen code with something to report but no state change to show it (the walkthrough) announces it on the document. */
+export const TELEMETRY_EVENT = 'clicker:telemetry';
+
+export function announce(event: TelemetryEvent): void {
+  document.dispatchEvent(new CustomEvent<TelemetryEvent>(TELEMETRY_EVENT, { detail: event }));
+}
 const MAX_PENDING = 100;
 const LOCAL_HOST = /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)|\.local$/;
 

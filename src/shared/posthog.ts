@@ -1,5 +1,5 @@
 import type { Store } from './store';
-import { createTelemetry, type OptOut, type TelemetryEvent, type TelemetryProps, type TelemetrySink } from './telemetry';
+import { createTelemetry, TELEMETRY_EVENT, type OptOut, type TelemetryEvent, type TelemetryProps, type TelemetrySink } from './telemetry';
 
 /** Public by design: a PostHog project key only allows sending events. */
 const POSTHOG_KEY = 'phc_sWEhq5z9p3HygDsTtgBJv8xrF3jLhKLAVy8ev2hgvZLx';
@@ -65,7 +65,11 @@ export function startAnalytics<S>(options: {
       shownAt = null;
     }
   };
+  const onAnnounced = (e: Event) => {
+    if (optOut.sharing()) telemetry.track((e as CustomEvent<TelemetryEvent>).detail);
+  };
   window.addEventListener('error', onError);
+  document.addEventListener(TELEMETRY_EVENT, onAnnounced);
   window.addEventListener('unhandledrejection', onRejection);
   document.addEventListener('visibilitychange', onVisibility);
   telemetry.track({ name: 'game_opened' });
@@ -83,6 +87,7 @@ export function startAnalytics<S>(options: {
     window.removeEventListener('error', onError);
     window.removeEventListener('unhandledrejection', onRejection);
     document.removeEventListener('visibilitychange', onVisibility);
+    document.removeEventListener(TELEMETRY_EVENT, onAnnounced);
   };
 }
 

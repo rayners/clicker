@@ -4,6 +4,7 @@ import { screen, within } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 import { createGuideProgress, type GuideRules, type GuideStep } from '../../src/shared/guide';
 import { createGuideView } from '../../src/shared/ui/guide';
+import { TELEMETRY_EVENT, type TelemetryEvent } from '../../src/shared/telemetry';
 
 interface S {
   drills: number;
@@ -77,5 +78,29 @@ describe('the guide on screen', () => {
     a.rulesDialog.hidden = b.rulesDialog.hidden = false;
     expect(screen.getByRole('dialog', { name: 'HOW EXTRACTION WORKS' })).toBe(a.rulesDialog);
     expect(screen.getByRole('dialog', { name: 'HOW THE WOOD WORKS' })).toBe(b.rulesDialog);
+  });
+
+  it('announces each step as it is done or dismissed, and the guide being skipped, for telemetry', async () => {
+    const heard: TelemetryEvent[] = [];
+    const listen = (e: Event) => heard.push((e as CustomEvent<TelemetryEvent>).detail);
+    document.addEventListener(TELEMETRY_EVENT, listen);
+    const { view, user } = mount();
+    view.render({ drills: 0 });
+    view.render({ drills: 1 });
+    expect(heard).toContainEqual({ name: 'guide_step', props: { guide: 'k', step: 'drill', how: 'done' } });
+    await user.click(screen.getByRole('button', { name: /got it/i }));
+    expect(heard).toContainEqual({ name: 'guide_step', props: { guide: 'k', step: 'next', how: 'dismissed' } });
+    document.removeEventListener(TELEMETRY_EVENT, listen);
+  });
+
+  it('announces skipping the guide with the step it was on', async () => {
+    const heard: TelemetryEvent[] = [];
+    const listen = (e: Event) => heard.push((e as CustomEvent<TelemetryEvent>).detail);
+    document.addEventListener(TELEMETRY_EVENT, listen);
+    const { view, user } = mount();
+    view.render({ drills: 0 });
+    await user.click(screen.getByRole('button', { name: /skip guide/i }));
+    expect(heard).toContainEqual({ name: 'guide_skipped', props: { guide: 'k', step: 'drill' } });
+    document.removeEventListener(TELEMETRY_EVENT, listen);
   });
 });

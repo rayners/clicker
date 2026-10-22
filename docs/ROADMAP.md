@@ -79,7 +79,8 @@ In order. Each item has its design written down first, so nothing lives only in 
      - LATE FEES: steps and a rules page for each of the four tapes (`src/late-fees-data/guide.ts`). The tip sits above the whistle and the `?` in the tape header; progress is kept under `latefees.guide`.
      - DOWN THERE: a step for each zone's lever as the water opens (pass, beach dial and guards, range and buoys, enhancement and pens, station depth and crews, walls, Bulwarks and pilots) and a season rules page (`src/fathom-data/guide.ts`), progress under `fathom.guide`.
      - Every play-as-the-horror tier (the Killer's Cut, the wood, the dragon, Special Order 0-77, the hunter, the Source): one shared hunt guide (`src/shared/hunt-guide.ts`) in each tier's own words, with a rules page behind a `?` in the tier's header. Each tier keeps its own progress (`latefees.cut.guide`, `elderdark.wood.guide`, `elderdark.dragon.guide`, `deep-contract.creature.guide`, `deep-contract.hunter.guide`, `fathom.deep.guide`).
-     - **Left:** guide telemetry.
+     - Telemetry: `guide_step` (done or dismissed) and `guide_skipped`, announced by the guide view and forwarded by `startAnalytics`; a walkthrough tile on the Game pacing dashboard.
+     - **Done.**
 7. **(User, 2026-10-22) A second first-tier horror: the outbreak.** A novel disease spreading through the workforce and turning them against the company (zombie/pandemic homage, original IP).
    - It needs a design doc first (`docs/OUTBREAK.md`). It stays decoupled from scenarios through signals, lexicon and hooks.
    - It also needs a rule for which horror a contract gets.

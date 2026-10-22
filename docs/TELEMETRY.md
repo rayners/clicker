@@ -17,6 +17,9 @@ with real players and to catch errors on devices we don't test on.
   ("Discard client IP data", on since 2026-10-21), so the IP itself is not stored.
 - **Out of the simulation.** Events are derived by diffing successive store states (`src/core/telemetry.ts`,
   `src/forest/telemetry.ts`, both pure). Nothing under `src/mission/` or the forest simulation calls PostHog.
+- **The walkthrough is the one exception to state diffs:** its progress is kept per device, outside the save, so the
+  guide view announces `guide_step` and `guide_skipped` on the document (`announce` in `src/shared/telemetry.ts`) and
+  `startAnalytics` forwards them through the same opt-out gate.
 - **Never in the way.** The SDK is a lazily loaded chunk; events buffer (bounded) until it arrives; sink failures are
   swallowed; offline means events are simply lost.
 
@@ -33,6 +36,8 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 | all | `sitting_ended` | seconds (how long the game was in view before a tab switch, the phone locking or closing) |
 | all | `upgrade_bought` | upgrade (id), upgrades (how many owned), minutes (to a tenth). Fills the time before the first milestone |
 | all | `beat_seen` | beat (story beat id), minutes (to a tenth) |
+| all | `guide_step` | guide (its progress key, e.g. `latefees.guide`, `elderdark.wood.guide`), step (id), how (`done`: the player used the lever; `dismissed`: tapped GOT IT). Once per step per device |
+| all | `guide_skipped` | guide, step (the one showing when the player tapped SKIP GUIDE) |
 | DEEP CONTRACT | `contract_started` | scenario, horror, reason (`start` / `renewal` / `reassign`) |
 | DEEP CONTRACT | `act_reached` | act, minutes |
 | DEEP CONTRACT | `contract_abandoned` | scenario, horror, act, minutes (reassignment) |
