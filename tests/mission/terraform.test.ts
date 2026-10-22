@@ -11,6 +11,7 @@ import {
   buyTerraformUpgrade,
   wavesReady,
   incomeRate,
+  incomeGain,
   isProcessorRevealed,
   lineStates,
   planetReadings,
@@ -246,5 +247,21 @@ describe('planet readings', () => {
     expect(planetReadings(fresh())).toEqual({ atmosphere: 0, heat: 61, water: 0 });
     const m = fresh({ climate: { atmosphere: 50, heat: 250, water: 30 } });
     expect(planetReadings(m)).toEqual(m.climate);
+  });
+});
+
+describe('what one more of anything adds to terraforming income', () => {
+  it('is the difference in income it would make, never negative', () => {
+    const m = withProcessors({ [tier1('atmosphere').id]: 2, [tier1('heat').id]: 2, [tier1('water').id]: 2 });
+    const id = tier1('atmosphere').id;
+    const after = { ...m, processors: { ...m.processors, [id]: m.processors[id]! + 1 } };
+    expect(incomeGain(m, { processor: id })).toBeCloseTo(Math.max(0, incomeRate(after) - incomeRate(m)));
+    expect(incomeGain(m, { reactor: REACTORS[0]!.id })).toBeGreaterThanOrEqual(0);
+  });
+
+  it('says a processor adds nothing when there is no power to run it, and a reactor nothing with no processor to feed', () => {
+    const starved = withProcessors({ [tier1('atmosphere').id]: 200 });
+    expect(incomeGain(starved, { processor: tier1('atmosphere').id })).toBe(0);
+    expect(incomeGain(fresh(), { reactor: REACTORS[0]!.id })).toBe(0);
   });
 });

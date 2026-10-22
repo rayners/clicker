@@ -2,8 +2,10 @@ import { formatNumber } from '../shared/format';
 import type { Store } from '../core/store';
 import { LINES, PROCESSORS, REACTORS } from '../data/terraform/systems';
 import {
+  incomeGain,
   isProcessorRevealed,
   isReactorRevealed,
+  lineStates,
   power,
   processorCost,
   processorRate,
@@ -16,12 +18,14 @@ interface Row {
   el: HTMLLIElement;
   owned: HTMLElement;
   rate: HTMLElement;
+  gain: HTMLElement;
   button: HTMLButtonElement;
 }
 
 function row(name: string, description: string, action: () => void): Row {
   const owned = h('span', { class: 'sys-owned', 'aria-label': `${name} owned` }, '0');
   const rate = h('span', { class: 'sys-rate' });
+  const gain = h('span', { class: 'sys-gain', 'aria-label': `${name} income` });
   const button = h('button', { class: 'buy', type: 'button' });
   button.addEventListener('click', action);
   const el = h(
@@ -29,9 +33,15 @@ function row(name: string, description: string, action: () => void): Row {
     { class: 'sys-row' },
     h('div', { class: 'sys-head' }, h('span', { class: 'sys-name' }, name), owned),
     h('p', { class: 'sys-desc' }, description),
-    h('div', { class: 'sys-foot' }, rate, button),
+    h('div', { class: 'sys-foot' }, h('span', { class: 'sys-rates' }, rate, gain), button),
   );
-  return { el, owned, rate, button };
+  return { el, owned, rate, gain, button };
+}
+
+/** What one more adds to income, which is what the player is really buying; and why, when it adds nothing. */
+function showGain(r: Row, gain: number, why: string) {
+  setText(r.gain, gain > 0 ? `+${formatNumber(gain)} CR/S` : `+0 CR/S · ${why}`);
+  r.gain.dataset.wasted = String(gain <= 0);
 }
 
 function price(r: Row, name: string, cost: number, credits: number) {
@@ -74,6 +84,8 @@ export function createTerraformSystemsPanel(store: Store): { el: HTMLElement; re
       const count = m.reactors[r.def.id] ?? 0;
       setText(r.owned, String(count));
       setText(r.rate, `+${formatNumber(r.def.mw)} MW EA`);
+      const fed = Object.values(m.processors).some((n) => n > 0);
+      showGain(r, incomeGain(m, { reactor: r.def.id }), fed ? 'PROCESSORS FULLY POWERED' : 'NO PROCESSORS TO FEED');
       price(r, r.def.name, reactorCost(r.def, count), m.credits);
     }
     for (const p of processors) {
@@ -84,6 +96,7 @@ export function createTerraformSystemsPanel(store: Store): { el: HTMLElement; re
       const rate = processorRate(m, p.def);
       setText(p.owned, String(count));
       setText(p.rate, `+${formatNumber(rate)} U/S · ${formatNumber(rate)} MW EA`);
+      showGain(p, incomeGain(m, { processor: p.def.id }), lineStates(m)[p.def.line] === 'power-limited' ? 'NO POWER TO SPARE' : 'OFF SPEC');
       price(p, p.def.name, processorCost(p.def, count), m.credits);
     }
   }

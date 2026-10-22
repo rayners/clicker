@@ -115,6 +115,13 @@ describe('terraform systems panel', () => {
     expect(mission().reactors[REACTORS[0]!.id]).toBe(1);
     expect(mission().processors[cracker.id]).toBe(1);
   });
+
+  it('shows what one more of each would add to income, and says why when it would add nothing', async () => {
+    const user = setup({ credits: 1_000 });
+    await user.click(screen.getByRole('tab', { name: /systems/i }));
+    expect(screen.getByLabelText(`${REACTORS[0]!.name} income`).textContent).toBe('+0 CR/S · NO PROCESSORS TO FEED');
+    expect(screen.getByLabelText(`${cracker.name} income`).textContent).toMatch(/^\+[\d.]+\w* CR\/S$/);
+  });
 });
 
 describe('terraform upgrades panel', () => {

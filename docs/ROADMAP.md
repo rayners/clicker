@@ -142,11 +142,11 @@ In order. Each item has its design written down first, so nothing lives only in 
   - Teletype clicks timed to each log line's print animation (6 per line, at most 4 lines at once), with the memo chime or anomaly drone closing the burst.
   - **To do:** listen on the iPhone and tune the levels. The other games have no sound yet.
 - (Done 2026-10-22) **A first-load boot sequence** for DEEP CONTRACT: WARDEN's BIOS lines type out on a brand-new player's first visit only (no save yet). Any tap or key skips it, it leaves by itself after about 4.4 s, and it prints at once with reduced motion. The e2e helper `skipBoot` steps past it.
-- **Raise `TERRAFORM_UNLOCK_CONTRACTS`** (currently 0 so it can be play-tested) once the user is happy with it.
-- **A second horror.** The architecture is ready: add `src/mission/<horror>/`, a `HorrorDef`, lexicon keys each scenario must supply, and optional pairings. Choosing a horror per contract (random or cycled from the profile) is still to be designed.
+- (Done 2026-10-22) `TERRAFORM_UNLOCK_CONTRACTS` is 2, with the unlock ladder (build queue item 6).
+- (Done 2026-10-22) **A second horror:** the outbreak (`docs/OUTBREAK.md`, build queue item 7), with `horrorFor` choosing a contract's horror.
 - (Done 2026-10-22) Terraform polish: while WARDEN balances, the three allocation lines fold into a one-line power split (e.g. `ATMO 40% · HEAT 30% · WATER 30%`). Taking control back restores the steps. (Every scenario now has its own vessel, target and action sprites.)
-- (Done 2026-10-22, extraction) **More flow feedback:** every generator and the refinery show what one more would add to income. It reads "+0 CR/S · REFINERY FULL" (or "NEEDS MORE ORE") in red when the other end of the line would swallow it. **Still open:** the same for the other scenarios' buy buttons.
-- The **Boardroom** layer (`docs/BOARDROOM.md`).
+- (Done 2026-10-22, extraction) **More flow feedback:** every generator and the refinery show what one more would add to income. It reads "+0 CR/S · REFINERY FULL" (or "NEEDS MORE ORE") in red when the other end of the line would swallow it. Terraform has it too (2026-10-22): reactors and processors, with NO PROCESSORS TO FEED, PROCESSORS FULLY POWERED, NO POWER TO SPARE or OFF SPEC when one more would add nothing. **Still open:** security, haulage and salvage.
+- (Done 2026-10-22) The **Boardroom** layer (`docs/BOARDROOM.md`, build queue item 8).
 
 ## Balance notes
 

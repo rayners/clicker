@@ -314,6 +314,15 @@ export function incomeRate(m: MissionState): number {
   return (balancedRate(m) + autoSurgeRate(m) * surgePower(m)) * CREDITS_PER_UNIT * colonyIncomeMultiplier(m);
 }
 
+/** How much income one more reactor or processor would add: nothing if power, the other lines or the spec hold it back. */
+export function incomeGain(m: MissionState, purchase: { reactor: string } | { processor: string }): number {
+  const after =
+    'reactor' in purchase
+      ? { ...m, reactors: { ...m.reactors, [purchase.reactor]: (m.reactors[purchase.reactor] ?? 0) + 1 } }
+      : { ...m, processors: { ...m.processors, [purchase.processor]: (m.processors[purchase.processor] ?? 0) + 1 } };
+  return Math.max(0, incomeRate(after) - incomeRate(m));
+}
+
 export function surgePower(m: MissionState): number {
   return BASE_SURGE * multipliers(m).surge;
 }
