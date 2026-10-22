@@ -1,7 +1,8 @@
 import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../shared/telemetry';
 import type { GameState } from './game';
 import { SECTIONS } from '../data/security/systems';
-import { isHaulage, isSecurity } from '../mission/state';
+import { COMPARTMENTS } from '../data/salvage/systems';
+import { isHaulage, isSalvage, isSecurity } from '../mission/state';
 import { profileOf } from '../mission/haulage/profiles';
 
 const minutes = (seconds: number) => Math.round(seconds / 60);
@@ -44,6 +45,10 @@ export function contractEvents(prev: GameState, next: GameState): TelemetryEvent
     if (isSecurity(m) && isSecurity(was) && m.deepest > was.deepest) {
       const sector = SECTIONS[m.deepest - 1]!.id;
       events.push({ name: 'sector_secured', props: { sector, sectors: m.deepest, minutes: minutes(m.elapsed), horror: m.horror, cycle } });
+    }
+    if (isSalvage(m) && isSalvage(was) && m.deepest > was.deepest) {
+      const compartment = COMPARTMENTS[m.deepest - 1]!.id;
+      events.push({ name: 'compartment_opened', props: { compartment, compartments: m.deepest, breaches: m.breaches, minutes: minutes(m.elapsed), horror: m.horror, cycle } });
     }
     if (isHaulage(m) && isHaulage(was) && m.leg > was.leg) {
       const onTime = m.onTime > was.onTime;

@@ -47,8 +47,14 @@ Requested 2026-10-19. Tracked in `docs/forest/DESIGN.md`. A playable first slice
 In order. Each item has its design written down first, so nothing lives only in a conversation.
 
 1. **(Done 2026-10-21.) LATE FEES: the Candy Corn Day tape.** A Grayhaven State Hospital venue and the killer Patient 10-30, with their crossovers, sequels and Killer's Cut entry. Design: `docs/late-fees/DESIGN.md` §3.
-2. **(Simulation built 2026-10-21; the screen is next.) A fourth game: the deep-water monster game** (working title FATHOM). Sharks, squid and octopus on the coast; deeper water and bigger things; then kaiju from a breach in the trench, and mechs to fight them. Design: `docs/kaiju/DESIGN.md`.
-3. **DEEP CONTRACT: salvage**, the last of the four approved missions (`docs/MISSIONS.md` §5).
+2. **(Built 2026-10-21; kept off the picker until it is named.) A fourth game: the deep-water monster game** (working title FATHOM). Sharks, squid and octopus on the coast; deeper water and bigger things; then kaiju from a breach in the trench, and mechs to fight them. Design: `docs/kaiju/DESIGN.md`.
+3. **(Done 2026-10-21.) DEEP CONTRACT: salvage**, the last of the four approved missions (`docs/MISSIONS.md` §5).
+
+4. **The kaiju game's remainder** (`docs/kaiju/DESIGN.md`):
+   - a name from the user (FATHOM is a working title), then its picker door;
+   - pilots' link rating (pilots are a plain count for now);
+   - its play-as-the-kaiju horror tier, on the shared hunt engine (`docs/HORROR-TIER.md`).
+5. **Then the backlog below**, in order: the Keep's sappers and haulage's tiring crew watches (the two leftovers from the missions), then the hunter and dragon horror tiers and Legend.
 
 ## Backlog / ideas
 
@@ -60,7 +66,7 @@ In order. Each item has its design written down first, so nothing lives only in 
   - **Built:** the Killer's Cut, the wood and the creature. **Left:** the hunter, the dragon and Legend.
 
 - **New missions (approved 2026-10-20):** security detachment, haulage and salvage for DEEP CONTRACT, and the Keep for Elderdark, with a shared held-ground engine. The design and build order are in `docs/MISSIONS.md`.
-  - **Built:** held ground, the security detachment, the Keep and haulage. **Left:** salvage, the Keep's sappers, and haulage's tiring crew watches.
+  - **Built:** held ground, the security detachment, the Keep, haulage and salvage. **Left:** the Keep's sappers, and haulage's tiring crew watches.
 
 - **Real-device pass on iPhone Safari**, both in-browser and installed to the home screen (offline, audio unlock, safe areas, storage persistence).
 - Debug extras from the plan: a time-scale multiplier, grant resources, a story flag viewer.

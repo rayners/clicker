@@ -197,13 +197,29 @@ The core trade-off is identical in both games and is the point of sharing it: **
 - **Debug jump:** `?debug=overland`.
 - **Pacing (bot):** terminus at 1h14, never leaving act 1.
 
+**5. Salvage: done** (2026-10-21).
+- **Code:** `src/mission/salvage/`, `src/data/salvage/`, `src/ui/scenarios/salvage.ts`, `src/ui/torch.ts` (the torch dial, the stress gauge and the governor), `src/ui/salvage-systems.ts`. The sector column (`src/ui/site.ts`) now takes any run of sections, a label and its own words (OPEN, BUCKLING, CUTTING, SHUT).
+- **How it plays:**
+  - Every cutter cuts at the frontier. Shoring braces open compartments from the airlock aft; short shoring lets them buckle shut (held ground's drift).
+  - Salvage pays as the torch goes in (30 seconds of the compartment's strip rate, paid once, however often it is cut back into), then every open compartment strips at 0.5 credits per second per point of value.
+  - The torch dial runs 1–10 and cuts at notch/5 speed. Above the safe line (5, raised by three requisitions and Kane) stress rises 1% per second per notch over; at or below it, stress bleeds 5% per second. Full stress breaches the frontier: its progress is lost and it is sealed for 60 seconds.
+  - The hull governor runs the torch at 10 until stress would cross 80% in the next tick, then drops to the safe line, so it never breaches.
+- **Deviations from the sketch, found by the pacing bot:**
+  - Shoring tiers get better per credit as they climb (there are no shoring tier upgrades), otherwise the brake trapped the early game.
+  - The hold and everything aft carry extra structural load (×1.5 per compartment from the hold) that pays nothing: a compartment's `value` is separate from its `threat`. Without it the late game paid so much the specimen rigs finished the contract early.
+  - Salvage has its own story curve (`PROGRESS_SCALE` 0.777, exponent 3.9).
+- **Debug jumps:** `?debug=salvage` and `?debug=sal-act2`.
+- **Telemetry:** `compartment_opened` (compartment, compartments, breaches, minutes).
+- **Saves:** no saved-shape change for existing contracts, so no migration.
+- **Pacing (bot, seeds 1/7/42):** Act II 1h00, Act III 2h44, Act IV 2h54, terminus 4h09.
+
 ## Build order
 
 1. **Held ground** in `src/shared/ground.ts`, test-first, with no game attached.
 2. **Security detachment**, built on held ground. DEEP CONTRACT already supports scenarios, so this proves the engine with the least refactoring. It adds the `HorrorDef.pressure` hook.
 3. **Elderdark site split, then the Keep**, which reuses held ground in the other game. (Done.)
 4. **Haulage.** (Done.)
-5. **Salvage.** (Designed 2026-10-21; being built.)
+5. **Salvage.** (Done 2026-10-21.)
 
 Each mission ships with:
 - its own pacing bot run inside `npm run simulate`, with the same act targets: Act II 45–60m, Act III 2–2.5h, Act IV around 3h, terminus 4–5h;

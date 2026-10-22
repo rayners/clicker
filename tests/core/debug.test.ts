@@ -7,6 +7,7 @@ import { depth } from '../../src/mission/extraction/progress';
 import { progress } from '../../src/mission/terraform/economy';
 import { progress as securityProgress } from '../../src/mission/security/economy';
 import { held } from '../../src/shared/ground';
+import { progress as salvageProgress, shoringHold, holdNeeded } from '../../src/mission/salvage/economy';
 import { isSpecialProjectsUnlocked } from '../../src/mission/organism/containment';
 
 const base = () => createGame(1, 0);
@@ -57,6 +58,22 @@ describe('debug scenarios', () => {
     const g = applyScenario(base(), 'haulage');
     expect(g.mission.scenario).toBe('haulage');
     expect(g.mission.elapsed).toBe(0);
+  });
+
+  it('starts a fresh salvage contract', () => {
+    const g = applyScenario(base(), 'salvage');
+    expect(g.mission.scenario).toBe('salvage');
+    expect(g.mission.elapsed).toBe(0);
+  });
+
+  it('jumps a salvage contract into act 2 with the forward compartments open and braced', () => {
+    const m = applyScenario(base(), 'sal-act2').mission as MissionOf<'salvage', 'organism'>;
+    expect(m.scenario).toBe('salvage');
+    expect(m.act).toBe(2);
+    expect(salvageProgress(m)).toBeGreaterThanOrEqual(1000);
+    expect(held(m.ground)).toBeGreaterThan(4);
+    expect(shoringHold(m)).toBeGreaterThanOrEqual(holdNeeded(m));
+    expect(Object.values(m.cutters).some((n) => n > 0)).toBe(true);
   });
 
   it('jumps a haulage contract into act 2 with a train under way', () => {

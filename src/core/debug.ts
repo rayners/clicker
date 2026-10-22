@@ -2,13 +2,14 @@ import { GENERATORS } from '../data/extraction/generators';
 import { PROCESSORS, REACTORS } from '../data/terraform/systems';
 import { FABRICATORS, SECTIONS, TROOPERS } from '../data/security/systems';
 import { CARS, ENGINES } from '../data/haulage/systems';
+import { COMPARTMENTS, CUTTERS, SHORING } from '../data/salvage/systems';
 import { createMission } from '../mission/state';
 import { missionConfigFor } from './prestige';
 import type { MissionOf, MissionState } from '../mission/state';
 import type { GameState } from './game';
 
 /** Developer shortcuts (?debug=act3 etc.) for testing pacing and theming without hours of play. */
-export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus', 'terraform', 'tf-act2', 'security', 'sec-act2', 'haulage', 'haul-act2', 'overland'] as const;
+export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus', 'terraform', 'tf-act2', 'security', 'sec-act2', 'haulage', 'haul-act2', 'overland', 'salvage', 'sal-act2'] as const;
 
 const owned = (upTo: number, count: number) =>
   Object.fromEntries(GENERATORS.map((g, i) => [g.id, i < upTo ? count : 0]));
@@ -97,12 +98,32 @@ const HAULAGE_PATCHES: Record<string, Partial<MissionOf<'haulage', 'organism'>>>
   },
 };
 
+const OPENED = 7;
+const SALVAGE_PATCHES: Record<string, Partial<MissionOf<'salvage', 'organism'>>> = {
+  salvage: {},
+  'sal-act2': {
+    act: 2,
+    recovered: 3e6,
+    lifetimeCredits: 3e6,
+    credits: 5e4,
+    deepest: OPENED,
+    ground: COMPARTMENTS.map((_, i) => ({ control: i < OPENED ? 1 : 0, garrison: 0, secured: i < OPENED })),
+    cutters: Object.fromEntries(CUTTERS.map((c, i) => [c.id, i === 0 ? 40 : i === 1 ? 30 : i === 2 ? 10 : 0])),
+    shoring: Object.fromEntries(SHORING.map((x, i) => [x.id, i === 0 ? 30 : i === 1 ? 20 : i === 2 ? 14 : 0])),
+  },
+};
+
 export function applyScenario(game: GameState, name: string): GameState {
   if (name === 'overland') return { ...game, assigning: false, mission: createMission(missionConfigFor(game.profile, 'overland'), game.mission.seed) };
   const haulage = HAULAGE_PATCHES[name];
   if (haulage) {
     const fresh = createMission(missionConfigFor(game.profile, 'haulage'), game.mission.seed);
     return { ...game, assigning: false, mission: { ...fresh, ...haulage } as MissionState };
+  }
+  const salvage = SALVAGE_PATCHES[name];
+  if (salvage) {
+    const fresh = createMission(missionConfigFor(game.profile, 'salvage'), game.mission.seed);
+    return { ...game, assigning: false, mission: { ...fresh, ...salvage } as MissionState };
   }
   const terraform = TERRAFORM_PATCHES[name];
   if (terraform) {

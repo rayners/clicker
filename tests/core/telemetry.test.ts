@@ -77,6 +77,15 @@ describe('DEEP CONTRACT play events', () => {
     ]);
   });
 
+  it('reports each compartment opened on a salvage contract, and the breaches so far', () => {
+    const g = reduce(newGame(1, 0), { type: 'chooseAssignment', scenario: 'salvage', seed: 1 });
+    const before = withMission(g, { elapsed: 600 } as never);
+    const after = withMission(before, { deepest: 1, breaches: 2 } as never);
+    expect(contractEvents(before, after)).toEqual([
+      { name: 'compartment_opened', props: { compartment: 'airlock', compartments: 1, breaches: 2, minutes: 10, horror: 'organism', cycle: 0 } },
+    ]);
+  });
+
   it('names the depot on the overland road', () => {
     const g = reduce(newGame(1, 0), { type: 'chooseAssignment', scenario: 'overland', seed: 1 });
     const after = withMission(g, { leg: 1, onTime: 0 } as never);
