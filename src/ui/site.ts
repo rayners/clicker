@@ -27,18 +27,32 @@ export function createSite(spec: SiteSpec): { el: HTMLElement; render(m: { groun
     );
     return { el, fill, state };
   });
-  const el = h('section', { class: 'site', 'aria-label': spec.label }, h('ol', { class: 'site-list' }, ...rows.map((r) => r.el)));
+  // On a phone only the rows that matter show; these count the rest (hidden on wider screens, where every row fits).
+  const moreHeld = h('p', { class: 'site-more' });
+  const moreAhead = h('p', { class: 'site-more' });
+  const el = h('section', { class: 'site', 'aria-label': spec.label }, moreHeld, h('ol', { class: 'site-list' }, ...rows.map((r) => r.el)), moreAhead);
 
   function render(m: { ground: SectionState[] }, frontierWord = words.frontier) {
     const line = frontier(m.ground);
+    let farHeld = 0;
+    let farAhead = 0;
     rows.forEach((r, i) => {
       const s = m.ground[i]!;
       const kind: SectorState = s.secured ? (s.control < 1 ? 'contested' : 'secured') : i === line ? 'frontier' : 'lost';
+      // Near: anything slipping, the last section held, the push itself and the one after it.
+      const near = kind === 'contested' || i === line - 1 || i === line || i === line + 1;
+      setAttr(r.el, 'data-far', String(!near));
+      if (!near && i < line) farHeld += 1;
+      if (!near && i > line) farAhead += 1;
       setAttr(r.el, 'data-state', kind);
       r.fill.style.width = `${Math.round(s.control * 100)}%`;
       const word = kind === 'frontier' ? frontierWord : words[kind];
       setText(r.state, kind === 'lost' ? (i > line ? '' : words.lost) : `${word} ${Math.floor(s.control * 100)}%`);
     });
+    setText(moreHeld, farHeld > 0 ? `${farHeld} MORE ${words.secured}` : '');
+    moreHeld.hidden = farHeld === 0;
+    setText(moreAhead, farAhead > 0 ? `${farAhead} MORE ${words.lost}` : '');
+    moreAhead.hidden = farAhead === 0;
   }
 
   return { el, render };

@@ -114,6 +114,11 @@ const SALVAGE_PATCHES: Record<string, Partial<MissionOf<'salvage', 'organism'>>>
 };
 
 export function applyScenario(game: GameState, name: string): GameState {
+  const jumped = jump(game, name);
+  return jumped === game ? game : { ...jumped, mode: 'mission' };
+}
+
+function jump(game: GameState, name: string): GameState {
   if (name === 'overland') return { ...game, assigning: false, mission: createMission(missionConfigFor(game.profile, 'overland'), game.mission.seed) };
   const haulage = HAULAGE_PATCHES[name];
   if (haulage) {

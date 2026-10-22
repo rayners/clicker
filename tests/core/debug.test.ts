@@ -150,4 +150,10 @@ describe('debug extras', () => {
     expect(applyScenario(onSalvage, 'act3').mission.scenario).toBe('extraction');
     expect(applyScenario(onSalvage, 'act3').mission.act).toBe(3);
   });
+
+  it('lands on the contract even from a horror tier', () => {
+    const hunting = { ...base(), mode: 'hunter' as const };
+    expect(applyScenario(hunting, 'salvage').mode).toBe('mission');
+    expect(applyScenario(hunting, 'act2').mode).toBe('mission');
+  });
 });

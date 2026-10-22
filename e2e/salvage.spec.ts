@@ -17,3 +17,17 @@ test('salvage: cut the bow airlock open by hand, then turn the torch up', async 
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   }
 });
+
+for (const [name, size] of [
+  ['upright', { width: 390, height: 664 }],
+  ['on its side', { width: 844, height: 390 }],
+] as const) {
+  test(`salvage on a phone ${name}: a long compartment column still leaves the tabs readable`, async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'phone layout');
+    await page.setViewportSize(size);
+    await page.goto('/contract/?debug=sal-act2');
+    await page.getByRole('tab', { name: /sys/i }).click();
+    await expect(page.getByRole('button', { name: /fit bracing frame/i })).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+  });
+}

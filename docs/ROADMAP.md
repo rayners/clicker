@@ -68,6 +68,11 @@ In order. Each item has its design written down first, so nothing lives only in 
 - **New missions (approved 2026-10-20):** security detachment, haulage and salvage for DEEP CONTRACT, and the Keep for Elderdark, with a shared held-ground engine. The design and build order are in `docs/MISSIONS.md`.
   - **Built:** held ground, the security detachment, the Keep, haulage and salvage. Nothing is left from the missions plan.
 
+- (Done 2026-10-22, from the user's iPhone playtest of salvage) **Phone layout fixes:**
+  - On a phone, the sector and compartment columns show only the rows that matter (slipping ones, the last held, the push and the next), with counts of the rest.
+  - The status area is capped (half the screen, or 42% on short Safari screens), so the tab below always has room. The chrome tightens on short upright screens.
+  - The desktop layout needs 500px of height, and a phone held sideways gets a two-column layout (status | tab) in all four games.
+  - New e2e checks cover salvage upright and sideways, plus a sideways check for every game.
 - **Real-device pass on iPhone Safari**, both in-browser and installed to the home screen (offline, audio unlock, safe areas, storage persistence).
 - (Done 2026-10-21) Debug extras for DEEP CONTRACT, dev builds only: `?speed=N` (1–100× clock), `?grant=N` (credits on load) and `?flags` (an overlay with the act, flags and latest beats). The act jumps now switch to an extraction contract first.
 - Run WebKit e2e once host dependencies are installed.

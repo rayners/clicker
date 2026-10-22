@@ -110,4 +110,18 @@ describe('a salvage contract on screen', () => {
     await user.click(screen.getByRole('button', { name: new RegExp(first.name, 'i') }));
     expect(mission().upgrades).toContain(first.id);
   });
+
+  it('keeps the compartment column short on a phone: the rooms that matter, and a count of the rest', () => {
+    setup({ ground: openTo(7).map((s, i) => (i === 2 ? { ...s, control: 0.6 } : s)) });
+    const items = hull().getAllByRole('listitem');
+    const near = items.filter((li) => li.dataset.far !== 'true').map((li) => li.textContent);
+    expect(near).toEqual([
+      expect.stringMatching(/CREW QUARTERS.*BUCKLING/),
+      expect.stringMatching(/CRYO BAY B.*OPEN/),
+      expect.stringMatching(/CRYO BAY C.*CUTTING/),
+      expect.stringMatching(/MACHINE SHOP/),
+    ]);
+    expect(hull().getByText('5 MORE OPEN')).toBeTruthy();
+    expect(hull().getByText('5 MORE SHUT')).toBeTruthy();
+  });
 });

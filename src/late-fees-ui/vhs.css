@@ -1014,7 +1014,7 @@ button:disabled {
 
 /* ---------- phone: keep the bar on one line and the log in view ---------- */
 
-@media (max-width: 899px) {
+@media (max-width: 899px), (max-height: 499px) {
   .osd {
     font-size: 1em;
     gap: 6px;
@@ -1041,7 +1041,7 @@ button:disabled {
 
 /* ---------- desktop: three columns ---------- */
 
-@media (min-width: 900px) {
+@media (min-width: 900px) and (min-height: 500px) {
   .vhs-shell {
     grid-template-columns: 320px minmax(0, 1fr) minmax(360px, 440px);
     grid-template-rows: auto auto minmax(0, 1fr) auto;
@@ -1261,7 +1261,7 @@ button:disabled {
   font-size: 0.9em;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 900px) and (min-height: 500px) {
   .cut-body {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -1277,4 +1277,33 @@ button:disabled {
 .shelf-side-b {
   color: var(--rec);
   text-shadow: 0 0 8px rgba(255, 50, 70, 0.6);
+}
+
+/* ---------- a phone on its side: too short for one column, too short for three ---------- */
+
+@media (orientation: landscape) and (max-height: 499px) {
+  .vhs-shell {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'osd osd'
+      'status main'
+      'action tabs';
+  }
+
+  .vhs-shell .status {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .vhs-shell .osd {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .vhs-shell .whistle-bay {
+    padding-top: 4px;
+    padding-bottom: max(4px, env(safe-area-inset-bottom));
+  }
 }
