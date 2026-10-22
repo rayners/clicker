@@ -47,13 +47,13 @@ Requested 2026-10-19. Tracked in `docs/forest/DESIGN.md`. A playable first slice
 In order. Each item has its design written down first, so nothing lives only in a conversation.
 
 1. **(Done 2026-10-21.) LATE FEES: the Candy Corn Day tape.** A Grayhaven State Hospital venue and the killer Patient 10-30, with their crossovers, sequels and Killer's Cut entry. Design: `docs/late-fees/DESIGN.md` §3.
-2. **(Built 2026-10-21; kept off the picker until it is named.) A fourth game: the deep-water monster game** (working title FATHOM). Sharks, squid and octopus on the coast; deeper water and bigger things; then kaiju from a breach in the trench, and mechs to fight them. Design: `docs/kaiju/DESIGN.md`.
+2. **(Built 2026-10-21.) A fourth game: DOWN THERE**, the deep-water monster game (working title FATHOM in code). Sharks, squid and octopus on the coast; deeper water and bigger things; then kaiju from a breach in the trench, and mechs to fight them. Design: `docs/kaiju/DESIGN.md`.
 3. **(Done 2026-10-21.) DEEP CONTRACT: salvage**, the last of the four approved missions (`docs/MISSIONS.md` §5).
 
 4. **The kaiju game's remainder** (`docs/kaiju/DESIGN.md`):
-   - a name from the user (FATHOM is a working title), then its picker door;
+   - (done 2026-10-21) the name, DOWN THERE, and its picker door at `/down-there/`;
    - (done 2026-10-21) pilots' link rating and fatigue;
-   - its play-as-the-kaiju horror tier, on the shared hunt engine (`docs/HORROR-TIER.md`).
+   - its play-as-the-horror tier, the Source, on the shared hunt engine (`docs/HORROR-TIER.md`): simulation built 2026-10-21, the screen next.
 5. **Then the backlog below**, in order: the Keep's sappers and haulage's tiring crew watches (the two leftovers from the missions), then the hunter and dragon horror tiers and Legend.
 
 ## Backlog / ideas

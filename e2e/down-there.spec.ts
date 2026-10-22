@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-test('fathom: sell passes, put umbrellas on the beach and open more of it, and keep it across a reload', async ({ page, isMobile }) => {
-  await page.goto('/fathom/');
+test('down there: sell passes, put umbrellas on the beach and open more of it, and keep it across a reload', async ({ page, isMobile }) => {
+  await page.goto('/down-there/');
   await page.evaluate(() => localStorage.removeItem('fathom.save'));
   await page.reload();
-  await expect(page).toHaveTitle(/FATHOM/);
+  await expect(page).toHaveTitle(/DOWN THERE/);
   const pass = page.getByRole('button', { name: /sell a beach pass/i });
   for (let i = 0; i < 20; i++) await pass.click();
   await page.getByRole('tab', { name: /beach/i }).click();

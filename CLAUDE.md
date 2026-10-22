@@ -1,12 +1,12 @@
-# DEEP CONTRACT, CHARTER OF THE ELDERDARK and LATE FEES — working notes for Claude
+# DEEP CONTRACT, CHARTER OF THE ELDERDARK, LATE FEES and DOWN THERE — working notes for Claude
 
-Three games in one repo, sharing an engine (`src/shared/`). Vite + TypeScript, no UI framework. DEEP CONTRACT is an intentional homage to the *Alien* films (names stay our own). The root page (`index.html`, `src/picker/`) is a game picker that only links to the games and imports nothing but `src/shared/`.
+Four games in one repo, sharing an engine (`src/shared/`). Vite + TypeScript, no UI framework. DEEP CONTRACT is an intentional homage to the *Alien* films (names stay our own). The root page (`index.html`, `src/picker/`) is a game picker that only links to the games and imports nothing but `src/shared/`.
 - **DEEP CONTRACT** (`/contract/`, `contract/index.html`, `src/main.ts`): retro-futurist idle clicker (Alien-flavoured, original IP) with a slow-burn horror turn.
 - **CHARTER OF THE ELDERDARK** (`/forest/`, `src/forest-main.ts`): dark-fantasy company management in a corrupting forest (Symbaroum-flavoured, original IP). Design and status are in `docs/forest/DESIGN.md`. Code lives in `src/forest/` (pure simulation, same rules as missions), `src/forest-data/` and `src/forest-ui/` (ledger UI, `ledger.css`). It has its own save key (`elderdark.save`).
 - **LATE FEES** (`/late-fees/`, `src/late-fees-main.ts`): modern-day slasher homages on a video store shelf (VHS look). Venues × killers, the counterpart of scenario × horror: `src/late-fees/` (pure simulation; venues `camp/`, `clinic/`, `insurer/` and `asylum/`, killers `drowned/`, `burned/`, `design/` and `patient/`, the shared film arc in `story.ts`, sequels in `sequels.ts`), `src/late-fees-data/`, `src/late-fees-ui/` (`vhs.css`). Its save key is `latefees.save`. Design and status are in `docs/late-fees/DESIGN.md`.
-- **FATHOM** (working title; `/fathom/`, `src/fathom-main.ts`): the deep-water monster game, from sharks off a resort beach down to kaiju from a breach in the trench. `src/fathom/` holds the pure simulation (zones `shallows`, `shelf`, `open-water`, `trench`, `breach`, with seasons for prestige), plus `src/fathom-data/` and `src/fathom-ui/` (`sonar.css`). Save key `fathom.save`. Design and status: `docs/kaiju/DESIGN.md`. It is not on the picker until it is named.
+- **DOWN THERE** (`/down-there/`, `src/fathom-main.ts`; the code keeps its working title FATHOM): the deep-water monster game, from sharks off a resort beach down to kaiju from a breach in the trench. `src/fathom/` holds the pure simulation (zones `shallows`, `shelf`, `open-water`, `trench`, `breach`, with seasons for prestige), plus `src/fathom-data/` and `src/fathom-ui/` (`sonar.css`). Save key `fathom.save`. Design and status: `docs/kaiju/DESIGN.md`. Its play-as-the-horror tier is the Source (`src/fathom/deep.ts`).
 - **Boundaries** (`tests/architecture.test.ts`): `src/shared/` imports nothing from either game, no game imports another (LATE FEES included), and the picker imports only shared code.
-- **One service worker** at the site root serves every page; each page registers it, and each game ships its own manifest from `public/contract/`, `public/forest/` or `public/late-fees/` so it installs as its own app.
+- **One service worker** at the site root serves every page; each page registers it, and each game ships its own manifest from `public/contract/`, `public/forest/`, `public/late-fees/` or `public/down-there/` so it installs as its own app.
 
 Read before changing things:
 - `docs/DESIGN.md`: premise, economy, the five acts and their pacing targets, prestige, UI/art direction.
@@ -15,7 +15,7 @@ Read before changing things:
 - `docs/ROADMAP.md`: what's built, deliberate deviations from the original plan, and the backlog.
 - `docs/late-fees/DESIGN.md`: the third game, LATE FEES (modern-day slasher homages, VHS look, venues × killers, sequels). All three tapes, the six crossovers and the Killer's Cut (play as the killer, on the shared hunt engine `src/shared/hunt.ts`) are built.
 - `docs/HORROR-TIER.md`: the planned play-as-the-horror tier in every game (a shared hunt engine: first-tier runs defended by their bots, the player as the horror). Approved; the engine, LATE FEES's Killer's Cut and Elderdark's wood are built, and DEEP CONTRACT's creature is next.
-- `docs/kaiju/DESIGN.md`: the planned fourth game (working title FATHOM): deep water to kaiju, sharks on the coast down to mechs at the breach. Approved 2026-10-21. The roadmap's build queue puts it after LATE FEES's Candy Corn Day tape and before salvage.
+- `docs/kaiju/DESIGN.md`: the fourth game, DOWN THERE (named by the user 2026-10-21; working title FATHOM in code): deep water to kaiju, sharks on the coast down to mechs at the breach.
 - `docs/MISSIONS.md`: the approved new missions (security detachment, haulage, salvage, the Keep), the shared held-ground engine, and the build order.
 - `docs/TELEMETRY.md`: anonymous PostHog analytics (published site only, opt-out, events derived from state diffs). Add an event there when a new milestone matters for pacing.
 

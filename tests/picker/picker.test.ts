@@ -5,6 +5,7 @@ import { GAMES, mountPicker } from '../../src/picker/picker';
 import { SAVE_KEY } from '../../src/core/save';
 import { FOREST_SAVE_KEY } from '../../src/forest/save';
 import { LATE_SAVE_KEY } from '../../src/late-fees/save';
+import { FATHOM_SAVE_KEY } from '../../src/fathom/save';
 
 const mount = () => {
   document.body.innerHTML = '<div id="app"></div>';
@@ -15,11 +16,12 @@ const link = (name: RegExp) => screen.getByRole('link', { name }) as HTMLAnchorE
 beforeEach(() => localStorage.clear());
 
 describe('the game picker', () => {
-  it('offers both games, each linking to its own page', () => {
+  it('offers every game, each linking to its own page', () => {
     mount();
     expect(link(/deep contract/i).getAttribute('href')).toBe('./contract/');
     expect(link(/elderdark/i).getAttribute('href')).toBe('./forest/');
     expect(link(/late fees/i).getAttribute('href')).toBe('./late-fees/');
+    expect(link(/down there/i).getAttribute('href')).toBe('./down-there/');
   });
 
   it('invites a new player to begin each game', () => {
@@ -36,7 +38,7 @@ describe('the game picker', () => {
   });
 
   it("knows each game's save key without importing the games", () => {
-    expect(GAMES.map((g) => g.saveKey).sort()).toEqual([SAVE_KEY, FOREST_SAVE_KEY, LATE_SAVE_KEY].sort());
+    expect(GAMES.map((g) => g.saveKey).sort()).toEqual([SAVE_KEY, FOREST_SAVE_KEY, LATE_SAVE_KEY, FATHOM_SAVE_KEY].sort());
   });
 
   it('still works when storage cannot be read', () => {

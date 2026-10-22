@@ -1,4 +1,4 @@
-/* The front page: three doors, each drawn in its own game's hand, meeting on slanted seams. */
+/* The front page: four doors, each drawn in its own game's hand, meeting on slanted seams. */
 
 :root {
   --bg: #0b0a07;
@@ -26,6 +26,12 @@
   --neon: #ff2bd6;
   --cyan: #2bf0ff;
   --font-neon: 'Monoton', 'VT323', sans-serif;
+
+  --sea-bg: #03121a;
+  --sea-ink: #d2f6fa;
+  --sea-dim: #6fa9b4;
+  --sonar: #34d6d6;
+  --ping: #ffc440;
 
   color-scheme: dark;
 }
@@ -319,7 +325,10 @@ body {
 .door-latefees {
   margin-top: calc(-1 * var(--slant));
   padding-top: calc(28px + var(--slant));
-  padding-bottom: calc(28px + env(safe-area-inset-bottom) + 2.5rem);
+  padding-bottom: calc(28px + var(--slant) + 2.5rem);
+  /* Above the sea, so its slanted foot shows the water beneath. */
+  z-index: 1;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--slant)), 0 100%);
   color: var(--vhs-ink);
   font-family: var(--font-term);
   font-size: 1.2rem;
@@ -407,11 +416,65 @@ body {
   text-shadow: none;
 }
 
+/* ---------- DOWN THERE: the sonar ---------- */
+
+.door-downthere {
+  margin-top: calc(-1 * var(--slant));
+  padding-top: calc(28px + var(--slant));
+  /* Room for the footer note, which sits over the last door. */
+  padding-bottom: calc(28px + env(safe-area-inset-bottom) + 3.5rem);
+  color: var(--sea-ink);
+  font-family: var(--font-term);
+  font-size: 1.2rem;
+  background:
+    /* Sonar rings spreading from the seam far below. */
+    repeating-radial-gradient(circle at 50% 120%, transparent 0 46px, rgba(52, 214, 214, 0.09) 46px 48px),
+    linear-gradient(to bottom, rgba(6, 35, 48, 0.4), #010a0f),
+    var(--sea-bg);
+}
+
+.door-downthere .door-overline {
+  font-size: 0.85em;
+  letter-spacing: 0.2em;
+  color: var(--sea-dim);
+}
+
+.door-downthere .door-icon {
+  filter: drop-shadow(0 0 10px rgba(52, 214, 214, 0.5));
+}
+
+.door-downthere .door-title {
+  font-family: var(--font-corp);
+  font-size: clamp(1.8rem, 8vw, 2.6rem);
+  letter-spacing: 0.12em;
+  color: var(--sonar);
+  text-shadow: 0 0 14px rgba(52, 214, 214, 0.45);
+}
+
+.door-downthere .door-motto {
+  font-size: 0.85em;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ping);
+}
+
+.door-downthere .door-cta {
+  border: 1px solid var(--sonar);
+  letter-spacing: 0.14em;
+  color: var(--sonar);
+}
+
+.door-downthere:hover .door-cta,
+.door-downthere:focus-visible .door-cta {
+  background: var(--sonar);
+  color: var(--sea-bg);
+}
+
 /* ---------- desktop: side by side, the seams diagonals ---------- */
 
 @media (min-width: 900px) {
   :root {
-    --slant: 9vw;
+    --slant: 6vw;
   }
 
   .picker {
@@ -419,7 +482,17 @@ body {
   }
 
   .door {
+    min-width: 0;
     min-height: 100dvh;
+  }
+
+  /* Four doors to a row: the titles come down a size so none spills past its seam. */
+  .picker .door-title {
+    font-size: clamp(1.2rem, 2.1vw, 2.4rem);
+  }
+
+  .door-inner {
+    max-width: 100%;
   }
 
   .door-contract {
@@ -435,6 +508,13 @@ body {
   }
 
   .door-latefees {
+    margin-top: 0;
+    margin-left: calc(-1 * var(--slant));
+    padding: 40px calc(40px + var(--slant)) calc(40px + 2.5rem) calc(40px + var(--slant));
+    clip-path: polygon(0 0, 100% 0, calc(100% - var(--slant)) 100%, 0 100%);
+  }
+
+  .door-downthere {
     margin-top: 0;
     margin-left: calc(-1 * var(--slant));
     padding: 40px 40px calc(40px + 2.5rem) calc(40px + var(--slant));

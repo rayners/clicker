@@ -1,4 +1,6 @@
-# FATHOM (working title) — design
+# DOWN THERE — design
+
+Named by the user on 2026-10-21 ("something like Down There"). The code, the save key (`fathom.save`) and the telemetry `game` property keep the working title FATHOM, so nothing saved or charted changes.
 
 The fourth game in the repo, beside DEEP CONTRACT (sci-fi), CHARTER OF THE ELDERDARK (fantasy) and LATE FEES (slashers). It is a monster-movie idle and management game. It was requested on 2026-10-21.
 
@@ -70,7 +72,7 @@ Play **the kaiju**, using the shared hunt engine (`src/shared/hunt.ts`). Several
 
 - It follows Elderdark and LATE FEES. `src/fathom/` holds the pure simulation (no DOM, clock or `Math.random()`), `src/fathom-data/` the content, and `src/fathom-ui/` the shell. It has its own page, save key, manifest and picker door.
 - The architecture test gains a `fathom` area that may import only `src/shared/`.
-- The final name is to be decided with the user before the page and save key are fixed. FATHOM is a placeholder.
+- **The name** is DOWN THERE. The page lives at `/down-there/` and has its picker door.
 
 ## Build order (each step test-first)
 
@@ -91,12 +93,12 @@ Play **the kaiju**, using the shared hunt engine (`src/shared/hunt.ts`). Several
   - **Zones feed each other:** escaped specimens add pressure on the beach until they swim off.
   - **Deviation:** walls and Bulwarks hold the coast like garrisons, and spare force retakes fallen cities. Pilots are paired two per Bulwark.
   - **The link (built 2026-10-21):** every pilot draws a temperament (0–1) from the season's seed when hired. The station pairs the closest temperaments first, and a pair's link is 1 − 2 × the gap between them (never below 30%). A Bulwark holds its 50,000 times its pair's link, and the best pairs take the cockpits. The corps tires while most pairs are crewed (with every pair in a cockpit, empty to exhausted in 30 minutes) and rests while pairs sit in reserve (exhausted to fresh in 10 minutes with nobody crewed); exhaustion halves what the Bulwarks hold. More pilots buy both better pairings and rotation, which is the pilots-against-fatigue dial. Save v2 gives older pilots one shared temperament, so they link perfectly.
-- **Built (screen, 2026-10-21):** a sonar console at `/fathom/`.
-  - **Code:** `src/fathom-ui/`, with `sonar.css` (cyan on deep teal, switching to a red and yellow alarm palette in act 4), `fathom/index.html`, `src/fathom-main.ts`, `public/fathom/` (manifest and fin icon).
+- **Built (screen, 2026-10-21):** a sonar console, now at `/down-there/`.
+  - **Code:** `src/fathom-ui/`, with `sonar.css` (cyan on deep teal, switching to a red and yellow alarm palette in act 4), `down-there/index.html`, `src/fathom-main.ts`, `public/down-there/` (manifest and fin icon).
   - **Telemetry:** `zone_reached`, `act_reached`, `landfall`, `season_completed`.
   - **Not yet on the picker:** it gets a door once it has a name.
 
 ## Open questions (for the user, before building)
 
-1. **The name.** Candidates: FATHOM, DEEP WATER, BREACHWATER, CRUSH DEPTH.
+1. **The name** (done): DOWN THERE.
 2. **One continuous outfit across all five zones, or a run per zone?** The design assumes one continuous run per season.

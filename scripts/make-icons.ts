@@ -44,9 +44,9 @@ for (const [file, size] of [
   console.log(`wrote public/late-fees/icons/${file}`);
 }
 
-// FATHOM: a fin breaking a sonar ring, cyan on deep teal.
+// DOWN THERE: a fin breaking a sonar ring, cyan on deep teal.
 const FATHOM_PALETTE = { a: [8, 52, 66], b: [52, 214, 214], c: [210, 246, 250], d: [120, 200, 220], e: [255, 196, 64] };
-mkdirSync('public/fathom/icons', { recursive: true });
+mkdirSync('public/down-there/icons', { recursive: true });
 for (const [file, size] of [
   ['icon-192.png', 192],
   ['icon-512.png', 512],
@@ -54,6 +54,6 @@ for (const [file, size] of [
   ['favicon-32.png', 32],
 ] as const) {
   const { width, height, rgba } = renderSpriteIcon(FATHOM_SPRITES.fin!, FATHOM_PALETTE, [3, 18, 26], size);
-  writeFileSync(`public/fathom/icons/${file}`, encodePng(width, height, rgba));
-  console.log(`wrote public/fathom/icons/${file}`);
+  writeFileSync(`public/down-there/icons/${file}`, encodePng(width, height, rgba));
+  console.log(`wrote public/down-there/icons/${file}`);
 }

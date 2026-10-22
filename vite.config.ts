@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       // The picker at the root; DEEP CONTRACT, CHARTER OF THE ELDERDARK, LATE FEES and the deep-water game each under their own path.
-      input: { picker: 'index.html', contract: 'contract/index.html', forest: 'forest/index.html', lateFees: 'late-fees/index.html', fathom: 'fathom/index.html' },
+      input: { picker: 'index.html', contract: 'contract/index.html', forest: 'forest/index.html', lateFees: 'late-fees/index.html', downThere: 'down-there/index.html' },
     },
   },
   plugins: [
@@ -23,7 +23,7 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         // Each game has its own page; never answer its navigations with the picker.
-        navigateFallbackDenylist: [/\/contract\//, /\/forest\//, /\/late-fees\//, /\/fathom\//],
+        navigateFallbackDenylist: [/\/contract\//, /\/forest\//, /\/late-fees\//, /\/down-there\//],
       },
     }),
   ],

@@ -1,7 +1,7 @@
 import { h } from '../shared/ui/dom';
 
 export interface GameDoor {
-  id: 'contract' | 'elderdark' | 'latefees';
+  id: 'contract' | 'elderdark' | 'latefees' | 'downthere';
   href: string;
   /** The game's localStorage save key (kept in step with the games by a test; the picker never imports them). */
   saveKey: string;
@@ -51,6 +51,18 @@ export const GAMES: GameDoor[] = [
     begin: 'PRESS PLAY',
     resume: 'RESUME TAPE',
   },
+  {
+    id: 'downthere',
+    href: './down-there/',
+    saveKey: 'fathom.save',
+    icon: './down-there/icons/icon-192.png',
+    overline: 'HARROW POINT MARINE SAFETY · SONAR',
+    title: 'DOWN THERE',
+    blurb: 'Keep a resort beach open through a season of sharks. Then the squid, the lab on the shelf, the station in the trench, and whatever comes up through the seam at the bottom.',
+    motto: 'The deeper you look, the bigger it gets.',
+    begin: 'OPEN THE BEACH',
+    resume: 'BACK IN THE WATER',
+  },
 ];
 
 function hasSave(storage: Storage, key: string): boolean {
@@ -85,7 +97,7 @@ export function mountPicker(root: HTMLElement, storage: Storage): void {
       { class: 'picker' },
       h('h1', { class: 'visually-hidden' }, 'Choose a game'),
       ...doors,
-      h('p', { class: 'picker-foot' }, 'All three run in your browser and save on this device. Add one to your home screen to play offline.'),
+      h('p', { class: 'picker-foot' }, 'All four run in your browser and save on this device. Add one to your home screen to play offline.'),
     ),
   );
 }
