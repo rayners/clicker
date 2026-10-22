@@ -63,7 +63,7 @@ In order. Each item has its design written down first, so nothing lives only in 
   - Elderdark: a dragon, hungry forest spirits, the wood itself.
   - LATE FEES: the killers (`docs/late-fees/DESIGN.md` §7).
   - Designed together in `docs/HORROR-TIER.md` (2026-10-20): a shared hunt engine where first-tier runs play themselves, defended by their bots, and the player is the horror.
-  - **Built:** the Killer's Cut, the wood, the creature and DOWN THERE's Source. **Left:** the hunter, the dragon and Legend.
+  - **Built:** the Killer's Cut, the wood, the creature, DOWN THERE's Source and the hunter. **Left:** the dragon and Legend.
 
 - **New missions (approved 2026-10-20):** security detachment, haulage and salvage for DEEP CONTRACT, and the Keep for Elderdark, with a shared held-ground engine. The design and build order are in `docs/MISSIONS.md`.
   - **Built:** held ground, the security detachment, the Keep, haulage and salvage. Nothing is left from the missions plan.

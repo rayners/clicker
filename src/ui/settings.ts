@@ -23,6 +23,8 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
   const close = h('button', { class: 'cfg-close', type: 'button', 'aria-label': 'Close' }, 'X');
   // Play as the creature (docs/HORROR-TIER.md).
   const specialOrder = h('button', { class: 'buy cfg-danger', type: 'button', 'aria-label': 'Accept Special Order 0-77' }, 'SPECIAL ORDER 0-77: ACCEPT');
+  // Play as the hunter: a second horror tier, beside the creature.
+  const theHunt = h('button', { class: 'buy cfg-danger', type: 'button', 'aria-label': 'Accept the hunt' }, 'THE HUNT: ACCEPT');
 
   const dialog = h(
     'div',
@@ -43,6 +45,7 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
       reassignButton,
       h('h3', { class: 'panel-subtitle' }, 'RESTRICTED'),
       specialOrder,
+      theHunt,
       h('h3', { class: 'panel-subtitle' }, 'DANGER'),
       resetButton,
     ),
@@ -138,7 +141,13 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
     show(false);
   });
 
+  theHunt.addEventListener('click', () => {
+    store.dispatch({ type: 'startHunter', seed: (Math.random() * 2 ** 31) | 0 });
+    show(false);
+  });
+
   function render(game: GameState) {
+    setText(theHunt, game.hunter ? 'THE HUNT: RESUME' : 'THE HUNT: ACCEPT');
     setText(specialOrder, game.creature ? 'SPECIAL ORDER 0-77: RESUME' : 'SPECIAL ORDER 0-77: ACCEPT');
     sound.checked = game.profile.settings.sound;
     motion.checked = game.profile.settings.reducedMotion;

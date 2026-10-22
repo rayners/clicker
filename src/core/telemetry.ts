@@ -13,8 +13,14 @@ export function contractProperties(game: GameState): TelemetryProps {
   return { game: 'deep-contract', scenario: m.scenario, horror: m.horror, act: m.act, cycle: game.profile.contractsCompleted };
 }
 
-/** Milestones between two successive states: contracts started, abandoned and completed, acts reached, and the creature's hunt. */
+/** Milestones between two successive states: contracts started, abandoned and completed, acts reached, and the creature's and the hunter's hunts. */
 export function contractEvents(prev: GameState, next: GameState): TelemetryEvent[] {
+  if (next.mode === 'hunter' && next.hunter) {
+    if (prev.mode !== 'hunter') return [{ name: 'hunter_started', props: {} }];
+    const h = next.hunter.hunt;
+    if (prev.hunter && h.beaten > prev.hunter.hunt.beaten) return [{ name: 'hunter_driven', props: { driven: h.beaten, harvest: Math.round(h.harvest) } }];
+    return [];
+  }
   if (next.mode === 'creature' && next.creature) {
     if (prev.mode !== 'creature') return [{ name: 'creature_started', props: {} }];
     const h = next.creature.hunt;

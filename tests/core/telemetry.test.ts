@@ -3,6 +3,7 @@ import { createGame, newGame, type GameState } from '../../src/core/game';
 import { reduce } from '../../src/core/store';
 import { contractEvents, contractProperties } from '../../src/core/telemetry';
 import { startCreature } from '../../src/core/creature';
+import { startHunter } from '../../src/core/hunter';
 
 const game = (patch: Partial<GameState> = {}): GameState => ({ ...createGame(1, 0), ...patch });
 const withMission = (g: GameState, patch: Partial<GameState['mission']>): GameState => ({ ...g, mission: { ...g.mission, ...patch } as GameState['mission'] });
@@ -99,6 +100,15 @@ describe('DEEP CONTRACT play events', () => {
     const vented = { ...hunting, creature: { ...hunting.creature!, hunt: { ...hunting.creature!.hunt, beaten: 1, harvest: 20 } } };
     expect(contractEvents(hunting, vented)).toEqual([{ name: 'creature_vented', props: { vented: 1, harvest: 20 } }]);
     expect(contractEvents(vented, reduce(vented, { type: 'tick', dt: 1 }))).toEqual([]);
+  });
+
+  it('reports the hunt accepted, and each time a crew drives the hunter off', () => {
+    const g = game();
+    const hunting = startHunter(g, 5);
+    expect(contractEvents(g, hunting)).toEqual([{ name: 'hunter_started', props: {} }]);
+    const driven = { ...hunting, hunter: { ...hunting.hunter!, hunt: { ...hunting.hunter!.hunt, beaten: 1, harvest: 30 } } };
+    expect(contractEvents(hunting, driven)).toEqual([{ name: 'hunter_driven', props: { driven: 1, harvest: 30 } }]);
+    expect(contractEvents(driven, reduce(driven, { type: 'tick', dt: 1 }))).toEqual([]);
   });
 
   it('describes the player for every event: game, contract and how far along', () => {

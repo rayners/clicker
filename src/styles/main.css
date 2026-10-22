@@ -1856,6 +1856,36 @@ button:focus-visible {
   display: none;
 }
 
+/* The hunter sees the crews through the cloak: the same shell, in thermal blue with the hot ones glowing. */
+.xeno[data-horror='hunter'] {
+  --heat-cold: #020a1a;
+  --heat-dim: #1d3f7a;
+  --heat: #2c8cff;
+  --heat-hot: #9fe7ff;
+  --heat-white: #f2fbff;
+  text-shadow: 0 0 6px rgba(44, 140, 255, 0.55);
+  background:
+    radial-gradient(ellipse at 50% 120%, rgba(44, 140, 255, 0.2), transparent 60%),
+    radial-gradient(circle at 15% 10%, rgba(255, 74, 28, 0.12), transparent 30%),
+    var(--heat-cold);
+}
+
+.xeno[data-horror='hunter']::after {
+  background: linear-gradient(180deg, transparent, rgba(44, 140, 255, 0.08), transparent);
+}
+
+.xeno[data-horror='hunter'] .xeno-ship,
+.xeno[data-horror='hunter'] .xeno-upgrade {
+  border-color: rgba(29, 63, 122, 0.7);
+  background: rgba(2, 10, 26, 0.85);
+}
+
+/* A crew it is stalking glows warm against the cold: the only heat it cares about. */
+.xeno[data-horror='hunter'] .xeno-ship[data-pushed='true'] {
+  border-color: #ff4a1c;
+  box-shadow: inset 0 0 18px rgba(255, 74, 28, 0.2), 0 0 10px rgba(255, 74, 28, 0.25);
+}
+
 .xeno-head {
   position: relative;
   z-index: 1;

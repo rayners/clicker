@@ -70,7 +70,7 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
   - Raiding a company's vault is the push; notoriety brings dragon-slayer charters.
   - Sleeping on the hoard is dormancy.
 
-### DEEP CONTRACT: the hunter (design, 2026-10-21)
+### DEEP CONTRACT: the hunter (built 2026-10-21)
 
 **What you are.** A hunter (a Predator homage, original IP) that comes for sport, not food. The prey are three contracts run by their WARDENs' bots: security, extraction and haulage.
 
@@ -95,6 +95,10 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
 - `src/core/hunter.ts`;
 - `src/data/hunter/`;
 - `src/ui/hunter.ts`, the same shell as the creature's, seen through the cloak in thermal blue.
+
+**As built.**
+- **Telemetry:** `hunter_started` and `hunter_driven`.
+- **Balance (bot):** 75 trophies in an hour, 193 in two and 355 in four, never driven off. A passive hunter takes nothing.
 
 ### The kaiju game (working title FATHOM): the Source
 
@@ -170,7 +174,8 @@ Added 2026-10-21 with the fourth game.
   - **Saves:** DEEP CONTRACT save v6 (`mode`, `creature`).
   - **Balance (bot):** 258 biomass in 2 hours and 424 in 4, with no vents. A passive creature takes nothing.
 - **Built (2026-10-21):** DOWN THERE's Source.
-- **Next:** the hunter (DEEP CONTRACT) and the dragon (Elderdark), then Legend (prestige across hunts).
+- **Built (2026-10-21):** DEEP CONTRACT's hunter.
+- **Next:** the dragon (Elderdark), then Legend (prestige across hunts).
 
 ## Build order
 

@@ -42,6 +42,8 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 | DEEP CONTRACT | `leg_completed` | station (or depot), legs, onTime (inside the window), minutes (haulage and overland contracts) |
 | DEEP CONTRACT | `creature_started` | (Special Order 0-77 accepted: playing as the creature) |
 | DEEP CONTRACT | `creature_vented` | vented (times a WARDEN vented its decks on the creature), harvest |
+| DEEP CONTRACT | `hunter_started` | (none): the player accepted the hunt |
+| DEEP CONTRACT | `hunter_driven` | driven (times a crew drove the hunter off), harvest |
 | Elderdark | `region_opened` | region, minutes (forest charters) |
 | Elderdark | `floor_secured` | floor, floors (how deep), minutes (Keep charters; each floor once, however often it is lost and retaken) |
 | Elderdark | `act_reached` | act, minutes |

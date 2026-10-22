@@ -50,3 +50,14 @@ test('accept Special Order 0-77 and stalk a contract as the creature', async ({ 
   await view.getByRole('button', { name: /return to the contract/i }).click();
   await expect(view).toBeHidden();
 });
+
+test('the hunt can be accepted from the configuration, and the hunter lets a crew see it', async ({ page }) => {
+  await page.getByRole('button', { name: /system configuration/i }).click();
+  await page.getByRole('button', { name: /accept the hunt/i }).click();
+  const hunt = page.getByRole('region', { name: /the hunt/i });
+  await expect(hunt).toBeVisible();
+  await hunt.getByRole('button', { name: /stalk .* closer/i }).first().click();
+  await expect(hunt.getByLabel('Strength free')).toHaveText('2 / 3');
+  await hunt.getByRole('button', { name: /return to the contract/i }).click();
+  await expect(hunt).toBeHidden();
+});
