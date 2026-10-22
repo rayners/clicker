@@ -1,5 +1,6 @@
 import type { GuideRules, GuideStep } from '../shared/guide';
 import type { ForestGame } from '../forest/game';
+import { TURN_THRESHOLD } from '../forest/company';
 
 /** Elderdark's walkthrough (docs/ROADMAP.md, item 6b): the Factor's levers in the order they matter, forest or Keep. */
 type Step = GuideStep<ForestGame>;
@@ -95,7 +96,7 @@ const SHARED_END: Step[] = [
   {
     id: 'blight',
     title: 'BLIGHT',
-    text: 'The wood comes home on the hands. High blight turns them; the Synod\'s penance, in the HALL, washes some of it away.',
+    text: `The wood comes home on the hands. Past ${TURN_THRESHOLD}% resting hands turn, and each one makes the wood more dangerous. Penance in the HALL lifts it; ? has the rest.`,
     target: '#tab-hall',
     show: (g) => charter(g) && g.company.blight >= 20,
     done: () => false,
@@ -106,6 +107,10 @@ export function forestGuideSteps(g: ForestGame): readonly Step[] {
   return [...SHARED_START, ...(g.company.site === 'keep' ? KEEP_STEPS : FOREST), ...SHARED_END];
 }
 
+/** What blight does, the same on either charter; only where the trips go differs. */
+const BLIGHT_RULE = (trips: string) =>
+  `The company's corruption, 0 to 100%, shown in the HALL. ${trips}; mystics in a party cut it, and relics waiting in the vault and fragments of the Key add a little every second. Past ${TURN_THRESHOLD}%, resting hands start to turn (garrisons twice as readily), faster the higher it climbs. A turned hand is gone from the roster and out there in the dark, and every one makes every region more dangerous. The chapel eases blight slowly; the Synod's penance, in the HALL, lifts a chunk for thalers.`;
+
 const RULES: Record<'forest' | 'keep', GuideRules> = {
   forest: {
     title: 'HOW THE CHARTER WORKS',
@@ -113,7 +118,7 @@ const RULES: Record<'forest' | 'keep', GuideRules> = {
       { heading: 'RELICS TO THALERS', text: 'Parties bring relics back from the wood; the Collegium appraises them into thalers. The slower of gathering and appraisal sets your income.' },
       { heading: 'PARTIES', text: 'A party\'s strength (blades fight, menders keep them alive, scouts are quicker and find more) is set against a region\'s danger. Outmatched, fewer come home.' },
       { heading: 'WAGES', text: 'Every hand is paid every second. An unpaid company deserts.' },
-      { heading: 'BLIGHT', text: 'Each trip brings blight home. Past the turning line, hands turn. Penance washes it down.' },
+      { heading: 'BLIGHT', text: BLIGHT_RULE('Every party brings some home from the wood, more from deeper regions') },
       { heading: 'THE KEY', text: 'Fragments of the Ashen Key lie deep in the wood. The charter ends at the reckoning.' },
     ],
   },
@@ -123,6 +128,7 @@ const RULES: Record<'forest' | 'keep', GuideRules> = {
       { heading: 'FLOORS', text: 'Morrowgate Keep is taken floor by floor from the gatehouse down. Returning assaults push the frontier floor; taking it deepens the delve.' },
       { heading: 'OIL', text: 'Every hand burns lamp oil going down and back. Short of oil, the party goes into the dark.' },
       { heading: 'GARRISONS', text: 'Posted blades hold a floor. Unheld floors slip back; held floors pay from their stores. A floor held too long keeps its garrison.' },
+      { heading: 'BLIGHT', text: BLIGHT_RULE('Every assault brings some home from below, more from deeper floors') + ' Blight also presses on floors held short-handed.' },
       { heading: 'SAPPERS', text: 'Sappers bring down the barricades of a floor nobody has broken into, multiplying that first assault.' },
     ],
   },
