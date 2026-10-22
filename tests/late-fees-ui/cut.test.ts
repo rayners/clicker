@@ -13,6 +13,7 @@ let store: LateStore;
 
 function setup(game: LateGame) {
   document.body.innerHTML = '<div id="app"></div>';
+  localStorage.clear();
   store = createLateStore(game);
   mountLate(document.getElementById('app')!, store);
   return userEvent.setup();
@@ -97,5 +98,21 @@ describe("the Killer's Cut on screen", () => {
     await user.click(cutView().getByRole('button', { name: /^confirm/i }));
     expect(store.getState().cut).toBeNull();
     expect(store.getState().profile.legend.drowned).toBe(4);
+  });
+
+  it('has its own guide: it starts by pointing at the first place to push, and moves on once the killer pushes', async () => {
+    const user = setup(inCut());
+    const guide = within(cutView().getByRole('region', { name: /guide/i }));
+    expect(guide.getByText('PUSH')).toBeTruthy();
+    const push = cutView().getAllByRole('button', { name: /push harder at/i })[0]!;
+    expect(push.classList.contains('guide-target')).toBe(true);
+    await user.click(push);
+    expect(within(cutView().getByRole('region', { name: /guide/i })).getByText('HUNGER')).toBeTruthy();
+  });
+
+  it("keeps the cut's rules one tap away in its header", async () => {
+    const user = setup(inCut());
+    await user.click(cutView().getByRole('button', { name: /how this works/i }));
+    expect(screen.getByRole('dialog', { name: /how the killer's cut works/i })).toBeTruthy();
   });
 });

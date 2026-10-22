@@ -8,9 +8,23 @@ import type { LateGame } from '../late-fees/game';
 import { KILLERS } from '../late-fees/registry';
 import type { LateStore } from '../late-fees/store';
 import { tapeCounter } from './app';
+import { createGuideView } from '../shared/ui/guide';
+import { createGuideProgress } from '../shared/guide';
+import { huntGuide } from '../shared/hunt-guide';
 
 const ACT_NAMES = ['', 'OPENING KILL', 'BODY COUNT', 'THE FINAL GIRL', 'THE CONFRONTATION'];
 const FEED = 8;
+const GUIDE_KEY = 'latefees.cut.guide';
+const GUIDE = huntGuide<LateGame>((g) => (g.mode === 'cut' ? (g.cut?.hunt ?? null) : null), {
+  title: "THE KILLER'S CUT",
+  prey: 'place',
+  harvest: 'DREAD',
+  notoriety: 'NOTORIETY',
+  root: '.cut',
+  push: '[aria-label^="Push harder at"]',
+  rest: 'GO TO GROUND',
+  growth: 'WHAT YOU HAVE BECOME',
+});
 
 /** One haunted place: its film, how far it has got, what it knows, its dead, and how hard the killer pushes there. */
 function createPlace(store: LateStore, index: number) {
@@ -60,6 +74,7 @@ export function createCutView(store: LateStore): { el: HTMLElement; render(game:
   const counter = h('span', { class: 'osd-counter' }, '0:00:00');
   const eject = h('button', { class: 'setup-open', type: 'button', 'aria-label': 'Eject: back to the shelf' }, 'EJECT ⏏');
   eject.addEventListener('click', () => store.dispatch({ type: 'leaveCut' }));
+  const guide = createGuideView<LateGame>({ ...GUIDE, progress: createGuideProgress(window.localStorage, GUIDE_KEY) });
   const stat = (label: string, aria: string) => {
     const value = h('dd', { class: 'stat-value', 'aria-label': aria }, '0');
     return { value, el: h('div', { class: 'stat' }, h('dt', { class: 'stat-label' }, label), value) };
@@ -83,7 +98,7 @@ export function createCutView(store: LateStore): { el: HTMLElement; render(game:
       'header',
       { class: 'osd' },
       h('div', { class: 'osd-left' }, h('span', { class: 'osd-rec-live' }, '● REC'), killer),
-      h('div', { class: 'osd-right' }, counter, eject),
+      h('div', { class: 'osd-right' }, counter, guide.rulesButton, eject),
     ),
     h(
       'div',
@@ -91,6 +106,7 @@ export function createCutView(store: LateStore): { el: HTMLElement; render(game:
       h(
         'div',
         { class: 'cut-col' },
+        guide.el,
         h('dl', { class: 'stats' }, dread.el, hunger.el, notoriety.el, free.el),
         note,
         h('div', { class: 'cut-places' }, ...places.map((p) => p.el)),
@@ -102,6 +118,7 @@ export function createCutView(store: LateStore): { el: HTMLElement; render(game:
       h('div', { class: 'cut-col' }, h('h3', { class: 'panel-sub' }, 'WHAT YOU HAVE BECOME'), upgrades),
     ),
     h('div', { class: 'vhs-noise', 'aria-hidden': 'true' }),
+    guide.rulesDialog,
   );
   let shownUpgrades = '';
   let shownFeed = '';
@@ -109,7 +126,7 @@ export function createCutView(store: LateStore): { el: HTMLElement; render(game:
   function render(game: LateGame) {
     el.hidden = game.mode !== 'cut' || !game.cut;
     const cut = game.cut;
-    if (el.hidden || !cut) return;
+    if (el.hidden || !cut) return guide.render(game);
     const hunt = cut.hunt;
     const carried = game.profile.legend[cut.killer] ?? 0;
     setText(killer, `THE KILLER'S CUT · ${KILLERS[cut.killer].name}${carried > 0 ? ` · LEGEND ${carried}` : ''}`);
@@ -161,6 +178,8 @@ export function createCutView(store: LateStore): { el: HTMLElement; render(game:
       shownFeed = feedKey;
       feed.replaceChildren(...kills.map((k) => h('li', { class: 'log-entry log-kill' }, h('span', { class: 'log-time' }, k.place), ' ', h('span', { class: 'log-text' }, k.text))));
     }
+    // Last, so the controls it points at are labelled.
+    guide.render(game);
   }
 
   return { el, render };

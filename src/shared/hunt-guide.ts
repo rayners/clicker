@@ -11,12 +11,14 @@ export interface HuntWords {
   harvest: string;
   /** Notoriety, upper case as on screen. */
   notoriety: string;
-  /** A selector for the first prey's "push harder" control. */
+  /** A selector for the tier's view, so targets never land on another tier's controls on the same page. */
+  root: string;
+  /** A selector, inside the view, for the first prey's "push harder" control. */
   push: string;
   /** The rest button's label, upper case: "SLEEP", "GO TO GROUND". */
   rest: string;
-  /** What spending the harvest is called: "grow", "evolve". */
-  grow: string;
+  /** The heading over what the harvest buys, as on screen: "WHAT THE WOOD BECOMES". */
+  growth: string;
 }
 
 /** The hunt guide: steps and a rules page for any tier on the shared hunt engine (docs/ROADMAP.md, item 6b). */
@@ -31,22 +33,22 @@ export function huntGuide<S>(hunt: (s: S) => HuntState<unknown> | null, w: HuntW
       id: 'hunt-push',
       title: 'PUSH',
       text: `Every ${w.prey} runs itself and defends itself. Put strength on one with + to push harder there.`,
-      target: w.push,
+      target: `${w.root} ${w.push}`,
       show: on(() => true),
       done: on(pushing),
     },
     {
       id: 'hunt-hunger',
       title: 'HUNGER',
-      text: `Pushing spends hunger; what you take feeds it. At zero, nothing moves until you ease off.`,
-      target: '[aria-label="Hunger"]',
+      text: `Pushing spends hunger; what you take feeds it. At zero, the hunt stalls until something feeds you.`,
+      target: `${w.root} [aria-label="Hunger"]`,
       show: on(pushing),
       done: () => false,
     },
     {
       id: 'hunt-harvest',
       title: w.harvest,
-      text: `What you take is ${w.harvest}. Spend it to ${w.grow}: the list beside the ${w.prey}s.`,
+      text: `What you take is ${w.harvest}. Spend it under ${w.growth}.`,
       show: on((h) => h.dread > 0),
       done: () => false,
     },
@@ -69,8 +71,8 @@ export function huntGuide<S>(hunt: (s: S) => HuntState<unknown> | null, w: HuntW
     title: `HOW ${w.title} WORKS`,
     sections: [
       { heading: 'STRENGTH', text: `Split your strength across the ${w.prey}s with − and +. Each step pushes harder there.` },
-      { heading: 'HUNGER', text: 'Every step pushed spends hunger each second; what you take feeds it back. Starving, the hunt stops until you are fed or ease off.' },
-      { heading: w.harvest, text: `Everything you take, kept to ${w.grow} with. It counts toward Legend too.` },
+      { heading: 'HUNGER', text: 'Every step pushed spends hunger each second; what you take feeds it back. Starving, the hunt stalls until something feeds you.' },
+      { heading: w.harvest, text: `Everything you take, to spend under ${w.growth}. All of it counts toward Legend, spent or not.` },
       { heading: w.notoriety, text: `Grows with every taking and makes every ${w.prey} defend harder. It fades with time, faster while you ${w.rest.toLowerCase()}.` },
       { heading: `THE END OF A ${w.prey.toUpperCase()}`, text: `Each ${w.prey} runs its own story and slowly works you out. One that reaches its end beats you back: you lie low for a while, and a fresh ${w.prey} takes its place.` },
       { heading: 'LEGEND', text: `Ending the hunt turns everything taken into Legend, kept for the next hunt by the same horror: a step of strength for every 2, and ${w.harvest} in hand for each.` },

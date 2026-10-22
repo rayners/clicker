@@ -8,9 +8,10 @@ const WORDS: HuntWords = {
   prey: 'charter',
   harvest: 'SAP',
   notoriety: 'FEAR',
+  root: '.wood',
   push: '[aria-label^="Lean harder on"]',
   rest: 'SLEEP',
-  grow: 'grow',
+  growth: 'WHAT THE WOOD BECOMES',
 };
 type S = { hunt: HuntState<number> | null };
 const guide = huntGuide<S>((s) => s.hunt, WORDS);
@@ -20,7 +21,7 @@ const next = (s: S, seen: string[] = []) => nextStep(guide.steps(s), s, seen);
 describe('the hunt guide, shared by every play-as-the-horror tier', () => {
   it('starts by pointing at the first prey to push', () => {
     const step = next(fresh())!;
-    expect(step.target).toBe(WORDS.push);
+    expect(step.target).toBe('.wood [aria-label^="Lean harder on"]');
     expect(step.text).toMatch(/charter/i);
   });
 
