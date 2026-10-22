@@ -206,7 +206,8 @@ const ACT_4: Beat[] = [
     id: 'a4-entry',
     act: 4,
     urgent: true,
-    when: ({ m }) => inAct(m, 3) && o(m).contacts > 0,
+    // Any breach starts the infestation, even if the bulkheads are vented before the alarm finishes sounding.
+    when: ({ m }) => inAct(m, 3) && (o(m).contacts > 0 || o(m).breaches > 0),
     entries: [
       { kind: 'anomaly', text: 'CONTAINMENT BREACH. CONTAINMENT BREACH. CONTAINMENT BREACH.' },
       { kind: 'sys', text: 'UNKNOWN CONTACTS ABOARD. MOTION TRACKING ENABLED. ALL CREW: REMAIN IN CRYO.' },

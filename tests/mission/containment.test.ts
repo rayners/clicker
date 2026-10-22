@@ -216,3 +216,10 @@ describe('integration', () => {
     expect(tickMission(unlocked({ rigs: 1 }), 10).specimens).toBeGreaterThan(0);
   });
 });
+
+describe('the infestation begins at the breach', () => {
+  it('even when every contact is vented before the alarm finishes sounding', () => {
+    const m = { ...createMission(DEFAULT_MISSION_CONFIG, 1), act: 3, breaches: 1, contacts: 0, elapsed: 10_000 };
+    expect(tickMission(m, 1).act).toBe(4);
+  });
+});
