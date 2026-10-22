@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { freshGame } from './helpers';
+import { freshGame, skipBoot } from './helpers';
 
 test('haulage: push the tug to the first station on its thrusters and get paid', async ({ page, isMobile }) => {
   await freshGame(page, 'haulage');
@@ -21,6 +21,7 @@ test('overland: the short contract is offered first, and the rig rolls on the en
   await page.goto('/contract/');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  await skipBoot(page);
   const cards = page.getByRole('dialog', { name: /contract assignment/i }).getByRole('button', { name: /accept .* contract/i });
   await expect(cards.first()).toHaveAccessibleName(/overland/i);
   await cards.first().click();

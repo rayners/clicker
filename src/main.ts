@@ -3,7 +3,8 @@ import '@fontsource/michroma';
 import './styles/main.css';
 import './styles/crt.css';
 import { catchUp } from './core/game';
-import { loadGame, saveGame } from './core/save';
+import { loadGame, saveGame, SAVE_KEY } from './core/save';
+import { createBootScreen } from './ui/boot';
 import { createStore } from './core/store';
 import { mountApp } from './ui/app';
 import { applyScenario, debugSpeed, grantCredits, storySummary } from './core/debug';
@@ -16,6 +17,14 @@ const AUTOSAVE_MS = 10_000;
 
 const storage = window.localStorage;
 const seed = (Math.random() * 2 ** 31) | 0;
+// Read before loading: a player with no save at all sees WARDEN boot up once.
+const firstLoad = (() => {
+  try {
+    return storage.getItem(SAVE_KEY) === null;
+  } catch {
+    return false;
+  }
+})();
 const loaded = loadGame(storage, Date.now(), seed);
 // Debug jumps replace the game, and autosave would write that over the real save: dev builds only.
 const debug = import.meta.env.DEV ? new URLSearchParams(location.search).get('debug') : null;
@@ -36,6 +45,10 @@ if (params?.has('flags')) {
 }
 
 mountApp(document.getElementById('app')!, store);
+if (firstLoad && !debug) {
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  document.body.append(createBootScreen({ onDone: () => undefined, reducedMotion }).el);
+}
 
 const optOut = createOptOut(storage);
 startAnalytics({

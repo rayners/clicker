@@ -2337,3 +2337,53 @@ button:focus-visible {
     padding-top: 6px;
   }
 }
+
+/* ---------- the boot sequence, first load only ---------- */
+
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+  padding: max(24px, env(safe-area-inset-top)) var(--gutter) max(24px, env(safe-area-inset-bottom));
+  background: var(--bg);
+  color: var(--phosphor);
+  font-family: var(--font-term);
+  font-size: 1.1rem;
+  text-shadow: 0 0 4px var(--glow), 0 0 12px var(--glow);
+}
+
+.boot-lines {
+  margin: 0 auto;
+  padding: 0;
+  max-width: 40rem;
+  list-style: none;
+}
+
+.boot-line {
+  margin-bottom: 4px;
+  animation: print 0.3s steps(14, end) both;
+  animation-delay: var(--delay);
+}
+
+.boot-line:last-child {
+  margin-top: 12px;
+  color: var(--phosphor-hi);
+}
+
+.boot[data-motion='reduced'] .boot-line {
+  animation: none;
+}
+
+.boot-skip {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--phosphor-faint);
+  background: transparent;
+  letter-spacing: 0.2em;
+  color: var(--phosphor-dim);
+}

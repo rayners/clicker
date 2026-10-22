@@ -91,7 +91,7 @@ In order. Each item has its design written down first, so nothing lives only in 
   - A held hum per act (60 Hz steady → beating → lower and rougher → a pulsing 41 Hz sawtooth), silent in the horror tiers.
   - Teletype clicks timed to each log line's print animation (6 per line, at most 4 lines at once), with the memo chime or anomaly drone closing the burst.
   - **To do:** listen on the iPhone and tune the levels. The other games have no sound yet.
-- An optional first-load boot sequence animation.
+- (Done 2026-10-22) **A first-load boot sequence** for DEEP CONTRACT: WARDEN's BIOS lines type out on a brand-new player's first visit only (no save yet). Any tap or key skips it, it leaves by itself after about 4.4 s, and it prints at once with reduced motion. The e2e helper `skipBoot` steps past it.
 - **Raise `TERRAFORM_UNLOCK_CONTRACTS`** (currently 0 so it can be play-tested) once the user is happy with it.
 - **A second horror.** The architecture is ready: add `src/mission/<horror>/`, a `HorrorDef`, lexicon keys each scenario must supply, and optional pairings. Choosing a horror per contract (random or cycled from the profile) is still to be designed.
 - Terraform polish: collapse the allocation controls to a one-line summary once WARDEN auto-balances (it frees phone space). (Every scenario now has its own vessel, target and action sprites.)
