@@ -68,7 +68,7 @@ export const contractYears = (c: BoardContract): number => boardYears(c.mission.
 const DIVIDEND_START = 0.5;
 const DIVIDEND_PAY = 0.25;
 /** Conscience for testifying, and for releasing the minutes; the terms a board needs behind it before it may release them. */
-const TESTIFY_CONSCIENCE = 3;
+export const TESTIFY_CONSCIENCE = 3;
 const RELEASE_CONSCIENCE = 5;
 export const RELEASE_AFTER_TERMS = 2;
 

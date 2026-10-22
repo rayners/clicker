@@ -1,4 +1,4 @@
-# The Boardroom (second tier: designed 2026-10-22, being built)
+# The Boardroom (second tier: built 2026-10-22)
 
 ## Concept
 

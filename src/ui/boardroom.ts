@@ -2,6 +2,9 @@ import type { GameState } from '../core/game';
 import type { Store } from '../core/store';
 import { boardDate, contractYears, charterable, charterCost, divisionCost, floorCost, freeSlot, MAX_SLOTS, INQUIRY_AT, termEndings, type BoardContract, type TermEnding } from '../core/boardroom';
 import { createConfirmButton } from '../shared/ui/confirm';
+import { createGuideView } from '../shared/ui/guide';
+import { createGuideProgress } from '../shared/guide';
+import { boardGuideRules, boardGuideSteps } from '../data/boardroom/guide';
 import { DIVISIONS } from '../data/boardroom/divisions';
 import { CREW } from '../data/crew';
 import { crewStatus } from '../mission/crew';
@@ -14,6 +17,7 @@ const ACT_NAMES = ['', 'ON SCHEDULE', 'UNDER REVIEW', 'SPECIAL INTEREST', 'LOSSE
 const HORROR_NAMES: Record<string, string> = { organism: 'SPECIAL PROJECTS', outbreak: 'BIOPRODUCTS', quiet: '' };
 const MINUTES_SHOWN = 12;
 const MAX_SAFETY_TENTHS = 10;
+const GUIDE_KEY = 'deep-contract.boardroom.guide';
 const ENDINGS: Record<TermEnding, { title: string; aria: string; text: string }> = {
   chair: { title: 'CHAIR THE BOARD', aria: 'Chair the Board', text: 'Take the chair. The minutes are sealed, the Dividend is paid, and next term starts richer.' },
   testify: { title: 'TESTIFY', aria: 'Testify', text: 'Give the inquiry everything: the manifests, Order 7731, the vote. The seat is withdrawn. Conscience.' },
@@ -38,6 +42,7 @@ function card(c: BoardContract) {
 export function createBoardroomView(store: Store): { el: HTMLElement; render(game: GameState): void } {
   const back = h('button', { class: 'br-back', type: 'button', 'aria-label': 'Return to the contract' }, 'RETURN');
   back.addEventListener('click', () => store.dispatch({ type: 'leaveBoardroom' }));
+  const guide = createGuideView<GameState>({ steps: boardGuideSteps, rules: boardGuideRules, progress: createGuideProgress(window.localStorage, GUIDE_KEY) });
   const term = h('span', { class: 'br-term' });
   const stat = (label: string, aria: string) => {
     const value = h('dd', { class: 'br-value', 'aria-label': aria }, '0');
@@ -60,7 +65,7 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
   more.addEventListener('click', () => store.dispatch({ type: 'shiftSafety', step: 1 }));
   const policy = h('button', { class: 'br-policy', type: 'button' });
   policy.addEventListener('click', () => store.dispatch({ type: 'setPolicy', policy: store.getState().boardroom?.policy === 'deliver' ? 'scuttle' : 'deliver' }));
-  const floor = h('button', { class: 'br-buy', type: 'button' });
+  const floor = h('button', { class: 'br-buy br-floor', type: 'button' });
   floor.addEventListener('click', () => store.dispatch({ type: 'buyFloor' }));
 
   const divisions = DIVISIONS.map((d) => {
@@ -84,13 +89,14 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
   const el = h(
     'section',
     { class: 'br', 'aria-label': 'The Boardroom', hidden: true },
-    h('header', { class: 'br-head' }, h('div', {}, h('h2', { class: 'br-name' }, 'KESSLER-AMARI COMBINE'), term), back),
+    h('header', { class: 'br-head' }, h('div', {}, h('h2', { class: 'br-name' }, 'KESSLER-AMARI COMBINE'), term), guide.rulesButton, back),
     h(
       'div',
       { class: 'br-body' },
       h(
         'div',
         { class: 'br-col' },
+        guide.el,
         h('dl', { class: 'br-stats' }, value.el, offices.el, scrutiny.el),
         frozen,
         termEnd,
@@ -111,12 +117,13 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
         minutes,
       ),
     ),
+    guide.rulesDialog,
   );
 
   function render(game: GameState) {
     el.hidden = game.mode !== 'boardroom' || !game.boardroom;
     const b = game.boardroom;
-    if (el.hidden || !b) return;
+    if (el.hidden || !b) return guide.render(game);
     setText(term, `TERM ${b.term} · ${boardDate(b.elapsed)}`);
     setText(value.value, `₭${formatNumber(b.value)}`);
     setText(offices.value, `${b.contracts.length} / ${b.slots}`);
@@ -178,6 +185,8 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
       minutesKey = mKey;
       minutes.replaceChildren(...recent.map((e) => h('li', { class: `br-minute br-${e.kind}` }, h('span', { class: 'br-when' }, boardDate(e.t)), ' ', e.text)));
     }
+    // Last, so the controls it points at are labelled.
+    guide.render(game);
   }
 
   return { el, render };

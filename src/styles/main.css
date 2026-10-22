@@ -2642,6 +2642,33 @@ button:focus-visible {
   background: rgba(110, 26, 31, 0.12);
 }
 
+.br .guide {
+  border-color: var(--oxblood);
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--ink);
+}
+
+.br .guide-title,
+.br .guide-rules-title,
+.br .guide-rules-heading {
+  color: var(--oxblood);
+}
+
+.br .guide-rules-box {
+  background: var(--paper);
+  border-color: var(--oxblood);
+  color: var(--ink);
+}
+
+.br .guide-target {
+  outline-color: var(--oxblood);
+}
+
+.br .guide-rules-open {
+  flex: none;
+  margin-left: auto;
+}
+
 .br-back {
   flex: none;
   padding: 0 10px;

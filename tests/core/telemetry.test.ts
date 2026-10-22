@@ -136,4 +136,20 @@ describe('DEEP CONTRACT play events', () => {
     const g = withMission(game(), { act: 3 });
     expect(contractProperties(g)).toEqual({ game: 'deep-contract', scenario: 'extraction', horror: 'organism', act: 3, cycle: 0 });
   });
+
+  it('reports the Boardroom: promotion, each contract the Board closes, inquiries, and the end of a term', () => {
+    const vet = veteran(createGame(1, 0));
+    const promoted = reduce(vet, { type: 'enterBoardroom', seed: 3 });
+    expect(contractEvents(vet, promoted)).toEqual([{ name: 'boardroom_entered', props: { term: 1 } }]);
+    const b = promoted.boardroom!;
+    const record = { scenario: 'extraction' as const, horror: 'outbreak' as const, shipName: 'X', ending: 'deliver', output: 1, outputUnit: 'T', specimens: 0, crewSurvived: 5, duration: 1 };
+    const delivered = { ...promoted, boardroom: { ...b, ledger: [record], elapsed: 2640 } };
+    expect(contractEvents(promoted, delivered)).toEqual([
+      { name: 'board_contract_delivered', props: { scenario: 'extraction', horror: 'outbreak', ending: 'deliver', crewLost: 2, delivered: 1, minutes: 44 } },
+    ]);
+    const inquired = { ...delivered, boardroom: { ...delivered.boardroom, inquiries: 1 } };
+    expect(contractEvents(delivered, inquired)).toEqual([{ name: 'inquiry_opened', props: { inquiries: 1, minutes: 44 } }]);
+    const ended = reduce({ ...inquired, boardroom: { ...inquired.boardroom, flags: ['term-end'] } }, { type: 'endTerm', ending: 'testify', seed: 1 });
+    expect(contractEvents(inquired, ended)).toContainEqual({ name: 'term_ended', props: { ending: 'testify', terms: 1, dividends: 0 } });
+  });
 });

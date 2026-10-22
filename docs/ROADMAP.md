@@ -103,6 +103,8 @@ In order. Each item has its design written down first, so nothing lives only in 
    - **Built:** piece 5, on screen (`src/ui/boardroom.ts`): THE BOARDROOM in letterhead cream and oxblood, offered from the configuration (ACCEPT PROMOTION, or what opens it); value, offices and scrutiny; charter buttons, contract cards, floors; the safety dial and standing policy; divisions; the minutes. One column on phones, two on desktop. **The Boardroom is now playable for veterans.**
    - **Built:** piece 6, the story (`src/data/boardroom/story.ts`, `src/core/boardroom-story.ts`): the Chair's welcome; the player's own callsigns and ships (from `profile.history`) on new manifests, a common name, then a clerical error; Reconditioning Order 7731, carried with WARDEN's own seat; crew reclassified as consumables, and the dead counted from the player's record.
    - **Built:** piece 7, the end of a term (75 minutes into Act IV, or ₭300M): Chair the Board (a Dividend: a richer start and +25% on deliveries next term), Testify (Conscience; the player's next contract remembers), and Release the minutes (from the third term). New terms keep the player's contract and record; save v11 adds `boardTerms` and `dividends`.
+   - **Built:** piece 8: pacing (`npm run simulate:board`; Board contracts at five times the Board clock; acts at the first, fifth and eighth delivery: 43m, 2h09m, 2h52m, term at 4h07m); a fiscal calendar (user: a Board minute is a quarter, so a contract's eleven-year haul passes in about 44 minutes); the Board's own guide and rules page; telemetry (`boardroom_entered`, `board_contract_delivered`, `inquiry_opened`, `term_ended`) and a Boardroom tile on the dashboard.
+   - **Done (2026-10-22).**
 
 ## Backlog / ideas
 

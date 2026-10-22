@@ -10,7 +10,7 @@ Four games in one repo, sharing an engine (`src/shared/`). Vite + TypeScript, no
 
 Read before changing things:
 - `docs/DESIGN.md`: premise, economy, the five acts and their pacing targets, prestige, UI/art direction.
-- `docs/BOARDROOM.md`: the planned second-tier layer and the architecture rules it imposes **now**.
+- `docs/BOARDROOM.md`: the second tier (built): WARDEN promoted to headquarters, chartering contracts run by their own WARDENs (`src/core/boardroom.ts`, `src/ui/boardroom.ts`, `src/data/boardroom/`), and the architecture rules it relies on.
 - `docs/TERRAFORM.md`: the terraforming scenario and the **scenario × horror** architecture (built).
 - `docs/ROADMAP.md`: what's built, deliberate deviations from the original plan, and the backlog.
 - `docs/late-fees/DESIGN.md`: the third game, LATE FEES (modern-day slasher homages, VHS look, venues × killers, sequels). All three tapes, the six crossovers and the Killer's Cut (play as the killer, on the shared hunt engine `src/shared/hunt.ts`) are built.

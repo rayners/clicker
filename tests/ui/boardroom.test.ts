@@ -91,4 +91,23 @@ describe('the BOARDROOM on screen', () => {
     expect(board().term).toBe(2);
     expect(view().queryByRole('region', { name: /end of term/i })).toBeNull();
   });
+
+  it('has its own guide: it starts by pointing at the charters, and moves on once one is chartered', async () => {
+    const user = setup(veteran(createGame(1, 0)));
+    localStorage.removeItem('deep-contract.boardroom.guide');
+    promoted();
+    const guide = within(view().getByRole('region', { name: /guide/i }));
+    expect(guide.getByText('CHARTER A CONTRACT')).toBeTruthy();
+    const charter = view().getByRole('button', { name: /^charter extraction/i });
+    expect(charter.closest('.br-charters')!.classList.contains('guide-target')).toBe(true);
+    await user.click(charter);
+    expect(within(view().getByRole('region', { name: /guide/i })).queryByText('CHARTER A CONTRACT')).toBeNull();
+  });
+
+  it('keeps the Board\'s rules one tap away in its masthead', async () => {
+    const user = setup(veteran(createGame(1, 0)));
+    promoted();
+    await user.click(view().getByRole('button', { name: /how this works/i }));
+    expect(screen.getByRole('dialog', { name: /how the boardroom works/i })).toBeTruthy();
+  });
 });

@@ -45,6 +45,10 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 | DEEP CONTRACT | `sector_secured` | sector, sectors (how many reached), minutes (security contracts) |
 | DEEP CONTRACT | `compartment_opened` | compartment, compartments (how many reached), breaches (so far), minutes (salvage contracts) |
 | DEEP CONTRACT | `leg_completed` | station (or depot), legs, onTime (inside the window), minutes (haulage and overland contracts) |
+| DEEP CONTRACT | `boardroom_entered` | term (promotion to the Boardroom, once per term) |
+| DEEP CONTRACT | `board_contract_delivered` | scenario, horror, ending (the standing policy), crewLost, delivered (count this term), minutes (Board time) |
+| DEEP CONTRACT | `inquiry_opened` | inquiries (this term), minutes |
+| DEEP CONTRACT | `term_ended` | ending (`chair` / `testify` / `release`), terms, dividends |
 | DEEP CONTRACT | `crew_turned` | crewTurned (how many named crew have turned), minutes (outbreak contracts) |
 | DEEP CONTRACT | `lockdown_used` | lockdowns (so far), minutes (outbreak contracts) |
 | DEEP CONTRACT | `creature_started` | (Special Order 0-77 accepted: playing as the creature) |

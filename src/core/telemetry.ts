@@ -1,3 +1,5 @@
+import { CREW } from '../data/crew';
+import { TESTIFY_CONSCIENCE } from './boardroom';
 import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../shared/telemetry';
 import type { GameState } from './game';
 import { SECTIONS } from '../data/security/systems';
@@ -14,7 +16,29 @@ export function contractProperties(game: GameState): TelemetryProps {
 }
 
 /** Milestones between two successive states: contracts started, abandoned and completed, acts reached, and the creature's and the hunter's hunts. */
+/** The Boardroom: promotion, the contracts it closes, its inquiries, and the end of a term (docs/BOARDROOM.md). */
+function boardEvents(prev: GameState, next: GameState): TelemetryEvent[] {
+  const b = next.boardroom;
+  const was = prev.boardroom;
+  if (!b) return [];
+  if (!was) return [{ name: 'boardroom_entered', props: { term: b.term } }];
+  if (next.profile.boardTerms > prev.profile.boardTerms) {
+    // Read from what the ending changed, so a term ended the same way twice is still named.
+    const ending = next.profile.dividends > prev.profile.dividends ? 'chair' : next.profile.conscience - prev.profile.conscience > TESTIFY_CONSCIENCE ? 'release' : 'testify';
+    return [{ name: 'term_ended', props: { ending, terms: next.profile.boardTerms, dividends: next.profile.dividends } }];
+  }
+  const minutes = Math.round(b.elapsed / 60);
+  const events: TelemetryEvent[] = b.ledger.slice(was.ledger.length).map((r, i) => ({
+    name: 'board_contract_delivered',
+    props: { scenario: r.scenario, horror: r.horror, ending: r.ending, crewLost: CREW.length - r.crewSurvived, delivered: was.ledger.length + i + 1, minutes },
+  }));
+  if (b.inquiries > was.inquiries) events.push({ name: 'inquiry_opened', props: { inquiries: b.inquiries, minutes } });
+  return events;
+}
+
 export function contractEvents(prev: GameState, next: GameState): TelemetryEvent[] {
+  const board = boardEvents(prev, next);
+  if (board.length > 0 || next.mode === 'boardroom') return board;
   for (const [horror, before, after] of [
     ['creature', prev.creature, next.creature],
     ['hunter', prev.hunter, next.hunter],
