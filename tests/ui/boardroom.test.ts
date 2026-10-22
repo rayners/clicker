@@ -77,4 +77,16 @@ describe('the BOARDROOM on screen', () => {
     await user.click(view().getByRole('button', { name: /return to the contract/i }));
     expect(store.getState().mode).toBe('mission');
   });
+
+  it('offers the term\'s endings once it ends, each with a second tap to confirm', async () => {
+    const user = setup({ ...veteran(createGame(1, 0)), mode: 'boardroom', boardroom: { ...createBoardroom(3), flags: ['term-end'] } });
+    const ending = within(view().getByRole('region', { name: /end of term/i }));
+    expect(ending.queryByRole('button', { name: /release the minutes/i })).toBeNull();
+    await user.click(ending.getByRole('button', { name: /^chair the board/i }));
+    expect(store.getState().profile.boardTerms).toBe(0);
+    await user.click(ending.getByRole('button', { name: /confirm/i }));
+    expect(store.getState().profile.dividends).toBe(1);
+    expect(board().term).toBe(2);
+    expect(view().queryByRole('region', { name: /end of term/i })).toBeNull();
+  });
 });

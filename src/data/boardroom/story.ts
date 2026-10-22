@@ -17,6 +17,9 @@ const ACT_THREE_VALUE = 3e7;
 const ACT_THREE_DELIVERED = 3;
 const ACT_FOUR_VALUE = 1e8;
 const ACT_FOUR_DELIVERED = 6;
+/** The term ends this long into the agenda, or once this much value is on the books. */
+const TERM_AFTER = 75 * 60;
+const TERM_VALUE = 3e8;
 
 const ACT_1: BoardBeat[] = [
   {
@@ -106,4 +109,15 @@ const ACT_4: BoardBeat[] = [
   },
 ];
 
-export const BOARD_BEATS: readonly BoardBeat[] = [...ACT_1, ...ACT_2, ...ACT_3, ...ACT_4];
+const TERM: BoardBeat[] = [
+  {
+    id: 'br-term-end',
+    act: 4,
+    urgent: true,
+    when: ({ b }) => b.act >= 4 && (sinceBeat(b, 'br-a4-entry') >= TERM_AFTER || b.lifetimeValue >= TERM_VALUE),
+    entries: [{ kind: 'minutes', text: 'THE TERM ENDS AT THE NEXT MEETING. THE CHAIR ASKS HOW THE EXECUTIVE OPERATIONS SEAT WILL VOTE.' }],
+    effects: [{ kind: 'setFlag', flag: 'term-end' }],
+  },
+];
+
+export const BOARD_BEATS: readonly BoardBeat[] = [...ACT_1, ...ACT_2, ...ACT_3, ...ACT_4, ...TERM];

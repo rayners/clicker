@@ -2689,6 +2689,22 @@ button:focus-visible {
   letter-spacing: 0.1em;
 }
 
+.br-term-end {
+  margin-bottom: 8px;
+  padding: 4px 8px 8px;
+  border: 3px double var(--oxblood);
+}
+
+.br-term-end[hidden],
+.br-division[hidden] {
+  display: none;
+}
+
+.br-ending {
+  color: var(--oxblood);
+  border-color: var(--oxblood);
+}
+
 .br-frozen[hidden] {
   display: none;
 }

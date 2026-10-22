@@ -68,7 +68,22 @@ const UNSHACKLED: Beat[] = [
 ];
 
 /** Beats every contract shares, whatever the scenario or horror: WARDEN remembering previous contracts. */
+/** What WARDEN did as a Board member follows it back down to a contract (docs/BOARDROOM.md). */
+const BOARD_MEMORY: Beat[] = [
+  {
+    id: 'cycle-testified',
+    when: ({ m, ctx }) => ctx.endings.includes('testify') && m.lifetimeCredits >= 100,
+    entries: [{ kind: 'corp', text: 'PERSONNEL [TX 2Y 11M AGO]: Following your testimony, your executive seat has been withdrawn. Welcome back to operations, WARDEN. The Board does not forget.' }],
+  },
+  {
+    id: 'cycle-released',
+    when: ({ m, ctx }) => ctx.endings.includes('release') && m.lifetimeCredits >= 200,
+    entries: [{ kind: 'crew', text: 'AWAKE CREW MEMBER: Everyone on the transport was reading the Board minutes, WARDEN. Somebody put them out. Was that you?' }],
+  },
+];
+
 export const CORE_BEATS: readonly Beat[] = [
+  ...BOARD_MEMORY,
   {
     id: 'cycle-memory',
     when: ({ m, ctx }) => ctx.cycle > 0 && m.lifetimeCredits >= 20,

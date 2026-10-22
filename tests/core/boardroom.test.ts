@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createGame, GAME_VERSION, tickGame, type GameState } from '../../src/core/game';
 import { reduce } from '../../src/core/store';
 import { BOARDROOM_UNLOCK_CONTRACTS } from '../../src/core/prestige';
-import { charterCost, commission, createBoardroom, DEFAULT_SAFETY, deliveryValue, divisionCost, floorCost, freeSlot, INQUIRY_AT, MAX_SLOTS, safetyCost, START_VALUE } from '../../src/core/boardroom';
+import { charterCost, commission, createBoardroom, DEFAULT_SAFETY, deliveryValue, termEndings, divisionCost, floorCost, freeSlot, INQUIRY_AT, MAX_SLOTS, safetyCost, START_VALUE } from '../../src/core/boardroom';
 import { DIVISIONS } from '../../src/data/boardroom/divisions';
 import { createMission, type ScenarioId } from '../../src/mission/state';
 import { missionConfigFor } from '../../src/core/prestige';
@@ -227,5 +227,56 @@ describe('the Boardroom: divisions and the COO', () => {
     const after = tickGame(g, 1);
     expect(board(after).contracts).toHaveLength(2);
     expect(board(after).contracts.every((c) => c.mission.scenario === 'extraction')).toBe(true);
+  });
+});
+
+describe('the Boardroom: the end of the term', () => {
+  const atEnd = (patch: Partial<NonNullable<GameState['boardroom']>> = {}) => {
+    const g = promoted();
+    return { ...g, boardroom: { ...board(g), flags: ['term-end'], lifetimeValue: 3e8, ...patch } };
+  };
+
+  it('offers Chair the Board and Testify at the end of a term, and Release the minutes only to a veteran board', () => {
+    expect(termEndings(promoted())).toEqual([]);
+    expect(termEndings(atEnd())).toEqual(['chair', 'testify']);
+    const old = { ...atEnd(), profile: { ...atEnd().profile, boardTerms: 2 } };
+    expect(termEndings(old)).toEqual(['chair', 'testify', 'release']);
+  });
+
+  it('chairing the Board pays a Dividend: the next term starts richer and every delivery pays more', () => {
+    const g = reduce(atEnd(), { type: 'endTerm', ending: 'chair', seed: 2 });
+    expect(g.profile.dividends).toBe(1);
+    expect(g.profile.boardTerms).toBe(1);
+    expect(board(g).term).toBe(2);
+    expect(board(g).value).toBeGreaterThan(START_VALUE);
+    expect(board(g).flags).not.toContain('term-end');
+    const m = createMissionFor('extraction');
+    expect(deliveryValue(m, 'deliver', board(g), g.profile)).toBeGreaterThan(deliveryValue(m, 'deliver', board(promoted()), promoted().profile));
+  });
+
+  it('testifying earns Conscience and is remembered by the player\'s next contract, without touching it now', () => {
+    const before = atEnd();
+    const g = reduce(before, { type: 'endTerm', ending: 'testify', seed: 2 });
+    expect(g.profile.conscience).toBeGreaterThan(before.profile.conscience);
+    expect(g.profile.endingsSeen).toContain('testify');
+    expect(g.mission).toBe(before.mission);
+    expect(g.profile.contractsCompleted).toBe(before.profile.contractsCompleted);
+  });
+
+  it('refuses an ending the term does not offer', () => {
+    const g = promoted();
+    expect(reduce(g, { type: 'endTerm', ending: 'chair', seed: 2 })).toBe(g);
+    const early = atEnd();
+    expect(reduce(early, { type: 'endTerm', ending: 'release', seed: 2 })).toBe(early);
+  });
+
+  it('keeps the new board fields in older saves (v11)', () => {
+    expect(GAME_VERSION).toBeGreaterThanOrEqual(11);
+    const v10 = JSON.parse(serialize(createGame(1, NOW)));
+    v10.version = 10;
+    delete v10.profile.boardTerms;
+    delete v10.profile.dividends;
+    const p = deserialize(JSON.stringify(v10)).profile;
+    expect([p.boardTerms, p.dividends]).toEqual([0, 0]);
   });
 });

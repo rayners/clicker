@@ -39,7 +39,7 @@ import type { DivisionId } from '../data/boardroom/divisions';
 import { buyCutter, buySalvageUpgrade, buyShoring, cut, shiftNotch, toggleGovernor } from '../mission/salvage/economy';
 import { buyCar, buyEngine, buyHaulageUpgrade, fireThrusters, refuel, setBurn, toggleAutopilot } from '../mission/haulage/economy';
 import { buyCreatureUpgrade, endCreature, leaveCreature, startCreature } from './creature';
-import { buyDivision, buyFloor, commission, enterBoardroom, leaveBoardroom, setPolicy, shiftSafety, type BoardPolicy } from './boardroom';
+import { buyDivision, buyFloor, commission, endTerm, enterBoardroom, leaveBoardroom, setPolicy, shiftSafety, type BoardPolicy, type TermEnding } from './boardroom';
 import { buyHunterUpgrade, endHunter, leaveHunter, startHunter } from './hunter';
 import { shiftPush, toggleDormant } from '../shared/hunt';
 
@@ -93,6 +93,7 @@ export type Action =
   | { type: 'enterBoardroom'; seed: number }
   | { type: 'leaveBoardroom' }
   | { type: 'buyFloor' }
+  | { type: 'endTerm'; ending: TermEnding; seed: number }
   | { type: 'buyDivision'; id: DivisionId }
   | { type: 'shiftSafety'; step: 1 | -1 }
   | { type: 'setPolicy'; policy: BoardPolicy }
@@ -232,6 +233,8 @@ export function reduce(game: GameState, action: Action): GameState {
       return shiftSafety(game, action.step);
     case 'buyDivision':
       return buyDivision(game, action.id);
+    case 'endTerm':
+      return endTerm(game, action.ending, action.seed);
     case 'buyFloor':
       return buyFloor(game);
     case 'setPolicy':

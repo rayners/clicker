@@ -43,6 +43,9 @@ export interface Profile {
   history: ContractRecord[];
   /** Legend each horror has carried out of finished hunts (see docs/HORROR-TIER.md). */
   legend: Record<string, number>;
+  /** Boardroom terms completed, and Dividends earned by chairing the Board (docs/BOARDROOM.md). */
+  boardTerms: number;
+  dividends: number;
 }
 
 /** A new player, a finished contract, or a mid-contract request (the only one that can be cancelled). */
@@ -66,7 +69,7 @@ export interface GameState {
   boardroom: BoardroomState | null;
 }
 
-export const GAME_VERSION = 10;
+export const GAME_VERSION = 11;
 
 export function createProfile(): Profile {
   return {
@@ -78,6 +81,8 @@ export function createProfile(): Profile {
     endingsSeen: [],
     history: [],
     legend: {},
+    boardTerms: 0,
+    dividends: 0,
   };
 }
 

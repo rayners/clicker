@@ -67,3 +67,11 @@ describe('the Boardroom story', () => {
     expect(four.log.map((e) => e.text).join(' ')).toMatch(/ATTRITION/);
   });
 });
+
+describe('the end of a term', () => {
+  it('comes after the agenda has been read long enough', () => {
+    const four = { ...createBoardroom(1), act: 4, beats: { 'br-a4-entry': 0 }, elapsed: 0, lifetimeValue: 1e8 };
+    const ended = play(four, veteranGame(), 60);
+    expect(ended.flags).toContain('term-end');
+  });
+});

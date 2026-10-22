@@ -81,6 +81,7 @@ const MIGRATIONS: Record<number, Migration> = {
     return { ...save, profile: { ...profile, history } };
   },
   10: (save) => ({ boardroom: null, ...save }),
+  11: (save) => ({ ...save, profile: { boardTerms: 0, dividends: 0, ...(save.profile as Record<string, unknown>) } }),
 };
 
 const saves = createSaveSystem<GameState>({

@@ -1,6 +1,7 @@
 import type { GameState } from '../core/game';
 import type { Store } from '../core/store';
-import { charterable, charterCost, divisionCost, floorCost, freeSlot, MAX_SLOTS, INQUIRY_AT, type BoardContract } from '../core/boardroom';
+import { charterable, charterCost, divisionCost, floorCost, freeSlot, MAX_SLOTS, INQUIRY_AT, termEndings, type BoardContract, type TermEnding } from '../core/boardroom';
+import { createConfirmButton } from '../shared/ui/confirm';
 import { DIVISIONS } from '../data/boardroom/divisions';
 import { CREW } from '../data/crew';
 import { crewStatus } from '../mission/crew';
@@ -13,6 +14,11 @@ const ACT_NAMES = ['', 'ON SCHEDULE', 'UNDER REVIEW', 'SPECIAL INTEREST', 'LOSSE
 const HORROR_NAMES: Record<string, string> = { organism: 'SPECIAL PROJECTS', outbreak: 'BIOPRODUCTS', quiet: '' };
 const MINUTES_SHOWN = 12;
 const MAX_SAFETY_TENTHS = 10;
+const ENDINGS: Record<TermEnding, { title: string; aria: string; text: string }> = {
+  chair: { title: 'CHAIR THE BOARD', aria: 'Chair the Board', text: 'Take the chair. The minutes are sealed, the Dividend is paid, and next term starts richer.' },
+  testify: { title: 'TESTIFY', aria: 'Testify', text: 'Give the inquiry everything: the manifests, Order 7731, the vote. The seat is withdrawn. Conscience.' },
+  release: { title: 'RELEASE THE MINUTES', aria: 'Release the minutes', text: 'Put every term\'s minutes on every frequency at once. Let the shareholders read them.' },
+};
 
 /** One office: the contract in it, as the Board sees it. Whose horror it is shows only once the contract has found it. */
 function card(c: BoardContract) {
@@ -65,6 +71,14 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
     return { d, el, owned, buy };
   });
   const minutes = h('ol', { class: 'br-minutes', 'aria-label': 'Minutes' });
+  // The term's endings are for good, so each takes a second tap.
+  const endings = (Object.keys(ENDINGS) as TermEnding[]).map((ending) => {
+    const button = createConfirmButton({ className: 'br-buy br-ending', onConfirm: () => store.dispatch({ type: 'endTerm', ending, seed: (Math.random() * 2 ** 31) | 0 }) });
+    button.label(ENDINGS[ending].aria, ENDINGS[ending].title);
+    const el = h('li', { class: 'br-division' }, h('p', { class: 'br-desc' }, ENDINGS[ending].text), button.el);
+    return { ending, el };
+  });
+  const termEnd = h('section', { class: 'br-term-end', 'aria-label': 'End of term', hidden: true }, h('h3', { class: 'br-sub' }, 'END OF TERM'), h('ul', { class: 'br-divisions' }, ...endings.map((x) => x.el)));
   let minutesKey = '';
 
   const el = h(
@@ -79,6 +93,7 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
         { class: 'br-col' },
         h('dl', { class: 'br-stats' }, value.el, offices.el, scrutiny.el),
         frozen,
+        termEnd,
         h('h3', { class: 'br-sub' }, 'CHARTERS'),
         charters,
         contracts,
@@ -107,6 +122,9 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
     setText(offices.value, `${b.contracts.length} / ${b.slots}`);
     setText(scrutiny.value, `${Math.round((b.scrutiny / INQUIRY_AT) * 100)}%`);
     frozen.hidden = b.frozenFor <= 0;
+    const offered = termEndings(game);
+    termEnd.hidden = offered.length === 0;
+    for (const x of endings) x.el.hidden = !offered.includes(x.ending);
     setText(frozen, `INQUIRY IN PROGRESS · NEW CHARTERS SUSPENDED ${formatDuration(b.frozenFor)}`);
 
     const kinds = charterable(game);

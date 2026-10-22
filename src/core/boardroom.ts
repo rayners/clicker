@@ -46,6 +46,15 @@ const PERSONNEL_DISCOUNT = 0.85;
 const LEGAL_SOFTENING = 0.8;
 const PRODUCT_BONUS = 0.5;
 const LOGISTICS_SPEED = 0.5;
+/** Each Dividend: this much more starting value, and this much more on every delivery, in later terms. */
+const DIVIDEND_START = 0.5;
+const DIVIDEND_PAY = 0.25;
+/** Conscience for testifying, and for releasing the minutes; the terms a board needs behind it before it may release them. */
+const TESTIFY_CONSCIENCE = 3;
+const RELEASE_CONSCIENCE = 5;
+export const RELEASE_AFTER_TERMS = 2;
+
+export type TermEnding = 'chair' | 'testify' | 'release';
 
 export type BoardLogKind = 'minutes' | 'memo' | 'ledger';
 /** What the Board does with a contract that reaches its terminus. */
@@ -86,12 +95,12 @@ export interface BoardroomState {
   nextLogId: number;
 }
 
-export function createBoardroom(seed: number, term = 1): BoardroomState {
+export function createBoardroom(seed: number, term = 1, dividends = 0): BoardroomState {
   return {
     term,
     rng: seed,
     elapsed: 0,
-    value: START_VALUE,
+    value: START_VALUE * (1 + DIVIDEND_START * dividends),
     lifetimeValue: 0,
     slots: START_SLOTS,
     contracts: [],
@@ -139,7 +148,7 @@ export const charterable = (game: GameState): ScenarioId[] => availableAssignmen
 export function enterBoardroom(game: GameState, seed: number): GameState {
   if (game.boardroom) return { ...game, mode: 'boardroom' };
   if (!isBoardroomUnlocked(game.profile)) return game;
-  return { ...game, mode: 'boardroom', boardroom: createBoardroom(seed) };
+  return { ...game, mode: 'boardroom', boardroom: createBoardroom(seed, game.profile.boardTerms + 1, game.profile.dividends) };
 }
 
 export const leaveBoardroom = (game: GameState): GameState => ({ ...game, mode: 'mission' });
@@ -216,16 +225,37 @@ export function buyFloor(game: GameState): GameState {
 export const setPolicy = (game: GameState, policy: BoardPolicy): GameState => (game.boardroom ? { ...game, boardroom: { ...game.boardroom, policy } } : game);
 
 /** What a finished contract pays the Board under each policy. */
-export function deliveryValue(m: MissionState, policy: BoardPolicy, b: BoardroomState): number {
+export function deliveryValue(m: MissionState, policy: BoardPolicy, b: BoardroomState, profile?: { dividends: number }): number {
   if (policy === 'scuttle') return CHARTER * SCUTTLE_RETURN;
+  const dividend = 1 + DIVIDEND_PAY * (profile?.dividends ?? 0);
   const specimens = missionRecord(m, policy).specimens * SPECIMEN_VALUE * (1 + PRODUCT_BONUS * level(b, 'specialProjects'));
   const samples = (isOutbreak(m) ? Math.floor(m.samples) : 0) * SAMPLE_VALUE * (1 + PRODUCT_BONUS * level(b, 'bioproducts'));
-  return CHARTER * DELIVERY_RETURN + specimens + samples;
+  return (CHARTER * DELIVERY_RETURN + specimens + samples) * dividend;
+}
+
+/** The endings a finished term offers; releasing the minutes takes a board with terms behind it. */
+export function termEndings(game: GameState): TermEnding[] {
+  if (!game.boardroom?.flags.includes('term-end')) return [];
+  return game.profile.boardTerms >= RELEASE_AFTER_TERMS ? ['chair', 'testify', 'release'] : ['chair', 'testify'];
+}
+
+/** The term ends: the profile remembers how, and a new term opens. The player's own contract is untouched. */
+export function endTerm(game: GameState, ending: TermEnding, seed: number): GameState {
+  if (!termEndings(game).includes(ending)) return game;
+  const p = game.profile;
+  const profile = {
+    ...p,
+    boardTerms: p.boardTerms + 1,
+    dividends: p.dividends + (ending === 'chair' ? 1 : 0),
+    conscience: p.conscience + (ending === 'testify' ? TESTIFY_CONSCIENCE : ending === 'release' ? RELEASE_CONSCIENCE : 0),
+    endingsSeen: p.endingsSeen.includes(ending) ? p.endingsSeen : [...p.endingsSeen, ending],
+  };
+  return { ...game, profile, boardroom: createBoardroom(seed, profile.boardTerms + 1, profile.dividends) };
 }
 
 /** A contract at its terminus is closed by the standing policy: paid, put in the ledger, its office freed. */
-function close(b: BoardroomState, c: BoardContract): BoardroomState {
-  const paid = deliveryValue(c.mission, b.policy, b);
+function close(b: BoardroomState, c: BoardContract, profile: { dividends: number }): BoardroomState {
+  const paid = deliveryValue(c.mission, b.policy, b, profile);
   const verb = b.policy === 'deliver' ? 'DELIVERED' : 'SCUTTLED';
   const next = {
     ...b,
@@ -260,7 +290,7 @@ export function tickBoardroom(game: GameState, dt: number): GameState {
     scrutiny: Math.max(0, b.scrutiny + deaths * DEATH_SCRUTINY * LEGAL_SOFTENING ** level(b, 'legal') - SCRUTINY_FADE * dt),
     frozenFor: Math.max(0, b.frozenFor - dt),
   };
-  for (const c of contracts) if (c.mission.flags.includes('terminus')) next = close(next, c);
+  for (const c of contracts) if (c.mission.flags.includes('terminus')) next = close(next, c, game.profile);
   if (next.scrutiny >= INQUIRY_AT) next = inquiry(next);
   next = runBoardStory(next, game);
   let after: GameState = { ...game, boardroom: next };
