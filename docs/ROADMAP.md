@@ -77,7 +77,8 @@ In order. Each item has its design written down first, so nothing lives only in 
      - Progress is kept per device under `deep-contract.guide`, not in the save, so it needs no migration. For the same reason, telemetry for the guide is still to do: events come from save-state diffs.
      - Elderdark: forest and Keep steps and rules (`src/forest-data/guide.ts`), progress under `elderdark.guide`.
      - LATE FEES: steps and a rules page for each of the four tapes (`src/late-fees-data/guide.ts`). The tip sits above the whistle and the `?` in the tape header; progress is kept under `latefees.guide`.
-     - **Left:** DOWN THERE, the horror tiers, and guide telemetry.
+     - DOWN THERE: a step for each zone's lever as the water opens (pass, beach dial and guards, range and buoys, enhancement and pens, station depth and crews, walls, Bulwarks and pilots) and a season rules page (`src/fathom-data/guide.ts`), progress under `fathom.guide`.
+     - **Left:** the horror tiers, and guide telemetry.
 7. **(User, 2026-10-22) A second first-tier horror: the outbreak.** A novel disease spreading through the workforce and turning them against the company (zombie/pandemic homage, original IP).
    - It needs a design doc first (`docs/OUTBREAK.md`). It stays decoupled from scenarios through signals, lexicon and hooks.
    - It also needs a rule for which horror a contract gets.

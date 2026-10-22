@@ -16,6 +16,9 @@ import { incomeNow } from '../fathom/income';
 import { createBeach, createCoast, createShelf, createStation, createTrench, type Component } from './zones';
 import { createConfig, createEndPanel, createStorePanel } from './panels';
 import { createDeepView } from './deep';
+import { createGuideView } from '../shared/ui/guide';
+import { createGuideProgress } from '../shared/guide';
+import { fathomGuideRules, fathomGuideSteps } from '../fathom-data/guide';
 
 /** The season clock: days of the season, as the log stamps them. */
 export function seasonClock(seconds: number): string {
@@ -38,15 +41,19 @@ function stat(label: string, aria: string) {
   return { value, el: h('div', { class: 'stat' }, h('dt', { class: 'stat-label' }, label), value) };
 }
 
+/** The guide's progress is a per-device convenience, kept apart from the save. */
+const GUIDE_KEY = 'fathom.guide';
+
 export function mountFathom(root: HTMLElement, store: FathomStore): void {
   const config = createConfig(store);
   const deepView = createDeepView(store);
+  const guide = createGuideView<FathomGame>({ steps: fathomGuideSteps, rules: fathomGuideRules, progress: createGuideProgress(window.localStorage, GUIDE_KEY) });
   const depthValue = h('span', { class: 'mast-depth', 'aria-label': 'Depth' }, '0 M');
   const season = h('span', { class: 'mast-season', 'aria-label': 'Season' }, 'SEASON 1');
   const banner = h(
     'header',
     { class: 'mast' },
-    h('div', { class: 'mast-line' }, h('span', { class: 'mast-name' }, 'HARROW POINT MARINE SAFETY'), config.button),
+    h('div', { class: 'mast-line' }, h('span', { class: 'mast-name' }, 'HARROW POINT MARINE SAFETY'), guide.rulesButton, config.button),
     h('div', { class: 'mast-line' }, season, depthValue),
     h('div', { class: 'sonar', 'aria-hidden': 'true' }, h('i', { class: 'sonar-sweep' })),
   );
@@ -151,7 +158,7 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
   });
 
   root.classList.add('sonar-shell');
-  root.replaceChildren(banner, status, ...panels.map((p) => p.el), h('div', { class: 'pass-bay' }, pass), tabbar, deepView.el, config.dialog);
+  root.replaceChildren(banner, status, ...panels.map((p) => p.el), h('div', { class: 'pass-bay' }, guide.el, pass), tabbar, deepView.el, config.dialog, guide.rulesDialog);
   select('log');
 
   function render(game: FathomGame) {
@@ -166,6 +173,7 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
     root.dataset.motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
     config.render(game);
     deepView.render(game);
+    guide.render(game);
     panels.forEach((p, i) => {
       const shown = p.visible?.(o) ?? true;
       tabs[i]!.hidden = !shown;
