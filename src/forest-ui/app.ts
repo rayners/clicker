@@ -1,4 +1,7 @@
 import { formatNumber } from '../shared/format';
+import { createGuideView } from '../shared/ui/guide';
+import { createGuideProgress } from '../shared/guide';
+import { forestGuideRules, forestGuideSteps } from '../forest-data/guide';
 import { h, setText } from '../shared/ui/dom';
 import { createFlow } from '../shared/ui/flow';
 import { createLogView } from '../shared/ui/log';
@@ -52,6 +55,8 @@ function stat(label: string, aria: string) {
 
 export function mountForest(root: HTMLElement, store: ForestStore): void {
   const config = createConfig(store);
+  // The walkthrough (docs/ROADMAP.md 6b): a tip above the forage button, the rules a tap away in the masthead.
+  const guide = createGuideView<ForestGame>({ steps: forestGuideSteps, rules: forestGuideRules, progress: createGuideProgress(window.localStorage, 'elderdark.guide') });
   const woodView = createWoodView(store);
   const dragonView = createDragonView(store);
   const dayStamp = h('span', { class: 'mast-day' });
@@ -59,7 +64,7 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
     'header',
     { class: 'masthead' },
     h('div', { class: 'mast-brand' }, h('span', { class: 'brand-name' }, 'The Company of the Ashen Key')),
-    h('div', { class: 'mast-line' }, h('span', { class: 'mast-place' }, 'LEDGER · THISTLEGATE'), h('span', { class: 'mast-right' }, dayStamp, config.button)),
+    h('div', { class: 'mast-line' }, h('span', { class: 'mast-place' }, 'LEDGER · THISTLEGATE'), h('span', { class: 'mast-right' }, dayStamp, guide.rulesButton, config.button)),
     // Repeated at native pixel scale (alternate copies mirrored) rather than stretched.
     h('div', { class: 'mast-trees', 'aria-hidden': 'true' }, ...Array.from({ length: TREE_COPIES }, () => kit.spriteCanvas('treeline', 'mast-tree'))),
   );
@@ -177,7 +182,7 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
   });
 
   root.classList.add('ledger-shell');
-  root.replaceChildren(masthead, standing, ...panels.map((p) => p.el), h('div', { class: 'forage-bay' }, forage), tabbar, woodView.el, dragonView.el, config.dialog);
+  root.replaceChildren(masthead, standing, ...panels.map((p) => p.el), h('div', { class: 'forage-bay' }, guide.el, forage), tabbar, woodView.el, dragonView.el, config.dialog, guide.rulesDialog);
   select('ledger');
   const palette = kit.readPalette(root);
   kit.paintAll(root);
@@ -198,6 +203,7 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
     root.dataset.motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
     config.render(game);
     woodView.render(game);
+    guide.render(game);
     dragonView.render(game);
     root.dataset.mode = game.mode;
     panels.forEach((p, i) => {

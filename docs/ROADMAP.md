@@ -75,7 +75,8 @@ In order. Each item has its design written down first, so nothing lives only in 
      - The engine (`src/shared/guide.ts`) and the tip and rules views (`src/shared/ui/guide.ts`).
      - DEEP CONTRACT's guide for all six contracts plus the shared levers, with a rules page each (`src/data/guide.ts`). The tip sits above the big button; the rules sit behind a `?` in the masthead.
      - Progress is kept per device under `deep-contract.guide`, not in the save, so it needs no migration. For the same reason, telemetry for the guide is still to do: events come from save-state diffs.
-     - **Left:** Elderdark, LATE FEES, DOWN THERE, the horror tiers, and guide telemetry.
+     - Elderdark: forest and Keep steps and rules (`src/forest-data/guide.ts`), progress under `elderdark.guide`.
+     - **Left:** LATE FEES, DOWN THERE, the horror tiers, and guide telemetry.
 7. **(User, 2026-10-22) A second first-tier horror: the outbreak.** A novel disease spreading through the workforce and turning them against the company (zombie/pandemic homage, original IP).
    - It needs a design doc first (`docs/OUTBREAK.md`). It stays decoupled from scenarios through signals, lexicon and hooks.
    - It also needs a rule for which horror a contract gets.
