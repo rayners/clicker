@@ -51,6 +51,8 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 | Elderdark | `charter_completed` | ending, minutes, relics, dead |
 | Elderdark | `wood_started` | (playing as the wood) |
 | Elderdark | `wood_beaten` | beaten (times a charter beat the wood back), harvest |
+| Elderdark | `dragon_started` | (none): the player woke the dragon |
+| Elderdark | `dragon_beaten` | beaten (times a charter's reckoning drove the dragon to its lair), harvest |
 | LATE FEES | `film_started` | venue, killer, part |
 | LATE FEES | `act_reached` | act, venue, killer, part, minutes |
 | LATE FEES | `zone_opened` | zone, zones, minutes, part (Camp Blackwater) |

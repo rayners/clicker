@@ -18,6 +18,7 @@ import { createMapStrip } from './map';
 import { createConfig } from './config';
 import { createReckoning } from './reckoning';
 import { createWoodView } from './wood';
+import { createDragonView } from './dragon';
 import { KEY_FRAGMENTS } from '../forest/company';
 import { FLOORS } from '../forest-data/keep';
 import { held } from '../shared/ground';
@@ -52,6 +53,7 @@ function stat(label: string, aria: string) {
 export function mountForest(root: HTMLElement, store: ForestStore): void {
   const config = createConfig(store);
   const woodView = createWoodView(store);
+  const dragonView = createDragonView(store);
   const dayStamp = h('span', { class: 'mast-day' });
   const masthead = h(
     'header',
@@ -175,7 +177,7 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
   });
 
   root.classList.add('ledger-shell');
-  root.replaceChildren(masthead, standing, ...panels.map((p) => p.el), h('div', { class: 'forage-bay' }, forage), tabbar, woodView.el, config.dialog);
+  root.replaceChildren(masthead, standing, ...panels.map((p) => p.el), h('div', { class: 'forage-bay' }, forage), tabbar, woodView.el, dragonView.el, config.dialog);
   select('ledger');
   const palette = kit.readPalette(root);
   kit.paintAll(root);
@@ -196,6 +198,7 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
     root.dataset.motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
     config.render(game);
     woodView.render(game);
+    dragonView.render(game);
     root.dataset.mode = game.mode;
     panels.forEach((p, i) => {
       const lit = p.attention?.(c) ?? false;

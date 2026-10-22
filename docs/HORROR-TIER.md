@@ -100,7 +100,7 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
 - **Telemetry:** `hunter_started` and `hunter_driven`.
 - **Balance (bot):** 75 trophies in an hour, 193 in two and 355 in four, never driven off. A passive hunter takes nothing.
 
-### CHARTER OF THE ELDERDARK: the dragon (design, 2026-10-21)
+### CHARTER OF THE ELDERDARK: the dragon (built 2026-10-21)
 
 **What you are.** The dragon under the Heartwood, which wants what the companies dig up.
 
@@ -123,6 +123,11 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
 **Entry.** "Wake the dragon" in the configuration.
 
 **Screen.** The ledger as the dragon keeps it: an inventory of the hoard, in gold on soot.
+
+**As built.**
+- **Code:** `src/forest/dragon.ts`, `src/forest-data/dragon-upgrades.ts`, `src/forest-ui/dragon.ts`.
+- **Telemetry:** `dragon_started` and `dragon_beaten`.
+- **Balance (bot):** a hoard of 139 in an hour, 312 in two and 611 in four, with three reckonings by then. A sleeping dragon takes nothing.
 
 ### The kaiju game (working title FATHOM): the Source
 
@@ -199,7 +204,8 @@ Added 2026-10-21 with the fourth game.
   - **Balance (bot):** 258 biomass in 2 hours and 424 in 4, with no vents. A passive creature takes nothing.
 - **Built (2026-10-21):** DOWN THERE's Source.
 - **Built (2026-10-21):** DEEP CONTRACT's hunter.
-- **Next:** the dragon (Elderdark), then Legend (prestige across hunts).
+- **Built (2026-10-21):** Elderdark's dragon.
+- **Next:** Legend (prestige across hunts).
 
 ## Build order
 

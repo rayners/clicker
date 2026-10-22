@@ -1221,6 +1221,48 @@ button:focus-visible {
   }
 }
 
+/* ---------- the dragon: the same turned ledger, kept in gold on soot ---------- */
+
+.wood.dragon {
+  color: #e8d3a0;
+  background:
+    radial-gradient(ellipse at 50% 110%, rgba(201, 162, 74, 0.22), transparent 55%),
+    radial-gradient(ellipse at 80% 0%, rgba(184, 67, 47, 0.14), transparent 45%),
+    #0b0705;
+}
+
+.wood.dragon::after {
+  background: repeating-linear-gradient(-30deg, transparent 0 7px, rgba(201, 162, 74, 0.03) 7px 8px);
+}
+
+.wood.dragon .wood-head {
+  border-bottom-color: rgba(201, 162, 74, 0.4);
+}
+
+.wood.dragon .wood-name,
+.wood.dragon .wood-note,
+.wood.dragon .wood-push {
+  color: var(--gilt);
+  text-shadow: 0 0 10px rgba(201, 162, 74, 0.35);
+}
+
+.wood.dragon .wood-company,
+.wood.dragon .wood-upgrade,
+.wood.dragon .wood-back,
+.wood.dragon .wood-sleep,
+.wood.dragon .wood-step {
+  border-color: rgba(201, 162, 74, 0.35);
+}
+
+.wood.dragon .wood-company {
+  background: rgba(16, 10, 6, 0.85);
+}
+
+.wood.dragon .wood-company[data-pushed='true'] {
+  border-color: var(--rubric);
+  box-shadow: 0 0 12px rgba(184, 67, 47, 0.35);
+}
+
 /* ---------- Morrowgate Keep: the assault and the floors held behind it ---------- */
 
 .keep-card {

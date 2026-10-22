@@ -3,6 +3,7 @@ import { createForestGame, type ForestGame } from '../../src/forest/game';
 import { reduce } from '../../src/forest/store';
 import { charterEvents, charterProperties } from '../../src/forest/telemetry';
 import { startWood } from '../../src/forest/wood';
+import { wakeDragon } from '../../src/forest/dragon';
 import { REGIONS } from '../../src/forest-data/regions';
 import { createCompany, type Company } from '../../src/forest/state';
 
@@ -53,6 +54,15 @@ describe('Elderdark play events', () => {
     const due = game({ flags: ['terminus'], elapsed: 4 * 3600 });
     const done = reduce(due, { type: 'completeCharter', ending: 'sell', seed: 4 });
     expect(charterEvents(due, done)[0]).toMatchObject({ name: 'charter_completed', props: { ending: 'sell', minutes: 240, charter: 1 } });
+  });
+
+  it('reports the dragon woken, and each time a charter drives it to its lair', () => {
+    const g = createForestGame(1, 0);
+    const awake = wakeDragon(g, 5);
+    expect(charterEvents(g, awake)).toEqual([{ name: 'dragon_started', props: {} }]);
+    const driven = { ...awake, dragon: { ...awake.dragon!, hunt: { ...awake.dragon!.hunt, beaten: 1, harvest: 42.4 } } };
+    expect(charterEvents(awake, driven)).toEqual([{ name: 'dragon_beaten', props: { beaten: 1, harvest: 42 } }]);
+    expect(charterEvents(driven, driven)).toEqual([]);
   });
 
   it('reports listening to the wood, and each time a charter beats it back', () => {

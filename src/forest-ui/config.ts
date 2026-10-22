@@ -20,6 +20,8 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
   const close = h('button', { class: 'cfg-close', type: 'button', 'aria-label': 'Close' }, '✕');
   // Play as the forest: the ledger turned over (docs/HORROR-TIER.md).
   const listen = h('button', { class: 'buy', type: 'button', 'aria-label': 'Listen to the wood' }, 'LISTEN TO THE WOOD');
+  // Or play as the dragon under the Heartwood.
+  const wake = h('button', { class: 'buy', type: 'button', 'aria-label': 'Wake the dragon' }, 'WAKE THE DRAGON');
   // Morrowgate Keep instead of the forest (docs/MISSIONS.md): tears up the charter in hand, earning nothing for it.
   const rewrite = h('button', { class: 'buy', type: 'button' });
   const dialog = h(
@@ -40,6 +42,7 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
       rewrite,
       h('h3', { class: 'panel-subtitle' }, 'THE WOOD'),
       listen,
+      wake,
       h('h3', { class: 'panel-subtitle' }, 'BURN THE LEDGER'),
       reset,
     ),
@@ -60,6 +63,10 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
   share.addEventListener('change', () => optOut.setSharing(share.checked));
   listen.addEventListener('click', () => {
     store.dispatch({ type: 'startWood', seed: (Math.random() * 2 ** 31) | 0 });
+    show(false);
+  });
+  wake.addEventListener('click', () => {
+    store.dispatch({ type: 'wakeDragon', seed: (Math.random() * 2 ** 31) | 0 });
     show(false);
   });
   motion.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'reducedMotion', value: motion.checked }));

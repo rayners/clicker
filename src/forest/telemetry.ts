@@ -11,8 +11,14 @@ export function charterProperties(game: ForestGame): TelemetryProps {
   return { game: 'elderdark', site: game.company.site, act: game.company.act, charter: game.company.charter.number };
 }
 
-/** Milestones between two successive states: regions opened, acts reached, Key fragments found, charters completed. */
+/** Milestones between two successive states: regions opened, acts reached, Key fragments found, charters completed, and the wood's and dragon's hunts. */
 export function charterEvents(prev: ForestGame, next: ForestGame): TelemetryEvent[] {
+  if (next.mode === 'dragon' && next.dragon) {
+    if (prev.mode !== 'dragon') return [{ name: 'dragon_started', props: {} }];
+    const h = next.dragon.hunt;
+    if (prev.dragon && h.beaten > prev.dragon.hunt.beaten) return [{ name: 'dragon_beaten', props: { beaten: h.beaten, harvest: Math.round(h.harvest) } }];
+    return [];
+  }
   if (next.mode === 'wood' && next.wood) {
     if (prev.mode !== 'wood') return [{ name: 'wood_started', props: {} }];
     const h = next.wood.hunt;

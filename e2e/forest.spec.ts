@@ -88,3 +88,17 @@ test('elderdark: write a charter for Morrowgate Keep, buy oil, send a party in a
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   }
 });
+
+test('elderdark: wake the dragon and circle a company', async ({ page }) => {
+  await page.goto('/forest/');
+  await page.evaluate(() => localStorage.removeItem('elderdark.save'));
+  await page.reload();
+  await page.getByRole('button', { name: /^configuration$/i }).click();
+  await page.getByRole('button', { name: /wake the dragon/i }).click();
+  const hoard = page.getByRole('region', { name: /the hoard/i });
+  await expect(hoard).toBeVisible();
+  await hoard.getByRole('button', { name: /circle closer over the company of the ashen key/i }).click();
+  await expect(hoard.getByLabel('Strength free')).toHaveText('2 / 3');
+  await hoard.getByRole('button', { name: /return to the ledger/i }).click();
+  await expect(hoard).toBeHidden();
+});
