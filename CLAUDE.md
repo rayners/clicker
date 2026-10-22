@@ -17,6 +17,7 @@ Read before changing things:
 - `docs/HORROR-TIER.md`: the planned play-as-the-horror tier in every game (a shared hunt engine: first-tier runs defended by their bots, the player as the horror). Approved; the engine, LATE FEES's Killer's Cut and Elderdark's wood are built, and DEEP CONTRACT's creature is next.
 - `docs/kaiju/DESIGN.md`: the fourth game, DOWN THERE (named by the user 2026-10-21; working title FATHOM in code): deep water to kaiju, sharks on the coast down to mechs at the breach.
 - `docs/MISSIONS.md`: the approved new missions (security detachment, haulage, salvage, the Keep), the shared held-ground engine, and the build order.
+- `docs/OUTBREAK.md`: the second first-tier horror for DEEP CONTRACT (a pathogen turning the workforce against the company), and the rule for which horror a contract gets. Designed; build next.
 - `docs/TELEMETRY.md`: anonymous PostHog analytics (published site only, opt-out, events derived from state diffs). Add an event there when a new milestone matters for pacing.
 
 ## Non-negotiable requirements
