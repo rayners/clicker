@@ -94,7 +94,7 @@ In order. Each item has its design written down first, so nothing lives only in 
 - (Done 2026-10-22) **A first-load boot sequence** for DEEP CONTRACT: WARDEN's BIOS lines type out on a brand-new player's first visit only (no save yet). Any tap or key skips it, it leaves by itself after about 4.4 s, and it prints at once with reduced motion. The e2e helper `skipBoot` steps past it.
 - **Raise `TERRAFORM_UNLOCK_CONTRACTS`** (currently 0 so it can be play-tested) once the user is happy with it.
 - **A second horror.** The architecture is ready: add `src/mission/<horror>/`, a `HorrorDef`, lexicon keys each scenario must supply, and optional pairings. Choosing a horror per contract (random or cycled from the profile) is still to be designed.
-- Terraform polish: collapse the allocation controls to a one-line summary once WARDEN auto-balances (it frees phone space). (Every scenario now has its own vessel, target and action sprites.)
+- (Done 2026-10-22) Terraform polish: while WARDEN balances, the three allocation lines fold into a one-line power split (e.g. `ATMO 40% · HEAT 30% · WATER 30%`). Taking control back restores the steps. (Every scenario now has its own vessel, target and action sprites.)
 - More flow feedback: show each purchase's effect on *income* (not just ore/s) on the buy buttons.
 - The **Boardroom** layer (`docs/BOARDROOM.md`).
 

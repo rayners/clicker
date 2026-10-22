@@ -97,6 +97,13 @@ describe('power allocation', () => {
     expect(allocation().queryByRole('button', { name: /more power/i })).toBeNull();
     expect(allocation().getByText(/WARDEN BALANCING/)).toBeTruthy();
   });
+
+  it('folds the three lines into one summary while WARDEN balances, to save room on a phone', () => {
+    const balancer = TERRAFORM_UPGRADES.find((u) => u.effect.kind === 'autoBalance')!;
+    setup({ upgrades: [balancer.id] });
+    for (const el of allocation().queryAllByText(/AT CAPACITY|POWER-LIMITED|NO PROCESSORS/)) expect(el.closest('[hidden]')).not.toBeNull();
+    expect(allocation().getByLabelText('Power split').textContent).toMatch(/^\S+ \d+% · \S+ \d+% · \S+ \d+%$/);
+  });
 });
 
 describe('terraform systems panel', () => {

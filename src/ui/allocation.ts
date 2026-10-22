@@ -53,9 +53,12 @@ export function createAllocation(store: Store): { el: HTMLElement; render(m: Ter
     return { line, el, share, target, state, reading, less, more, steps };
   });
   const auto = h('p', { class: 'alloc-auto' }, 'WARDEN BALANCING · ALLOCATION FOLLOWS CORPORATE SPEC');
+  // While WARDEN balances, the three lines fold into one summary: nothing to set, so no room spent on steps.
+  const summary = h('p', { class: 'alloc-summary', 'aria-label': 'Power split' });
+  const grid = h('div', { class: 'alloc-grid' }, ...rows.map((r) => r.el));
   const handover = h('button', { class: 'alloc-handover', type: 'button' });
   handover.addEventListener('click', () => store.dispatch({ type: 'toggleBalancer' }));
-  const el = h('section', { class: 'alloc', 'aria-label': 'Power allocation' }, h('div', { class: 'alloc-grid' }, ...rows.map((r) => r.el)), auto, handover);
+  const el = h('section', { class: 'alloc', 'aria-label': 'Power allocation' }, grid, summary, auto, handover);
 
   function render(m: TerraformMission) {
     const automated = isAutoBalanced(m);
@@ -65,6 +68,9 @@ export function createAllocation(store: Store): { el: HTMLElement; render(m: Ter
     const supply = power(m);
     const given = linePower(m);
     auto.hidden = !automated;
+    grid.hidden = automated;
+    summary.hidden = !automated;
+    if (automated) setText(summary, rows.map((r) => `${r.line.short} ${Math.round((given[r.line.id] / supply) * 100)}%`).join(' · '));
     el.dataset.auto = String(automated);
     const installed = m.upgrades.includes(BALANCER);
     handover.hidden = !installed;
