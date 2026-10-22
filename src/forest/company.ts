@@ -224,7 +224,8 @@ export function wages(c: Company): number {
   return CLASS_IDS.reduce((s, id) => s + c.hired[id] * def(id).wage, 0) * modifiers(c).wages;
 }
 
-function inField(c: Company, id: ClassId): number {
+/** Hands out with a party: in the wood, or on an assault at the Keep. */
+export function inField(c: Company, id: ClassId): number {
   return c.parties.reduce((s, p) => s + p.comp[id], 0);
 }
 
@@ -233,7 +234,7 @@ export function available(c: Company, id: ClassId): number {
   return Math.max(0, c.hired[id] - c.wounded[id] - inField(c, id) - (id === 'blade' ? postedBlades(c) : 0));
 }
 
-const postedBlades = (c: Company) => c.posted.reduce((s, n) => s + n, 0);
+export const postedBlades = (c: Company): number => c.posted.reduce((s, n) => s + n, 0);
 
 function payWages(c: Company, dt: number): Company {
   const due = wages(c) * dt;

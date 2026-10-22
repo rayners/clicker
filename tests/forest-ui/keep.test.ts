@@ -102,6 +102,14 @@ describe('Morrowgate Keep on screen', () => {
     expect(company().charter.number).toBe(2);
   });
 
+  it('lists posted blades on the roster as garrisoned, and calls parties out on the Keep an assault, not the wood', async () => {
+    const user = setup({ hired: crew, posted: FLOORS.map((_, i) => (i === 0 ? 4 : 0)), floors: taken(1) });
+    await user.click(screen.getByRole('tab', { name: /roster/i }));
+    const blades = within(screen.getByRole('article', { name: /^blades$/i }));
+    expect(blades.getByText(/8 READY · 0 ON ASSAULT · 4 GARRISONED · 0 WOUNDED/)).toBeTruthy();
+    expect(screen.queryByText(/IN THE WOOD/)).toBeNull();
+  });
+
   it('hires sappers for the Keep and sends them with the assault', async () => {
     const user = setup({ silver: 1_000 });
     await user.click(screen.getByRole('tab', { name: /roster/i }));

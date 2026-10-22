@@ -1,13 +1,13 @@
 import { formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
 import { CLASSES } from '../forest-data/classes';
-import { available, hireCost, isHireable } from '../forest/company';
+import { available, hireCost, inField, isHireable, postedBlades } from '../forest/company';
 import type { Company } from '../forest/state';
 import type { ForestStore } from '../forest/store';
 
 const PER_MINUTE = 60;
 
-/** Hire hands; see who is ready, out in the wood, or mending, and what they cost to keep. */
+/** Hire hands; see who is ready, out with a party, garrisoned at the Keep, or mending, and what they cost to keep. */
 export function createRoster(store: ForestStore): { el: HTMLElement; render(c: Company): void } {
   const rows = CLASSES.map((k) => {
     const counts = h('p', { class: 'roster-counts' });
@@ -34,9 +34,10 @@ export function createRoster(store: ForestStore): { el: HTMLElement; render(c: C
       if (r.el.hidden) continue;
       const ready = available(c, id);
       const wounded = c.wounded[id];
-      const out = c.hired[id] - ready - wounded;
+      const out = `${inField(c, id)} ${c.site === 'keep' ? 'ON ASSAULT' : 'IN THE WOOD'}`;
+      const posted = id === 'blade' && c.site === 'keep' ? ` · ${postedBlades(c)} GARRISONED` : '';
       setText(r.total, String(c.hired[id]));
-      setText(r.counts, `${ready} READY · ${out} IN THE WOOD · ${wounded} WOUNDED`);
+      setText(r.counts, `${ready} READY · ${out}${posted} · ${wounded} WOUNDED`);
       setText(r.wage, `${formatNumber(r.k.wage * PER_MINUTE)} THALERS/MIN EACH`);
       const cost = hireCost(c, id);
       setText(r.hire, `HIRE · ${formatNumber(cost)} ₮`);
