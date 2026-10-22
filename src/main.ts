@@ -6,7 +6,7 @@ import { catchUp } from './core/game';
 import { loadGame, saveGame } from './core/save';
 import { createStore } from './core/store';
 import { mountApp } from './ui/app';
-import { applyScenario } from './core/debug';
+import { applyScenario, debugSpeed, grantCredits, storySummary } from './core/debug';
 import { contractEvents, contractProperties } from './core/telemetry';
 import { startAnalytics } from './shared/posthog';
 import { createOptOut, telemetryAllowed } from './shared/telemetry';
@@ -20,7 +20,20 @@ const loaded = loadGame(storage, Date.now(), seed);
 // Debug jumps replace the game, and autosave would write that over the real save: dev builds only.
 const debug = import.meta.env.DEV ? new URLSearchParams(location.search).get('debug') : null;
 const initial = catchUp(loaded.game, Date.now()).game;
-const store = createStore(debug ? applyScenario(initial, debug) : initial);
+const params = import.meta.env.DEV ? new URLSearchParams(location.search) : null;
+const jumped = debug ? applyScenario(initial, debug) : initial;
+const store = createStore(params?.has('grant') ? grantCredits(jumped, Number(params.get('grant'))) : jumped);
+// Dev-only extras (docs/ROADMAP.md): ?speed=N runs the clock faster, ?flags shows the story so far.
+const speed = import.meta.env.DEV ? debugSpeed(location.search) : 1;
+if (params?.has('flags')) {
+  const overlay = document.createElement('pre');
+  overlay.className = 'debug-flags';
+  overlay.setAttribute('aria-hidden', 'true');
+  document.body.append(overlay);
+  const show = () => (overlay.textContent = storySummary(store.getState()).join('\n'));
+  store.subscribe(show);
+  show();
+}
 
 mountApp(document.getElementById('app')!, store);
 
@@ -37,7 +50,7 @@ startAnalytics({
 let last = Date.now();
 setInterval(() => {
   const now = Date.now();
-  store.dispatch({ type: 'tick', dt: (now - last) / 1000 });
+  store.dispatch({ type: 'tick', dt: ((now - last) / 1000) * speed });
   last = now;
 }, TICK_MS);
 

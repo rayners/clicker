@@ -2,7 +2,7 @@ import { progress as haulageProgress } from '../../src/mission/haulage/economy';
 import type { MissionOf } from '../../src/mission/state';
 import { describe, it, expect } from 'vitest';
 import { createGame, newGame } from '../../src/core/game';
-import { applyScenario, SCENARIOS } from '../../src/core/debug';
+import { applyScenario, debugSpeed, grantCredits, SCENARIOS, storySummary } from '../../src/core/debug';
 import { depth } from '../../src/mission/extraction/progress';
 import { progress } from '../../src/mission/terraform/economy';
 import { progress as securityProgress } from '../../src/mission/security/economy';
@@ -118,5 +118,36 @@ describe('debug scenarios', () => {
 describe('debug jumps on a brand-new game', () => {
   it('skip the assignment screen: a jump means "play this now"', () => {
     for (const name of ['act2', 'tf-act2']) expect(applyScenario(newGame(1, 0), name).assigning).toBe(false);
+  });
+});
+
+describe('debug extras', () => {
+  it('reads a time-scale multiplier from the address, within sane bounds', () => {
+    expect(debugSpeed('?speed=10')).toBe(10);
+    expect(debugSpeed('?speed=1000')).toBe(100);
+    expect(debugSpeed('?speed=0.1')).toBe(1);
+    expect(debugSpeed('?debug=act2')).toBe(1);
+    expect(debugSpeed('?speed=fast')).toBe(1);
+  });
+
+  it('grants credits to the running contract', () => {
+    const g = base();
+    expect(grantCredits(g, 5_000).mission.credits).toBe(g.mission.credits + 5_000);
+    expect(grantCredits(g, 5_000).mission.lifetimeCredits).toBe(g.mission.lifetimeCredits);
+    expect(grantCredits(g, Number.NaN)).toBe(g);
+  });
+
+  it('summarises the story so far: act, flags and the latest beats', () => {
+    const g = applyScenario(base(), 'act3');
+    const lines = storySummary(g);
+    expect(lines[0]).toMatch(/ACT 3/);
+    expect(lines.join('\n')).toMatch(/specimens/);
+    expect(lines.join('\n')).toMatch(/a3-special-projects/);
+  });
+
+  it('jumps to an extraction contract for the act jumps, whatever contract was running', () => {
+    const onSalvage = applyScenario(base(), 'salvage');
+    expect(applyScenario(onSalvage, 'act3').mission.scenario).toBe('extraction');
+    expect(applyScenario(onSalvage, 'act3').mission.act).toBe(3);
   });
 });

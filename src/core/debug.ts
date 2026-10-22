@@ -137,6 +137,34 @@ export function applyScenario(game: GameState, name: string): GameState {
   }
   const patch = PATCHES[name];
   if (!patch) return game;
-  const mission = { ...game.mission, ...patch, beats: { ...game.mission.beats, ...patch.beats } } as MissionState;
+  // The act jumps are extraction states: start one if another kind of contract is running.
+  const base = game.mission.scenario === 'extraction' ? game.mission : createMission(missionConfigFor(game.profile, 'extraction'), game.mission.seed);
+  const mission = { ...base, ...patch, beats: { ...base.beats, ...patch.beats } } as MissionState;
   return { ...game, assigning: false, mission };
+}
+
+const MAX_SPEED = 100;
+
+/** `?speed=N` runs the clock N times faster (1 to 100). */
+export function debugSpeed(search: string): number {
+  const speed = Number(new URLSearchParams(search).get('speed'));
+  return Number.isFinite(speed) && speed > 1 ? Math.min(MAX_SPEED, speed) : 1;
+}
+
+/** `?grant=N` hands the running contract N credits, without counting them as earned. */
+export function grantCredits(game: GameState, amount: number): GameState {
+  if (!Number.isFinite(amount) || amount <= 0) return game;
+  return { ...game, mission: { ...game.mission, credits: game.mission.credits + amount } };
+}
+
+const RECENT_BEATS = 6;
+
+/** `?flags`: the story so far, for the overlay. */
+export function storySummary(game: GameState): string[] {
+  const m = game.mission;
+  const beats = Object.entries(m.beats)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, RECENT_BEATS)
+    .map(([id, t]) => `${id} @${Math.round(t)}s`);
+  return [`ACT ${m.act} · ${m.scenario}/${m.horror} · ${Math.round(m.elapsed)}s`, `FLAGS ${m.flags.join(', ') || '-'}`, ...beats];
 }
