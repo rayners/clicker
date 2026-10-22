@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createGame, GAME_VERSION, tickGame, type GameState } from '../../src/core/game';
 import { reduce } from '../../src/core/store';
 import { BOARDROOM_UNLOCK_CONTRACTS } from '../../src/core/prestige';
-import { BOARD_SPEED, charterCost, commission, createBoardroom, DEFAULT_SAFETY, deliveryValue, termEndings, divisionCost, floorCost, freeSlot, INQUIRY_AT, MAX_SLOTS, safetyCost, START_VALUE } from '../../src/core/boardroom';
+import { BOARD_SPEED, boardDate, boardYears, contractYears, charterCost, commission, createBoardroom, DEFAULT_SAFETY, deliveryValue, termEndings, divisionCost, floorCost, freeSlot, INQUIRY_AT, MAX_SLOTS, safetyCost, START_VALUE } from '../../src/core/boardroom';
 import { DIVISIONS } from '../../src/data/boardroom/divisions';
 import { createMission, type ScenarioId } from '../../src/mission/state';
 import { missionConfigFor } from '../../src/core/prestige';
@@ -279,5 +279,20 @@ describe('the Boardroom: the end of the term', () => {
     delete v10.profile.dividends;
     const p = deserialize(JSON.stringify(v10)).profile;
     expect([p.boardTerms, p.dividends]).toEqual([0, 0]);
+  });
+});
+
+describe('the Boardroom calendar', () => {
+  it('counts Board time in fiscal quarters, a quarter a minute, so an eleven-year haul passes in about three quarters of an hour', () => {
+    expect(boardDate(0)).toBe('Q1 · YEAR 1');
+    expect(boardDate(60)).toBe('Q2 · YEAR 1');
+    expect(boardDate(4 * 60)).toBe('Q1 · YEAR 2');
+    expect(boardYears(44 * 60)).toBe(11);
+  });
+
+  it('says how many years a contract has been out, from its own clock', () => {
+    const g = reduce(promoted(), { type: 'commission', scenario: 'extraction', seed: 4 });
+    const c = board(g).contracts[0]!;
+    expect(contractYears({ ...c, mission: { ...c.mission, elapsed: 8 * 60 * BOARD_SPEED } })).toBe(2);
   });
 });

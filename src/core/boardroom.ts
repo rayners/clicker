@@ -48,6 +48,22 @@ const PRODUCT_BONUS = 0.5;
 const LOGISTICS_SPEED = 0.5;
 /** Contract seconds per Board second: what a player runs in hours, the Board runs in minutes. */
 export const BOARD_SPEED = 5;
+/**
+ * The Board's calendar: contracts are years-long hauls (eleven years home from Tethys Minor), so one Board minute is a
+ * fiscal quarter, and a contract delivered in about three quarters of an hour has been out about eleven years.
+ */
+const SECONDS_PER_QUARTER = 60;
+const QUARTERS_PER_YEAR = 4;
+
+export const boardYears = (seconds: number): number => Math.floor(seconds / (SECONDS_PER_QUARTER * QUARTERS_PER_YEAR));
+
+export function boardDate(seconds: number): string {
+  const quarter = Math.floor(seconds / SECONDS_PER_QUARTER) % QUARTERS_PER_YEAR;
+  return `Q${quarter + 1} · YEAR ${boardYears(seconds) + 1}`;
+}
+
+/** Years a contract has been out, in Board time (its own clock runs faster than the Board's). */
+export const contractYears = (c: BoardContract): number => boardYears(c.mission.elapsed / BOARD_SPEED);
 /** Each Dividend: this much more starting value, and this much more on every delivery, in later terms. */
 const DIVIDEND_START = 0.5;
 const DIVIDEND_PAY = 0.25;
@@ -267,7 +283,7 @@ function close(b: BoardroomState, c: BoardContract, profile: { dividends: number
     contracts: b.contracts.filter((x) => x !== c),
     ledger: [...b.ledger, missionRecord(c.mission, b.policy)],
   };
-  return appendLog<BoardLogKind, BoardroomState>(next, 'ledger', `${c.mission.config.shipName.toUpperCase()} ${verb}. +₭${formatNumber(paid)}.`);
+  return appendLog<BoardLogKind, BoardroomState>(next, 'ledger', `${c.mission.config.shipName.toUpperCase()} ${verb} AFTER ${contractYears(c)} YEARS. +₭${formatNumber(paid)}.`);
 }
 
 export function tickBoardroom(game: GameState, dt: number): GameState {

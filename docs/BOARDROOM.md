@@ -18,6 +18,10 @@ The user gave the go-ahead on 2026-10-22 ("Go ahead with the boardroom layer whe
 - **A layer, not a contract:** `game.mode === 'boardroom'`, with its own `game.boardroom` state, beside the player's own contract. That contract is kept and resumes when the player leaves the Boardroom, the same way the creature and hunter tiers work. Only the open side's time passes.
 - **Look:** the same terminal, recoloured as an executive suite: a cream and oxblood palette, a letterhead masthead, and minutes instead of logs. Phone-first, with a desktop three-column layout at 900px.
 
+### Time
+
+Contracts are years-long hauls (the user, 2026-10-22: the Boardroom's time scale is months or years because of the travel times). The Board keeps a fiscal calendar: one Board minute is a quarter, so a contract delivered in about three quarters of an hour has been out about eleven years, the length of the haul home, and a term runs some sixty years. Cards say how many years a contract has been out; the minutes are dated by quarter.
+
 ### The loop
 
 - **Value (₭)** is the Boardroom's money, the shareholders' figure.

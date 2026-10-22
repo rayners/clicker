@@ -1,12 +1,12 @@
 import type { GameState } from '../core/game';
 import type { Store } from '../core/store';
-import { charterable, charterCost, divisionCost, floorCost, freeSlot, MAX_SLOTS, INQUIRY_AT, termEndings, type BoardContract, type TermEnding } from '../core/boardroom';
+import { boardDate, contractYears, charterable, charterCost, divisionCost, floorCost, freeSlot, MAX_SLOTS, INQUIRY_AT, termEndings, type BoardContract, type TermEnding } from '../core/boardroom';
 import { createConfirmButton } from '../shared/ui/confirm';
 import { DIVISIONS } from '../data/boardroom/divisions';
 import { CREW } from '../data/crew';
 import { crewStatus } from '../mission/crew';
 import type { ScenarioId } from '../mission/state';
-import { formatDuration, formatNumber } from '../shared/format';
+import { formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
 
 const KIND: Record<ScenarioId, string> = { extraction: 'EXTRACTION', terraform: 'TERRAFORM', security: 'SECURITY', haulage: 'HAULAGE', overland: 'OVERLAND', salvage: 'SALVAGE' };
@@ -29,7 +29,7 @@ function card(c: BoardContract) {
     'article',
     { class: 'br-contract', 'aria-label': m.config.shipName, 'data-act': m.act },
     h('div', { class: 'br-row' }, h('span', { class: 'br-ship' }, m.config.shipName.toUpperCase()), h('span', { class: 'br-kind' }, KIND[m.scenario])),
-    h('div', { class: 'br-row' }, h('span', {}, `ACT ${m.act} · ${ACT_NAMES[m.act] ?? ''}`), h('span', {}, `T+${formatDuration(m.elapsed)}`)),
+    h('div', { class: 'br-row' }, h('span', {}, `ACT ${m.act} · ${ACT_NAMES[m.act] ?? ''}`), h('span', {}, `${contractYears(c)} YEARS OUT`)),
     h('div', { class: 'br-row' }, h('span', {}, `CREW LOST ${lost} / ${CREW.length}`), h('span', { class: 'br-horror' }, horror)),
   );
 }
@@ -117,7 +117,7 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
     el.hidden = game.mode !== 'boardroom' || !game.boardroom;
     const b = game.boardroom;
     if (el.hidden || !b) return;
-    setText(term, `EXECUTIVE OPERATIONS · TERM ${b.term}`);
+    setText(term, `TERM ${b.term} · ${boardDate(b.elapsed)}`);
     setText(value.value, `₭${formatNumber(b.value)}`);
     setText(offices.value, `${b.contracts.length} / ${b.slots}`);
     setText(scrutiny.value, `${Math.round((b.scrutiny / INQUIRY_AT) * 100)}%`);
@@ -125,7 +125,7 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
     const offered = termEndings(game);
     termEnd.hidden = offered.length === 0;
     for (const x of endings) x.el.hidden = !offered.includes(x.ending);
-    setText(frozen, `INQUIRY IN PROGRESS · NEW CHARTERS SUSPENDED ${formatDuration(b.frozenFor)}`);
+    setText(frozen, `INQUIRY IN PROGRESS · NEW CHARTERS SUSPENDED FOR ${Math.ceil(b.frozenFor / 60)} QUARTERS`);
 
     const kinds = charterable(game);
     if (kinds.join() !== charterKey) {
@@ -147,7 +147,7 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
       button.disabled = !open || b.value < cost;
     }
 
-    const key = b.contracts.map((c) => `${c.slot}:${c.mission.seed}:${c.mission.act}:${Math.floor(c.mission.elapsed)}:${c.lost}`).join(',');
+    const key = b.contracts.map((c) => `${c.slot}:${c.mission.seed}:${c.mission.act}:${contractYears(c)}:${c.lost}`).join(',');
     if (key !== contractsKey) {
       contractsKey = key;
       contracts.replaceChildren(...[...b.contracts].sort((a, x) => a.slot - x.slot).map(card));
@@ -176,7 +176,7 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
     const mKey = recent.map((e) => e.id).join(',');
     if (mKey !== minutesKey) {
       minutesKey = mKey;
-      minutes.replaceChildren(...recent.map((e) => h('li', { class: `br-minute br-${e.kind}` }, h('span', { class: 'br-when' }, formatDuration(e.t)), ' ', e.text)));
+      minutes.replaceChildren(...recent.map((e) => h('li', { class: `br-minute br-${e.kind}` }, h('span', { class: 'br-when' }, boardDate(e.t)), ' ', e.text)));
     }
   }
 

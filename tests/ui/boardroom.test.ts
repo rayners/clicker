@@ -51,6 +51,8 @@ describe('the BOARDROOM on screen', () => {
     expect(board().contracts).toHaveLength(1);
     const card = view().getByRole('article', { name: board().contracts[0]!.mission.config.shipName });
     expect(within(card).getByText(/ACT 1/)).toBeTruthy();
+    expect(within(card).getByText('0 YEARS OUT')).toBeTruthy();
+    expect(view().getByText(/Q1 · YEAR 1/)).toBeTruthy();
     expect(view().getByRole('button', { name: /^charter terraform/i })).toHaveProperty('disabled', true);
   });
 
