@@ -2,7 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { createGame, GAME_VERSION, tickGame, type GameState } from '../../src/core/game';
 import { reduce } from '../../src/core/store';
 import { BOARDROOM_UNLOCK_CONTRACTS } from '../../src/core/prestige';
-import { charterCost, commission, createBoardroom, DEFAULT_SAFETY, floorCost, freeSlot, INQUIRY_AT, MAX_SLOTS, safetyCost, START_VALUE } from '../../src/core/boardroom';
+import { charterCost, commission, createBoardroom, DEFAULT_SAFETY, deliveryValue, divisionCost, floorCost, freeSlot, INQUIRY_AT, MAX_SLOTS, safetyCost, START_VALUE } from '../../src/core/boardroom';
+import { DIVISIONS } from '../../src/data/boardroom/divisions';
+import { createMission, type ScenarioId } from '../../src/mission/state';
+import { missionConfigFor } from '../../src/core/prestige';
 import { deserialize, serialize } from '../../src/core/save';
 import { applyScenario } from '../../src/core/debug';
 import { veteran } from '../helpers';
@@ -10,6 +13,7 @@ import { veteran } from '../helpers';
 const NOW = 1_000;
 const promoted = (): GameState => reduce(veteran(createGame(1, NOW)), { type: 'enterBoardroom', seed: 9 });
 const board = (g: GameState) => g.boardroom!;
+const createMissionFor = (scenario: ScenarioId) => createMission(missionConfigFor(createGame(1, NOW).profile, scenario), 1);
 
 describe('the Boardroom: the layer', () => {
   it('stays shut until enough contracts are completed', () => {
@@ -179,5 +183,49 @@ describe('the Boardroom: safety and scrutiny', () => {
     expect(b.scrutiny).toBeLessThan(INQUIRY_AT);
     expect(b.log.at(-1)!.text).toMatch(/INQUIRY/);
     expect(reduce(after, { type: 'commission', scenario: 'extraction', seed: 4 })).toBe(after);
+  });
+});
+
+describe('the Boardroom: divisions and the COO', () => {
+  const rich = () => ({ ...promoted(), boardroom: { ...board(promoted()), value: 1e12 } });
+
+  it('lists every division once, each level dearer than the last', () => {
+    expect(new Set(DIVISIONS.map((d) => d.id)).size).toBe(DIVISIONS.length);
+    for (const d of DIVISIONS.filter((x) => x.max > 1)) expect(divisionCost(d, 1)).toBeGreaterThan(divisionCost(d, 0));
+  });
+
+  it('buys division levels with value, up to each one\'s cap', () => {
+    const g = reduce(rich(), { type: 'buyDivision', id: 'legal' });
+    expect(board(g).divisions.legal).toBe(1);
+    expect(board(g).value).toBe(1e12 - divisionCost(DIVISIONS.find((d) => d.id === 'legal')!, 0));
+    let top: GameState = rich();
+    for (let i = 0; i < 30; i++) top = reduce(top, { type: 'buyDivision', id: 'coo' });
+    expect(board(top).divisions.coo).toBe(1);
+  });
+
+  it('pays more for specimens with Special Projects, and charges less for charters with Personnel', () => {
+    const b = board(rich());
+    expect(charterCost({ ...b, divisions: { personnel: 2 } }, 'extraction')).toBeLessThan(charterCost(b, 'extraction'));
+    const m = { ...createMissionFor('extraction'), specimens: 10 } as never;
+    expect(deliveryValue(m, 'deliver', { ...b, divisions: { specialProjects: 2 } })).toBeGreaterThan(deliveryValue(m, 'deliver', b));
+  });
+
+  it('softens scrutiny with Legal, and speeds contracts with Logistics', () => {
+    const g = reduce(rich(), { type: 'commission', scenario: 'extraction', seed: 4 });
+    const fast = { ...g, boardroom: { ...board(g), divisions: { logistics: 2 } } };
+    expect(board(tickGame(fast, 10)).contracts[0]!.mission.elapsed).toBeGreaterThan(board(tickGame(g, 10)).contracts[0]!.mission.elapsed);
+    const c = board(g).contracts[0]!;
+    const id = Object.keys(c.mission.crew)[0]!;
+    const dead = { ...c, mission: { ...c.mission, crew: { ...c.mission.crew, [id]: { ...c.mission.crew[id]!, status: 'lost' as const } } } };
+    const plain = board(tickGame({ ...g, boardroom: { ...board(g), contracts: [dead] } }, 1)).scrutiny;
+    const lawyered = board(tickGame({ ...g, boardroom: { ...board(g), contracts: [dead], divisions: { legal: 3 } } }, 1)).scrutiny;
+    expect(lawyered).toBeLessThan(plain);
+  });
+
+  it('has the COO recharter every free office with the best-paying contract on the ledger', () => {
+    const g = { ...rich(), boardroom: { ...board(rich()), divisions: { coo: 1 }, slots: 2, ledger: [] } };
+    const after = tickGame(g, 1);
+    expect(board(after).contracts).toHaveLength(2);
+    expect(board(after).contracts.every((c) => c.mission.scenario === 'extraction')).toBe(true);
   });
 });

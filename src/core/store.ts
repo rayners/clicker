@@ -35,10 +35,11 @@ import { advance, newGame, type GameState, type Settings } from './game';
 import { createReducerStore, type Listener as SharedListener, type Store as SharedStore } from '../shared/store';
 import { chooseAssignment, completeContract, isCreatureUnlocked, isHunterUnlocked, type Ending } from './prestige';
 import type { ScenarioId } from '../mission/state';
+import type { DivisionId } from '../data/boardroom/divisions';
 import { buyCutter, buySalvageUpgrade, buyShoring, cut, shiftNotch, toggleGovernor } from '../mission/salvage/economy';
 import { buyCar, buyEngine, buyHaulageUpgrade, fireThrusters, refuel, setBurn, toggleAutopilot } from '../mission/haulage/economy';
 import { buyCreatureUpgrade, endCreature, leaveCreature, startCreature } from './creature';
-import { buyFloor, commission, enterBoardroom, leaveBoardroom, setPolicy, shiftSafety, type BoardPolicy } from './boardroom';
+import { buyDivision, buyFloor, commission, enterBoardroom, leaveBoardroom, setPolicy, shiftSafety, type BoardPolicy } from './boardroom';
 import { buyHunterUpgrade, endHunter, leaveHunter, startHunter } from './hunter';
 import { shiftPush, toggleDormant } from '../shared/hunt';
 
@@ -92,6 +93,7 @@ export type Action =
   | { type: 'enterBoardroom'; seed: number }
   | { type: 'leaveBoardroom' }
   | { type: 'buyFloor' }
+  | { type: 'buyDivision'; id: DivisionId }
   | { type: 'shiftSafety'; step: 1 | -1 }
   | { type: 'setPolicy'; policy: BoardPolicy }
   | { type: 'commission'; scenario: ScenarioId; seed: number }
@@ -228,6 +230,8 @@ export function reduce(game: GameState, action: Action): GameState {
       return leaveBoardroom(game);
     case 'shiftSafety':
       return shiftSafety(game, action.step);
+    case 'buyDivision':
+      return buyDivision(game, action.id);
     case 'buyFloor':
       return buyFloor(game);
     case 'setPolicy':

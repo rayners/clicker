@@ -1,5 +1,7 @@
 import { createMission, isOutbreak, type MissionConfig, type MissionState, type ScenarioId } from '../mission/state';
 import { CREW } from '../data/crew';
+import { DIVISIONS, type Division, type DivisionId } from '../data/boardroom/divisions';
+import { nextRandom } from '../shared/rng';
 import { crewStatus } from '../mission/crew';
 import { tickMission } from '../mission/tick';
 import { appendLog, type LogEntry } from '../shared/log';
@@ -38,6 +40,11 @@ export const INQUIRY_AT = 100;
 const INQUIRY_FINE = 0.2;
 const INQUIRY_FREEZE = 600;
 const AFTER_INQUIRY = 40;
+/** What each division level does. */
+const PERSONNEL_DISCOUNT = 0.85;
+const LEGAL_SOFTENING = 0.8;
+const PRODUCT_BONUS = 0.5;
+const LOGISTICS_SPEED = 0.5;
 
 export type BoardLogKind = 'minutes' | 'memo' | 'ledger';
 /** What the Board does with a contract that reaches its terminus. */
@@ -68,6 +75,7 @@ export interface BoardroomState {
   inquiries: number;
   /** Seconds left on an inquiry's freeze on new charters. */
   frozenFor: number;
+  divisions: Partial<Record<DivisionId, number>>;
   ledger: ContractRecord[];
   act: number;
   beats: Record<string, number>;
@@ -91,6 +99,7 @@ export function createBoardroom(seed: number, term = 1): BoardroomState {
     scrutiny: 0,
     inquiries: 0,
     frozenFor: 0,
+    divisions: {},
     ledger: [],
     act: 1,
     beats: {},
@@ -101,7 +110,21 @@ export function createBoardroom(seed: number, term = 1): BoardroomState {
   };
 }
 
-export const charterCost = (_b: BoardroomState, _scenario: ScenarioId): number => CHARTER;
+const level = (b: BoardroomState, id: DivisionId) => b.divisions[id] ?? 0;
+
+export const charterCost = (b: BoardroomState, _scenario: ScenarioId): number => Math.ceil(CHARTER * PERSONNEL_DISCOUNT ** level(b, 'personnel'));
+
+export const divisionCost = (d: Division, owned: number): number => Math.ceil(d.cost * d.growth ** owned);
+
+export function buyDivision(game: GameState, id: DivisionId): GameState {
+  const b = game.boardroom;
+  const d = DIVISIONS.find((x) => x.id === id);
+  if (!b || !d) return game;
+  const owned = level(b, id);
+  const cost = divisionCost(d, owned);
+  if (owned >= d.max || b.value < cost) return game;
+  return { ...game, boardroom: { ...b, value: b.value - cost, divisions: { ...b.divisions, [id]: owned + 1 } } };
+}
 
 /** The lowest-numbered office with no contract in it, or null when every office is busy. */
 export function freeSlot(b: BoardroomState): number | null {
@@ -154,6 +177,26 @@ export const safetyCost = (b: BoardroomState): number => SAFETY_RATE * b.safety 
 
 const lostCrew = (m: MissionState) => CREW.filter((c) => crewStatus(m, c.id) === 'lost').length;
 
+/** The contract that has paid best per second on the ledger; extraction until there is a ledger to read. */
+function bestContract(game: GameState): ScenarioId {
+  const open = charterable(game);
+  const rated = (game.boardroom?.ledger ?? []).filter((r) => r.ending === 'deliver' && open.includes(r.scenario));
+  if (rated.length === 0) return open.includes('extraction') ? 'extraction' : open[0]!;
+  return rated.reduce((a, r) => (r.output / Math.max(1, r.duration) > a.output / Math.max(1, a.duration) ? r : a)).scenario;
+}
+
+/** The COO fills every free office, while the money and the regulators allow. */
+function recharter(game: GameState): GameState {
+  let g = game;
+  while (g.boardroom && freeSlot(g.boardroom) !== null) {
+    const [roll, rng] = nextRandom(g.boardroom.rng);
+    const next = commission({ ...g, boardroom: { ...g.boardroom, rng } }, bestContract(g), Math.floor(roll * 2 ** 31));
+    if (next.boardroom!.contracts.length === g.boardroom.contracts.length) return g;
+    g = next;
+  }
+  return g;
+}
+
 /** Scrutiny past the line: a fine, a freeze on charters, and the matter minuted. */
 function inquiry(b: BoardroomState): BoardroomState {
   const fine = b.value * INQUIRY_FINE;
@@ -172,19 +215,20 @@ export function buyFloor(game: GameState): GameState {
 export const setPolicy = (game: GameState, policy: BoardPolicy): GameState => (game.boardroom ? { ...game, boardroom: { ...game.boardroom, policy } } : game);
 
 /** What a finished contract pays the Board under each policy. */
-export function deliveryValue(m: MissionState, policy: BoardPolicy): number {
+export function deliveryValue(m: MissionState, policy: BoardPolicy, b: BoardroomState): number {
   if (policy === 'scuttle') return CHARTER * SCUTTLE_RETURN;
-  const record = missionRecord(m, policy);
-  return CHARTER * DELIVERY_RETURN + record.specimens * SPECIMEN_VALUE + (isOutbreak(m) ? Math.floor(m.samples) * SAMPLE_VALUE : 0);
+  const specimens = missionRecord(m, policy).specimens * SPECIMEN_VALUE * (1 + PRODUCT_BONUS * level(b, 'specialProjects'));
+  const samples = (isOutbreak(m) ? Math.floor(m.samples) : 0) * SAMPLE_VALUE * (1 + PRODUCT_BONUS * level(b, 'bioproducts'));
+  return CHARTER * DELIVERY_RETURN + specimens + samples;
 }
 
 /** A contract at its terminus is closed by the standing policy: paid, put in the ledger, its office freed. */
 function close(b: BoardroomState, c: BoardContract): BoardroomState {
-  const paid = deliveryValue(c.mission, b.policy);
+  const paid = deliveryValue(c.mission, b.policy, b);
   const verb = b.policy === 'deliver' ? 'DELIVERED' : 'SCUTTLED';
   const next = {
     ...b,
-    scrutiny: b.scrutiny + (b.policy === 'scuttle' ? SCUTTLE_SCRUTINY : 0),
+    scrutiny: b.scrutiny + (b.policy === 'scuttle' ? SCUTTLE_SCRUTINY * LEGAL_SOFTENING ** level(b, 'legal') : 0),
     value: b.value + paid,
     lifetimeValue: b.lifetimeValue + paid,
     contracts: b.contracts.filter((x) => x !== c),
@@ -198,9 +242,11 @@ export function tickBoardroom(game: GameState, dt: number): GameState {
   if (!b) return game;
   const ctx = { cycle: game.profile.contractsCompleted, endings: game.profile.endingsSeen };
   let deaths = 0;
+  // Logistics runs every contract faster than the Boardroom's own clock.
+  const step = dt * (1 + LOGISTICS_SPEED * level(b, 'logistics'));
   const contracts = b.contracts.map((c) => {
-    const defended = defendMission(c, dt);
-    const mission = tickMission(defended.mission, dt, ctx);
+    const defended = defendMission(c, step);
+    const mission = tickMission(defended.mission, step, ctx);
     const lost = lostCrew(mission);
     deaths += Math.max(0, lost - c.lost);
     return { ...defended, mission, lost };
@@ -210,10 +256,12 @@ export function tickBoardroom(game: GameState, dt: number): GameState {
     elapsed: b.elapsed + dt,
     contracts,
     value: Math.max(0, b.value - safetyCost(b) * dt),
-    scrutiny: Math.max(0, b.scrutiny + deaths * DEATH_SCRUTINY - SCRUTINY_FADE * dt),
+    scrutiny: Math.max(0, b.scrutiny + deaths * DEATH_SCRUTINY * LEGAL_SOFTENING ** level(b, 'legal') - SCRUTINY_FADE * dt),
     frozenFor: Math.max(0, b.frozenFor - dt),
   };
   for (const c of contracts) if (c.mission.flags.includes('terminus')) next = close(next, c);
   if (next.scrutiny >= INQUIRY_AT) next = inquiry(next);
-  return { ...game, boardroom: next };
+  let after: GameState = { ...game, boardroom: next };
+  if (level(next, 'coo') > 0) after = recharter(after);
+  return after;
 }
