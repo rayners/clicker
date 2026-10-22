@@ -3,7 +3,9 @@ import { test, expect } from '@playwright/test';
 test('late fees: rent the nightmare, take readings, fill a bed and turn the dial', async ({ page }) => {
   await page.goto('/late-fees/');
   await page.evaluate(() => localStorage.removeItem('latefees.save'));
-  await page.reload();
+  // This tape comes in after a few films; the member jump stocks it for the test.
+  await page.goto('/late-fees/?debug=member');
+  await page.goto('/late-fees/');
   await page.getByRole('button', { name: /^rent a nightmare on sycamore street$/i }).click();
   const reading = page.getByRole('button', { name: /take a reading/i });
   for (let i = 0; i < 30; i++) await reading.click();

@@ -35,7 +35,7 @@ import {
   toggleAutoSedation,
 } from './asylum/economy';
 import { advance, newLateGame, type LateGame, type LateSettings } from './game';
-import { chooseTape, completeRun } from './sequels';
+import { chooseTape, completeRun, isCutUnlocked, isTapeStocked, tapeFor } from './sequels';
 import { buyCutUpgrade, endCut, leaveCut, startCut } from './cut';
 import { shiftPush, toggleDormant } from '../shared/hunt';
 import type { Ending } from './kinds';
@@ -147,11 +147,12 @@ export function reduce(game: LateGame, action: LateAction): LateGame {
       if (game.run.venue === 'asylum') return asylum(game, (r) => buyAsylumUpgrade(r, action.id));
       return camp(game, (r) => buyCampUpgrade(r, action.id));
     case 'chooseTape':
-      return chooseTape(game, action.venue, action.seed, action.killer);
+      // Only what is on the shelf can be rented.
+      return isTapeStocked(game.profile, tapeFor(action.venue, action.killer)) ? chooseTape(game, action.venue, action.seed, action.killer) : game;
     case 'completeRun':
       return completeRun(game, action.ending, action.seed);
     case 'startCut':
-      return startCut(game, action.killer, action.seed);
+      return game.cut || isCutUnlocked(game.profile) ? startCut(game, action.killer, action.seed) : game;
     case 'shiftCutPush':
       return game.cut ? { ...game, cut: { ...game.cut, hunt: shiftPush(game.cut.hunt, action.index, action.step) } } : game;
     case 'toggleCutDormant':

@@ -1,6 +1,6 @@
 import { h } from '../shared/ui/dom';
 import type { LateGame } from '../late-fees/game';
-import { CROSSOVERS, isTapeStocked, ORIGINALS, runConfigFor, type TapeDef } from '../late-fees/sequels';
+import { CROSSOVERS, CUT_UNLOCK_FILMS, isCutUnlocked, isTapeStocked, ORIGINALS, runConfigFor, tapeUnlock, type TapeDef } from '../late-fees/sequels';
 import type { LateStore } from '../late-fees/store';
 import { KILLERS } from '../late-fees/registry';
 import type { KillerId } from '../late-fees/state';
@@ -27,7 +27,8 @@ export function createShelf(store: LateStore): { el: HTMLElement; render(game: L
     const spine = h('span', { class: 'tape-spine' }, title);
     const blurb = h('p', { class: 'tape-blurb' }, t.blurb);
     if (!isTapeStocked(game.profile, t)) {
-      return h('li', { class: 'tape', 'data-stock': 'out' }, spine, blurb, h('span', { class: 'tape-out' }, 'OUT OF STOCK'));
+      const needed = tapeUnlock(t);
+      return h('li', { class: 'tape', 'data-stock': 'out' }, spine, blurb, h('span', { class: 'tape-out' }, `BACK IN STOCK AFTER ${needed} FILM${needed === 1 ? '' : 'S'}`));
     }
     const rent = h('button', { class: 'tape-rent', type: 'button', 'aria-label': `Rent ${title}` }, 'RENT ▶');
     rent.addEventListener('click', () => store.dispatch({ type: 'chooseTape', venue: t.venue, killer: t.killer, seed: (Math.random() * 2 ** 31) | 0 }));
@@ -37,6 +38,9 @@ export function createShelf(store: LateStore): { el: HTMLElement; render(game: L
   /** Side B: flip the tape and play the killer, haunting every place at once. */
   const killerTape = (game: LateGame, k: KillerId) => {
     const name = KILLERS[k].name;
+    if (!game.cut && !isCutUnlocked(game.profile)) {
+      return h('li', { class: 'tape', 'data-stock': 'out', 'data-side': 'b' }, h('span', { class: 'tape-spine' }, name), h('span', { class: 'tape-out' }, `SIDE B · AFTER ${CUT_UNLOCK_FILMS} FILMS`));
+    }
     const resuming = game.cut?.killer === k;
     const play = h('button', { class: 'tape-rent', type: 'button', 'aria-label': `Play as ${name}` }, resuming ? 'RESUME ▶' : 'FLIP ▶');
     play.addEventListener('click', () => store.dispatch({ type: 'startCut', killer: k, seed: (Math.random() * 2 ** 31) | 0 }));

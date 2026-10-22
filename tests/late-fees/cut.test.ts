@@ -1,3 +1,4 @@
+import { member } from '../helpers';
 import { describe, it, expect } from 'vitest';
 import { advance, createLateGame, newLateGame, type LateGame } from '../../src/late-fees/game';
 import {
@@ -85,7 +86,7 @@ describe("the Killer's Cut", () => {
   });
 
   it('takes orders: start, push, sleep, buy, and rewind', () => {
-    let g = reduce(newLateGame(1, NOW), { type: 'startCut', killer: 'design', seed: 3 });
+    let g = reduce(member(newLateGame(1, NOW)), { type: 'startCut', killer: 'design', seed: 3 });
     expect(g.cut!.killer).toBe('design');
     g = reduce(g, { type: 'shiftCutPush', index: 2, step: 1 });
     expect(g.cut!.hunt.split[2]).toBe(1);

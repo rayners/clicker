@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { member } from '../helpers';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { within, screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
@@ -28,7 +29,7 @@ beforeEach(() => {
 
 describe("the Killer's Cut on screen", () => {
   it('is on side B of the shelf: pick a killer to flip the tape', async () => {
-    const user = setup(newLateGame(1, 0));
+    const user = setup(member(newLateGame(1, 0)));
     const shelf = within(screen.getByRole('dialog', { name: /horror/i }));
     await user.click(shelf.getByRole('button', { name: /play as the burned man/i }));
     expect(store.getState().mode).toBe('cut');

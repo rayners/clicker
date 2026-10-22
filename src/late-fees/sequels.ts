@@ -33,8 +33,14 @@ export interface TapeDef {
   crossover?: boolean;
 }
 
-/** Films finished before crossover tapes appear. Zero while they are being play-tested; meant to rise. */
-export const CROSSOVER_UNLOCK_FILMS = 0;
+/** Films finished before each tape is stocked (user, 2026-10-22: one to start, the rest unlocked). */
+const ORIGINAL_UNLOCK_FILMS: Record<VenueId, number> = { camp: 0, clinic: 1, insurer: 2, asylum: 3 };
+export const CROSSOVER_UNLOCK_FILMS = 4;
+/** Films finished before side B, the Killer's Cut, can be played. */
+export const CUT_UNLOCK_FILMS = 2;
+
+export const tapeUnlock = (tape: TapeDef): number => (tape.crossover ? CROSSOVER_UNLOCK_FILMS : ORIGINAL_UNLOCK_FILMS[tape.venue]);
+export const isCutUnlocked = (profile: LateProfile): boolean => profile.sequels >= CUT_UNLOCK_FILMS;
 
 /** The three originals: each killer in its own place. */
 export const ORIGINALS: readonly TapeDef[] = [
@@ -69,9 +75,8 @@ const HOME: Record<VenueId, KillerId> = { camp: 'drowned', clinic: 'burned', ins
 export const tapeFor = (venue: VenueId, killer: KillerId = HOME[venue]): TapeDef =>
   TAPES.find((t) => t.venue === venue && t.killer === killer) ?? ORIGINALS.find((t) => t.venue === venue)!;
 
-/** Whether the shelf shows a tape: originals always, crossovers once enough films are finished. */
-export const isTapeStocked = (profile: LateProfile, tape: TapeDef): boolean =>
-  tape.available && (!tape.crossover || profile.sequels >= CROSSOVER_UNLOCK_FILMS);
+/** Whether the shelf stocks a tape yet: each one comes in after enough films are finished. */
+export const isTapeStocked = (profile: LateProfile, tape: TapeDef): boolean => tape.available && profile.sequels >= tapeUnlock(tape);
 
 /** The genre's sequel ladder. Part numbers carry on forever; the subtitles run out. */
 export function sequelTitle(title: string, part: number): string {

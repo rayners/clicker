@@ -2,6 +2,7 @@ import '@fontsource/vt323';
 import '@fontsource/monoton';
 import './late-fees-ui/vhs.css';
 import { catchUp } from './late-fees/game';
+import { applyLateScenario } from './late-fees/debug';
 import { lateSaves } from './late-fees/save';
 import { createLateStore } from './late-fees/store';
 import { filmEvents, filmProperties } from './late-fees/telemetry';
@@ -15,7 +16,10 @@ const AUTOSAVE_MS = 10_000;
 const storage = window.localStorage;
 const seed = (Math.random() * 2 ** 31) | 0;
 const loaded = lateSaves.loadGame(storage, Date.now(), seed);
-const store = createLateStore(catchUp(loaded.game, Date.now()));
+// Debug jumps (dev builds only): ?debug=member stocks the whole shelf for testing.
+const debug = import.meta.env.DEV ? new URLSearchParams(location.search).get('debug') : null;
+const caught = catchUp(loaded.game, Date.now());
+const store = createLateStore(debug ? applyLateScenario(caught, debug) : caught);
 
 mountLate(document.getElementById('app')!, store);
 

@@ -3,7 +3,9 @@ import { test, expect } from '@playwright/test';
 test('late fees: rent Candy Corn Day, walk the wards, fill a bed and raise the dose', async ({ page, isMobile }) => {
   await page.goto('/late-fees/');
   await page.evaluate(() => localStorage.removeItem('latefees.save'));
-  await page.reload();
+  // This tape comes in after a few films; the member jump stocks it for the test.
+  await page.goto('/late-fees/?debug=member');
+  await page.goto('/late-fees/');
   await page.getByRole('button', { name: /^rent candy corn day$/i }).click();
   await expect(page.getByLabel('Days to Candy Corn Day')).toHaveText(/DAYS/);
   const walk = page.getByRole('button', { name: /walk the wards/i });

@@ -10,3 +10,6 @@ export const veteran = <G extends { profile: { contractsCompleted: number } }>(g
 
 /** An Elderdark game whose Factor has finished enough charters to open every site and tier. */
 export const seasoned = <G extends { profile: { chartersCompleted: number } }>(g: G): G => ({ ...g, profile: { ...g.profile, chartersCompleted: 10 } });
+
+/** A LATE FEES member with enough films behind them to rent every tape and flip side B. */
+export const member = <G extends { profile: { sequels: number } }>(g: G): G => ({ ...g, profile: { ...g.profile, sequels: 10 } });

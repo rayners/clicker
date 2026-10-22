@@ -19,7 +19,9 @@ test('late fees: rent the tape, open the camp with the whistle, and keep it acro
 test('late fees: a crossover puts one killer in another place', async ({ page }) => {
   await page.goto('/late-fees/');
   await page.evaluate(() => localStorage.removeItem('latefees.save'));
-  await page.reload();
+  // Crossovers and side B come after a few films; the member jump stocks them for the test.
+  await page.goto('/late-fees/?debug=member');
+  await page.goto('/late-fees/');
   await page.getByRole('button', { name: /^rent a nightmare at camp blackwater$/i }).click();
   await expect(page.getByRole('banner')).toContainText('A NIGHTMARE AT CAMP BLACKWATER');
   await expect(page.getByRole('button', { name: /blow the whistle/i })).toBeVisible();
@@ -28,7 +30,9 @@ test('late fees: a crossover puts one killer in another place', async ({ page })
 test("late fees: flip the tape to the Killer's Cut and push a place", async ({ page }) => {
   await page.goto('/late-fees/');
   await page.evaluate(() => localStorage.removeItem('latefees.save'));
-  await page.reload();
+  // Crossovers and side B come after a few films; the member jump stocks them for the test.
+  await page.goto('/late-fees/?debug=member');
+  await page.goto('/late-fees/');
   await page.getByRole('button', { name: /play as the drowned boy/i }).click();
   const cut = page.getByRole('region', { name: /the killer's cut/i });
   await expect(cut).toBeVisible();
