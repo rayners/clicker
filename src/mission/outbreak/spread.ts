@@ -34,7 +34,7 @@ const WELLNESS_RECOVERY = 0.5;
 const SCREENING_FOCUS = 0.5;
 const MIN_CONTACT = 0.05;
 /** Share of the workforce one ward holds, out of reach of turning. */
-const WARD_SIZE = 0.03;
+export const WARD_SIZE = 0.03;
 /** Samples per second per culture tank, the infectiousness each tank adds, and the funding samples bring. */
 const CULTURE_RATE = 0.01;
 const CULTURE_SPREAD = 0.1;
@@ -106,7 +106,8 @@ export function tickOutbreak<M extends OutbreakMission>(m: M, dt: number, hooks:
   if (m.officer) m = { ...m, quarantine: officerQuarantine(m) };
   const isolation = Math.min(1 - MIN_CONTACT, QUARANTINE_CUT * m.quarantine * (1 + SCREENING_FOCUS * m.screening));
   const contact = CONTACT * (1 - isolation) * (1 + CULTURE_SPREAD * m.cultures);
-  const infected = Math.min(healthy(m), contact * healthy(m) * (m.exposed + m.sick) * dt);
+  // The turned are infectious too: act IV keeps spreading even once quarantine has emptied the sick bay.
+  const infected = Math.min(healthy(m), contact * healthy(m) * (m.exposed + m.sick + m.turned) * dt);
   const showing = (m.exposed * dt) / INCUBATION;
   // Before the discovery it is a flu: the sick get better. After it, they stop coming back; in act IV they turn.
   const better = m.act < 3 ? (m.sick * dt * (1 + WELLNESS_RECOVERY * m.wellness)) / RECOVERY : 0;

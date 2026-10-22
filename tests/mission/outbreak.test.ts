@@ -43,6 +43,11 @@ describe('the outbreak (Strain KA-11)', () => {
     expect(four.turned).toBeGreaterThan(0);
   });
 
+  it('has the turned spread it too, so act four keeps pressing even after quarantine has emptied the sick bay', () => {
+    const m = run(fresh({ act: 4, turned: 0.05 }), 600);
+    expect(m.exposed + m.sick).toBeGreaterThan(0);
+  });
+
   it('spreads more slowly the more of the workforce is in quarantine', () => {
     const open = run(fresh({ act: 3, exposed: 0.05 }), 900);
     const closed = run(fresh({ act: 3, exposed: 0.05, quarantine: MAX_QUARANTINE }), 900);

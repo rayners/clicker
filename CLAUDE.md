@@ -17,7 +17,7 @@ Read before changing things:
 - `docs/HORROR-TIER.md`: the planned play-as-the-horror tier in every game (a shared hunt engine: first-tier runs defended by their bots, the player as the horror). Approved; the engine, LATE FEES's Killer's Cut and Elderdark's wood are built, and DEEP CONTRACT's creature is next.
 - `docs/kaiju/DESIGN.md`: the fourth game, DOWN THERE (named by the user 2026-10-21; working title FATHOM in code): deep water to kaiju, sharks on the coast down to mechs at the breach.
 - `docs/MISSIONS.md`: the approved new missions (security detachment, haulage, salvage, the Keep), the shared held-ground engine, and the build order.
-- `docs/OUTBREAK.md`: the second first-tier horror for DEEP CONTRACT (a pathogen turning the workforce against the company), and the rule for which horror a contract gets. Being built (pieces 1–5 of 8 done).
+- `docs/OUTBREAK.md`: the second first-tier horror for DEEP CONTRACT (a pathogen turning the workforce against the company), and the rule for which horror a contract gets. Being built (pieces 1–5 and 7 of 8 done).
 - `docs/TELEMETRY.md`: anonymous PostHog analytics (published site only, opt-out, events derived from state diffs). Add an event there when a new milestone matters for pacing.
 
 ## Non-negotiable requirements
@@ -33,7 +33,7 @@ Read before changing things:
 
 - `npm test`: vitest (unit, jsdom UI, data invariants, pacing). `npx tsc --noEmit` for types.
 - `npm run test:e2e`: Playwright on desktop Chromium plus iPhone 13 emulation (Chromium by default; `E2E_WEBKIT=1` for real WebKit once `sudo npx playwright install-deps webkit` has been run).
-- `npm run simulate [overland|extraction|terraform|security|haulage|salvage]`: bot playthrough timings per act, for every scenario by default.
+- `npm run simulate [overland|extraction|terraform|security|haulage|salvage|all] [outbreak]`: bot playthrough timings per act, for every scenario by default; a second argument runs a different horror.
 - `npm run dev -- --host`: test on a phone over the LAN. Debug jumps: `/contract/?debug=act2|act3|act4|terminus|terraform|tf-act2|security|sec-act2|haulage|haul-act2|overland|salvage|sal-act2|outbreak|ob-act2|ob-act3|ob-act4` (`src/core/debug.ts`). Debug jumps only work in dev builds. `?debug=veteran` unlocks every contract and tier and opens the assignment screen (the e2e helper uses it). Dev extras: `&speed=N` (1–100× clock), `&grant=N` (credits), `&flags` (story overlay).
 - If the dev server suddenly serves unstyled pages after a CSS edit, its watcher caught the file mid-write: `touch src/styles/*.css`. Prefer the Edit tool over scripts that truncate and rewrite CSS.
 - `npm run simulate:late [camp|clinic|insurer|asylum] [drowned|burned|design|patient]`: the same for LATE FEES (a venue, optionally with a crossover killer). `npm run simulate:forest [keep] [hours]` for Elderdark (forest by default). LATE FEES has one dev-only jump, `/late-fees/?debug=member` (every tape and side B stocked), and DOWN THERE one, `/down-there/?debug=veteran` (the Source open). Elderdark debug jumps: `/forest/?debug=keep|keep-deep|veteran` (`src/forest/debug.ts`).

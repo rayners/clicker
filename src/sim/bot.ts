@@ -11,7 +11,15 @@ import { generatorCost, generatorRate, oreRate, refineryCapacity, refineryCost }
 import { availableUpgrades } from '../mission/extraction/upgrades';
 import { crewStatus, isCrewUnlocked, maxAwake, awakeCount } from '../mission/crew';
 import { containmentLevelCost, isSpecialProjectsUnlocked, reinforceCost, rigCost, ventCost } from '../mission/organism/containment';
-import { createMission, type HaulageMission, type MissionOf, type MissionState, type ScenarioId } from '../mission/state';
+import { cultureCost, lockdownCost, OFFICER_COST, screeningCost, wardCost, wellnessCost } from '../mission/outbreak/levers';
+
+import { WARD_SIZE } from '../mission/outbreak/spread';
+
+/** The sick bay bot locks down at this share turned. */
+const LOCKDOWN_AT = 0.15;
+/** Tenths of quarantine the bot holds by hand before it can hire the officer. */
+const HAND_QUARANTINE = 3;
+import { createMission, isOutbreak, type HaulageMission, type HorrorId, type MissionOf, type MissionState, type OutbreakMission, type ScenarioId } from '../mission/state';
 import { LINES, PROCESSORS, REACTORS } from '../data/terraform/systems';
 import {
   allocate,
@@ -79,6 +87,8 @@ import { SECTIONS } from '../data/security/systems';
 export interface SimOptions {
   seed: number;
   scenario?: ScenarioId;
+  /** Run a different horror from the scenario's own (the outbreak, for its pacing). */
+  horror?: HorrorId;
   maxSeconds: number;
   seniority?: number;
   /** Clicks per second while the player is actively playing. */
@@ -121,8 +131,29 @@ function decideShared(game: GameState): Action | null {
   return null;
 }
 
+/**
+ * The sick bay (docs/OUTBREAK.md): the officer on the dial as soon as it can, screening when cheap, ward beds for the
+ * sick, cultures only as far as the wards hold, and a lockdown once the turned are building up.
+ */
+function decideSickBay(m: OutbreakMission): Action | null {
+  const cheap = (cost: number) => m.credits >= cost && cost <= m.credits * 0.3;
+  if (m.act >= 4 && m.turned >= LOCKDOWN_AT && m.lockdownFor <= 0 && m.credits >= lockdownCost(m)) return { type: 'lockdown' };
+  if (m.act >= 3 && m.flags.includes('outbreak')) {
+    if (!m.officer && m.credits >= OFFICER_COST) return { type: 'hireOfficer' };
+    // Until the officer is hired, a hand on the dial: a few tenths while it is going round.
+    if (!m.officer && m.exposed + m.sick > 0.01 && m.quarantine < HAND_QUARANTINE) return { type: 'shiftQuarantine', step: 1 };
+    if (!m.officer && m.exposed + m.sick <= 0.01 && m.quarantine > 0) return { type: 'shiftQuarantine', step: -1 };
+    if (m.sick > m.wards * WARD_SIZE && m.credits >= wardCost(m) && wardCost(m) <= m.credits * 0.5) return { type: 'buyWard' };
+    if (m.screening < 3 && cheap(screeningCost(m))) return { type: 'buyScreening' };
+    if (m.flags.includes('cultures') && m.cultures < m.wards / 2 && cheap(cultureCost(m))) return { type: 'buyCulture' };
+  }
+  if (m.act >= 2 && m.sick > 0.03 && m.wellness < 3 && m.credits >= wellnessCost(m) && wellnessCost(m) <= m.credits * 0.1) return { type: 'buyWellness' };
+  return null;
+}
+
 /** Special Projects: keep containment ahead of the specimen count, keep recovering. */
 function decideProjects(game: GameState): Action | null {
+  if (isOutbreak(game.mission)) return decideSickBay(game.mission);
   const m = game.mission as MissionOf<ScenarioId, 'organism'>;
   if (isSpecialProjectsUnlocked(m)) {
     if (m.specimens >= 4 + m.containmentLevel * 4 && m.credits >= containmentLevelCost(m)) return { type: 'buyContainmentLevel' };
@@ -467,7 +498,8 @@ export function simulateRun(options: SimOptions): SimResult {
     options;
   let game: GameState = createGame(seed, 0);
   const profile = seniority > 0 ? { ...createProfile(), seniority, contractsCompleted: 1, endingsSeen: ['deliver'] } : game.profile;
-  game = { ...game, profile, mission: createMission(missionConfigFor(profile, scenario), seed) };
+  const config = { ...missionConfigFor(profile, scenario), ...(options.horror ? { horror: options.horror } : {}) };
+  game = { ...game, profile, mission: createMission(config, seed) };
   const press = PRESS[scenario];
   const actAt: Record<number, number> = { 1: 0 };
   let terminusAt: number | undefined;

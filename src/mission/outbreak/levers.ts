@@ -1,17 +1,17 @@
 import type { OutbreakMission } from '../state';
 
 /** The SICK BAY's levers (docs/OUTBREAK.md): what the player can buy against Strain KA-11, and what tempts them. */
-const WELLNESS_BASE = 5e4;
+const WELLNESS_BASE = 2e4;
 const WELLNESS_GROWTH = 2.2;
-const SCREENING_BASE = 2e6;
+const SCREENING_BASE = 5e5;
 const SCREENING_GROWTH = 3;
-const WARD_BASE = 1e6;
-const WARD_GROWTH = 1.6;
-const CULTURE_BASE = 1e6;
+const WARD_BASE = 2e5;
+const WARD_GROWTH = 1.5;
+const CULTURE_BASE = 3e5;
 const CULTURE_GROWTH = 1.8;
-const LOCKDOWN_BASE = 2e6;
+const LOCKDOWN_BASE = 5e5;
 const LOCKDOWN_GROWTH = 2;
-export const OFFICER_COST = 5e6;
+export const OFFICER_COST = 1e6;
 /** Seconds a sealed section keeps its workers from their shifts. */
 export const LOCKDOWN_SECONDS = 120;
 /** Share of the turned shut in behind a sealed section. */

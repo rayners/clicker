@@ -157,3 +157,22 @@ describe('first overland haul pacing', () => {
     expect(run.actAt[2]).toBeUndefined();
   });
 });
+
+/** The outbreak (docs/OUTBREAK.md) runs to the same act targets as the organism, on every contract it can turn up on. */
+describe('outbreak pacing', () => {
+  const hours = (s: number | undefined) => (s === undefined ? Infinity : s / 3600);
+  for (const scenario of ['extraction', 'terraform', 'security', 'haulage', 'salvage'] as const) {
+    // Run outside the test, like the other pacing runs: terraform takes longer than a test's timeout.
+    const run = simulateRun({ seed: 7, scenario, horror: 'outbreak', maxSeconds: 9 * 3600 });
+    it(`${scenario}: act 2 at 40-75 minutes, act 3 at 2-3 hours, act 4 within 4 hours, terminus at 4-6 hours`, () => {
+      expect(run.final.mission.horror).toBe('outbreak');
+      expect(hours(run.actAt[2])).toBeGreaterThan(40 / 60);
+      expect(hours(run.actAt[2])).toBeLessThan(75 / 60);
+      expect(hours(run.actAt[3])).toBeGreaterThan(2);
+      expect(hours(run.actAt[3])).toBeLessThan(3);
+      expect(hours(run.actAt[4])).toBeLessThan(4);
+      expect(hours(run.terminusAt)).toBeGreaterThan(4);
+      expect(hours(run.terminusAt)).toBeLessThan(6);
+    });
+  }
+});
