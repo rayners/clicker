@@ -2,6 +2,8 @@ import { nextStep, type GuideRules, type GuideStep, type createGuideProgress } f
 import { h, setText } from './dom';
 
 const TARGET_CLASS = 'guide-target';
+/** A page can hold more than one guide (a game and its horror tier); each rules page needs its own title id. */
+let views = 0;
 
 /**
  * The walkthrough on screen: one small tip at a time, never blocking play, pointing at the control it describes;
@@ -20,12 +22,13 @@ export function createGuideView<S>(options: {
   const el = h('section', { class: 'guide', 'aria-label': 'Guide', hidden: true }, title, skip, text, ok);
 
   const rulesButton = h('button', { class: 'guide-rules-open', type: 'button', 'aria-label': 'How this works' }, '?');
-  const rulesTitle = h('h2', { class: 'guide-rules-title', id: 'guide-rules-title' });
+  const titleId = `guide-rules-title-${++views}`;
+  const rulesTitle = h('h2', { class: 'guide-rules-title', id: titleId });
   const rulesBody = h('div', { class: 'guide-rules-body' });
   const close = h('button', { class: 'guide-rules-close', type: 'button', 'aria-label': 'Close' }, '✕');
   const rulesDialog = h(
     'div',
-    { class: 'guide-rules', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'guide-rules-title', hidden: true },
+    { class: 'guide-rules', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': titleId, hidden: true },
     h('div', { class: 'guide-rules-box' }, h('div', { class: 'guide-rules-head' }, rulesTitle, close), rulesBody),
   );
 

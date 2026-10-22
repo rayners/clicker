@@ -66,4 +66,16 @@ describe('the guide on screen', () => {
     await user.click(dialog.getByRole('button', { name: /close/i }));
     expect(screen.queryByRole('dialog', { name: /how extraction works/i })).toBeNull();
   });
+
+  it('names each rules page by its own title when two guides share a page (a game and its horror tier)', () => {
+    document.body.innerHTML = '';
+    const a = createGuideView<S>({ steps: () => steps, rules: () => rules, progress: createGuideProgress(memory(), 'a') });
+    const b = createGuideView<S>({ steps: () => steps, rules: () => ({ title: 'HOW THE WOOD WORKS', sections: [] }), progress: createGuideProgress(memory(), 'b') });
+    document.body.append(a.rulesDialog, b.rulesDialog);
+    a.render({ drills: 0 });
+    b.render({ drills: 0 });
+    a.rulesDialog.hidden = b.rulesDialog.hidden = false;
+    expect(screen.getByRole('dialog', { name: 'HOW EXTRACTION WORKS' })).toBe(a.rulesDialog);
+    expect(screen.getByRole('dialog', { name: 'HOW THE WOOD WORKS' })).toBe(b.rulesDialog);
+  });
 });
