@@ -85,7 +85,7 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
 
 **In the engine's words.**
 - **Trophies** are the harvest.
-- **Legend** (notoriety) makes every ship's output, and so its arms, better.
+- **Stories** (notoriety) make every ship's output, and so its arms, better. They were called Legend until Legend became the prestige.
 - **Upgrades** are bought with trophies.
 
 **Entry and saves.** "The hunt: accept" under RESTRICTED in DEEP CONTRACT's configuration, beside Special Order 0-77. DEEP CONTRACT save v7 (`hunter`; `mode` gains `'hunter'`).
@@ -159,6 +159,17 @@ Added 2026-10-21 with the fourth game.
 - **Balance (bot):**
   - 107 drowned in an hour and 283 in two, against none for a Source that never pushes.
   - 1,183 in four hours, when the towns' own breaches open and the first three seasons end. An idle Source takes 975 by then, because cities fall by themselves.
+
+## Legend: prestige across hunts (design, 2026-10-21)
+
+Legend works the same way in every game, with the engine part in `src/shared/hunt.ts`.
+
+- **Ending a hunt.** A hunt can be ended at any time, behind a two-tap confirmation. Ending turns its lifetime harvest into Legend: floor(√(harvest ÷ 25)), so 100 → 2, 300 → 3, 900 → 6.
+- **Where it's kept.** Each horror keeps its own Legend in its game's profile (`profile.legend[horror]`). Legend survives everything except a hard reset.
+- **What it buys.** The next hunt by the same horror starts with one more step of strength for every two Legend, and 10 harvest in hand per Legend for early upgrades.
+- **Unlocks.** Every horror is open while being play-tested, so a new horror unlocking is deferred until the tiers are gated.
+- **Telemetry:** `hunt_ended` (horror, harvest, legend earned).
+- **Saves:** each game gains `profile.legend`. That is DEEP CONTRACT v8, Elderdark v11, LATE FEES (next version) and DOWN THERE v4.
 
 ## UI
 

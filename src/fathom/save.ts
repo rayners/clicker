@@ -16,6 +16,8 @@ export const fathomSaves = createSaveSystem<FathomGame>({
     },
     // v3: the Source (play as the horror). Older saves are on the season, with no hunt and no push on the outfit.
     3: (save) => ({ ...save, mode: 'season', deep: null, outfit: { deepPush: 0, ...(save.outfit as Record<string, unknown>) } }),
+    // v4: Legend, carried out of finished hunts. Nobody has finished one yet.
+    4: (save) => ({ ...save, profile: { legend: {}, ...(save.profile as Record<string, unknown>) } }),
   },
   label: 'FATHOM',
   required: ['profile', 'outfit'],

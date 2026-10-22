@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { advance, createFathomGame, type FathomGame } from '../../src/fathom/game';
 import { createOutfit } from '../../src/fathom/state';
 import { tickOutfit } from '../../src/fathom/tick';
-import { buyDeepUpgrade, DEEP_ADAPTER, DEEP_TOWNS, deepRules, deepUpgradeCost, leaveDeep, startDeep } from '../../src/fathom/deep';
+import { buyDeepUpgrade, DEEP_ADAPTER, DEEP_TOWNS, deepRules, deepUpgradeCost, endDeep, leaveDeep, startDeep } from '../../src/fathom/deep';
 import { DEEP_UPGRADES } from '../../src/fathom-data/deep-upgrades';
 import { CITIES } from '../../src/fathom-data/breach';
 import { ATTRACTIONS } from '../../src/fathom-data/shallows';
@@ -138,5 +138,31 @@ describe('the Source, played through', () => {
     const idle = simulateDeep({ seed: 7, maxSeconds: 2 * 3600, passive: true });
     expect(played.harvest).toBeGreaterThan(idle.harvest * 1.5);
     expect(played.upgrades).toBeGreaterThan(1);
+  });
+});
+
+describe('Legend', () => {
+  it('ends the hunt for Legend: the harvest becomes Legend, the hunt is over, and the season is back', () => {
+    const g = deep();
+    const fed = { ...g, deep: { ...g.deep!, hunt: { ...g.deep!.hunt, harvest: 400 } } };
+    const ended = endDeep(fed);
+    expect(ended.deep).toBeNull();
+    expect(ended.mode).toBe('season');
+    expect(ended.profile.legend.deep).toBe(4);
+  });
+
+  it('starts the next Source stronger for its Legend', () => {
+    const storied = createFathomGame(1, NOW);
+    const legendary = startDeep({ ...storied, profile: { ...storied.profile, legend: { deep: 6 } } }, 7);
+    expect(legendary.deep!.hunt.strength).toBe(deep().deep!.hunt.strength + 3);
+    expect(legendary.deep!.hunt.dread).toBe(60);
+  });
+
+  it('takes the order to end the hunt, and older saves start with no Legend', () => {
+    const ended = reduce(deep(), { type: 'endDeep' });
+    expect(ended.deep).toBeNull();
+    const old = createFathomGame(1, NOW);
+    const { legend: _l, ...profile } = old.profile;
+    expect(fathomSaves.deserialize(JSON.stringify({ ...old, version: 3, profile })).profile.legend).toEqual({});
   });
 });

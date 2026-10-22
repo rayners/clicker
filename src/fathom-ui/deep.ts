@@ -2,12 +2,14 @@ import { formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
 import { DEEP_UPGRADES } from '../fathom-data/deep-upgrades';
 import { DEEP_ADAPTER, deepUpgradeCost, isDeepUpgradeAvailable, type DeepHunt } from '../fathom/deep';
+import { legendEarned } from '../shared/hunt';
 import type { FathomGame } from '../fathom/game';
 import type { FathomStore } from '../fathom/store';
 import { seasonClock } from './app';
 
 const ACT_NAMES = ['', 'THE SEASON', 'SIGHTINGS', 'THE SOURCE', 'LANDFALL'];
 const FEED = 8;
+const CONFIRM_MS = 5000;
 
 function createTownStrip(store: FathomStore, index: number, town: string) {
   const title = h('span', { class: 'deep-title' });
@@ -47,6 +49,7 @@ function createTownStrip(store: FathomStore, index: number, town: string) {
 
 /** The sonar turned around: the towns as the thing behind the seam hears them. */
 export function createDeepView(store: FathomStore): { el: HTMLElement; render(game: FathomGame): void } {
+  const name = h('h2', { class: 'deep-name' }, 'THE SOURCE');
   const back = h('button', { class: 'deep-back', type: 'button', 'aria-label': 'Return to the surface' }, 'RETURN TO THE SURFACE');
   back.addEventListener('click', () => store.dispatch({ type: 'leaveDeep' }));
   const stat = (label: string, aria: string) => {
@@ -60,6 +63,24 @@ export function createDeepView(store: FathomStore): { el: HTMLElement; render(ga
   const note = h('p', { class: 'deep-note' });
   const sink = h('button', { class: 'deep-sink', type: 'button' });
   sink.addEventListener('click', () => store.dispatch({ type: 'toggleDeepDormant' }));
+  // Ending the hunt is for good, so it takes a second tap.
+  const end = h('button', { class: 'deep-sink deep-end', type: 'button' });
+  let confirming = false;
+  let confirmTimer: ReturnType<typeof setTimeout> | undefined;
+  end.addEventListener('click', () => {
+    if (!confirming) {
+      confirming = true;
+      confirmTimer = setTimeout(() => {
+        confirming = false;
+        render(store.getState());
+      }, CONFIRM_MS);
+      render(store.getState());
+      return;
+    }
+    confirming = false;
+    clearTimeout(confirmTimer);
+    store.dispatch({ type: 'endDeep' });
+  });
   let towns: ReturnType<typeof createTownStrip>[] = [];
   const townList = h('div', { class: 'deep-towns' });
   const upgrades = h('ul', { class: 'deep-upgrades' });
@@ -67,7 +88,7 @@ export function createDeepView(store: FathomStore): { el: HTMLElement; render(ga
   const el = h(
     'section',
     { class: 'deep', 'aria-label': 'The Source', hidden: true },
-    h('header', { class: 'deep-head' }, h('h2', { class: 'deep-name' }, 'THE SOURCE'), back),
+    h('header', { class: 'deep-head' }, name, back),
     h(
       'div',
       { class: 'deep-body' },
@@ -78,6 +99,7 @@ export function createDeepView(store: FathomStore): { el: HTMLElement; render(ga
         note,
         townList,
         sink,
+        end,
         h('h3', { class: 'panel-sub' }, 'WHAT THE SOURCE TOOK'),
         feed,
       ),
@@ -117,6 +139,11 @@ export function createDeepView(store: FathomStore): { el: HTMLElement; render(ga
     setText(sink, hunt.dormant ? 'RISE' : 'SINK');
     setAttr(sink, 'aria-label', hunt.dormant ? 'Rise' : 'Sink');
     for (const t of towns) t.render(d);
+    const carried = game.profile.legend.deep ?? 0;
+    setText(name, carried > 0 ? `THE SOURCE · LEGEND ${carried}` : 'THE SOURCE');
+    const earned = legendEarned(hunt.harvest);
+    setText(end, confirming ? `CONFIRM: END THE HUNT FOR ${earned} LEGEND` : `END THE HUNT · +${earned} LEGEND`);
+    setAttr(end, 'aria-label', confirming ? `Confirm: end the hunt for ${earned} Legend` : `End the hunt for ${earned} Legend`);
 
     const key = DEEP_UPGRADES.map((u) => `${u.id}:${d.bought[u.id] ?? 0}`).join(',');
     if (key !== shownUpgrades) {

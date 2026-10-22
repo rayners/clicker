@@ -54,14 +54,24 @@ export interface HuntState<P> {
   beatenFor: number;
 }
 
-export function createHunt<P>(prey: P[], options: { strength: number; hunger: number }): HuntState<P> {
+/** Harvest per unit of Legend squared: Legend grows with the square root of a hunt's harvest. */
+const LEGEND_HARVEST = 25;
+/** Legend per extra step of strength a new hunt starts with, and harvest in hand per Legend. */
+const LEGEND_PER_STRENGTH = 2;
+const LEGEND_DREAD = 10;
+
+/** What a finished hunt leaves behind, carried into the next hunt by the same horror. */
+export const legendEarned = (harvest: number): number => Math.floor(Math.sqrt(Math.max(0, harvest) / LEGEND_HARVEST));
+
+export function createHunt<P>(prey: P[], options: { strength: number; hunger: number; legend?: number }): HuntState<P> {
+  const legend = options.legend ?? 0;
   return {
     prey,
     split: prey.map(() => 0),
-    strength: options.strength,
+    strength: options.strength + Math.floor(legend / LEGEND_PER_STRENGTH),
     hunger: options.hunger,
     harvest: 0,
-    dread: 0,
+    dread: legend * LEGEND_DREAD,
     notoriety: 0,
     dormant: false,
     beaten: 0,

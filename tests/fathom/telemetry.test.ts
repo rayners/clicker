@@ -1,4 +1,4 @@
-import { startDeep } from '../../src/fathom/deep';
+import { endDeep, startDeep } from '../../src/fathom/deep';
 import { describe, it, expect } from 'vitest';
 import { createFathomGame, type FathomGame } from '../../src/fathom/game';
 import { completeSeason } from '../../src/fathom/season';
@@ -47,5 +47,11 @@ describe('deep-water play events', () => {
     const beaten = { ...answering, deep: { ...answering.deep!, hunt: { ...answering.deep!.hunt, beaten: 1, harvest: 40 } } };
     expect(seasonEvents(answering, beaten)).toEqual([{ name: 'deep_beaten', props: { beaten: 1, harvest: 40 } }]);
     expect(seasonEvents(beaten, beaten)).toEqual([]);
+  });
+
+  it('reports a hunt ended for Legend', () => {
+    const answering = startDeep(createFathomGame(1, 0), 5);
+    const fed = { ...answering, deep: { ...answering.deep!, hunt: { ...answering.deep!.hunt, harvest: 400 } } };
+    expect(seasonEvents(fed, endDeep(fed))).toEqual([{ name: 'hunt_ended', props: { horror: 'source', harvest: 400, legend: 4 } }]);
   });
 });

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   createHunt,
+  legendEarned,
   pushOn,
   shiftPush,
   tickHunt,
@@ -109,5 +110,22 @@ describe('the hunt', () => {
   it('reports each prey\'s alarm', () => {
     const h = run(hunt(), 500);
     expect(adapter.alarm(h.prey[0]!)).toBeGreaterThan(0);
+  });
+});
+
+describe('Legend: what a finished hunt leaves behind', () => {
+  it('grows with the square root of the harvest, so the first hunts count most', () => {
+    expect(legendEarned(0)).toBe(0);
+    expect(legendEarned(100)).toBe(2);
+    expect(legendEarned(300)).toBe(3);
+    expect(legendEarned(900)).toBe(6);
+  });
+
+  it('starts the next hunt stronger: a step of strength per two Legend, and harvest in hand to grow with', () => {
+    const plain = createHunt([1, 2], { strength: 3, hunger: 60 });
+    const storied = createHunt([1, 2], { strength: 3, hunger: 60, legend: 5 });
+    expect(storied.strength).toBe(plain.strength + 2);
+    expect(storied.dread).toBe(50);
+    expect(plain.dread).toBe(0);
   });
 });

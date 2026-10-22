@@ -1,4 +1,4 @@
-import { createHunt, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../shared/hunt';
+import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../shared/hunt';
 import { nextRandom } from '../shared/rng';
 import { isSecured } from '../shared/ground';
 import { DEEP_UPGRADES, type DeepEffect } from '../fathom-data/deep-upgrades';
@@ -10,6 +10,8 @@ import { tickOutfit } from './tick';
 /** Answer the Source: the sonar turned around. You are what is behind the seam; the seaside towns run themselves. */
 export const DEEP_TOWNS = ['HARROW POINT', 'GULLHAVEN', 'CAPE MORROW'] as const;
 
+/** Where the Source's Legend is kept in the profile. */
+export const LEGEND_KEY = 'deep';
 const START_STRENGTH = 3;
 const START_HUNGER = 60;
 /** Standing (more income) each town gains per point of notoriety: the sightings bring money for defences. */
@@ -89,7 +91,15 @@ export const DEEP_ADAPTER: PreyAdapter<DeepPrey> = {
 export function startDeep(game: FathomGame, seed: number): FathomGame {
   if (game.deep) return { ...game, mode: 'deep' };
   const prey = DEEP_TOWNS.map((town, i) => ({ outfit: createOutfit(seed + i), taps: 0, decideIn: 0, town, baseStanding: 0 }));
-  return { ...game, mode: 'deep', deep: { hunt: createHunt(prey, { strength: START_STRENGTH, hunger: START_HUNGER }), bought: {} } };
+  const legend = game.profile.legend[LEGEND_KEY] ?? 0;
+  return { ...game, mode: 'deep', deep: { hunt: createHunt(prey, { strength: START_STRENGTH, hunger: START_HUNGER, legend }), bought: {} } };
+}
+
+/** End the hunt: the harvest becomes Legend for the next Source, and the season is back on the sonar. */
+export function endDeep(game: FathomGame): FathomGame {
+  if (!game.deep) return game;
+  const legend = { ...game.profile.legend, [LEGEND_KEY]: (game.profile.legend[LEGEND_KEY] ?? 0) + legendEarned(game.deep.hunt.harvest) };
+  return { ...game, mode: 'season', deep: null, profile: { ...game.profile, legend } };
 }
 
 export function leaveDeep(game: FathomGame): FathomGame {

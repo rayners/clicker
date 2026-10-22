@@ -81,4 +81,14 @@ describe('the Source on screen', () => {
     await user.click(source().getByRole('button', { name: /return to the surface/i }));
     expect(store.getState().mode).toBe('season');
   });
+
+  it('ends the hunt for Legend, after a confirming second tap', async () => {
+    const user = setup(inDeep({ harvest: 400 }));
+    const end = source().getByRole('button', { name: /end the hunt for 4 legend/i });
+    await user.click(end);
+    expect(store.getState().deep).not.toBeNull();
+    await user.click(source().getByRole('button', { name: /confirm/i }));
+    expect(store.getState().deep).toBeNull();
+    expect(store.getState().profile.legend.deep).toBe(4);
+  });
 });

@@ -7,7 +7,7 @@ import { buyAttraction, hireGuard, sellPass, shiftOpen } from './shallows';
 import { buyBuoy, buyTrawler, shiftRange } from './shelf';
 import { buyModule, hireRepairCrew, shiftStation } from './trench';
 import { buyUpgrade } from './upgrades';
-import { buyDeepUpgrade, leaveDeep, startDeep } from './deep';
+import { buyDeepUpgrade, endDeep, leaveDeep, startDeep } from './deep';
 import { shiftPush, toggleDormant } from '../shared/hunt';
 import type { Outfit } from './state';
 
@@ -34,6 +34,7 @@ export type FathomAction =
   | { type: 'hardReset'; seed: number; now: number }
   | { type: 'startDeep'; seed: number }
   | { type: 'leaveDeep' }
+  | { type: 'endDeep' }
   | { type: 'shiftDeepPush'; index: number; step: 1 | -1 }
   | { type: 'toggleDeepDormant' }
   | { type: 'buyDeepUpgrade'; id: string }
@@ -92,6 +93,8 @@ export function reduce(game: FathomGame, action: FathomAction): FathomGame {
       return startDeep(game, action.seed);
     case 'leaveDeep':
       return leaveDeep(game);
+    case 'endDeep':
+      return endDeep(game);
     case 'shiftDeepPush':
       return game.deep ? { ...game, deep: { ...game.deep, hunt: shiftPush(game.deep.hunt, action.index, action.step) } } : game;
     case 'toggleDeepDormant':

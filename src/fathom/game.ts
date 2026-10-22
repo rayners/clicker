@@ -4,7 +4,7 @@ import { createOutfit, type EntryKind, type Outfit } from './state';
 import { tickOutfit } from './tick';
 import { tickDeep, type DeepHunt } from './deep';
 
-export const FATHOM_VERSION = 3;
+export const FATHOM_VERSION = 4;
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
 const CATCH_UP_STEP_SECONDS = 1;
 /** Frame gaps longer than this are treated as the player having been away. */
@@ -31,6 +31,8 @@ export interface FathomProfile {
   seasons: number;
   endingsSeen: string[];
   history: SeasonRecord[];
+  /** Legend each horror has carried out of finished hunts (see docs/HORROR-TIER.md). */
+  legend: Record<string, number>;
 }
 
 export interface FathomGame {
@@ -44,7 +46,7 @@ export interface FathomGame {
 }
 
 export function createFathomProfile(): FathomProfile {
-  return { settings: { sound: false, reducedMotion: false }, standing: 0, notes: 0, seasons: 0, endingsSeen: [], history: [] };
+  return { settings: { sound: false, reducedMotion: false }, standing: 0, notes: 0, seasons: 0, endingsSeen: [], history: [], legend: {} };
 }
 
 export function createFathomGame(seed: number, now: number): FathomGame {
