@@ -1,4 +1,7 @@
 import { formatClock, formatNumber } from '../shared/format';
+import { createGuideView } from '../shared/ui/guide';
+import { createGuideProgress } from '../shared/guide';
+import { guideRules, guideSteps } from '../data/guide';
 import type { GameState } from '../core/game';
 import type { Store } from '../core/store';
 import { h, setText } from '../shared/ui/dom';
@@ -63,6 +66,9 @@ function scenarioView(ui: ScenarioUi) {
 
 const DEFAULT_SPRITES = { vessel: 'ship', target: 'moonlet', action: 'drill' };
 
+/** The guide's progress is a per-device convenience, kept apart from the save. */
+const GUIDE_KEY = 'deep-contract.guide';
+
 export function mountApp(root: HTMLElement, store: Store): void {
   const sound = createSound();
   const settings = createSettings(store);
@@ -75,6 +81,8 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const vesselBit = spriteCanvas('ship', 'mast-sprite');
   const targetBit = spriteCanvas('moonlet', 'status-moon');
   const clock = h('span', { class: 'mast-clock' });
+  // The walkthrough (docs/ROADMAP.md 6b): a tip above the big button, and the rules a tap away in the masthead.
+  const guide = createGuideView<GameState>({ steps: guideSteps, rules: guideRules, progress: createGuideProgress(window.localStorage, GUIDE_KEY) });
   const masthead = h(
     'header',
     { class: 'masthead' },
@@ -83,6 +91,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
       { class: 'mast-brand' },
       h('span', { class: 'brand-mark', 'aria-hidden': 'true' }, 'K/A'),
       h('span', { class: 'brand-name' }, 'KESSLER-AMARI COMBINE'),
+      guide.rulesButton,
       settings.button,
     ),
     h('div', { class: 'mast-line' }, h('span', { class: 'mast-ship-wrap' }, vesselBit, shipName), clock),
@@ -137,7 +146,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     if (e.detail === 0) drillOnce();
   });
   // Outside the panels so it stays reachable on phones whichever tab is open.
-  const drillBay = h('div', { class: 'drill-bay' }, drill);
+  const drillBay = h('div', { class: 'drill-bay' }, guide.el, drill);
 
   const panelSection = (id: string, ...children: HTMLElement[]) =>
     h('section', { class: `panel panel-${id}`, role: 'tabpanel', id: `panel-${id}`, 'aria-labelledby': `tab-${id}` }, ...children);
@@ -252,7 +261,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
   }
 
   root.classList.add('shell');
-  root.replaceChildren(masthead, status, ...panels.map((p) => p.el), drillBay, tabbar, settings.dialog, assignment.el, creatureView.el, hunterView.el);
+  root.replaceChildren(masthead, status, ...panels.map((p) => p.el), drillBay, tabbar, settings.dialog, assignment.el, creatureView.el, hunterView.el, guide.rulesDialog);
   selectTab('ops');
   let palette = readPalette(root);
   paintAll(root);
@@ -282,6 +291,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
 
   function render(game: GameState) {
     creatureView.render(game);
+    guide.render(game);
     hunterView.render(game);
     if (root.dataset.mode !== game.mode) root.dataset.mode = game.mode;
     const m = game.mission;

@@ -25,6 +25,9 @@ for (const [name, size] of [
   test(`salvage on a phone ${name}: a long compartment column still leaves the tabs readable`, async ({ page, isMobile }) => {
     test.skip(!isMobile, 'phone layout');
     await page.setViewportSize(size);
+    // About the compartment column, not the walkthrough: start with the guide put away, as a player would after a tip.
+    await page.goto('/contract/');
+    await page.evaluate(() => localStorage.setItem('deep-contract.guide', JSON.stringify({ seen: [], skipped: true })));
     await page.goto('/contract/?debug=sal-act2');
     await page.getByRole('tab', { name: /sys/i }).click();
     await expect(page.getByRole('button', { name: /fit bracing frame/i })).toBeInViewport();
