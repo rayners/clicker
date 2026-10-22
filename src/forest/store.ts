@@ -5,8 +5,8 @@ import { adjustOrder, buyBuilding, buyOil, buyUpgrade, dispatch, forage, hire, p
 import { advance, createForestGame, type ForestGame, type ForestSettings } from './game';
 import { completeCharter, rewriteCharter, type Ending } from './charter';
 import type { SiteId } from './state';
-import { buyWoodUpgrade, leaveWood, startWood } from './wood';
-import { buyDragonUpgrade, leaveDragon, wakeDragon } from './dragon';
+import { buyWoodUpgrade, endWood, leaveWood, startWood } from './wood';
+import { buyDragonUpgrade, endDragon, leaveDragon, wakeDragon } from './dragon';
 import { shiftPush, toggleDormant } from '../shared/hunt';
 
 export type ForestAction =
@@ -27,6 +27,8 @@ export type ForestAction =
   | { type: 'toggleWoodDormant' }
   | { type: 'buyWoodUpgrade'; id: string }
   | { type: 'leaveWood' }
+  | { type: 'endWood' }
+  | { type: 'endDragon' }
   | { type: 'wakeDragon'; seed: number }
   | { type: 'shiftDragonPush'; index: number; step: 1 | -1 }
   | { type: 'toggleDragonDormant' }
@@ -78,6 +80,10 @@ export function reduce(game: ForestGame, action: ForestAction): ForestGame {
       return buyWoodUpgrade(game, action.id);
     case 'leaveWood':
       return leaveWood(game);
+    case 'endWood':
+      return endWood(game);
+    case 'endDragon':
+      return endDragon(game);
     case 'wakeDragon':
       return wakeDragon(game, action.seed);
     case 'shiftDragonPush':

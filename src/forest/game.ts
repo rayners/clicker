@@ -5,7 +5,7 @@ import { createCompany, type Company, type EntryKind } from './state';
 import { tickWood, type WoodHunt } from './wood';
 import { tickDragon, type DragonHunt } from './dragon';
 
-export const FOREST_VERSION = 10;
+export const FOREST_VERSION = 11;
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
 const CATCH_UP_STEP_SECONDS = 1;
 /** Frame gaps longer than this are treated as the player having been away. */
@@ -33,6 +33,8 @@ export interface ForestProfile {
   grace: number;
   chartersCompleted: number;
   history: CharterRecord[];
+  /** Legend each horror has carried out of finished hunts (see docs/HORROR-TIER.md). */
+  legend: Record<string, number>;
 }
 
 export interface ForestGame {
@@ -47,7 +49,7 @@ export interface ForestGame {
 }
 
 export function createForestProfile(): ForestProfile {
-  return { settings: { sound: false, reducedMotion: false }, renown: 0, grace: 0, chartersCompleted: 0, history: [] };
+  return { settings: { sound: false, reducedMotion: false }, renown: 0, grace: 0, chartersCompleted: 0, history: [], legend: {} };
 }
 
 export function createForestGame(seed: number, now: number): ForestGame {

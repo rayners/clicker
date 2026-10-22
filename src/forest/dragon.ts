@@ -1,4 +1,4 @@
-import { createHunt, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../shared/hunt';
+import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../shared/hunt';
 import { appendLog } from '../shared/log';
 import { nextRandom } from '../shared/rng';
 import { formatNumber } from '../shared/format';
@@ -12,6 +12,8 @@ import { createCompany, type Company, type EntryKind } from './state';
 /** Wake the dragon: the ledger as the dragon keeps it. You lie under the Heartwood; the companies dig, and you take. */
 export const DRAGON_COMPANIES = 3;
 
+/** Where this horror's Legend is kept in the profile. */
+export const LEGEND_KEY = 'dragon';
 const START_STRENGTH = 3;
 const START_HUNGER = 60;
 /** Seconds between raids at one unit of push. */
@@ -114,7 +116,14 @@ export const DRAGON_ADAPTER: PreyAdapter<DragonPrey> = {
 export function wakeDragon(game: ForestGame, seed: number): ForestGame {
   if (game.dragon) return { ...game, mode: 'dragon' };
   const prey = Array.from({ length: DRAGON_COMPANIES }, (_, i) => ({ company: createCompany(seed + i), taps: 0, decideIn: 0, baseRenown: 0, raidIn: 0, raids: 0, hoard: 0 }));
-  return { ...game, mode: 'dragon', dragon: { hunt: createHunt(prey, { strength: START_STRENGTH, hunger: START_HUNGER }), bought: {} } };
+  return { ...game, mode: 'dragon', dragon: { hunt: createHunt(prey, { strength: START_STRENGTH, hunger: START_HUNGER, legend: game.profile.legend[LEGEND_KEY] ?? 0 }), bought: {} } };
+}
+
+/** End the hunt: the harvest becomes Legend for the next one, and the ledger is back. */
+export function endDragon(game: ForestGame): ForestGame {
+  if (!game.dragon) return game;
+  const legend = { ...game.profile.legend, [LEGEND_KEY]: (game.profile.legend[LEGEND_KEY] ?? 0) + legendEarned(game.dragon.hunt.harvest) };
+  return { ...game, mode: 'charter', dragon: null, profile: { ...game.profile, legend } };
 }
 
 export function leaveDragon(game: ForestGame): ForestGame {

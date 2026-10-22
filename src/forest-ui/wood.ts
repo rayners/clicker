@@ -1,5 +1,7 @@
 import { formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
+import { createConfirmButton } from '../shared/ui/confirm';
+import { legendEarned } from '../shared/hunt';
 import { WOOD_UPGRADES } from '../forest-data/wood-upgrades';
 import { isWoodUpgradeAvailable, woodUpgradeCost, WOOD_ADAPTER, type WoodHunt } from '../forest/wood';
 import type { ForestGame } from '../forest/game';
@@ -60,6 +62,9 @@ export function createWoodView(store: ForestStore): { el: HTMLElement; render(ga
   const fear = stat('FEAR', 'Fear');
   const free = stat('STRENGTH', 'Strength free');
   const note = h('p', { class: 'wood-note' });
+  // Ending the hunt is for good, so it takes a second tap.
+  const end = createConfirmButton({ className: 'wood-sleep wood-end', onConfirm: () => store.dispatch({ type: 'endWood' }) });
+  const name = h('h2', { class: 'wood-name' }, 'The Wood Listens');
   const sleep = h('button', { class: 'wood-sleep', type: 'button' });
   sleep.addEventListener('click', () => store.dispatch({ type: 'toggleWoodDormant' }));
   const companies = [0, 1, 2].map((i) => createCompanyStrip(store, i));
@@ -68,7 +73,7 @@ export function createWoodView(store: ForestStore): { el: HTMLElement; render(ga
   const el = h(
     'section',
     { class: 'wood', 'aria-label': 'The wood', hidden: true },
-    h('header', { class: 'wood-head' }, h('h2', { class: 'wood-name' }, 'The Wood Listens'), back),
+    h('header', { class: 'wood-head' }, name, back),
     h(
       'div',
       { class: 'wood-body' },
@@ -79,6 +84,7 @@ export function createWoodView(store: ForestStore): { el: HTMLElement; render(ga
         note,
         ...companies.map((c) => c.el),
         sleep,
+        end.el,
         h('h3', { class: 'panel-subtitle' }, 'WHAT THE WOOD TOOK'),
         feed,
       ),
@@ -113,6 +119,10 @@ export function createWoodView(store: ForestStore): { el: HTMLElement; render(ga
     el.dataset.state = hunt.beatenFor > 0 ? 'beaten' : hunt.dormant ? 'dormant' : 'hunting';
     setText(sleep, hunt.dormant ? 'WAKE' : 'SLEEP');
     setAttr(sleep, 'aria-label', hunt.dormant ? 'Wake' : 'Sleep');
+    const carried = game.profile.legend.wood ?? 0;
+    setText(name, carried > 0 ? `The Wood Listens · Legend ${carried}` : 'The Wood Listens');
+    const earned = legendEarned(hunt.harvest);
+    end.label(`End the hunt for ${earned} Legend`, `END THE HUNT · +${earned} LEGEND`);
     for (const c of companies) c.render(w);
 
     const key = WOOD_UPGRADES.map((u) => `${u.id}:${w.bought[u.id] ?? 0}`).join(',');

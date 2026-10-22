@@ -73,4 +73,13 @@ describe('the dragon on screen', () => {
     await user.click(lair().getByRole('button', { name: /return to the ledger/i }));
     expect(store.getState().mode).toBe('charter');
   });
+
+  it('ends the hunt for Legend, after a confirming second tap', async () => {
+    const user = setup(awake({ harvest: 400 }));
+    await user.click(lair().getByRole('button', { name: /end the hunt for 4 legend/i }));
+    expect(store.getState().dragon).not.toBeNull();
+    await user.click(lair().getByRole('button', { name: /confirm/i }));
+    expect(store.getState().dragon).toBeNull();
+    expect(store.getState().profile.legend.dragon).toBe(4);
+  });
 });

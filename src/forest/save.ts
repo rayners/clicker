@@ -72,6 +72,8 @@ export const forestSaves = createSaveSystem<ForestGame>({
     },
     // v10: the dragon (a second way to play the horror). Nobody has woken it yet.
     10: (save) => ({ dragon: null, ...save }),
+    // v11: Legend, carried out of finished hunts. Nobody has finished one yet.
+    11: (save) => ({ ...save, profile: { legend: {}, ...(save.profile as Record<string, unknown>) } }),
   },
   label: 'ELDERDARK',
   required: ['profile', 'company'],

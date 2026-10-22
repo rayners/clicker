@@ -81,4 +81,13 @@ describe('the wood on screen', () => {
     await user.click(woodView().getByRole('button', { name: /return to the ledger/i }));
     expect(store.getState().mode).toBe('charter');
   });
+
+  it('ends the hunt for Legend, after a confirming second tap', async () => {
+    const user = setup(inWood({ harvest: 400 }));
+    await user.click(woodView().getByRole('button', { name: /end the hunt for 4 legend/i }));
+    expect(store.getState().wood).not.toBeNull();
+    await user.click(woodView().getByRole('button', { name: /confirm/i }));
+    expect(store.getState().wood).toBeNull();
+    expect(store.getState().profile.legend.wood).toBe(4);
+  });
 });

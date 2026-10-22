@@ -1,5 +1,7 @@
 import { formatNumber } from '../shared/format';
 import { h, setAttr, setText } from '../shared/ui/dom';
+import { createConfirmButton } from '../shared/ui/confirm';
+import { legendEarned } from '../shared/hunt';
 import { DRAGON_UPGRADES } from '../forest-data/dragon-upgrades';
 import { DRAGON_ADAPTER, dragonUpgradeCost, isDragonUpgradeAvailable, type DragonHunt } from '../forest/dragon';
 import type { ForestGame } from '../forest/game';
@@ -60,6 +62,9 @@ export function createDragonView(store: ForestStore): { el: HTMLElement; render(
   const slayers = stat('SLAYERS', 'Slayers');
   const free = stat('STRENGTH', 'Strength free');
   const note = h('p', { class: 'wood-note' });
+  // Ending the hunt is for good, so it takes a second tap.
+  const end = createConfirmButton({ className: 'wood-sleep wood-end', onConfirm: () => store.dispatch({ type: 'endDragon' }) });
+  const name = h('h2', { class: 'wood-name' }, 'The Hoard');
   const sleep = h('button', { class: 'wood-sleep', type: 'button' });
   sleep.addEventListener('click', () => store.dispatch({ type: 'toggleDragonDormant' }));
   const companies = [0, 1, 2].map((i) => createCompanyStrip(store, i));
@@ -68,7 +73,7 @@ export function createDragonView(store: ForestStore): { el: HTMLElement; render(
   const el = h(
     'section',
     { class: 'wood dragon', 'aria-label': 'The hoard', hidden: true },
-    h('header', { class: 'wood-head' }, h('h2', { class: 'wood-name' }, 'The Hoard'), back),
+    h('header', { class: 'wood-head' }, name, back),
     h(
       'div',
       { class: 'wood-body' },
@@ -79,6 +84,7 @@ export function createDragonView(store: ForestStore): { el: HTMLElement; render(
         note,
         ...companies.map((c) => c.el),
         sleep,
+        end.el,
         h('h3', { class: 'panel-subtitle' }, 'WHAT THE DRAGON TOOK'),
         feed,
       ),
@@ -113,6 +119,10 @@ export function createDragonView(store: ForestStore): { el: HTMLElement; render(
     el.dataset.state = hunt.beatenFor > 0 ? 'beaten' : hunt.dormant ? 'dormant' : 'hunting';
     setText(sleep, hunt.dormant ? 'WAKE' : 'SLEEP ON THE HOARD');
     setAttr(sleep, 'aria-label', hunt.dormant ? 'Wake' : 'Sleep on the hoard');
+    const carried = game.profile.legend.dragon ?? 0;
+    setText(name, carried > 0 ? `The Hoard · Legend ${carried}` : 'The Hoard');
+    const earned = legendEarned(hunt.harvest);
+    end.label(`End the hunt for ${earned} Legend`, `END THE HUNT · +${earned} LEGEND`);
     for (const c of companies) c.render(d);
 
     const key = DRAGON_UPGRADES.map((u) => `${u.id}:${d.bought[u.id] ?? 0}`).join(',');
