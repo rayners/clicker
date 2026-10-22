@@ -116,4 +116,9 @@ describe('a haulage contract on screen', () => {
     await user.click(screen.getByRole('button', { name: new RegExp(first.name, 'i') }));
     expect(mission().upgrades).toContain(first.id);
   });
+
+  it('warns in the cryo bay that watches on a haul tire the crew faster', () => {
+    setup({ lifetimeCredits: 1e9 });
+    expect(document.getElementById('panel-crew')!.textContent).toMatch(/WATCHES TIRE CREW X1\.35/);
+  });
 });

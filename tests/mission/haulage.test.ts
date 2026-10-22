@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createMission, HAULAGE_MISSION_CONFIG, type MissionOf } from '../../src/mission/state';
+import { createMission, DEFAULT_MISSION_CONFIG, HAULAGE_MISSION_CONFIG, type MissionOf } from '../../src/mission/state';
 import { tickMission } from '../../src/mission/tick';
 import { SCENARIOS } from '../../src/mission/registry';
 import { BEACON_LEG, CARS, ENGINES, TUG_MASS, TUG_VALUE, stationName } from '../../src/data/haulage/systems';
@@ -230,5 +230,17 @@ describe('the story scale', () => {
   it('measures progress by freight delivered, on the shared scale', () => {
     expect(progress(fresh())).toBe(0);
     expect(progress(fresh({ delivered: 1e6 }))).toBeGreaterThan(progress(fresh({ delivered: 1e4 })));
+  });
+});
+
+describe('long watches', () => {
+  it('tire the haul\'s crew faster than any other contract\'s', () => {
+    const awake = <M extends { crew: Record<string, { status: string; fatigue: number }> }>(m: M): M => ({ ...m, crew: { ...m.crew, okonkwo: { status: 'awake', fatigue: 0 } } });
+    const hauling = tickMission(awake(createMission(HAULAGE_MISSION_CONFIG, 1)), 60);
+    const mining = tickMission(awake(createMission(DEFAULT_MISSION_CONFIG, 1)), 60);
+    expect(hauling.crew.okonkwo!.fatigue).toBeGreaterThan(mining.crew.okonkwo!.fatigue * 1.3);
+    for (const s of Object.values(SCENARIOS)) {
+      if (s.id !== 'haulage' && s.id !== 'overland') expect(s.watchStrain ?? 1).toBeLessThan(SCENARIOS.haulage.watchStrain!);
+    }
   });
 });

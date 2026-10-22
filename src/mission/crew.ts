@@ -73,8 +73,8 @@ function fatigueMultiplier(m: MissionCore): number {
   return CREW.reduce((mult, c) => (c.fatigueRelief !== undefined && isCrewEffective(m, c.id) ? mult * c.fatigueRelief : mult), 1);
 }
 
-export function tickCrew<M extends MissionCore>(m: M, dt: number): M {
-  const gain = (dt / FATIGUE_SECONDS) * MAX_FATIGUE * fatigueMultiplier(m);
+export function tickCrew<M extends MissionCore>(m: M, dt: number, strain = 1): M {
+  const gain = (dt / FATIGUE_SECONDS) * MAX_FATIGUE * fatigueMultiplier(m) * strain;
   const loss = (dt / RECOVERY_SECONDS) * MAX_FATIGUE;
   let next: M = { ...m, crew: { ...m.crew } };
   for (const def of CREW) {

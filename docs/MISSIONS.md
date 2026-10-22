@@ -190,12 +190,12 @@ The core trade-off is identical in both games and is the point of sharing it: **
 - **Deviations from the sketch:**
   - Pay accrues continuously rather than as one payment per delivery. Lump deliveries left hour-long gaps with no income, and paid cars coupled just short of a station for the whole leg.
   - Haulage has its own progress curve (`PROGRESS_SCALE` 3.82, exponent 3.12) instead of extraction's, because freight revenue compounds differently.
-  - Crew watches don't yet tire faster than in other missions.
+  - (Built 2026-10-21) Crew watches tire 1.35× faster on both hauls, through a new `ScenarioDef.watchStrain`, and the cryo bay says so. At 1.5× the bot's crew rotation reached the terminus early, under 4 hours.
 - **The beacon:** the leg to THE BEACON (the ninth station) is the obliged detour. Past it the story has deep access.
 - **Debug jumps:** `?debug=haulage` and `?debug=haul-act2`.
 - **Telemetry:** `leg_completed` (station, legs, onTime, minutes).
 - **Saves:** there is no saved-shape change for existing contracts, so no migration.
-- **Pacing (bot, seed 7):** Act II 55m, Act III 2h43, Act IV 2h52, terminus 4h07. An 8-hour catch-up takes about 0.3 s.
+- **Pacing (bot, seed 7):** Act II 55m, Act III 2h43, Act IV 2h52, terminus 4h07 (with tiring watches: Act II 57m, Act III 2h48, terminus 4h11). An 8-hour catch-up takes about 0.3 s.
 
 **4b. The overland haul: done** (2026-10-21, user's idea: "land is a good lower/quicker level").
 - **What it is:** a short contract (an hour or so) and the first one offered. A crawler rig hauls trailers along the lift road, from the mine through ten depots to Port Kessler Lift. Reaching the lift opens the terminus, and the one ending is the promotion to the long haul (+1 seniority).

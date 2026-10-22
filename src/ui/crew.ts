@@ -21,6 +21,7 @@ function bar(fatigue: number): string {
 
 export function createCrewPanel(store: Store): { el: HTMLElement; render(m: MissionState): void } {
   const lifeSupport = h('p', { class: 'crew-life' });
+  const strain = h('p', { class: 'crew-strain', hidden: true });
   const cards = CREW.map((def) => {
     const status = h('span', { class: 'crew-status' });
     const meter = h('div', {
@@ -59,6 +60,7 @@ export function createCrewPanel(store: Store): { el: HTMLElement; render(m: Miss
     { class: 'panel panel-crew', role: 'tabpanel', id: 'panel-crew', 'aria-labelledby': 'tab-crew' },
     h('h2', { class: 'panel-title' }, 'CRYO BAY'),
     lifeSupport,
+    strain,
     h('div', { class: 'crew-list' }, ...cards.map((c) => c.el)),
   );
 
@@ -66,6 +68,9 @@ export function createCrewPanel(store: Store): { el: HTMLElement; render(m: Miss
     for (const card of cards) setText(card.boost, boostText(m, card.def.id, card.def.fatigueRelief));
     const awake = awakeCount(m);
     setText(lifeSupport, `AWAKE ${awake}/${maxAwake(m)}`);
+    const watch = scenarioOf(m).watchStrain ?? 1;
+    strain.hidden = watch === 1;
+    setText(strain, `LONG WATCHES: WATCHES TIRE CREW X${watch} ON THIS CONTRACT`);
     for (const card of cards) {
       const state = m.crew[card.def.id];
       if (!state) continue;

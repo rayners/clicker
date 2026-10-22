@@ -828,6 +828,11 @@ button:focus-visible {
   color: var(--phosphor-dim);
 }
 
+.crew-strain {
+  margin: 0 var(--gutter) 6px;
+  color: var(--phosphor-hi);
+}
+
 .crew-list {
   padding: 0 var(--gutter) 16px;
 }

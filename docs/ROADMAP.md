@@ -54,7 +54,7 @@ In order. Each item has its design written down first, so nothing lives only in 
    - (done 2026-10-21) the name, DOWN THERE, and its picker door at `/down-there/`;
    - (done 2026-10-21) pilots' link rating and fatigue;
    - its play-as-the-horror tier, the Source, on the shared hunt engine (`docs/HORROR-TIER.md`): built 2026-10-21.
-5. **Then the backlog below**, in order: (done 2026-10-21) the Keep's sappers, then haulage's tiring crew watches (the last leftover from the missions), then the hunter and dragon horror tiers and Legend.
+5. **Then the backlog below**, in order: (done 2026-10-21) the Keep's sappers and haulage's tiring crew watches, then the hunter and dragon horror tiers and Legend.
 
 ## Backlog / ideas
 
@@ -66,7 +66,7 @@ In order. Each item has its design written down first, so nothing lives only in 
   - **Built:** the Killer's Cut, the wood, the creature and DOWN THERE's Source. **Left:** the hunter, the dragon and Legend.
 
 - **New missions (approved 2026-10-20):** security detachment, haulage and salvage for DEEP CONTRACT, and the Keep for Elderdark, with a shared held-ground engine. The design and build order are in `docs/MISSIONS.md`.
-  - **Built:** held ground, the security detachment, the Keep, haulage and salvage. **Left:** haulage's tiring crew watches.
+  - **Built:** held ground, the security detachment, the Keep, haulage and salvage. Nothing is left from the missions plan.
 
 - **Real-device pass on iPhone Safari**, both in-browser and installed to the home screen (offline, audio unlock, safe areas, storage persistence).
 - Debug extras from the plan: a time-scale multiplier, grant resources, a story flag viewer.

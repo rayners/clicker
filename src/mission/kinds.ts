@@ -42,6 +42,8 @@ export interface ScenarioDef {
   outcome(m: MissionState): { output: number; outputUnit: string };
   /** Who or what is at stake when the terminus choice is made, if the scenario has anyone to name. */
   stakes?(m: MissionState): string;
+  /** How much faster than usual a waking crew tires on this contract's watches (1 when absent). */
+  watchStrain?: number;
 }
 
 /** Everything a horror may ask of whichever scenario it is running in. */

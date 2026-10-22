@@ -32,6 +32,9 @@ interface HaulWords {
 }
 
 /** One haul's scenario: the shared rules, with this haul's fleet, route and words. */
+/** Long hauls, short crews: every watch on a tug or a rig tires people faster than on any other contract. */
+const WATCH_STRAIN = 1.35;
+
 function haulScenario<S extends HaulId>(id: S, profile: HaulProfile, words: HaulWords): ScenarioDef {
   const carCount = (m: HaulageMission) => profile.cars.reduce((n, c) => n + (m.cars[c.id] ?? 0), 0);
   return {
@@ -56,6 +59,7 @@ function haulScenario<S extends HaulId>(id: S, profile: HaulProfile, words: Haul
     tick: (m, dt) => tickHaulage(s(m), dt),
     signals: (m) => ({ progress: progress(s(m)), deepAccess: answeredBeacon(s(m)) }),
     lexicon: words.lexicon,
+    watchStrain: WATCH_STRAIN,
     beats: words.beats,
     directives: words.directives,
     metric: (m, name) => {

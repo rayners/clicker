@@ -36,7 +36,7 @@ export function runStory<M extends MissionState>(m: M, ctx: MissionContext = NO_
 /** Scenario and horror never change mid-mission, so the result has the same shape as the input. */
 export function tickWith<M extends MissionState>(m: M, dt: number, ctx: MissionContext, scenario: ScenarioDef, horror: HorrorDef): M {
   let next = scenario.tick({ ...m, elapsed: m.elapsed + dt }, dt);
-  next = tickCrew(next, dt);
+  next = tickCrew(next, dt, scenario.watchStrain);
   next = horror.tick(next, dt, { loseEquipment: scenario.loseEquipment });
   next = tickDirectives(next, scenario);
   return runBeats(next, storyBeats(scenario, horror), ctx, storyEnv(next, scenario, horror)) as M;
