@@ -106,3 +106,20 @@ describe('integration with the mission tick', () => {
     expect(tickMission(fresh({ lifetimeCredits: first.unlockCredits }), 0.1).directive?.id).toBe(first.id);
   });
 });
+
+describe('directives for the late acts', () => {
+  const late = DIRECTIVES.filter((d) => (d.minAct ?? 1) >= 3);
+  const done = Object.fromEntries(DIRECTIVES.filter((d) => !d.minAct).map((d) => [d.id, 'completed' as const]));
+
+  it('holds the darker orders back until the discovery, however rich the contract', () => {
+    expect(late.length).toBeGreaterThanOrEqual(3);
+    const rich = fresh({ lifetimeCredits: 1e15, act: 2, directiveResults: done });
+    expect(tickDirectives(rich).directive).toBeNull();
+    const after = tickDirectives({ ...rich, act: 3 });
+    expect(after.directive?.id).toBe(late[0]!.id);
+  });
+
+  it('reaches act 4 with orders of its own', () => {
+    expect(DIRECTIVES.some((d) => d.minAct === 4)).toBe(true);
+  });
+});

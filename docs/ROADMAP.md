@@ -82,7 +82,7 @@ In order. Each item has its design written down first, so nothing lives only in 
   - **The true-ending thread:** after the first broadcast of 0-77, every contract has WARDEN routing its own orders and filing counter-directive 0-78.
   - A first contract meets none of it.
   - **Still open:** the counter-directive could change play (crew safety outranking specimens), not just the story.
-- Sinister directives during Acts III–IV (the directive table currently ends at KA-008).
+- (Done 2026-10-22 for extraction) **Sinister directives in Acts III–IV.** Directives take an optional `minAct`. KA-009 to KA-012 wait for the discovery (two in act 3, two in act 4): ordinary goals with worse and worse briefs. **Still open:** late directives for terraforming, security, haulage and salvage, which end in act 2 today.
 - Sound polish: an ambient hum per act, and a typewriter cadence tied to the print animation.
 - An optional first-load boot sequence animation.
 - **Raise `TERRAFORM_UNLOCK_CONTRACTS`** (currently 0 so it can be play-tested) once the user is happy with it.

@@ -20,6 +20,8 @@ export interface DirectiveDef {
   lag: string;
   /** Lifetime credits before it can be issued. */
   unlockCredits: number;
+  /** The act the contract must have reached first: the darker orders wait for the discovery. */
+  minAct?: number;
   goal: DirectiveGoal;
   /** Seconds allowed. */
   duration: number;
@@ -79,7 +81,7 @@ export function tickDirectives(m: MissionState, scenario: ScenarioDef = scenario
     return m;
   }
   if (m.lastDirectiveAt !== null && m.elapsed - m.lastDirectiveAt < DIRECTIVE_COOLDOWN) return m;
-  const next = scenario.directives.find((d) => !(d.id in m.directiveResults) && m.lifetimeCredits >= d.unlockCredits);
+  const next = scenario.directives.find((d) => !(d.id in m.directiveResults) && m.lifetimeCredits >= d.unlockCredits && m.act >= (d.minAct ?? 1));
   if (!next) return m;
   const issued: MissionState = { ...m, directive: { id: next.id, issuedAt: m.elapsed, baseline: counter(m, next, scenario) } };
   return appendLog(
