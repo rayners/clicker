@@ -4,7 +4,9 @@ import { SPECIMENS } from '../fathom-data/open-water';
 import { CITIES } from '../fathom-data/breach';
 import { SOURCE_NOTCH } from '../fathom-data/trench';
 import { activeBulwarks, bulwarkCost, defence, isBreachOpen, pilotCost, wallCost } from './breach';
-import { createFathomGame, type FathomGame } from './game';
+import { advance, createFathomGame, type FathomGame } from './game';
+import { DEEP_ADAPTER, deepUpgradeCost, isDeepUpgradeAvailable, startDeep } from './deep';
+import { DEEP_UPGRADES } from '../fathom-data/deep-upgrades';
 import { contained, isAutoEnhanceActive, isOpenWaterOpen, penCost, specimenCost, specimens } from './open-water';
 import { attractionCost, attractionRate, guardCost, isAttractionRevealed, isAutoOpenActive, isGuardRevealed, swimmers, watch } from './shallows';
 import { boats, buoyCost, coveredRange, isAutoRangeActive, isShelfOpen, isTrawlerRevealed, trawlerCost } from './shelf';
@@ -119,6 +121,67 @@ function decide(game: FathomGame): FathomAction | null {
 }
 
 /** A sensible, greedy player: taps for the first stretch, then checks in every few seconds. */
+const DEFEND_SECONDS = 5;
+const EARLY_TAPS = 4;
+const LATE_TAPS = 0.1;
+const EARLY_SECONDS = 20 * 60;
+
+/** A town's own outfit, played by the bot: sells passes early, then buys every few seconds. Prey for the Source. */
+export function defendOutfit<P extends { outfit: Outfit; taps: number; decideIn: number }>(p: P, dt: number): P {
+  let game = { outfit: p.outfit } as FathomGame;
+  let taps = p.taps + dt * (p.outfit.elapsed < EARLY_SECONDS ? EARLY_TAPS : LATE_TAPS);
+  while (taps >= 1) {
+    game = reduce(game, { type: 'sellPass' });
+    taps -= 1;
+  }
+  let decideIn = p.decideIn - dt;
+  if (decideIn <= 0) {
+    decideIn += DEFEND_SECONDS;
+    for (let i = 0; i < 30; i++) {
+      const action = decide(game);
+      if (!action) break;
+      const next = reduce(game, action);
+      if (next === game) break;
+      game = next;
+    }
+  }
+  return { ...p, outfit: game.outfit, taps, decideIn };
+}
+
+/** The horror bot: buys what it can, sinks when the sightings mount, pushes the least alarmed town. */
+function decideDeep(game: FathomGame): FathomAction | null {
+  const d = game.deep!;
+  const h = d.hunt;
+  const upgrade = DEEP_UPGRADES.find((u) => isDeepUpgradeAvailable(d, u.id) && deepUpgradeCost(d, u.id) <= h.dread);
+  if (upgrade) return { type: 'buyDeepUpgrade', id: upgrade.id };
+  if (!h.dormant && h.notoriety > 4) return { type: 'toggleDeepDormant' };
+  if (h.dormant && h.notoriety < 1) return { type: 'toggleDeepDormant' };
+  const used = h.split.reduce((a, b) => a + b, 0);
+  if (used < h.strength) {
+    const order = h.prey.map((p, i) => ({ i, alarm: DEEP_ADAPTER.alarm(p) + h.split[i]! * 0.2 })).sort((a, b) => a.alarm - b.alarm);
+    return { type: 'shiftDeepPush', index: order[0]!.i, step: 1 };
+  }
+  return null;
+}
+
+export function simulateDeep(options: { seed: number; maxSeconds: number; passive?: boolean }): { harvest: number; upgrades: number; beaten: number; final: FathomGame } {
+  let game = startDeep(createFathomGame(options.seed, 0), options.seed);
+  for (let t = 1; t <= options.maxSeconds; t++) {
+    if (!options.passive && t % 5 === 0) {
+      for (let i = 0; i < 20; i++) {
+        const action = decideDeep(game);
+        if (!action) break;
+        const next = reduce(game, action);
+        if (next === game) break;
+        game = next;
+      }
+    }
+    game = advance(game, 1);
+  }
+  const h = game.deep!.hunt;
+  return { harvest: h.harvest, upgrades: Object.values(game.deep!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
+}
+
 export function simulateFathom(options: FathomSimOptions): FathomSimResult {
   const { seed, maxSeconds, activeTaps = 4, activeSeconds = 20 * 60, decisionInterval = 5 } = options;
   let game = createFathomGame(seed, 0);

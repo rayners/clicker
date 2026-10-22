@@ -64,6 +64,8 @@ export interface Outfit {
   temperaments: number[];
   /** 0..1: how worn down the pilot corps is. Fighting tires them; a reserve lets them rotate out and rest. */
   fatigue: number;
+  /** How hard the Source is pushing on this season (the play-as-the-horror tier); zero in an ordinary season. */
+  deepPush: number;
   /** The category of the kaiju now coming ashore, and seconds until the next, bigger one. */
   category: number;
   landfallIn: number;
@@ -124,6 +126,7 @@ export function createOutfit(seed: number, terms: SeasonTerms = FIRST_SEASON): O
     pilots: 0,
     temperaments: [],
     fatigue: 0,
+    deepPush: 0,
     category: 0,
     landfallIn: 0,
     reputation: 1,

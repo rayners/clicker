@@ -122,7 +122,7 @@ export function tickBreach(o: Outfit, dt: number): Outfit {
   const defs = threatened(next);
   const { cities: posted, spare } = post(next.cities, defs, defence(next));
   const retaken = frontier(posted) < CITIES.length && spare > 0 ? assault(posted, defs, spare, dt).states : posted;
-  const cities = tickGround(retaken, defs, dt, 1);
+  const cities = tickGround(retaken, defs, dt, 1 + next.deepPush);
   const income = levyRate({ ...next, cities }) * dt;
   let out: Outfit = { ...next, cities, cash: next.cash + income, lifetimeCash: next.lifetimeCash + income };
   cities.forEach((c, i) => {

@@ -11,6 +11,8 @@ const DIAL_STEPS = 10;
 const CLOSED_INCOME = 0.25;
 /** Chance per second that an unwatched swimmer is taken, at pressure 1. */
 const ATTACK_RATE = 0.002;
+/** Share of even watched swimmers within the Source's reach, per point of its push. */
+const DEEP_REACH = 0.1;
 const REPUTATION_HIT = 0.97;
 const REPUTATION_RECOVERY_SECONDS = 900;
 const REPUTATION_FLOOR = 0.4;
@@ -100,7 +102,8 @@ const log = (o: Outfit, kind: EntryKind, text: string) => appendLog<EntryKind, O
 
 /** Unwatched swimmers are taken; each one costs the town's trust. */
 function attacks(o: Outfit, dt: number, pressure: number): Outfit {
-  let next: Outfit = { ...o, attacks: o.attacks + exposed(o) * ATTACK_RATE * pressure * dt };
+  const reached = exposed(o) + inWater(o) * DEEP_REACH * o.deepPush;
+  let next: Outfit = { ...o, attacks: o.attacks + reached * ATTACK_RATE * pressure * dt };
   while (next.attacks >= 1) {
     const [roll, rng] = nextRandom(next.rng);
     const who = SWIMMERS[Math.floor(roll * SWIMMERS.length)]!;

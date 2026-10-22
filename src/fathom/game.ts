@@ -2,8 +2,9 @@ import { appendLog } from '../shared/log';
 import { formatDuration, formatNumber } from '../shared/format';
 import { createOutfit, type EntryKind, type Outfit } from './state';
 import { tickOutfit } from './tick';
+import { tickDeep, type DeepHunt } from './deep';
 
-export const FATHOM_VERSION = 2;
+export const FATHOM_VERSION = 3;
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
 const CATCH_UP_STEP_SECONDS = 1;
 /** Frame gaps longer than this are treated as the player having been away. */
@@ -37,6 +38,9 @@ export interface FathomGame {
   savedAt: number;
   profile: FathomProfile;
   outfit: Outfit;
+  /** Which side of the sonar is open: the season, or the Source. Only that side's time passes. */
+  mode: 'season' | 'deep';
+  deep: DeepHunt | null;
 }
 
 export function createFathomProfile(): FathomProfile {
@@ -44,10 +48,19 @@ export function createFathomProfile(): FathomProfile {
 }
 
 export function createFathomGame(seed: number, now: number): FathomGame {
-  return { version: FATHOM_VERSION, savedAt: now, profile: createFathomProfile(), outfit: createOutfit(seed) };
+  return { version: FATHOM_VERSION, savedAt: now, profile: createFathomProfile(), outfit: createOutfit(seed), mode: 'season', deep: null };
 }
 
+/** The Source runs several towns at once; away from the screen it steps coarsely to keep catch-up cheap. */
+const DEEP_CATCH_UP_STEP_SECONDS = 5;
+
 function simulate(game: FathomGame, seconds: number): FathomGame {
+  if (game.mode === 'deep') {
+    let g = game;
+    const step = seconds > LIVE_MAX_DT ? DEEP_CATCH_UP_STEP_SECONDS : seconds;
+    for (let left = seconds; left > 0; left -= step) g = tickDeep(g, Math.min(step, left));
+    return g;
+  }
   let outfit = game.outfit;
   for (let left = seconds; left > 0; left -= CATCH_UP_STEP_SECONDS) outfit = tickOutfit(outfit, Math.min(CATCH_UP_STEP_SECONDS, left));
   return { ...game, outfit };
@@ -56,7 +69,7 @@ function simulate(game: FathomGame, seconds: number): FathomGame {
 function away(game: FathomGame, gap: number): FathomGame {
   const seconds = Math.min(gap, OFFLINE_CAP_SECONDS);
   const g = simulate(game, seconds);
-  if (seconds < ABSENCE_NOTE_SECONDS) return g;
+  if (seconds < ABSENCE_NOTE_SECONDS || game.mode === 'deep') return g;
   const earned = g.outfit.lifetimeCash - game.outfit.lifetimeCash;
   const text = `WHILE YOU WERE ASHORE (${formatDuration(seconds)}): $${formatNumber(earned)} EARNED. ${g.outfit.bodyCount - game.outfit.bodyCount} LOST TO THE WATER.`;
   return { ...g, outfit: appendLog<EntryKind, Outfit>(g.outfit, 'sonar', text) };

@@ -7,6 +7,8 @@ import { buyAttraction, hireGuard, sellPass, shiftOpen } from './shallows';
 import { buyBuoy, buyTrawler, shiftRange } from './shelf';
 import { buyModule, hireRepairCrew, shiftStation } from './trench';
 import { buyUpgrade } from './upgrades';
+import { buyDeepUpgrade, leaveDeep, startDeep } from './deep';
+import { shiftPush, toggleDormant } from '../shared/hunt';
 import type { Outfit } from './state';
 
 export type FathomAction =
@@ -30,11 +32,16 @@ export type FathomAction =
   | { type: 'completeSeason'; ending: Ending; seed: number }
   | { type: 'setSetting'; key: keyof FathomSettings; value: boolean }
   | { type: 'hardReset'; seed: number; now: number }
+  | { type: 'startDeep'; seed: number }
+  | { type: 'leaveDeep' }
+  | { type: 'shiftDeepPush'; index: number; step: 1 | -1 }
+  | { type: 'toggleDeepDormant' }
+  | { type: 'buyDeepUpgrade'; id: string }
   | { type: 'tick'; dt: number };
 
 export type FathomStore = Store<FathomGame, FathomAction>;
 
-const outfit = (game: FathomGame, next: Outfit): FathomGame => (next === game.outfit ? game : { ...game, outfit: next });
+const outfit = (game: FathomGame, next: Outfit): FathomGame => (next === game.outfit || game.mode === 'deep' ? game : { ...game, outfit: next });
 
 export function reduce(game: FathomGame, action: FathomAction): FathomGame {
   const o = game.outfit;
@@ -81,6 +88,16 @@ export function reduce(game: FathomGame, action: FathomAction): FathomGame {
       const fresh = createFathomGame(action.seed, action.now);
       return { ...fresh, profile: { ...fresh.profile, settings: game.profile.settings } };
     }
+    case 'startDeep':
+      return startDeep(game, action.seed);
+    case 'leaveDeep':
+      return leaveDeep(game);
+    case 'shiftDeepPush':
+      return game.deep ? { ...game, deep: { ...game.deep, hunt: shiftPush(game.deep.hunt, action.index, action.step) } } : game;
+    case 'toggleDeepDormant':
+      return game.deep ? { ...game, deep: { ...game.deep, hunt: toggleDormant(game.deep.hunt) } } : game;
+    case 'buyDeepUpgrade':
+      return buyDeepUpgrade(game, action.id);
     case 'tick':
       return advance(game, action.dt);
   }

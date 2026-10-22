@@ -70,6 +70,29 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
   - Raiding a company's vault is the push; notoriety brings dragon-slayer charters.
   - Sleeping on the hoard is dormancy.
 
+### The kaiju game (working title FATHOM): the Source
+
+Added 2026-10-21 with the fourth game.
+
+**What you are.** The thing behind the seam in the trench, which sends the sharks, the squid and finally the kaiju.
+
+**Prey.** Three seaside towns, each running a season of the first tier: Harrow Point, Gullhaven and Cape Morrow. Each is defended by the season bot (`defendOutfit` in `src/fathom/bot.ts`).
+
+**The hunt in its own words.**
+- **The push** is a new `Outfit.deepPush`, zero in ordinary seasons. Each point adds 100% to:
+  - the beach's attack pressure;
+  - the shelf's boat losses;
+  - the lab's escapes;
+  - the kaiju's pressure on held cities.
+- **The drowned** are the harvest: everyone added to a town's body count, plus 25 for each city that falls.
+- **Sightings** are the notoriety. Each one adds standing to every town, so they earn more and buy better defences.
+- **A town that reaches its season's end** closes the seam, which beats the Source back for 10 minutes. That town's next season replaces it.
+- **Growth:** upgrades are bought with the drowned (strength, push, patience, appetite, quiet).
+
+**Entry.** "Answer the Source" in the configuration. The player's own season waits while the Source hunts.
+
+**Saves.** FATHOM save v3 (`mode`, `deep`).
+
 ## UI
 
 - The horror tier is a **second mode inside each game**, not a new page. It's reached from the game's own menu once unlocked: **FLIP THE TAPE** in LATE FEES, **SPECIAL ORDER 0-77: ACCEPTED** in DEEP CONTRACT, **LISTEN TO THE WOOD** in Elderdark.
@@ -112,7 +135,7 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
   - **Whispers** (notoriety) raise every ship's output: the Combine pays for better-run crews.
   - **Saves:** DEEP CONTRACT save v6 (`mode`, `creature`).
   - **Balance (bot):** 258 biomass in 2 hours and 424 in 4, with no vents. A passive creature takes nothing.
-- **Next:** the hunter (DEEP CONTRACT) and the dragon (Elderdark), then Legend (prestige across hunts).
+- **Next:** the kaiju game's Source (being built 2026-10-21), then the hunter (DEEP CONTRACT) and the dragon (Elderdark), then Legend (prestige across hunts).
 
 ## Build order
 
