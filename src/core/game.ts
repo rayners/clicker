@@ -5,6 +5,7 @@ import { scenarioOf } from '../mission/registry';
 import { formatDuration, formatNumber } from '../shared/format';
 import { tickCreature, type CreatureHunt } from './creature';
 import { tickHunter, type HunterHunt } from './hunter';
+import { tickBoardroom, type BoardroomState } from './boardroom';
 
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
 const CATCH_UP_STEP_SECONDS = 1;
@@ -55,16 +56,17 @@ export interface GameState {
   /** Waiting for the player to pick the next contract, and why; nothing runs meanwhile. */
   assigning: false | AssignmentReason;
   /** Which side is open: the player's own contract, Special Order 0-77 (the creature), or the hunt (the hunter). */
-  mode: 'mission' | 'creature' | 'hunter';
+  mode: 'mission' | 'creature' | 'hunter' | 'boardroom';
   /** The creature's hunt, once accepted; kept while the player is back on their contract. */
   creature: CreatureHunt | null;
   /** The hunter's, likewise. */
   hunter: HunterHunt | null;
   /** Reserved for the future Boardroom layer. */
-  boardroom?: unknown;
+  /** The second tier, once promoted (docs/BOARDROOM.md); kept while the player is back on their contract. */
+  boardroom: BoardroomState | null;
 }
 
-export const GAME_VERSION = 9;
+export const GAME_VERSION = 10;
 
 export function createProfile(): Profile {
   return {
@@ -90,6 +92,7 @@ export function createGame(seed: number, now: number): GameState & { mission: Mi
     mode: 'mission',
     creature: null,
     hunter: null,
+    boardroom: null,
   };
 }
 
@@ -101,6 +104,7 @@ export function newGame(seed: number, now: number): GameState {
 export function tickGame(game: GameState, dt: number): GameState {
   if (game.mode === 'creature') return tickCreature(game, dt);
   if (game.mode === 'hunter') return tickHunter(game, dt);
+  if (game.mode === 'boardroom') return tickBoardroom(game, dt);
   if (game.assigning) return game;
   const ctx = { cycle: game.profile.contractsCompleted, endings: game.profile.endingsSeen };
   return { ...game, mission: tickMission(game.mission, dt, ctx) };

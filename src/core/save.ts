@@ -80,6 +80,7 @@ const MIGRATIONS: Record<number, Migration> = {
     const history = (profile.history ?? []).map((r) => ({ horror: r.scenario === 'overland' ? 'quiet' : 'organism', ...r }));
     return { ...save, profile: { ...profile, history } };
   },
+  10: (save) => ({ boardroom: null, ...save }),
 };
 
 const saves = createSaveSystem<GameState>({

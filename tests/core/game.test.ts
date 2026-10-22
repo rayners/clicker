@@ -12,7 +12,7 @@ describe('a new game', () => {
     expect(g.profile.contractsCompleted).toBe(0);
     expect(g.profile.history).toEqual([]);
     expect(g.mission.elapsed).toBe(0);
-    expect(g.boardroom).toBeUndefined();
+    expect(g.boardroom).toBeNull();
   });
 
   it('stamps the creation time as the last save time', () => {

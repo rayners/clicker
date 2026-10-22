@@ -7,9 +7,10 @@ import { createMission } from '../mission/state';
 import { missionConfigFor } from './prestige';
 import type { MissionOf, MissionState } from '../mission/state';
 import type { GameState } from './game';
+import { enterBoardroom } from './boardroom';
 
 /** Developer shortcuts (?debug=act3 etc.) for testing pacing and theming without hours of play. */
-export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus', 'terraform', 'tf-act2', 'security', 'sec-act2', 'haulage', 'haul-act2', 'overland', 'salvage', 'sal-act2', 'outbreak', 'ob-act2', 'ob-act3', 'ob-act4', 'veteran'] as const;
+export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus', 'terraform', 'tf-act2', 'security', 'sec-act2', 'haulage', 'haul-act2', 'overland', 'salvage', 'sal-act2', 'outbreak', 'ob-act2', 'ob-act3', 'ob-act4', 'boardroom', 'veteran'] as const;
 
 const owned = (upTo: number, count: number) =>
   Object.fromEntries(GENERATORS.map((g, i) => [g.id, i < upTo ? count : 0]));
@@ -127,11 +128,13 @@ const SALVAGE_PATCHES: Record<string, Partial<MissionOf<'salvage', 'organism'>>>
 
 export function applyScenario(game: GameState, name: string): GameState {
   const jumped = jump(game, name);
-  return jumped === game ? game : { ...jumped, mode: 'mission' };
+  // Every jump lands on the contract, except the one into the Boardroom.
+  return jumped === game || name === 'boardroom' ? jumped : { ...jumped, mode: 'mission' };
 }
 
 function jump(game: GameState, name: string): GameState {
   // Every contract and tier unlocked, choosing the next contract: for testing what new players cannot reach yet.
+  if (name === 'boardroom') return enterBoardroom({ ...game, assigning: false, profile: { ...game.profile, contractsCompleted: Math.max(10, game.profile.contractsCompleted) } }, game.mission.seed);
   if (name === 'veteran') return { ...game, assigning: 'start', profile: { ...game.profile, contractsCompleted: Math.max(10, game.profile.contractsCompleted) } };
   if (name === 'overland') return { ...game, assigning: false, mission: createMission(missionConfigFor(game.profile, 'overland'), game.mission.seed) };
   const haulage = HAULAGE_PATCHES[name];
