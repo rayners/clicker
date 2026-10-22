@@ -70,6 +70,32 @@ You pick a killer. The prey are tapes running at once: the camp, the clinic, the
   - Raiding a company's vault is the push; notoriety brings dragon-slayer charters.
   - Sleeping on the hoard is dormancy.
 
+### DEEP CONTRACT: the hunter (design, 2026-10-21)
+
+**What you are.** A hunter (a Predator homage, original IP) that comes for sport, not food. The prey are three contracts run by their WARDENs' bots: security, extraction and haulage.
+
+**The honour code.** The hunter takes trophies only from prey that can fight back.
+- **Glimpses.** While a ship's crew has not noticed it (alert below 5), the push takes nothing. Each stalk is a glimpse: a shape in the cloak, and a little more alert.
+- **The hunt.** Once the crew is armed and looking (alert 5 and up), each stalk takes a trophy and raises alert by one.
+  - An awake crew member, the officers who walk the decks, is a trophy worth 3, chosen first.
+  - Otherwise it takes equipment through `HorrorHooks.loseEquipment`, worth 1.
+  - It never takes sleepers from cryo.
+- **Alert** fades by one every two minutes. At 25 the crew drives the hunter off: the contract's terminus, which beats the hunter back for 10 minutes before the next ship is sent.
+- **The play** is a band: be seen enough to make a ship worth hunting, then move on before it drives you off.
+
+**In the engine's words.**
+- **Trophies** are the harvest.
+- **Legend** (notoriety) makes every ship's output, and so its arms, better.
+- **Upgrades** are bought with trophies.
+
+**Entry and saves.** "The hunt: accept" under RESTRICTED in DEEP CONTRACT's configuration, beside Special Order 0-77. DEEP CONTRACT save v7 (`hunter`; `mode` gains `'hunter'`).
+
+**Code.**
+- `src/mission/hunter/`, a fourth horror beside the organism, the quiet and the creature;
+- `src/core/hunter.ts`;
+- `src/data/hunter/`;
+- `src/ui/hunter.ts`, the same shell as the creature's, seen through the cloak in thermal blue.
+
 ### The kaiju game (working title FATHOM): the Source
 
 Added 2026-10-21 with the fourth game.

@@ -1,6 +1,8 @@
 import { advance, createGame, createProfile, tickGame, type GameState } from '../core/game';
 import { creatureUpgradeCost, CREATURE_ADAPTER, isCreatureUpgradeAvailable, startCreature, type CreaturePrey } from '../core/creature';
 import { CREATURE_UPGRADES } from '../data/creature/upgrades';
+import { HUNTER_UPGRADES } from '../data/hunter/upgrades';
+import { HUNTER_ADAPTER, hunterUpgradeCost, isHunterUpgradeAvailable, startHunter, type HunterPrey } from '../core/hunter';
 import { missionConfigFor } from '../core/prestige';
 import { reduce, type Action } from '../core/store';
 import { CREW } from '../data/crew';
@@ -418,6 +420,46 @@ export function simulateCreature(options: { seed: number; maxSeconds: number; pa
   }
   const h = game.creature!.hunt;
   return { harvest: h.harvest, upgrades: Object.values(game.creature!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
+}
+
+/** The hunter bot: the creature's play, in the hunter's band. Stalk the calmest ship, step away before a crew can drive it off. */
+function decideHunter(game: GameState): Action | null {
+  const c = game.hunter!;
+  const h = c.hunt;
+  const upgrade = HUNTER_UPGRADES.find((u) => isHunterUpgradeAvailable(c, u.id) && hunterUpgradeCost(c, u.id) <= h.dread);
+  if (upgrade) return { type: 'buyHunterUpgrade', id: upgrade.id };
+  if (!h.dormant && h.notoriety > 4) return { type: 'toggleHunterDormant' };
+  if (h.dormant && h.notoriety < 1) return { type: 'toggleHunterDormant' };
+  const alarm = (p: HunterPrey) => HUNTER_ADAPTER.alarm(p);
+  const wary = h.prey.findIndex((p, i) => alarm(p) >= EASE_OFF_AT && h.split[i]! > 0);
+  if (wary >= 0) return { type: 'shiftHunterPush', index: wary, step: -1 };
+  const used = h.split.reduce((a, b) => a + b, 0);
+  if (used < h.strength) {
+    const order = h.prey
+      .map((p, i) => ({ i, score: alarm(p) + h.split[i]! * 0.2, ready: h.split[i]! > 0 ? alarm(p) < EASE_OFF_AT : alarm(p) < RETURN_AT }))
+      .filter((x) => x.ready)
+      .sort((a, b) => a.score - b.score);
+    if (order[0]) return { type: 'shiftHunterPush', index: order[0].i, step: 1 };
+  }
+  return null;
+}
+
+export function simulateHunter(options: { seed: number; maxSeconds: number; passive?: boolean }): { harvest: number; upgrades: number; beaten: number; final: GameState } {
+  let game = startHunter(createGame(options.seed, 0), options.seed);
+  for (let t = 1; t <= options.maxSeconds; t++) {
+    if (!options.passive && t % 5 === 0) {
+      for (let i = 0; i < 20; i++) {
+        const action = decideHunter(game);
+        if (!action) break;
+        const next = reduce(game, action);
+        if (next === game) break;
+        game = next;
+      }
+    }
+    game = advance(game, 1).game;
+  }
+  const h = game.hunter!.hunt;
+  return { harvest: h.harvest, upgrades: Object.values(game.hunter!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
 }
 
 export function simulateRun(options: SimOptions): SimResult {

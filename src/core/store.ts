@@ -34,6 +34,7 @@ import type { ScenarioId } from '../mission/state';
 import { buyCutter, buySalvageUpgrade, buyShoring, cut, shiftNotch, toggleGovernor } from '../mission/salvage/economy';
 import { buyCar, buyEngine, buyHaulageUpgrade, fireThrusters, refuel, setBurn, toggleAutopilot } from '../mission/haulage/economy';
 import { buyCreatureUpgrade, leaveCreature, startCreature } from './creature';
+import { buyHunterUpgrade, leaveHunter, startHunter } from './hunter';
 import { shiftPush, toggleDormant } from '../shared/hunt';
 
 export type Action =
@@ -81,6 +82,11 @@ export type Action =
   | { type: 'shiftCreaturePush'; index: number; step: 1 | -1 }
   | { type: 'toggleCreatureDormant' }
   | { type: 'buyCreatureUpgrade'; id: string }
+  | { type: 'startHunter'; seed: number }
+  | { type: 'leaveHunter' }
+  | { type: 'shiftHunterPush'; index: number; step: 1 | -1 }
+  | { type: 'toggleHunterDormant' }
+  | { type: 'buyHunterUpgrade'; id: string }
   | { type: 'tick'; dt: number };
 
 /** Horror actions only apply to missions running that horror. */
@@ -198,6 +204,16 @@ export function reduce(game: GameState, action: Action): GameState {
       return game.creature ? { ...game, creature: { ...game.creature, hunt: toggleDormant(game.creature.hunt) } } : game;
     case 'buyCreatureUpgrade':
       return buyCreatureUpgrade(game, action.id);
+    case 'startHunter':
+      return startHunter(game, action.seed);
+    case 'leaveHunter':
+      return leaveHunter(game);
+    case 'shiftHunterPush':
+      return game.hunter ? { ...game, hunter: { ...game.hunter, hunt: shiftPush(game.hunter.hunt, action.index, action.step) } } : game;
+    case 'toggleHunterDormant':
+      return game.hunter ? { ...game, hunter: { ...game.hunter, hunt: toggleDormant(game.hunter.hunt) } } : game;
+    case 'buyHunterUpgrade':
+      return buyHunterUpgrade(game, action.id);
     case 'tick':
       return advance(game, action.dt).game;
     default:

@@ -70,6 +70,8 @@ const MIGRATIONS: Record<number, Migration> = {
   },
   // v6: Special Order 0-77 (the creature) can be accepted alongside the contract.
   6: (save) => ({ mode: 'mission', creature: null, ...save }),
+  // v7: the hunt (the hunter) can be accepted too.
+  7: (save) => ({ hunter: null, ...save }),
 };
 
 const saves = createSaveSystem<GameState>({
