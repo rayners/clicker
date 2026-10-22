@@ -9,6 +9,9 @@ import { createSetup } from './setup';
 import { createShelf } from './shelf';
 import { createVenueUis, type VenueUi } from './venues';
 import { createCutView } from './cut';
+import { createGuideView } from '../shared/ui/guide';
+import { createGuideProgress } from '../shared/guide';
+import { lateGuideRules, lateGuideSteps } from '../late-fees-data/guide';
 
 /** The VCR's tape counter: H:MM:SS. */
 export function tapeCounter(seconds: number): string {
@@ -31,6 +34,9 @@ interface Panel {
   attention?(game: LateGame): boolean;
 }
 
+/** The guide's progress is a per-device convenience, kept apart from the save. */
+const GUIDE_KEY = 'latefees.guide';
+
 export function mountLate(root: HTMLElement, store: LateStore): void {
   const setup = createSetup(store);
   const shelf = createShelf(store);
@@ -38,13 +44,14 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
   const venues = createVenueUis(store);
   let view: VenueUi | null = null;
 
+  const guide = createGuideView<LateGame>({ steps: lateGuideSteps, rules: lateGuideRules, progress: createGuideProgress(window.localStorage, GUIDE_KEY) });
   const title = h('span', { class: 'osd-title' });
   const counter = h('span', { class: 'osd-counter', 'aria-label': 'Tape counter' }, '0:00:00');
   const banner = h(
     'header',
     { class: 'osd' },
     h('div', { class: 'osd-left' }, h('span', { class: 'osd-play' }, 'PLAY ▶'), title),
-    h('div', { class: 'osd-right' }, h('span', { class: 'osd-rec', 'aria-hidden': 'true' }, '●', h('span', { class: 'osd-rec-text' }, ' REC')), h('span', { class: 'osd-sp' }, 'SP'), counter, setup.button),
+    h('div', { class: 'osd-right' }, h('span', { class: 'osd-rec', 'aria-hidden': 'true' }, '●', h('span', { class: 'osd-rec-text' }, ' REC')), h('span', { class: 'osd-sp' }, 'SP'), counter, guide.rulesButton, setup.button),
   );
 
   const cash = stat('CASH', 'Cash');
@@ -143,12 +150,13 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
     banner,
     status,
     ...panels.map((p) => p.el),
-    h('div', { class: 'whistle-bay' }, action),
+    h('div', { class: 'whistle-bay' }, guide.el, action),
     tabbar,
     h('div', { class: 'vhs-noise', 'aria-hidden': 'true' }),
     cutView.el,
     shelf.el,
     setup.dialog,
+    guide.rulesDialog,
   );
   select('camp');
 
@@ -169,6 +177,7 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
     shelf.render(game);
     setup.render(game);
     cutView.render(game);
+    guide.render(game);
     root.dataset.mode = game.mode;
     for (const p of panels) {
       const shown = p.visible?.(game) ?? true;

@@ -1118,6 +1118,139 @@ button:disabled {
   }
 }
 
+/* ---------- the guide: a tracking-label tip over the whistle, and the rules card ---------- */
+
+.guide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'title skip' 'text ok';
+  align-items: center;
+  gap: 2px 8px;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--cyan);
+  background: var(--bg-raise);
+  font-size: 0.95em;
+}
+
+.guide[hidden] {
+  display: none;
+}
+
+.guide-title {
+  grid-area: title;
+  margin: 0;
+  letter-spacing: 0.18em;
+  color: var(--cyan);
+}
+
+.guide-text {
+  grid-area: text;
+  margin: 0;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.guide-ok,
+.guide-skip {
+  border: 1px solid var(--faint);
+  background: transparent;
+  letter-spacing: 0.12em;
+}
+
+.guide-ok {
+  grid-area: ok;
+  min-height: 44px;
+  padding: 0 12px;
+  border-color: var(--cyan);
+}
+
+/* Small on purpose: the tip should not crowd the screen. */
+.guide-skip {
+  grid-area: skip;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 0;
+  color: var(--dim);
+}
+
+.guide-target {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+  animation: guide-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes guide-pulse {
+  50% {
+    outline-color: transparent;
+  }
+}
+
+.guide-rules-open {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--faint);
+  background: transparent;
+}
+
+.guide-rules {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(16px + env(safe-area-inset-top)) var(--gutter) calc(16px + env(safe-area-inset-bottom));
+  background: rgba(4, 2, 8, 0.9);
+}
+
+.guide-rules[hidden] {
+  display: none;
+}
+
+.guide-rules-box {
+  width: min(36rem, 100%);
+  max-height: 85dvh;
+  overflow-y: auto;
+  padding: 12px 16px;
+  border: 2px solid var(--neon);
+  background: var(--bg);
+  box-shadow: 0 0 14px rgba(255, 43, 214, 0.25);
+}
+
+.guide-rules-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.guide-rules-title {
+  margin: 0;
+  font-size: 1.2em;
+  letter-spacing: 0.15em;
+  color: var(--neon);
+}
+
+.guide-rules-close {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--faint);
+  background: transparent;
+}
+
+.guide-rules-heading {
+  margin: 12px 0 2px;
+  letter-spacing: 0.15em;
+  color: var(--cyan);
+}
+
+.guide-rules-text {
+  margin: 0;
+  line-height: 1.3;
+}
+
 /* ---------- motion ---------- */
 
 @media (prefers-reduced-motion: reduce) {
