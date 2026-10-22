@@ -88,4 +88,13 @@ describe("the Killer's Cut on screen", () => {
     expect(store.getState().mode).toBe('films');
     expect(screen.getByRole('dialog', { name: /horror/i })).toBeTruthy();
   });
+
+  it('ends the cut for Legend, after a confirming second tap', async () => {
+    const user = setup(inCut({ harvest: 400 }));
+    await user.click(cutView().getByRole('button', { name: /end the cut for 4 legend/i }));
+    expect(store.getState().cut).not.toBeNull();
+    await user.click(cutView().getByRole('button', { name: /^confirm/i }));
+    expect(store.getState().cut).toBeNull();
+    expect(store.getState().profile.legend.drowned).toBe(4);
+  });
 });

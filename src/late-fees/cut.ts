@@ -1,4 +1,4 @@
-import { createHunt, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../shared/hunt';
+import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../shared/hunt';
 import { nextRandom } from '../shared/rng';
 import { CUT_UPGRADES, type CutEffect } from '../late-fees-data/cut-upgrades';
 import { defend, type Defended } from './defenders';
@@ -92,8 +92,16 @@ export const CUT_ADAPTER: PreyAdapter<CutPrey> = {
 export function startCut(game: LateGame, killer: KillerId, seed: number): LateGame {
   if (game.cut && game.cut.killer === killer) return { ...game, mode: 'cut', shelf: false };
   const prey = CUT_VENUES.map((venue, i) => ({ run: createRun(runConfigFor(game.profile, venue, killer), seed + i), presses: 0, decideIn: 0 }));
-  const cut: KillerCut = { killer, hunt: createHunt(prey, { strength: START_STRENGTH, hunger: START_HUNGER }), bought: {} };
+  const cut: KillerCut = { killer, hunt: createHunt(prey, { strength: START_STRENGTH, hunger: START_HUNGER, legend: game.profile.legend[killer] ?? 0 }), bought: {} };
   return { ...game, mode: 'cut', shelf: false, cut };
+}
+
+/** End the cut: its body count becomes the killer's Legend for their next cut, and the tape goes back on the shelf. */
+export function endCut(game: LateGame): LateGame {
+  if (!game.cut) return game;
+  const killer = game.cut.killer;
+  const legend = { ...game.profile.legend, [killer]: (game.profile.legend[killer] ?? 0) + legendEarned(game.cut.hunt.harvest) };
+  return { ...game, mode: 'films', shelf: true, cut: null, profile: { ...game.profile, legend } };
 }
 
 /** Rewind to the shelf. The cut is kept, paused, for when the tape is flipped again. */

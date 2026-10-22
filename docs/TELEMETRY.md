@@ -44,6 +44,7 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 | DEEP CONTRACT | `creature_vented` | vented (times a WARDEN vented its decks on the creature), harvest |
 | DEEP CONTRACT | `hunter_started` | (none): the player accepted the hunt |
 | DEEP CONTRACT | `hunter_driven` | driven (times a crew drove the hunter off), harvest |
+| every game | `hunt_ended` | horror (`creature`, `hunter`, `wood`, `dragon`, `source`, or a LATE FEES killer), harvest, legend (earned by ending it) |
 | Elderdark | `region_opened` | region, minutes (forest charters) |
 | Elderdark | `floor_secured` | floor, floors (how deep), minutes (Keep charters; each floor once, however often it is lost and retaken) |
 | Elderdark | `act_reached` | act, minutes |

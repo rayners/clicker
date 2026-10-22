@@ -36,7 +36,7 @@ import {
 } from './asylum/economy';
 import { advance, newLateGame, type LateGame, type LateSettings } from './game';
 import { chooseTape, completeRun } from './sequels';
-import { buyCutUpgrade, leaveCut, startCut } from './cut';
+import { buyCutUpgrade, endCut, leaveCut, startCut } from './cut';
 import { shiftPush, toggleDormant } from '../shared/hunt';
 import type { Ending } from './kinds';
 import type { AsylumRun, CampRun, ClinicRun, InsurerRun, KillerId, Run, VenueId } from './state';
@@ -73,6 +73,7 @@ export type LateAction =
   | { type: 'toggleCutDormant' }
   | { type: 'buyCutUpgrade'; id: string }
   | { type: 'leaveCut' }
+  | { type: 'endCut' }
   | { type: 'setSetting'; key: keyof LateSettings; value: boolean }
   | { type: 'hardReset'; seed: number; now: number }
   | { type: 'tick'; dt: number };
@@ -159,6 +160,8 @@ export function reduce(game: LateGame, action: LateAction): LateGame {
       return buyCutUpgrade(game, action.id);
     case 'leaveCut':
       return leaveCut(game);
+    case 'endCut':
+      return endCut(game);
     case 'setSetting':
       return { ...game, profile: { ...game.profile, settings: { ...game.profile.settings, [action.key]: action.value } } };
     case 'hardReset': {

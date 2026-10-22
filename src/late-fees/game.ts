@@ -4,7 +4,7 @@ import { CAMP_CONFIG, createRun, type EntryKind, type KillerId, type Run, type V
 import { tickRun } from './tick';
 import { tickCut, type KillerCut } from './cut';
 
-export const LATE_VERSION = 3;
+export const LATE_VERSION = 4;
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
 const CATCH_UP_STEP_SECONDS = 1;
 /** Frame gaps longer than this are treated as the player having been away. */
@@ -37,6 +37,8 @@ export interface LateProfile {
   lore: number;
   endingsSeen: string[];
   history: SequelRecord[];
+  /** Legend each killer has carried out of finished cuts (see docs/HORROR-TIER.md). */
+  legend: Record<string, number>;
 }
 
 export interface LateGame {
@@ -52,7 +54,7 @@ export interface LateGame {
 }
 
 export function createLateProfile(): LateProfile {
-  return { settings: { sound: false, reducedMotion: false }, sequels: 0, boxOffice: 0, lore: 0, endingsSeen: [], history: [] };
+  return { settings: { sound: false, reducedMotion: false }, sequels: 0, boxOffice: 0, lore: 0, endingsSeen: [], history: [], legend: {} };
 }
 
 /** A game already playing the first tape (tests, debug). */

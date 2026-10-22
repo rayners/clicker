@@ -160,7 +160,7 @@ Added 2026-10-21 with the fourth game.
   - 107 drowned in an hour and 283 in two, against none for a Source that never pushes.
   - 1,183 in four hours, when the towns' own breaches open and the first three seasons end. An idle Source takes 975 by then, because cities fall by themselves.
 
-## Legend: prestige across hunts (design, 2026-10-21)
+## Legend: prestige across hunts (built 2026-10-21)
 
 Legend works the same way in every game, with the engine part in `src/shared/hunt.ts`.
 
@@ -169,7 +169,12 @@ Legend works the same way in every game, with the engine part in `src/shared/hun
 - **What it buys.** The next hunt by the same horror starts with one more step of strength for every two Legend, and 10 harvest in hand per Legend for early upgrades.
 - **Unlocks.** Every horror is open while being play-tested, so a new horror unlocking is deferred until the tiers are gated.
 - **Telemetry:** `hunt_ended` (horror, harvest, legend earned).
-- **Saves:** each game gains `profile.legend`. That is DEEP CONTRACT v8, Elderdark v11, LATE FEES (next version) and DOWN THERE v4.
+- **Saves:** each game gains `profile.legend`. That is DEEP CONTRACT v8, Elderdark v11, LATE FEES v4 and DOWN THERE v4.
+- **As built:**
+  - Every hunt screen has an END THE HUNT (END THE CUT on the tape) button through the shared two-tap `createConfirmButton` (`src/shared/ui/confirm.ts`).
+  - Each screen's title shows the Legend that horror has carried.
+  - LATE FEES keeps Legend per killer.
+  - The hunter's notoriety was renamed Stories.
 
 ## UI
 
@@ -216,7 +221,8 @@ Legend works the same way in every game, with the engine part in `src/shared/hun
 - **Built (2026-10-21):** DOWN THERE's Source.
 - **Built (2026-10-21):** DEEP CONTRACT's hunter.
 - **Built (2026-10-21):** Elderdark's dragon.
-- **Next:** Legend (prestige across hunts).
+- **Built (2026-10-21):** Legend.
+- **Next:** the Boardroom (`docs/BOARDROOM.md`), which can reuse the multi-prey core.
 
 ## Build order
 

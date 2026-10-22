@@ -16,6 +16,8 @@ export const lateSaves = createSaveSystem<LateGame>({
     },
     // v3: the Killer's Cut. Old saves are playing the films, with no cut started.
     3: (save) => ({ ...save, mode: 'films', cut: null }),
+    // v4: Legend, carried out of finished cuts. Nobody has finished one yet.
+    4: (save) => ({ ...save, profile: { legend: {}, ...(save.profile as Record<string, unknown>) } }),
   },
   label: 'LATE FEES',
   required: ['profile', 'run'],

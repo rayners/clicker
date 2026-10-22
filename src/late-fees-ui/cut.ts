@@ -1,4 +1,6 @@
 import { formatNumber } from '../shared/format';
+import { createConfirmButton } from '../shared/ui/confirm';
+import { legendEarned } from '../shared/hunt';
 import { h, setAttr, setText } from '../shared/ui/dom';
 import { CUT_UPGRADES } from '../late-fees-data/cut-upgrades';
 import { CUT_ADAPTER, cutUpgradeCost, isCutUpgradeAvailable, type KillerCut } from '../late-fees/cut';
@@ -67,6 +69,8 @@ export function createCutView(store: LateStore): { el: HTMLElement; render(game:
   const notoriety = stat('NOTORIETY', 'Notoriety');
   const free = stat('STRENGTH', 'Strength free');
   const note = h('p', { class: 'cut-note' });
+  // Ending the cut is for good, so it takes a second tap.
+  const end = createConfirmButton({ className: 'split-handover cut-end', onConfirm: () => store.dispatch({ type: 'endCut' }) });
   const sleep = h('button', { class: 'split-handover', type: 'button' });
   sleep.addEventListener('click', () => store.dispatch({ type: 'toggleCutDormant' }));
   const places = [0, 1, 2].map((i) => createPlace(store, i));
@@ -91,6 +95,7 @@ export function createCutView(store: LateStore): { el: HTMLElement; render(game:
         note,
         h('div', { class: 'cut-places' }, ...places.map((p) => p.el)),
         sleep,
+        end.el,
         h('h3', { class: 'panel-sub' }, 'THE BODY COUNT'),
         feed,
       ),
@@ -106,7 +111,10 @@ export function createCutView(store: LateStore): { el: HTMLElement; render(game:
     const cut = game.cut;
     if (el.hidden || !cut) return;
     const hunt = cut.hunt;
-    setText(killer, `THE KILLER'S CUT · ${KILLERS[cut.killer].name}`);
+    const carried = game.profile.legend[cut.killer] ?? 0;
+    setText(killer, `THE KILLER'S CUT · ${KILLERS[cut.killer].name}${carried > 0 ? ` · LEGEND ${carried}` : ''}`);
+    const earned = legendEarned(hunt.harvest);
+    end.label(`End the cut for ${earned} Legend`, `END THE CUT · +${earned} LEGEND`);
     setText(counter, tapeCounter(Math.max(...hunt.prey.map((p) => p.run.elapsed))));
     setText(dread.value, formatNumber(hunt.dread));
     setText(hunger.value, `${Math.round(hunt.hunger)}%`);
