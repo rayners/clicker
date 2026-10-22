@@ -1,16 +1,28 @@
-import { createMission, type MissionState, type ScenarioId } from '../mission/state';
+import { createMission, isOutbreak, type MissionState, type ScenarioId } from '../mission/state';
 import { tickMission } from '../mission/tick';
-import type { LogEntry } from '../shared/log';
+import { appendLog, type LogEntry } from '../shared/log';
+import { formatNumber } from '../shared/format';
 import { defendMission } from '../sim/bot';
 import type { ContractRecord, GameState } from './game';
-import { availableAssignments, horrorFor, isBoardroomUnlocked, missionConfigFor } from './prestige';
+import { availableAssignments, horrorFor, isBoardroomUnlocked, missionConfigFor, missionRecord } from './prestige';
 
 /** The Boardroom (docs/BOARDROOM.md): WARDEN promoted to Kessler-Amari headquarters, running contracts in parallel. */
 export const START_VALUE = 5e6;
 const START_SLOTS = 1;
+export const MAX_SLOTS = 6;
 const CHARTER = 2e6;
+/** A delivered contract returns its charter this many times over, plus what Special Projects and Bioproducts pay. */
+const DELIVERY_RETURN = 2.5;
+const SPECIMEN_VALUE = 2e5;
+const SAMPLE_VALUE = 1e5;
+/** A scuttled contract: the insurance, more or less. */
+const SCUTTLE_RETURN = 0.2;
+const FLOOR_BASE = 5e6;
+const FLOOR_GROWTH = 3;
 
 export type BoardLogKind = 'minutes' | 'memo' | 'ledger';
+/** What the Board does with a contract that reaches its terminus. */
+export type BoardPolicy = 'deliver' | 'scuttle';
 
 /** A first-tier contract chartered by the Board, run by its own WARDEN instance. */
 export interface BoardContract {
@@ -28,6 +40,7 @@ export interface BoardroomState {
   lifetimeValue: number;
   slots: number;
   contracts: BoardContract[];
+  policy: BoardPolicy;
   ledger: ContractRecord[];
   act: number;
   beats: Record<string, number>;
@@ -46,6 +59,7 @@ export function createBoardroom(seed: number, term = 1): BoardroomState {
     lifetimeValue: 0,
     slots: START_SLOTS,
     contracts: [],
+    policy: 'deliver',
     ledger: [],
     act: 1,
     beats: {},
@@ -86,6 +100,37 @@ export function commission(game: GameState, scenario: ScenarioId, seed: number):
   return { ...game, boardroom: { ...b, value: b.value - cost, contracts: [...b.contracts, contract] } };
 }
 
+export const floorCost = (b: BoardroomState): number => Math.ceil(FLOOR_BASE * FLOOR_GROWTH ** (b.slots - START_SLOTS));
+
+export function buyFloor(game: GameState): GameState {
+  const b = game.boardroom;
+  if (!b || b.slots >= MAX_SLOTS || b.value < floorCost(b)) return game;
+  return { ...game, boardroom: { ...b, value: b.value - floorCost(b), slots: b.slots + 1 } };
+}
+
+export const setPolicy = (game: GameState, policy: BoardPolicy): GameState => (game.boardroom ? { ...game, boardroom: { ...game.boardroom, policy } } : game);
+
+/** What a finished contract pays the Board under each policy. */
+export function deliveryValue(m: MissionState, policy: BoardPolicy): number {
+  if (policy === 'scuttle') return CHARTER * SCUTTLE_RETURN;
+  const record = missionRecord(m, policy);
+  return CHARTER * DELIVERY_RETURN + record.specimens * SPECIMEN_VALUE + (isOutbreak(m) ? Math.floor(m.samples) * SAMPLE_VALUE : 0);
+}
+
+/** A contract at its terminus is closed by the standing policy: paid, put in the ledger, its office freed. */
+function close(b: BoardroomState, c: BoardContract): BoardroomState {
+  const paid = deliveryValue(c.mission, b.policy);
+  const verb = b.policy === 'deliver' ? 'DELIVERED' : 'SCUTTLED';
+  const next = {
+    ...b,
+    value: b.value + paid,
+    lifetimeValue: b.lifetimeValue + paid,
+    contracts: b.contracts.filter((x) => x !== c),
+    ledger: [...b.ledger, missionRecord(c.mission, b.policy)],
+  };
+  return appendLog<BoardLogKind, BoardroomState>(next, 'ledger', `${c.mission.config.shipName.toUpperCase()} ${verb}. +₭${formatNumber(paid)}.`);
+}
+
 export function tickBoardroom(game: GameState, dt: number): GameState {
   const b = game.boardroom;
   if (!b) return game;
@@ -94,5 +139,7 @@ export function tickBoardroom(game: GameState, dt: number): GameState {
     const defended = defendMission(c, dt);
     return { ...defended, mission: tickMission(defended.mission, dt, ctx) };
   });
-  return { ...game, boardroom: { ...b, elapsed: b.elapsed + dt, contracts } };
+  let next: BoardroomState = { ...b, elapsed: b.elapsed + dt, contracts };
+  for (const c of contracts) if (c.mission.flags.includes('terminus')) next = close(next, c);
+  return { ...game, boardroom: next };
 }

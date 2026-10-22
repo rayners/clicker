@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createGame, GAME_VERSION, tickGame, type GameState } from '../../src/core/game';
 import { reduce } from '../../src/core/store';
 import { BOARDROOM_UNLOCK_CONTRACTS } from '../../src/core/prestige';
-import { charterCost, commission, createBoardroom, freeSlot, START_VALUE } from '../../src/core/boardroom';
+import { charterCost, commission, createBoardroom, floorCost, freeSlot, MAX_SLOTS, START_VALUE } from '../../src/core/boardroom';
 import { deserialize, serialize } from '../../src/core/save';
 import { applyScenario } from '../../src/core/debug';
 import { veteran } from '../helpers';
@@ -84,5 +84,52 @@ describe('the Boardroom: saves and testing', () => {
     const g = applyScenario(createGame(1, NOW), 'boardroom');
     expect(g.mode).toBe('boardroom');
     expect(g.boardroom).not.toBeNull();
+  });
+});
+
+describe('the Boardroom: delivery', () => {
+  const finished = (policy?: 'deliver' | 'scuttle') => {
+    const g = reduce(promoted(), { type: 'commission', scenario: 'extraction', seed: 4 });
+    const b = board(g);
+    const c = b.contracts[0]!;
+    const done = { ...c, mission: { ...c.mission, flags: [...c.mission.flags, 'terminus'], elapsed: 4 * 3600 } };
+    return { ...g, boardroom: { ...b, contracts: [done], ...(policy ? { policy } : {}) } };
+  };
+
+  it('delivers a finished contract by the standing policy: value paid, a ledger line, the office freed', () => {
+    const g = finished();
+    expect(board(g).policy).toBe('deliver');
+    const after = tickGame(g, 1);
+    const b = board(after);
+    expect(b.contracts).toHaveLength(0);
+    expect(b.ledger).toHaveLength(1);
+    expect(b.ledger[0]).toMatchObject({ scenario: 'extraction', ending: 'deliver' });
+    expect(b.value).toBeGreaterThan(board(g).value);
+    expect(b.lifetimeValue).toBe(b.value - board(g).value);
+    expect(b.log.at(-1)!.text).toMatch(/DELIVERED/);
+    expect(freeSlot(b)).toBe(0);
+  });
+
+  it('pays far less for a scuttled contract, and leaves the player\'s own record alone', () => {
+    const delivered = board(tickGame(finished('deliver'), 1)).lifetimeValue;
+    const scuttledGame = tickGame(finished('scuttle'), 1);
+    expect(board(scuttledGame).lifetimeValue).toBeLessThan(delivered / 5);
+    expect(board(scuttledGame).ledger[0]!.ending).toBe('scuttle');
+    expect(scuttledGame.profile.history).toEqual(finished().profile.history);
+  });
+
+  it('sets the standing policy from the store', () => {
+    expect(board(reduce(promoted(), { type: 'setPolicy', policy: 'scuttle' })).policy).toBe('scuttle');
+  });
+
+  it('buys floors for more offices, each dearer, up to the top of the tower', () => {
+    const rich = { ...promoted(), boardroom: { ...board(promoted()), value: 1e12 } };
+    const one = reduce(rich, { type: 'buyFloor' });
+    expect(board(one).slots).toBe(2);
+    expect(board(one).value).toBe(1e12 - floorCost(board(rich)));
+    expect(floorCost(board(one))).toBeGreaterThan(floorCost(board(rich)));
+    let top: GameState = rich;
+    for (let i = 0; i < 20; i++) top = reduce(top, { type: 'buyFloor' });
+    expect(board(top).slots).toBe(MAX_SLOTS);
   });
 });

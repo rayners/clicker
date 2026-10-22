@@ -16,7 +16,7 @@ import {
 } from '../mission/state';
 import { horrorOf, scenarioOf } from '../mission/registry';
 import { nextRandom } from '../shared/rng';
-import type { GameState, Profile } from './game';
+import type { ContractRecord, GameState, Profile } from './game';
 
 export type Ending = 'deliver' | 'scuttle' | 'broadcast';
 export interface Reward {
@@ -182,6 +182,20 @@ function survivors(game: GameState): number {
   return CREW.filter((c) => crewStatus(game.mission, c.id) !== 'lost').length;
 }
 
+/** What a finished contract leaves on the books, for the player's history or the Board's ledger. */
+export function missionRecord(m: MissionState, ending: string): ContractRecord {
+  return {
+    scenario: m.scenario,
+    horror: m.horror,
+    shipName: m.config.shipName,
+    ending,
+    ...scenarioOf(m).outcome(m),
+    specimens: specimensHeld(m),
+    crewSurvived: CREW.filter((c) => crewStatus(m, c.id) !== 'lost').length,
+    duration: m.elapsed,
+  };
+}
+
 export function endingRewards(game: GameState): Record<Ending, Reward> {
   const seniority = 1 + Math.floor(specimensHeld(game.mission) / SPECIMENS_PER_SENIORITY);
   const conscience = 1 + survivors(game);
@@ -203,19 +217,7 @@ export function completeContract(game: GameState, ending: Ending, seed: number):
     contractsCompleted: game.profile.contractsCompleted + 1,
     deliveries: game.profile.deliveries + (ending === 'deliver' ? 1 : 0),
     endingsSeen: game.profile.endingsSeen.includes(ending) ? game.profile.endingsSeen : [...game.profile.endingsSeen, ending],
-    history: [
-      ...game.profile.history,
-      {
-        scenario: m.scenario,
-        horror: m.horror,
-        shipName: m.config.shipName,
-        ending,
-        ...scenarioOf(m).outcome(m),
-        specimens: specimensHeld(m),
-        crewSurvived: survivors(game),
-        duration: m.elapsed,
-      },
-    ],
+    history: [...game.profile.history, missionRecord(m, ending)],
   };
   // The next contract is chosen on the assignment screen; this placeholder never runs.
   return { ...game, profile, assigning: 'renewal', mission: createMission(missionConfigFor(profile, m.scenario), seed) };

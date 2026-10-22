@@ -38,7 +38,7 @@ import type { ScenarioId } from '../mission/state';
 import { buyCutter, buySalvageUpgrade, buyShoring, cut, shiftNotch, toggleGovernor } from '../mission/salvage/economy';
 import { buyCar, buyEngine, buyHaulageUpgrade, fireThrusters, refuel, setBurn, toggleAutopilot } from '../mission/haulage/economy';
 import { buyCreatureUpgrade, endCreature, leaveCreature, startCreature } from './creature';
-import { commission, enterBoardroom, leaveBoardroom } from './boardroom';
+import { buyFloor, commission, enterBoardroom, leaveBoardroom, setPolicy, type BoardPolicy } from './boardroom';
 import { buyHunterUpgrade, endHunter, leaveHunter, startHunter } from './hunter';
 import { shiftPush, toggleDormant } from '../shared/hunt';
 
@@ -91,6 +91,8 @@ export type Action =
   | { type: 'hardReset'; seed: number; now: number }
   | { type: 'enterBoardroom'; seed: number }
   | { type: 'leaveBoardroom' }
+  | { type: 'buyFloor' }
+  | { type: 'setPolicy'; policy: BoardPolicy }
   | { type: 'commission'; scenario: ScenarioId; seed: number }
   | { type: 'startCreature'; seed: number }
   | { type: 'leaveCreature' }
@@ -223,6 +225,10 @@ export function reduce(game: GameState, action: Action): GameState {
       return enterBoardroom(game, action.seed);
     case 'leaveBoardroom':
       return leaveBoardroom(game);
+    case 'buyFloor':
+      return buyFloor(game);
+    case 'setPolicy':
+      return setPolicy(game, action.policy);
     case 'commission':
       return commission(game, action.scenario, action.seed);
     case 'startCreature':

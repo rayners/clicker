@@ -92,6 +92,5 @@ These are already in place. Keep them true.
 ## Not yet done (deliberately deferred until the Boardroom is built)
 
 - A generic `Layer` interface (`id`, `init`, `tick`, `serialize`/`migrate`, `render`) and an "active layer" in the loop and UI shell. Skipped under TDD because nothing needs it yet. Introduce it, test-first, as the first Boardroom step.
-- A `missionOutcome(state)` summary function. Today `completeContract` builds the record inline.
 - Cheap analytic advancement of unattended missions (instead of ticking each one second by second) if many run in parallel.
 - Save migration to add `boardroom` state.
