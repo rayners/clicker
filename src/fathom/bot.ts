@@ -13,6 +13,9 @@ import { crewCost, hullRate, isAutoStationActive, isTrenchOpen, moduleCost } fro
 import { availableUpgrades } from './upgrades';
 import type { Outfit } from './state';
 
+/** Pilot fatigue past which the bot hires a reserve to rotate in. */
+const FATIGUE_LINE = 0.3;
+
 export interface FathomSimOptions {
   seed: number;
   maxSeconds: number;
@@ -50,7 +53,8 @@ function safety(o: Outfit): FathomAction | null {
   if (isBreachOpen(o)) {
     const need = CITIES.reduce((s, c) => s + c.threat * Math.max(1, o.category), 0);
     if (defence(o) < need) {
-      if (o.bulwarks > activeBulwarks(o) && pilotCost(o) <= o.cash) return { type: 'hirePilot' };
+      // A crew for every Bulwark, then a reserve to rotate in once the corps is tiring.
+      if ((o.bulwarks > activeBulwarks(o) || o.fatigue > FATIGUE_LINE) && pilotCost(o) <= o.cash) return { type: 'hirePilot' };
       if (bulwarkCost(o) <= o.cash * 0.5) return { type: 'buildBulwark' };
       if (wallCost(o) <= o.cash) return { type: 'buildWall' };
     }

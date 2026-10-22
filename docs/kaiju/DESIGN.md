@@ -89,7 +89,8 @@ Play **the kaiju**, using the shared hunt engine (`src/shared/hunt.ts`). Several
   - **Pacing (bot, seed 7):** act 2 at 1h04, the source at 2h11, the first landfall at about 2h51, the season's end at about 4h06.
   - **Opening depths (story scale):** the Shelf at 100 m, Open Water at 500 m, the Trench at 2,000 m. Act 2 is at 1,000 m. Act 3 is at 3,200 m, once the station sits at notch 8 (the source).
   - **Zones feed each other:** escaped specimens add pressure on the beach until they swim off.
-  - **Deviation:** walls and Bulwarks hold the coast like garrisons, and spare force retakes fallen cities. Pilots are a count (two per Bulwark) for now; the link rating is still to come.
+  - **Deviation:** walls and Bulwarks hold the coast like garrisons, and spare force retakes fallen cities. Pilots are paired two per Bulwark.
+  - **The link (built 2026-10-21):** every pilot draws a temperament (0–1) from the season's seed when hired. The station pairs the closest temperaments first, and a pair's link is 1 − 2 × the gap between them (never below 30%). A Bulwark holds its 50,000 times its pair's link, and the best pairs take the cockpits. The corps tires while most pairs are crewed (with every pair in a cockpit, empty to exhausted in 30 minutes) and rests while pairs sit in reserve (exhausted to fresh in 10 minutes with nobody crewed); exhaustion halves what the Bulwarks hold. More pilots buy both better pairings and rotation, which is the pilots-against-fatigue dial. Save v2 gives older pilots one shared temperament, so they link perfectly.
 - **Built (screen, 2026-10-21):** a sonar console at `/fathom/`.
   - **Code:** `src/fathom-ui/`, with `sonar.css` (cyan on deep teal, switching to a red and yellow alarm palette in act 4), `fathom/index.html`, `src/fathom-main.ts`, `public/fathom/` (manifest and fin icon).
   - **Telemetry:** `zone_reached`, `act_reached`, `landfall`, `season_completed`.

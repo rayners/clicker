@@ -135,4 +135,14 @@ describe('the deep-water game on screen', () => {
     setup();
     expect(screen.getByRole('region', { name: /production flow/i }).dataset.bottleneck).not.toBe('shelf');
   });
+
+  it('shows every pilot pair\'s link, which pairs are in a cockpit, and how tired the corps is', async () => {
+    const user = setup({ lifetimeCash: 1e13, flags: ['breach'], bulwarks: 1, pilots: 4, temperaments: [0.5, 0.5, 0.1, 0.9], fatigue: 0.4 });
+    await user.click(tab(/coast/i)!);
+    const pairs = within(panel(/coast/i).getByRole('list', { name: /pilot pairs/i })).getAllByRole('listitem');
+    expect(pairs).toHaveLength(2);
+    expect(pairs[0]!.textContent).toMatch(/LINK 100%.*CREWED/);
+    expect(pairs[1]!.textContent).toMatch(/LINK 30%.*RESERVE/);
+    expect(panel(/coast/i).getByLabelText('Pilot fatigue').textContent).toBe('40%');
+  });
 });

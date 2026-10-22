@@ -86,4 +86,13 @@ describe('a season of the deep-water game', () => {
     const g = advance(createFathomGame(1, NOW), 1);
     expect(fathomSaves.deserialize(fathomSaves.serialize(g)).outfit.elapsed).toBe(1);
   });
+
+  it('brings an older save forward: its pilots link perfectly and nobody is tired yet', () => {
+    const g = createFathomGame(1, NOW);
+    const { temperaments: _t, fatigue: _f, ...old } = { ...g.outfit, pilots: 4 };
+    const loaded = fathomSaves.deserialize(JSON.stringify({ ...g, version: 1, outfit: old }));
+    expect(loaded.version).toBe(FATHOM_VERSION);
+    expect(loaded.outfit.temperaments).toEqual([0.5, 0.5, 0.5, 0.5]);
+    expect(loaded.outfit.fatigue).toBe(0);
+  });
 });

@@ -8,7 +8,7 @@ import { attractionCost, attractionRate, guardCost, isAttractionRevealed, isAuto
 import { buoyCost, coveredRange, isAutoRangeActive, isTrawlerRevealed, rangeShare, trawlerCost } from '../fathom/shelf';
 import { contained, enhancement, isAutoEnhanceActive, isSpecimenRevealed, penCost, specimenCost, specimens } from '../fathom/open-water';
 import { crewCost, hullRate, isAutoStationActive, moduleCost, reachedSource, sampleRate } from '../fathom/trench';
-import { activeBulwarks, bulwarkCost, defence, pilotCost, wallCost } from '../fathom/breach';
+import { activeBulwarks, bulwarkCost, defence, links, pilotCost, wallCost } from '../fathom/breach';
 import type { Outfit } from '../fathom/state';
 import type { FathomAction, FathomStore } from '../fathom/store';
 
@@ -294,6 +294,9 @@ export function createCoast(store: FathomStore): Component {
     return { el, state };
   });
   const status = h('p', { class: 'zone-note' });
+  const pairs = h('ul', { class: 'pair-list', 'aria-label': 'Pilot pairs' });
+  const fatigue = h('span', { class: 'pair-fatigue', 'aria-label': 'Pilot fatigue' }, '0%');
+  let shownPairs = '';
   const parts = zone(
     'THE COAST',
     'Kaiju come ashore from the Breach, each a category bigger. Walls and Bulwarks hold the cities; spare force takes fallen ones back.',
@@ -328,12 +331,22 @@ export function createCoast(store: FathomStore): Component {
         rate: () => 'TWO PER BULWARK',
       },
     ]),
+    h('p', { class: 'zone-note' }, 'PILOT PAIRS · FATIGUE ', fatigue),
+    pairs,
   );
   return {
     el: parts.el,
     render(o) {
       parts.render(o);
       setText(status, `CATEGORY ${o.category} · DEFENCE ${formatNumber(defence(o))}`);
+      setText(fatigue, pct(o.fatigue));
+      const crewed = activeBulwarks(o);
+      const linked = links(o).map((link, i) => `PAIR ${i + 1} · LINK ${pct(link)} · ${i < crewed ? 'CREWED' : 'RESERVE'}`);
+      const key = linked.join('|');
+      if (key !== shownPairs) {
+        shownPairs = key;
+        pairs.replaceChildren(...linked.map((text, i) => h('li', { class: 'pair', 'data-crewed': String(i < crewed) }, text)));
+      }
       o.cities.forEach((c, i) => {
         const row = cities[i]!;
         const state = c.secured ? (c.control >= 1 ? 'held' : 'contested') : 'fallen';

@@ -3,7 +3,7 @@ import { formatDuration, formatNumber } from '../shared/format';
 import { createOutfit, type EntryKind, type Outfit } from './state';
 import { tickOutfit } from './tick';
 
-export const FATHOM_VERSION = 1;
+export const FATHOM_VERSION = 2;
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
 const CATCH_UP_STEP_SECONDS = 1;
 /** Frame gaps longer than this are treated as the player having been away. */

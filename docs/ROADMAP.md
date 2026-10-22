@@ -52,7 +52,7 @@ In order. Each item has its design written down first, so nothing lives only in 
 
 4. **The kaiju game's remainder** (`docs/kaiju/DESIGN.md`):
    - a name from the user (FATHOM is a working title), then its picker door;
-   - pilots' link rating (pilots are a plain count for now);
+   - (done 2026-10-21) pilots' link rating and fatigue;
    - its play-as-the-kaiju horror tier, on the shared hunt engine (`docs/HORROR-TIER.md`).
 5. **Then the backlog below**, in order: the Keep's sappers and haulage's tiring crew watches (the two leftovers from the missions), then the hunter and dragon horror tiers and Legend.
 

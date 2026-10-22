@@ -3,6 +3,11 @@ import {
   BULWARK_COST_GROWTH,
   BULWARK_HOLD,
   CITIES,
+  FATIGUE_PENALTY,
+  FATIGUE_RATE,
+  LINK_SPREAD,
+  MIN_LINK,
+  REST_RATE,
   KAIJU_NAMES,
   LANDFALL_SECONDS,
   LEVY_PER_THREAT,
@@ -16,6 +21,7 @@ import {
 } from '../fathom-data/breach';
 import { assault, frontier, held, isSecured, tickGround, type SectionDef, type SectionState } from '../shared/ground';
 import { appendLog } from '../shared/log';
+import { nextRandom } from '../shared/rng';
 import { effects } from './upgrades';
 import { incomeMultiplier, type EntryKind, type Outfit } from './state';
 
@@ -35,13 +41,43 @@ function buy(o: Outfit, cost: number, change: Partial<Outfit>): Outfit {
 
 export const buildWall = (o: Outfit): Outfit => buy(o, wallCost(o), { walls: o.walls + 1 });
 export const buildBulwark = (o: Outfit): Outfit => buy(o, bulwarkCost(o), { bulwarks: o.bulwarks + 1 });
-export const hirePilot = (o: Outfit): Outfit => buy(o, pilotCost(o), { pilots: o.pilots + 1 });
+export function hirePilot(o: Outfit): Outfit {
+  const [temperament, rng] = nextRandom(o.rng);
+  return buy(o, pilotCost(o), { pilots: o.pilots + 1, temperaments: [...o.temperaments, temperament], rng });
+}
+
+/** Every pair the station can make, strongest link first: pilots of like temperament share a cockpit. */
+export function links(o: Outfit): number[] {
+  const left = [...o.temperaments].sort((a, b) => a - b);
+  const pairs: number[] = [];
+  // Greedy: the two closest temperaments left always pair next.
+  while (left.length >= PILOTS_PER_BULWARK) {
+    let best = 0;
+    for (let i = 1; i + 1 < left.length; i++) if (left[i + 1]! - left[i]! < left[best + 1]! - left[best]!) best = i;
+    pairs.push(Math.max(MIN_LINK, 1 - LINK_SPREAD * (left[best + 1]! - left[best]!)));
+    left.splice(best, 2);
+  }
+  return pairs;
+}
 
 /** Bulwarks with a linked pair of pilots aboard. */
-export const activeBulwarks = (o: Outfit): number => Math.min(o.bulwarks, Math.floor(o.pilots / PILOTS_PER_BULWARK));
+export const activeBulwarks = (o: Outfit): number => Math.min(o.bulwarks, links(o).length);
+
+/** What the crewed Bulwarks hold: the best links take the cockpits, and a tired corps holds less. */
+export const bulwarkHold = (o: Outfit): number =>
+  links(o).slice(0, activeBulwarks(o)).reduce((s, link) => s + link * BULWARK_HOLD, 0) * (1 - o.fatigue * FATIGUE_PENALTY);
 
 /** Holding force: every wall, and every crewed Bulwark. */
-export const defence = (o: Outfit): number => o.walls * WALL_HOLD + activeBulwarks(o) * BULWARK_HOLD;
+export const defence = (o: Outfit): number => o.walls * WALL_HOLD + bulwarkHold(o);
+
+/** Crewed pairs tire; resting pairs recover. The share of the corps in the cockpit sets which way it goes. */
+function tire(o: Outfit, dt: number): Outfit {
+  const pairs = links(o).length;
+  if (pairs === 0) return o;
+  const share = activeBulwarks(o) / pairs;
+  const fatigue = Math.min(1, Math.max(0, o.fatigue + (share * FATIGUE_RATE - (1 - share) * REST_RATE) * dt));
+  return fatigue === o.fatigue ? o : { ...o, fatigue };
+}
 
 /** The coast as the current kaiju sees it: every city's threat scaled by its category. */
 const threatened = (o: Outfit): SectionDef[] => CITIES.map((c) => ({ ...c, threat: c.threat * Math.max(1, o.category) }));
@@ -82,7 +118,7 @@ function landfall(o: Outfit, dt: number): Outfit {
 export function tickBreach(o: Outfit, dt: number): Outfit {
   if (!isBreachOpen(o)) return o;
   const opened = o.cities.length === 0 ? openBreach(o) : o;
-  const next = landfall(opened, dt);
+  const next = tire(landfall(opened, dt), dt);
   const defs = threatened(next);
   const { cities: posted, spare } = post(next.cities, defs, defence(next));
   const retaken = frontier(posted) < CITIES.length && spare > 0 ? assault(posted, defs, spare, dt).states : posted;

@@ -488,6 +488,24 @@ button:disabled {
   opacity: 0.75;
 }
 
+.pair-list {
+  margin: 4px 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.pair {
+  padding: 3px 6px;
+  margin-bottom: 2px;
+  border: 1px solid var(--faint);
+  opacity: 0.7;
+}
+
+.pair[data-crewed='true'] {
+  opacity: 1;
+  border-color: var(--ping);
+}
+
 .end-title {
   margin: 0;
   font-weight: 400;

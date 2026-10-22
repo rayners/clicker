@@ -60,6 +60,10 @@ export interface Outfit {
   walls: number;
   bulwarks: number;
   pilots: number;
+  /** Each pilot's temperament, 0..1, drawn when hired; like temperaments link well in a cockpit. */
+  temperaments: number[];
+  /** 0..1: how worn down the pilot corps is. Fighting tires them; a reserve lets them rotate out and rest. */
+  fatigue: number;
   /** The category of the kaiju now coming ashore, and seconds until the next, bigger one. */
   category: number;
   landfallIn: number;
@@ -118,6 +122,8 @@ export function createOutfit(seed: number, terms: SeasonTerms = FIRST_SEASON): O
     walls: 0,
     bulwarks: 0,
     pilots: 0,
+    temperaments: [],
+    fatigue: 0,
     category: 0,
     landfallIn: 0,
     reputation: 1,

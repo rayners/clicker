@@ -27,6 +27,14 @@ export const BULWARK_COST_GROWTH = 1.4;
 export const PILOTS_PER_BULWARK = 2;
 export const PILOT_BASE_COST = 10_000_000;
 export const PILOT_COST_GROWTH = 1.35;
+/** A pair's link falls this much per unit of temperament between them, but never below the floor. */
+export const LINK_SPREAD = 2;
+export const MIN_LINK = 0.3;
+/** Fatigue gained per second with every pair crewed, and shed per second with every pair resting. */
+export const FATIGUE_RATE = 1 / 1800;
+export const REST_RATE = 1 / 600;
+/** Share of a Bulwark's hold lost to a wholly exhausted crew. */
+export const FATIGUE_PENALTY = 0.5;
 
 /** Seconds between landfalls once the Breach is open: each one is a category bigger. */
 export const LANDFALL_SECONDS = 15 * 60;
