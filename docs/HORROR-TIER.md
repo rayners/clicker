@@ -93,6 +93,14 @@ Added 2026-10-21 with the fourth game.
 
 **Saves.** FATHOM save v3 (`mode`, `deep`).
 
+**As built (2026-10-21).**
+- **Simulation:** `src/fathom/deep.ts`. The push also reaches watched swimmers: 10% of everyone in the water per point of push, on top of the unwatched. Otherwise the defender's guards made it harmless.
+- **Screen:** `src/fathom-ui/deep.ts`. The towns are seen from the trench floor: amber lights above, the sonar rings rising. Entry is "Answer the Source" in the configuration, and "Return to the surface" goes back.
+- **Telemetry:** `deep_started` and `deep_beaten`.
+- **Balance (bot):**
+  - 107 drowned in an hour and 283 in two, against none for a Source that never pushes.
+  - 1,183 in four hours, when the towns' own breaches open and the first three seasons end. An idle Source takes 975 by then, because cities fall by themselves.
+
 ## UI
 
 - The horror tier is a **second mode inside each game**, not a new page. It's reached from the game's own menu once unlocked: **FLIP THE TAPE** in LATE FEES, **SPECIAL ORDER 0-77: ACCEPTED** in DEEP CONTRACT, **LISTEN TO THE WOOD** in Elderdark.
@@ -135,7 +143,8 @@ Added 2026-10-21 with the fourth game.
   - **Whispers** (notoriety) raise every ship's output: the Combine pays for better-run crews.
   - **Saves:** DEEP CONTRACT save v6 (`mode`, `creature`).
   - **Balance (bot):** 258 biomass in 2 hours and 424 in 4, with no vents. A passive creature takes nothing.
-- **Next:** the kaiju game's Source (being built 2026-10-21), then the hunter (DEEP CONTRACT) and the dragon (Elderdark), then Legend (prestige across hunts).
+- **Built (2026-10-21):** DOWN THERE's Source.
+- **Next:** the hunter (DEEP CONTRACT) and the dragon (Elderdark), then Legend (prestige across hunts).
 
 ## Build order
 

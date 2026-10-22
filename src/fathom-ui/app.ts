@@ -15,6 +15,7 @@ import type { FathomStore } from '../fathom/store';
 import { incomeNow } from '../fathom/income';
 import { createBeach, createCoast, createShelf, createStation, createTrench, type Component } from './zones';
 import { createConfig, createEndPanel, createStorePanel } from './panels';
+import { createDeepView } from './deep';
 
 /** The season clock: days of the season, as the log stamps them. */
 export function seasonClock(seconds: number): string {
@@ -39,6 +40,7 @@ function stat(label: string, aria: string) {
 
 export function mountFathom(root: HTMLElement, store: FathomStore): void {
   const config = createConfig(store);
+  const deepView = createDeepView(store);
   const depthValue = h('span', { class: 'mast-depth', 'aria-label': 'Depth' }, '0 M');
   const season = h('span', { class: 'mast-season', 'aria-label': 'Season' }, 'SEASON 1');
   const banner = h(
@@ -149,7 +151,7 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
   });
 
   root.classList.add('sonar-shell');
-  root.replaceChildren(banner, status, ...panels.map((p) => p.el), h('div', { class: 'pass-bay' }, pass), tabbar, config.dialog);
+  root.replaceChildren(banner, status, ...panels.map((p) => p.el), h('div', { class: 'pass-bay' }, pass), tabbar, deepView.el, config.dialog);
   select('log');
 
   function render(game: FathomGame) {
@@ -163,6 +165,7 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
     root.dataset.act = String(o.act);
     root.dataset.motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
     config.render(game);
+    deepView.render(game);
     panels.forEach((p, i) => {
       const shown = p.visible?.(o) ?? true;
       tabs[i]!.hidden = !shown;

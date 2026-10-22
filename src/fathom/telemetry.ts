@@ -17,8 +17,14 @@ export function seasonProperties(game: FathomGame): TelemetryProps {
   return { game: 'fathom', act: game.outfit.act, season: game.outfit.terms.season };
 }
 
-/** Milestones between two successive states: zones reached, acts, landfalls, seasons ended. */
+/** Milestones between two successive states: zones reached, acts, landfalls, seasons ended, and the Source's hunt. */
 export function seasonEvents(prev: FathomGame, next: FathomGame): TelemetryEvent[] {
+  if (next.mode === 'deep' && next.deep) {
+    if (prev.mode !== 'deep') return [{ name: 'deep_started', props: {} }];
+    const h = next.deep.hunt;
+    if (prev.deep && h.beaten > prev.deep.hunt.beaten) return [{ name: 'deep_beaten', props: { beaten: h.beaten, harvest: Math.round(h.harvest) } }];
+    return [];
+  }
   const was = prev.outfit;
   if (next.profile.seasons > prev.profile.seasons) {
     const record = next.profile.history.at(-1)!;

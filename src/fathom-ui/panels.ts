@@ -110,6 +110,8 @@ export function createConfig(store: FathomStore): { button: HTMLButtonElement; d
   const importButton = h('button', { class: 'buy', type: 'button' }, 'IMPORT');
   const reset = h('button', { class: 'buy cfg-danger', type: 'button', 'aria-label': 'Start a new season from scratch' }, 'START OVER');
   const close = h('button', { class: 'cfg-close', type: 'button', 'aria-label': 'Close' }, '✕');
+  // Play as the Source: the sonar turned around (docs/HORROR-TIER.md).
+  const answer = h('button', { class: 'buy', type: 'button', 'aria-label': 'Answer the Source' }, 'ANSWER THE SOURCE');
   const dialog = h(
     'div',
     { class: 'cfg', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'fa-cfg-title', hidden: true },
@@ -124,6 +126,8 @@ export function createConfig(store: FathomStore): { button: HTMLButtonElement; d
       code,
       h('div', { class: 'cfg-row' }, exportButton, importButton),
       status,
+      h('h3', { class: 'panel-sub' }, 'THE SOURCE'),
+      answer,
       h('h3', { class: 'panel-sub' }, 'START OVER'),
       reset,
     ),
@@ -154,6 +158,10 @@ export function createConfig(store: FathomStore): { button: HTMLButtonElement; d
     } catch {
       setText(status, 'THAT IS NOT A SAVE CODE. NOTHING CHANGED.');
     }
+  });
+  answer.addEventListener('click', () => {
+    store.dispatch({ type: 'startDeep', seed: seed() });
+    show(false);
   });
   let pending = false;
   let timer: ReturnType<typeof setTimeout> | undefined;

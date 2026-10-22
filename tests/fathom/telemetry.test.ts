@@ -1,3 +1,4 @@
+import { startDeep } from '../../src/fathom/deep';
 import { describe, it, expect } from 'vitest';
 import { createFathomGame, type FathomGame } from '../../src/fathom/game';
 import { completeSeason } from '../../src/fathom/season';
@@ -37,5 +38,14 @@ describe('deep-water play events', () => {
 
   it('describes the player for every event', () => {
     expect(seasonProperties(g({ act: 3 }))).toEqual({ game: 'fathom', act: 3, season: 1 });
+  });
+
+  it('reports the Source answered, and each time a town beats it back', () => {
+    const before = createFathomGame(1, 0);
+    const answering = startDeep(before, 5);
+    expect(seasonEvents(before, answering)).toEqual([{ name: 'deep_started', props: {} }]);
+    const beaten = { ...answering, deep: { ...answering.deep!, hunt: { ...answering.deep!.hunt, beaten: 1, harvest: 40 } } };
+    expect(seasonEvents(answering, beaten)).toEqual([{ name: 'deep_beaten', props: { beaten: 1, harvest: 40 } }]);
+    expect(seasonEvents(beaten, beaten)).toEqual([]);
   });
 });

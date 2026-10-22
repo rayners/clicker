@@ -58,10 +58,12 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 | LATE FEES | `cut_started` | killer (the tape flipped to the Killer's Cut) |
 | LATE FEES | `cut_beaten` | killer, beaten (times put down), harvest |
 | LATE FEES | `survivor_lost` | survivor, left (names still on the list), minutes, part (Providence Mutual) |
-| FATHOM | `zone_reached` | zone (`shelf`, `open-water`, `trench`), minutes, season |
-| FATHOM | `act_reached` | act, minutes, season |
-| FATHOM | `landfall` | category (2–5; the first comes with act 4), minutes, season |
-| FATHOM | `season_completed` | ending (`close`, `study`, `through`), minutes, lost, season |
+| DOWN THERE (`game: 'fathom'`) | `zone_reached` | zone (`shelf`, `open-water`, `trench`), minutes, season |
+| DOWN THERE (`game: 'fathom'`) | `act_reached` | act, minutes, season |
+| DOWN THERE (`game: 'fathom'`) | `landfall` | category (2–5; the first comes with act 4), minutes, season |
+| DOWN THERE (`game: 'fathom'`) | `season_completed` | ending (`close`, `study`, `through`), minutes, lost, season |
+| DOWN THERE (`game: 'fathom'`) | `deep_started` | (none): the player answered the Source |
+| DOWN THERE (`game: 'fathom'`) | `deep_beaten` | beaten (times a town's season end beat the Source back), harvest |
 | LATE FEES | `film_completed` | ending, venue, bodyCount, minutes, part |
 
 Useful PostHog insights: a funnel `act_reached` (act = 2, 3, 4) → `contract_completed`, broken down by scenario; the

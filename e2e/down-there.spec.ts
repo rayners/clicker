@@ -23,3 +23,17 @@ test('down there: sell passes, put umbrellas on the beach and open more of it, a
   await page.getByRole('tab', { name: /beach/i }).click();
   await expect(page.getByRole('tabpanel', { name: /beach/i }).getByLabel('BEACH UMBRELLAS owned')).toHaveText('1');
 });
+
+test('down there: answer the Source from the configuration and rise under a town', async ({ page }) => {
+  await page.goto('/down-there/');
+  await page.evaluate(() => localStorage.removeItem('fathom.save'));
+  await page.reload();
+  await page.getByRole('button', { name: /^configuration$/i }).click();
+  await page.getByRole('button', { name: /answer the source/i }).click();
+  const source = page.getByRole('region', { name: /the source/i });
+  await expect(source).toBeVisible();
+  await source.getByRole('button', { name: /rise under harrow point/i }).click();
+  await expect(source.getByLabel('Strength free')).toHaveText('2 / 3');
+  await source.getByRole('button', { name: /return to the surface/i }).click();
+  await expect(source).toBeHidden();
+});
