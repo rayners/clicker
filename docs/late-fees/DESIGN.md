@@ -154,7 +154,7 @@ After enough sequels, the franchise "goes in a new direction": you play **the ki
   - the body count at progress 1,000;
   - the final girl at 3,200 with the far shore open;
   - the confrontation 25 minutes later;
-  - the credits 75 minutes after that.
+  - the credits 75 minutes after that. A red line under the stats counts down to them ("FINAL ACT · CREDITS IN …"), and once they roll it says to choose an ending in CREDITS. A playtest (2026-10-22) took the confrontation for the end and found the film still running.
 - **Pacing (bot):** act 2 at 59m, the final girl at 2h27m, the confrontation at 2h52m, credits at 4h07m (`npm run simulate:late`, `tests/late-fees/pacing.test.ts`).
 - **Sequels:** Box Office (+25% takings each), Lore (takes back some of the killer's sequel strength), and pressure +15% per part. *Burn it down* unlocks after three films.
 **Step 3 is done: the Sycamore Street Sleep Clinic with the Burned Man.**

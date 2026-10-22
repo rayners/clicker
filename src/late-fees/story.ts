@@ -65,3 +65,9 @@ export function actBeats(id: string, t: ActTexts): RunBeat[] {
 export function runStory(r: Run, beats: readonly RunBeat[], signals: Signals, lexicon: Record<string, string>): Run {
   return runBeats<EntryKind, Run, StoryArgs>(r, beats, { r, signals }, { minGap: STORY_MIN_GAP, lexicon });
 }
+
+/** Seconds until the credits roll, once the confrontation has begun; null before it and after the credits. */
+export function creditsIn(r: Run): number | null {
+  if (r.flags.includes('terminus') || r.beats['act-4'] === undefined) return null;
+  return Math.max(0, CREDITS_AFTER - sinceBeat(r, 'act-4'));
+}

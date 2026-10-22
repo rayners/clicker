@@ -4,7 +4,7 @@ import { tickRun } from '../../src/late-fees/tick';
 import { KILLERS, VENUES } from '../../src/late-fees/registry';
 import { COUNSELORS } from '../../src/late-fees-data/camp';
 import { NIGHT_FROM } from '../../src/late-fees/camp/economy';
-import { CONFRONTATION_AFTER, CREDITS_AFTER } from '../../src/late-fees/story';
+import { CONFRONTATION_AFTER, CREDITS_AFTER, creditsIn } from '../../src/late-fees/story';
 import { placeholders } from '../../src/shared/lexicon';
 import type { VenueDef } from '../../src/late-fees/kinds';
 
@@ -77,5 +77,14 @@ describe('the film', () => {
     expect(confronted.act).toBe(4);
     const credits = run(confronted, CREDITS_AFTER + 5);
     expect(credits.flags).toContain('terminus');
+  });
+
+  it('counts down to the credits through the confrontation, and only then', () => {
+    const girl = fresh({ act: 3, beats: { 'act-2': 0, 'act-3': 0 }, lifetimeCash: 1e8, deepest: 11 });
+    expect(creditsIn(girl)).toBeNull();
+    const confronted = run(girl, CONFRONTATION_AFTER + 5);
+    expect(creditsIn(confronted)).toBeGreaterThan(CREDITS_AFTER - 60);
+    expect(creditsIn(confronted)).toBeLessThanOrEqual(CREDITS_AFTER);
+    expect(creditsIn(run(confronted, CREDITS_AFTER + 5))).toBeNull();
   });
 });

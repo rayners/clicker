@@ -122,6 +122,19 @@ describe('Camp Blackwater on tape', () => {
     expect(run().upgrades).toContain(CAMP_UPGRADES[0]!.id);
   });
 
+  it('says through the confrontation how long until the credits, and once they roll, where to choose the ending', () => {
+    setup(playing({ act: 4, elapsed: 600, beats: { 'act-2': 0, 'act-3': 0, 'act-4': 0 } }));
+    expect(screen.getByRole('status', { name: /finale/i }).textContent).toMatch(/CREDITS IN 1h 5m/i);
+    document.body.innerHTML = '';
+    setup(playing({ flags: ['terminus'] }));
+    expect(screen.getByRole('status', { name: /finale/i }).textContent).toMatch(/CHOOSE AN ENDING IN CREDITS/);
+  });
+
+  it('shows no finale line before the confrontation', () => {
+    setup(playing());
+    expect(screen.queryByRole('status', { name: /finale/i })).toBeNull();
+  });
+
   it('rolls credits with the endings, and the sequel goes on the shelf', async () => {
     const user = setup(playing({ flags: ['terminus'], bodyCount: 40 }));
     await user.click(screen.getByRole('tab', { name: /credits/i }));

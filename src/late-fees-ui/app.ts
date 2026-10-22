@@ -1,9 +1,10 @@
-import { formatNumber } from '../shared/format';
+import { formatDuration, formatNumber } from '../shared/format';
 import { h, setText } from '../shared/ui/dom';
 import { createLogView } from '../shared/ui/log';
 import type { LateGame } from '../late-fees/game';
 import type { EntryKind } from '../late-fees/state';
 import type { LateStore } from '../late-fees/store';
+import { creditsIn } from '../late-fees/story';
 import { createCredits } from './credits';
 import { createSetup } from './setup';
 import { createShelf } from './shelf';
@@ -64,7 +65,9 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
   const mainSlot = h('div', { class: 'venue-slot' });
   const staffSlot = h('div', { class: 'venue-slot' });
   const storeSlot = h('div', { class: 'venue-slot' });
-  const status = h('section', { class: 'status', 'aria-label': 'Status' }, h('dl', { class: 'stats' }, cash.el, dead.el, rep.el, clock.el), flowSlot);
+  // The film's last stretch is long; say when it ends, and once it has, where the ending is chosen.
+  const finale = h('p', { class: 'finale', role: 'status', 'aria-label': 'Finale', hidden: true });
+  const status = h('section', { class: 'status', 'aria-label': 'Status' }, h('dl', { class: 'stats' }, cash.el, dead.el, rep.el, clock.el), finale, flowSlot);
 
   const log = createLogView<EntryKind>({ label: 'Tape log', stamp: tapeCounter });
   const credits = createCredits(store);
@@ -174,6 +177,10 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
     setText(dead.value, formatNumber(r.bodyCount));
     setText(rep.value, `${Math.round(r.reputation * 100)}%`);
     setText(clock.value, view!.clock.read(r));
+    const left = creditsIn(r);
+    const rolled = r.flags.includes('terminus');
+    finale.hidden = left === null && !rolled;
+    setText(finale, rolled ? 'CHOOSE AN ENDING IN CREDITS' : left === null ? '' : `FINAL ACT · CREDITS IN ${formatDuration(left)}`);
     shelf.render(game);
     setup.render(game);
     cutView.render(game);

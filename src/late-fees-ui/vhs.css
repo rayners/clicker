@@ -202,6 +202,20 @@ button:disabled {
   margin: 0 0 6px;
 }
 
+.finale {
+  margin: 0 0 6px;
+  padding: 2px 8px;
+  border: 1px solid var(--rec);
+  color: var(--rec);
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-shadow: 0 0 6px rgba(255, 50, 70, 0.6);
+}
+
+.finale[hidden] {
+  display: none;
+}
+
 .stat {
   display: flex;
   justify-content: space-between;
