@@ -163,6 +163,7 @@ describe('real migrations', () => {
     expect(upgraded.mission.config).toMatchObject({ scenario: 'extraction', horror: 'organism' });
     expect(upgraded.profile.history[0]).toEqual({
       scenario: 'extraction',
+      horror: 'organism',
       shipName: 'MSV Calloway Reach',
       ending: 'deliver',
       output: 5e8,

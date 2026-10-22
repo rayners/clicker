@@ -69,7 +69,7 @@ describe('contract record', () => {
         contractsCompleted: 1,
         seniority: 3,
         conscience: 0,
-        history: [{ scenario: 'extraction', shipName: 'MSV Calloway Reach', ending: 'deliver', output: 1e10, outputUnit: 'ORE', specimens: 10, crewSurvived: 2, duration: 9000 }],
+        history: [{ scenario: 'extraction', horror: 'organism', shipName: 'MSV Calloway Reach', ending: 'deliver', output: 1e10, outputUnit: 'ORE', specimens: 10, crewSurvived: 2, duration: 9000 }],
       },
     );
     await user.click(tab(/archive/i)!);

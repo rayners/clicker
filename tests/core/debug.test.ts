@@ -2,6 +2,7 @@ import { progress as haulageProgress } from '../../src/mission/haulage/economy';
 import type { MissionOf } from '../../src/mission/state';
 import { describe, it, expect } from 'vitest';
 import { createGame, newGame } from '../../src/core/game';
+import type { OutbreakMission } from '../../src/mission/state';
 import { applyScenario, debugSpeed, grantCredits, SCENARIOS, storySummary } from '../../src/core/debug';
 import { depth } from '../../src/mission/extraction/progress';
 import { progress } from '../../src/mission/terraform/economy';
@@ -107,6 +108,22 @@ describe('debug scenarios', () => {
 
   it('terminus offers the ending', () => {
     expect(applyScenario(base(), 'terminus').mission.flags).toContain('terminus');
+  });
+
+  it('starts an outbreak contract, and jumps one to the flu, the discovery and the turned', () => {
+    const fresh = applyScenario(base(), 'outbreak');
+    expect(fresh.mission.horror).toBe('outbreak');
+    expect(fresh.mission.act).toBe(1);
+    const flu = applyScenario(base(), 'ob-act2').mission as OutbreakMission;
+    expect([flu.horror, flu.act]).toEqual(['outbreak', 2]);
+    expect(flu.sick).toBeGreaterThan(0);
+    const found = applyScenario(base(), 'ob-act3').mission as OutbreakMission;
+    expect(found.act).toBe(3);
+    expect(found.flags).toEqual(expect.arrayContaining(['outbreak', 'cultures']));
+    expect('specimens' in found).toBe(false);
+    const turned = applyScenario(base(), 'ob-act4').mission as OutbreakMission;
+    expect(turned.act).toBe(4);
+    expect(turned.turned).toBeGreaterThan(0);
   });
 
   it('ignores unknown scenarios', () => {

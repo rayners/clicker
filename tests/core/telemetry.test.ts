@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { veteran } from '../helpers';
+import { createMission } from '../../src/mission/state';
 import { createGame, newGame, type GameState } from '../../src/core/game';
 import { reduce } from '../../src/core/store';
 import { contractEvents, contractProperties } from '../../src/core/telemetry';
@@ -10,10 +11,12 @@ const game = (patch: Partial<GameState> = {}): GameState => ({ ...createGame(1, 
 const withMission = (g: GameState, patch: Partial<GameState['mission']>): GameState => ({ ...g, mission: { ...g.mission, ...patch } as GameState['mission'] });
 const names = (prev: GameState, next: GameState) => contractEvents(prev, next).map((e) => e.name);
 
-/** A contract of this kind, on a first-contract profile (so every event reports cycle 0). */
+/** A contract of this kind with the organism, on a first-contract profile (so every event reports cycle 0). */
 const onContract = (scenario: 'security' | 'haulage' | 'salvage' | 'overland') => {
   const fresh = newGame(1, 0);
-  return { ...reduce(veteran(fresh), { type: 'chooseAssignment', scenario, seed: 1 }), profile: fresh.profile };
+  const g = reduce(veteran(fresh), { type: 'chooseAssignment', scenario, seed: 1 });
+  const horror = scenario === 'overland' ? 'quiet' : 'organism';
+  return { ...g, mission: createMission({ ...g.mission.config, horror }, 1), profile: fresh.profile } as GameState;
 };
 
 describe('DEEP CONTRACT play events', () => {

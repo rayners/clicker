@@ -9,7 +9,7 @@ import type { MissionOf, MissionState } from '../mission/state';
 import type { GameState } from './game';
 
 /** Developer shortcuts (?debug=act3 etc.) for testing pacing and theming without hours of play. */
-export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus', 'terraform', 'tf-act2', 'security', 'sec-act2', 'haulage', 'haul-act2', 'overland', 'salvage', 'sal-act2', 'veteran'] as const;
+export const SCENARIOS = ['act2', 'act3', 'act4', 'terminus', 'terraform', 'tf-act2', 'security', 'sec-act2', 'haulage', 'haul-act2', 'overland', 'salvage', 'sal-act2', 'outbreak', 'ob-act2', 'ob-act3', 'ob-act4', 'veteran'] as const;
 
 const owned = (upTo: number, count: number) =>
   Object.fromEntries(GENERATORS.map((g, i) => [g.id, i < upTo ? count : 0]));
@@ -51,6 +51,18 @@ const PATCHES: Record<string, Partial<MissionOf<'extraction', 'organism'>>> = {
     breaches: 2,
   },
 };
+
+/** Outbreak jumps: an extraction contract at the same depth as the act jumps, with Strain KA-11 instead. */
+const OUTBREAK_PATCHES: Record<string, { act: keyof typeof PATCHES | null; patch: Partial<MissionOf<'extraction', 'outbreak'>> }> = {
+  outbreak: { act: null, patch: {} },
+  'ob-act2': { act: 'act2', patch: { exposed: 0.03, sick: 0.06, recovered: 0.04 } },
+  'ob-act3': { act: 'act3', patch: { exposed: 0.05, sick: 0.12, recovered: 0.1, flags: ['outbreak', 'cultures'], beats: { 'ob-a2-entry': 0, 'ob-a3-entry': 0, 'ob-a3-bioproducts': 0 } } },
+  'ob-act4': {
+    act: 'act4',
+    patch: { sick: 0.15, turned: 0.12, recovered: 0.1, wards: 3, quarantine: 3, flags: ['outbreak', 'cultures'], beats: { 'ob-a2-entry': 0, 'ob-a3-entry': 0, 'ob-a3-bioproducts': 0, 'ob-a4-entry': 0 } },
+  },
+};
+const ECONOMY = ['act', 'lifetimeOre', 'credits', 'refineryLevel', 'generators'] as const;
 
 const lines = (counts: number[]) =>
   Object.fromEntries(['atmosphere', 'heat', 'water'].flatMap((line) => PROCESSORS.filter((p) => p.line === line).map((p, i) => [p.id, counts[i] ?? 0])));
@@ -141,6 +153,14 @@ function jump(game: GameState, name: string): GameState {
   if (security) {
     const fresh = createMission(missionConfigFor(game.profile, 'security'), game.mission.seed);
     return { ...game, assigning: false, mission: { ...fresh, ...security } as MissionState };
+  }
+  const outbreak = OUTBREAK_PATCHES[name];
+  if (outbreak) {
+    const fresh = createMission({ ...missionConfigFor(game.profile, 'extraction'), horror: 'outbreak' }, game.mission.seed);
+    const depth = outbreak.act ? PATCHES[outbreak.act]! : {};
+    // Only the economy from the act jumps: their horror fields belong to the organism.
+    const economy = Object.fromEntries(ECONOMY.filter((k) => k in depth).map((k) => [k, depth[k]]));
+    return { ...game, assigning: false, mission: { ...fresh, ...economy, ...outbreak.patch } as MissionState };
   }
   const patch = PATCHES[name];
   if (!patch) return game;

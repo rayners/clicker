@@ -89,6 +89,7 @@ In order. Each item has its design written down first, so nothing lives only in 
    - **Built:** piece 2, the story (`src/data/outbreak/`): Act II's flu (sick days, a Wellness memo, a cough, everyone back on shift, swabs kept for the records, a cold patient, a quiet mess hall), the discovery, Bioproducts, the sick bay doors opening, named crew turning, Directive 11 in the archive, and three endings (ship the samples, burn the cultures, broadcast Directive 11).
    - **Built:** piece 3, the levers (`src/mission/outbreak/levers.ts`, store actions): Wellness (Act II), screening, ward beds, culture tanks and samples (Bioproducts funding, a more infectious strain), lockdown (Act IV), and the Infection Control Officer.
    - **Built:** piece 4, on screen: the SICK BAY tab (`src/ui/sick-bay.ts`) from Act II, the quarantine dial and the rest after the discovery, OFF SICK and TURNED in the status area, guide steps (sick bay, quarantine, wards, lockdown) and an OUTBREAK section on the rules page after the discovery.
+   - **Built:** piece 5, the rule (`horrorFor` in `src/core/prestige.ts`): from 6 contracts, organism or outbreak drawn from the contract seed, never three running; contract records name their horror (save v9); debug jumps `outbreak`, `ob-act2`, `ob-act3`, `ob-act4`. **Outbreak contracts are now live for veterans.**
 8. **(User, 2026-10-22: "go ahead with the boardroom layer when it comes up") The Boardroom** (`docs/BOARDROOM.md`).
 
 ## Backlog / ideas

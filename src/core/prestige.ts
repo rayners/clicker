@@ -10,10 +10,12 @@ import {
   SALVAGE_MISSION_CONFIG,
   OVERLAND_MISSION_CONFIG,
   type MissionConfig,
+  type HorrorId,
   type MissionState,
   type ScenarioId,
 } from '../mission/state';
 import { horrorOf, scenarioOf } from '../mission/registry';
+import { nextRandom } from '../shared/rng';
 import type { GameState, Profile } from './game';
 
 export type Ending = 'deliver' | 'scuttle' | 'broadcast';
@@ -35,6 +37,11 @@ export const SALVAGE_UNLOCK_CONTRACTS = 4;
 /** Completed contracts before each play-as-the-horror tier is offered. */
 export const CREATURE_UNLOCK_CONTRACTS = 3;
 export const HUNTER_UNLOCK_CONTRACTS = 5;
+/** Completed contracts before a contract may turn out to be an outbreak (docs/OUTBREAK.md). */
+export const OUTBREAK_UNLOCK_CONTRACTS = 6;
+/** The same horror at most this many contracts running. */
+const HORROR_RUN = 2;
+const DRAWN: readonly HorrorId[] = ['organism', 'outbreak'];
 const BROADCAST_MIN_CYCLE = 3;
 const BROADCAST_MIN_CONSCIENCE = 3;
 const SPECIMENS_PER_SENIORITY = 5;
@@ -136,10 +143,24 @@ export function availableAssignments(profile: Profile): ScenarioId[] {
 export const isCreatureUnlocked = (profile: Profile): boolean => profile.contractsCompleted >= CREATURE_UNLOCK_CONTRACTS;
 export const isHunterUnlocked = (profile: Profile): boolean => profile.contractsCompleted >= HUNTER_UNLOCK_CONTRACTS;
 
+/**
+ * Which horror a new contract gets: the scenario's own until the outbreak is unlocked, then organism or outbreak drawn
+ * from the contract seed, never the same three times running. Hidden from the assignment screen on purpose.
+ */
+export function horrorFor(profile: Profile, scenario: ScenarioId, seed: number): HorrorId {
+  const own = BASE_CONFIGS[scenario].horror;
+  if (!DRAWN.includes(own) || profile.contractsCompleted < OUTBREAK_UNLOCK_CONTRACTS) return own;
+  const recent = profile.history.slice(-HORROR_RUN).map((r) => r.horror);
+  if (recent.length === HORROR_RUN && recent.every((h) => h === recent[0]) && DRAWN.includes(recent[0]!)) return DRAWN.find((h) => h !== recent[0])!;
+  const [roll] = nextRandom(seed);
+  return DRAWN[Math.floor(roll * DRAWN.length)]!;
+}
+
 /** Starts the chosen contract. Whatever was running is abandoned without reward. */
 export function chooseAssignment(game: GameState, scenario: ScenarioId, seed: number): GameState {
   if (!availableAssignments(game.profile).includes(scenario)) return game;
-  return { ...game, assigning: false, mission: createMission(missionConfigFor(game.profile, scenario), seed) };
+  const config = { ...missionConfigFor(game.profile, scenario), horror: horrorFor(game.profile, scenario, seed) };
+  return { ...game, assigning: false, mission: createMission(config, seed) };
 }
 
 export function availableEndings(game: GameState): Ending[] {
@@ -186,6 +207,7 @@ export function completeContract(game: GameState, ending: Ending, seed: number):
       ...game.profile.history,
       {
         scenario: m.scenario,
+        horror: m.horror,
         shipName: m.config.shipName,
         ending,
         ...scenarioOf(m).outcome(m),

@@ -71,7 +71,8 @@ Today every contract except overland runs the organism. The outbreak adds a draw
 - **The draw:** once it is unlocked, each new contract (start, renewal or reassignment) draws its horror from the contract seed, organism or outbreak, 50/50. The same horror can come up at most twice in a row.
   - It is **not shown or chosen** on the assignment screen. Knowing in advance would spoil the slow-burn turn (requirement 5). Act II tells must fit either horror.
 - **Overland stays quiet** (it has one ending and no horror).
-- **Debug jumps:** `?debug=outbreak` and `?debug=ob-act3` (dev builds only).
+- **Debug jumps:** `?debug=outbreak`, `ob-act2`, `ob-act3` and `ob-act4` (dev builds only).
+- **Records:** each contract record now names its horror (save v9; older records are the organism, or quiet for overland).
 
 This is a rule in `src/core/prestige.ts` (`horrorFor(profile, scenario, seed)`), not in any scenario.
 

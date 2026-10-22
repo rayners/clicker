@@ -74,6 +74,12 @@ const MIGRATIONS: Record<number, Migration> = {
   7: (save) => ({ hunter: null, ...save }),
   // v8: Legend, carried out of finished hunts. Nobody has finished one yet.
   8: (save) => ({ ...save, profile: { legend: {}, ...(save.profile as Record<string, unknown>) } }),
+  // Contract records name their horror; every contract before the outbreak was the organism, or quiet on the road.
+  9: (save) => {
+    const profile = save.profile as { history?: { scenario: string }[] };
+    const history = (profile.history ?? []).map((r) => ({ horror: r.scenario === 'overland' ? 'quiet' : 'organism', ...r }));
+    return { ...save, profile: { ...profile, history } };
+  },
 };
 
 const saves = createSaveSystem<GameState>({
