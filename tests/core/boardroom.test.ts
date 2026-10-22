@@ -110,7 +110,7 @@ describe('the Boardroom: delivery', () => {
     expect(b.ledger[0]).toMatchObject({ scenario: 'extraction', ending: 'deliver' });
     expect(b.value).toBeGreaterThan(board(g).value);
     expect(b.value - board(g).value).toBeCloseTo(b.lifetimeValue - safetyCost(board(g)));
-    expect(b.log.at(-1)!.text).toMatch(/DELIVERED/);
+    expect(b.log.some((e) => /DELIVERED/.test(e.text))).toBe(true);
     expect(freeSlot(b)).toBe(0);
   });
 
@@ -181,7 +181,7 @@ describe('the Boardroom: safety and scrutiny', () => {
     expect(b.value).toBeLessThan(1e7);
     expect(b.frozenFor).toBeGreaterThan(0);
     expect(b.scrutiny).toBeLessThan(INQUIRY_AT);
-    expect(b.log.at(-1)!.text).toMatch(/INQUIRY/);
+    expect(b.log.some((e) => /INQUIRY/.test(e.text))).toBe(true);
     expect(reduce(after, { type: 'commission', scenario: 'extraction', seed: 4 })).toBe(after);
   });
 });

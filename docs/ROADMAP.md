@@ -101,6 +101,7 @@ In order. Each item has its design written down first, so nothing lives only in 
    - **Built:** piece 3, safety and scrutiny: a safety dial (0-10) that scales every running contract's incidents and berths and costs value per contract per second; scrutiny from crew deaths and scuttles, fading over time; an inquiry at 100 (a fifth of value fined, charters frozen for ten minutes).
    - **Built:** piece 4, divisions (`src/data/boardroom/divisions.ts`): Personnel (cheaper charters), Legal (softer scrutiny), Special Projects and Bioproducts (product pay), Logistics (contracts run faster), and a COO who recharters every free office with the best-paying contract on the ledger.
    - **Built:** piece 5, on screen (`src/ui/boardroom.ts`): THE BOARDROOM in letterhead cream and oxblood, offered from the configuration (ACCEPT PROMOTION, or what opens it); value, offices and scrutiny; charter buttons, contract cards, floors; the safety dial and standing policy; divisions; the minutes. One column on phones, two on desktop. **The Boardroom is now playable for veterans.**
+   - **Built:** piece 6, the story (`src/data/boardroom/story.ts`, `src/core/boardroom-story.ts`): the Chair's welcome; the player's own callsigns and ships (from `profile.history`) on new manifests, a common name, then a clerical error; Reconditioning Order 7731, carried with WARDEN's own seat; crew reclassified as consumables, and the dead counted from the player's record.
 
 ## Backlog / ideas
 

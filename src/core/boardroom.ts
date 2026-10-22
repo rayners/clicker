@@ -8,6 +8,7 @@ import { appendLog, type LogEntry } from '../shared/log';
 import { formatNumber } from '../shared/format';
 import { defendMission } from '../sim/bot';
 import type { ContractRecord, GameState } from './game';
+import { runBoardStory } from './boardroom-story';
 import { availableAssignments, horrorFor, isBoardroomUnlocked, missionConfigFor, missionRecord } from './prestige';
 
 /** The Boardroom (docs/BOARDROOM.md): WARDEN promoted to Kessler-Amari headquarters, running contracts in parallel. */
@@ -261,6 +262,7 @@ export function tickBoardroom(game: GameState, dt: number): GameState {
   };
   for (const c of contracts) if (c.mission.flags.includes('terminus')) next = close(next, c);
   if (next.scrutiny >= INQUIRY_AT) next = inquiry(next);
+  next = runBoardStory(next, game);
   let after: GameState = { ...game, boardroom: next };
   if (level(next, 'coo') > 0) after = recharter(after);
   return after;
