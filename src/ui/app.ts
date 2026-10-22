@@ -23,7 +23,7 @@ import { createCreatureView } from './creature';
 import { createHunterView } from './hunter';
 import { createAssignment } from './assignment';
 import { createAlerts } from './alerts';
-import { createSound, cueForLog } from './sound';
+import { createSound, cueForLog, MAX_PRINTED_LINES, PRINT_SECONDS, PRINT_STAGGER } from './sound';
 import { isSpecialProjectsUnlocked } from '../mission/organism/containment';
 import { isOrganism, type ScenarioId } from '../mission/state';
 import { crewNeedingAttention, isCrewUnlocked } from '../mission/crew';
@@ -155,8 +155,10 @@ export function mountApp(root: HTMLElement, store: Store): void {
       render: (g) => {
         view.monitor.render(g.mission);
         const fresh = log.render(g.mission.log, `${g.mission.config.shipName}:${g.mission.seed}`);
+        // Key clicks keep time with the lines printing; a memo's chime or an anomaly's drone closes the burst.
+        if (fresh.length > 0) sound.typewriter(fresh.length);
         const last = fresh[fresh.length - 1];
-        if (last) sound.play(cueForLog(last.kind));
+        if (last && cueForLog(last.kind) !== 'teletype') sound.play(cueForLog(last.kind), Math.min(fresh.length, MAX_PRINTED_LINES) * PRINT_STAGGER + PRINT_SECONDS);
       },
       visible: () => true,
     },
@@ -295,6 +297,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     const motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
     if (root.dataset.motion !== motion) root.dataset.motion = motion;
     sound.setEnabled(game.profile.settings.sound);
+    sound.setHum(game.mode === 'mission' ? game.mission.act : 0);
     settings.render(game);
     assignment.render(game);
     const tracking = m.flags.includes('tracker');

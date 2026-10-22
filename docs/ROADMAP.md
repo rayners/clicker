@@ -87,7 +87,10 @@ In order. Each item has its design written down first, so nothing lives only in 
   - Extraction has KA-009 to KA-012. Terraforming, security, haulage and salvage have three each, two in act 3 and one in act 4: ordinary goals with worse and worse briefs.
   - A data test holds every contract that can turn to having them.
   - **Found on the way:** the organism's act 4 now starts at any breach, not only while contacts are aboard. Otherwise a rich bot that vented at once never saw act 4 (haulage, seed 7).
-- Sound polish: an ambient hum per act, and a typewriter cadence tied to the print animation.
+- (Done 2026-10-22, DEEP CONTRACT) **Sound polish**, only with sound turned on:
+  - A held hum per act (60 Hz steady → beating → lower and rougher → a pulsing 41 Hz sawtooth), silent in the horror tiers.
+  - Teletype clicks timed to each log line's print animation (6 per line, at most 4 lines at once), with the memo chime or anomaly drone closing the burst.
+  - **To do:** listen on the iPhone and tune the levels. The other games have no sound yet.
 - An optional first-load boot sequence animation.
 - **Raise `TERRAFORM_UNLOCK_CONTRACTS`** (currently 0 so it can be play-tested) once the user is happy with it.
 - **A second horror.** The architecture is ready: add `src/mission/<horror>/`, a `HorrorDef`, lexicon keys each scenario must supply, and optional pairings. Choosing a horror per contract (random or cycled from the profile) is still to be designed.
