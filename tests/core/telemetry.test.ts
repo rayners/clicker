@@ -97,6 +97,17 @@ describe('DEEP CONTRACT play events', () => {
     ]);
   });
 
+  it('reports named crew turning and each lockdown on an outbreak contract', () => {
+    const g = game();
+    const before = { ...g, mission: { ...createMission({ ...g.mission.config, horror: 'outbreak' }, 1), elapsed: 600 } } as GameState;
+    expect(contractEvents(before, withMission(before, { crewTurned: 2 } as never))).toEqual([
+      { name: 'crew_turned', props: { crewTurned: 2, minutes: 10, horror: 'outbreak', cycle: 0 } },
+    ]);
+    expect(contractEvents(before, withMission(before, { lockdowns: 1 } as never))).toEqual([
+      { name: 'lockdown_used', props: { lockdowns: 1, minutes: 10, horror: 'outbreak', cycle: 0 } },
+    ]);
+  });
+
   it('names the depot on the overland road', () => {
     const g = onContract('overland');
     const after = withMission(g, { leg: 1, onTime: 0 } as never);

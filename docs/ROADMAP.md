@@ -91,6 +91,7 @@ In order. Each item has its design written down first, so nothing lives only in 
    - **Built:** piece 4, on screen: the SICK BAY tab (`src/ui/sick-bay.ts`) from Act II, the quarantine dial and the rest after the discovery, OFF SICK and TURNED in the status area, guide steps (sick bay, quarantine, wards, lockdown) and an OUTBREAK section on the rules page after the discovery.
    - **Built:** piece 5, the rule (`horrorFor` in `src/core/prestige.ts`): from 6 contracts, organism or outbreak drawn from the contract seed, never three running; contract records name their horror (save v9); debug jumps `outbreak`, `ob-act2`, `ob-act3`, `ob-act4`. **Outbreak contracts are now live for veterans.**
    - **Built:** piece 7 (ahead of 6, since the outbreak is live): the pacing bot's sick bay, `npm run simulate all outbreak`, and an outbreak pacing test for each of the five scenarios. Seed 7: act 2 at 52m–1h08m, act 3 at 2h26m–2h49m, act 4 at 3h02m–3h39m, terminus at 4h17m–4h54m. Prices were cut to fit Act III budgets (officer 1M, wards 200k) and the turned now spread it too, so Act IV keeps pressing.
+   - **Built:** piece 8, telemetry: `crew_turned` and `lockdown_used`, and an "act timing by horror" tile on the Game pacing dashboard.
 8. **(User, 2026-10-22: "go ahead with the boardroom layer when it comes up") The Boardroom** (`docs/BOARDROOM.md`).
 
 ## Backlog / ideas
