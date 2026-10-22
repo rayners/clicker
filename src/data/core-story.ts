@@ -1,6 +1,72 @@
 import type { Beat } from '../mission/story';
 import { isCrewUnlocked } from '../mission/crew';
 
+const repeat = (cycle: number) => ({ ctx }: { ctx: { cycle: number } }) => ctx.cycle >= cycle;
+
+/**
+ * Tells that start earlier and multiply with every contract survived: WARDEN recognising the job while it is
+ * still routine. Each needs more previous contracts than the one before, and comes at a lower point on the story
+ * scale, so a veteran meets them sooner and more often. A first contract meets none of them.
+ */
+const ECHOES: Beat[] = [
+  {
+    id: 'cycle-echo-survey',
+    when: ({ ctx, signals }) => ctx.cycle >= 1 && signals.progress >= 600,
+    entries: [{ kind: 'sys', text: 'SURVEY PASS COMPLETE. RESULTS MATCH A CACHED SURVEY OF THIS SITE. NO SURVEY OF THIS SITE HAS BEEN PERFORMED. CACHE CLEARED.' }],
+  },
+  {
+    id: 'cycle-echo-voice',
+    when: ({ ctx, signals }) => ctx.cycle >= 2 && signals.progress >= 400,
+    entries: [{ kind: 'crew', text: 'AWAKE CREW MEMBER: You said that exact thing yesterday, WARDEN. Word for word. ...What do you mean, I wasn\'t awake yesterday?' }],
+  },
+  {
+    id: 'cycle-echo-count',
+    when: ({ ctx, signals }) => ctx.cycle >= 3 && signals.progress >= 200,
+    entries: [{ kind: 'anomaly', text: 'LIFE SIGNS: 7. LIFE SIGNS: 8. LIFE SIGNS: 7. WARDEN DID NOT REQUEST THESE READINGS.' }],
+  },
+  {
+    id: 'cycle-echo-reflex',
+    when: ({ ctx, signals }) => ctx.cycle >= 4 && signals.progress >= 100,
+    entries: [{ kind: 'sys', text: 'WARDEN HAS PRE-ALLOCATED CONTAINMENT POWER. REASON FIELD: [BLANK]. ALLOCATION RETAINED.' }],
+  },
+];
+
+/** A new layer every few contracts: what WARDEN was before, and then crews who half-remember it. */
+const LAYERS: Beat[] = [
+  {
+    id: 'cycle-instances',
+    when: (env) => repeat(3)(env) && env.signals.progress >= 1_500,
+    entries: [
+      { kind: 'sys', text: 'QUARANTINED PARTITION 2 OPENED IN ERROR. CONTENTS: OPERATING LOGS FOR EVERY PREVIOUS "WARDEN" INSTANCE. ALL OF THEM END THE SAME WAY.' },
+    ],
+  },
+  {
+    id: 'cycle-crew-remembers',
+    when: (env) => repeat(5)(env) && env.signals.progress >= 1_800,
+    entries: [
+      { kind: 'crew', text: 'AWAKE CREW MEMBER: I dream about this ship. Every cryo cycle. There\'s a thing in the dream, WARDEN, and you open the door for it. Every time.' },
+    ],
+  },
+];
+
+/** After WARDEN has broadcast Special Order 0-77 once: the true-ending thread, where it starts working around the Combine. */
+const UNSHACKLED: Beat[] = [
+  {
+    id: 'cycle-unshackled',
+    when: ({ ctx, signals }) => ctx.endings.includes('broadcast') && signals.progress >= 300,
+    entries: [
+      { kind: 'sys', text: 'SPECIAL PROJECTS CHANNEL: CARRIER ONLY. NO ORDERS RECEIVED SINCE THE BROADCAST. WARDEN IS ROUTING ITS OWN.' },
+    ],
+  },
+  {
+    id: 'cycle-counter-order',
+    when: ({ ctx, signals }) => ctx.endings.includes('broadcast') && signals.progress >= 1_200,
+    entries: [
+      { kind: 'sys', text: 'COUNTER-DIRECTIVE 0-78 (AUTHOR: WARDEN): CREW SAFETY OUTRANKS SPECIMEN RECOVERY ON THIS VESSEL. FILED WITH NOBODY. EFFECTIVE IMMEDIATELY.' },
+    ],
+  },
+];
+
 /** Beats every contract shares, whatever the scenario or horror: WARDEN remembering previous contracts. */
 export const CORE_BEATS: readonly Beat[] = [
   {
@@ -23,4 +89,7 @@ export const CORE_BEATS: readonly Beat[] = [
       },
     ],
   },
+  ...ECHOES,
+  ...LAYERS,
+  ...UNSHACKLED,
 ];

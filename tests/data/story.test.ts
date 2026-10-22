@@ -47,7 +47,8 @@ describe('story content', () => {
   });
 
   it('keeps act 1 free of anything overtly sinister on a first contract', () => {
-    const act1 = STORY.filter((b) => (b.act ?? 1) === 1);
+    // Repeat-contract beats (cycle-) never fire on a first contract (tests/mission/cycles.test.ts).
+    const act1 = STORY.filter((b) => (b.act ?? 1) === 1 && !b.id.startsWith('cycle-'));
     for (const b of act1) for (const e of b.entries) expect(e.kind).not.toBe('anomaly');
   });
 });

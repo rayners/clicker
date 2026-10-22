@@ -71,7 +71,12 @@ In order. Each item has its design written down first, so nothing lives only in 
 - **Real-device pass on iPhone Safari**, both in-browser and installed to the home screen (offline, audio unlock, safe areas, storage persistence).
 - (Done 2026-10-21) Debug extras for DEEP CONTRACT, dev builds only: `?speed=N` (1–100× clock), `?grant=N` (credits on load) and `?flags` (an overlay with the act, flags and latest beats). The act jumps now switch to an extraction contract first.
 - Run WebKit e2e once host dependencies are installed.
-- More late-cycle story: tells starting earlier and multiplying on repeat contracts, new layers per cycle, and the true-ending thread where WARDEN subverts the Combine. The game stays playable afterwards.
+- (Done 2026-10-21) **More late-cycle story** (`src/data/core-story.ts`, every scenario and horror):
+  - **Echoes:** four of them, from the 2nd to the 5th contract, each needing one more past contract and coming earlier on the story scale (600 down to 100).
+  - **New layers:** WARDEN's previous instances from the 4th contract, and a crew that dreams of it from the 6th.
+  - **The true-ending thread:** after the first broadcast of 0-77, every contract has WARDEN routing its own orders and filing counter-directive 0-78.
+  - A first contract meets none of it.
+  - **Still open:** the counter-directive could change play (crew safety outranking specimens), not just the story.
 - Sinister directives during Acts III–IV (the directive table currently ends at KA-008).
 - Sound polish: an ambient hum per act, and a typewriter cadence tied to the print animation.
 - An optional first-load boot sequence animation.

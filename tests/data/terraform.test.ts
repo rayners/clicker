@@ -82,7 +82,7 @@ describe('terraform story', () => {
   });
 
   it('keeps act 1 free of anything overtly sinister', () => {
-    for (const b of beats.filter((x) => (x.act ?? 1) === 1)) for (const e of b.entries) expect(e.kind).not.toBe('anomaly');
+    for (const b of beats.filter((x) => (x.act ?? 1) === 1 && !x.id.startsWith('cycle-'))) for (const e of b.entries) expect(e.kind).not.toBe('anomaly');
   });
 });
 
