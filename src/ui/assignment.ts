@@ -30,6 +30,11 @@ const BRIEFS: Record<ScenarioId, { title: string; name: string; brief: string }>
     name: 'haulage',
     brief: 'Tow a refinery train home station by station. Burn hot to make the delivery windows, but the fuel bill and the freight both feel it.',
   },
+  salvage: {
+    title: 'SALVAGE',
+    name: 'salvage',
+    brief: 'Strip a derelict colony transport compartment by compartment. Run the torch hot for faster salvage, but brace what you open, and a stressed hull breaches.',
+  },
 };
 
 /** Where WARDEN chooses its next contract: on a new game, after a terminus, or on request from CFG. */

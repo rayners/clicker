@@ -2097,6 +2097,39 @@ button:focus-visible {
   }
 }
 
+/* ---------- the cutting torch (salvage) ---------- */
+
+.torch[data-strain='true'] .split-side:first-child .split-figure {
+  color: var(--danger);
+}
+
+.torch[data-danger='true'] {
+  border-color: var(--danger);
+}
+
+.torch[data-danger='true'] .split-side-line .split-figure {
+  color: var(--danger);
+}
+
+.torch-gauge {
+  display: block;
+  height: 4px;
+  margin-top: 4px;
+  border: 1px solid var(--phosphor-faint);
+}
+
+.torch-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--phosphor);
+  transition: width 0.3s linear;
+}
+
+.torch[data-danger='true'] .torch-fill {
+  background: var(--danger);
+}
+
 /* ---------- the helm and the route (haulage) ---------- */
 
 .helm[data-strain='true'] {

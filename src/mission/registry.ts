@@ -4,11 +4,12 @@ import { EXTRACTION } from './extraction';
 import { TERRAFORM } from './terraform';
 import { SECURITY } from './security';
 import { HAULAGE, OVERLAND } from './haulage';
+import { SALVAGE } from './salvage';
 import { HORRORS } from './horrors';
 
 export { HORRORS };
 
-export const SCENARIOS: Readonly<Record<ScenarioId, ScenarioDef>> = { extraction: EXTRACTION, terraform: TERRAFORM, security: SECURITY, haulage: HAULAGE, overland: OVERLAND };
+export const SCENARIOS: Readonly<Record<ScenarioId, ScenarioDef>> = { extraction: EXTRACTION, terraform: TERRAFORM, security: SECURITY, haulage: HAULAGE, overland: OVERLAND, salvage: SALVAGE };
 
 export function scenarioOf(m: MissionState): ScenarioDef {
   return SCENARIOS[m.scenario];

@@ -333,6 +333,73 @@ const reticle = sprite(
   ],
 );
 
+// Salvage: the salvage tug with its grapple arm out (32x12), the derelict, broken open aft (16x16), and a
+// cutting torch throwing sparks (12x12, two frames).
+const salvager = sprite([
+  '................................',
+  '..............bbbbbbb...........',
+  '.............bccccccdb..........',
+  '.e..........bcaacccccbbbbbbb....',
+  'ede.bbbbbbbbbcccccccccccccccb...',
+  '.d.bcccccccccccccccccccccccccbe.',
+  '..bdcdcdcccccccccccccccccccccbee',
+  '...bcccccccccccccccccccccccccbe.',
+  '....bbbbbbbbbcccccccccccccccb...',
+  '.............bbbbbbbbbbbbbbb....',
+  '................................',
+  '................................',
+]);
+
+const derelict = sprite([
+  '................',
+  '......bbbb......',
+  '....bbccccbb....',
+  '...bccacaccb....',
+  '..bccccccccb....',
+  '..bcccdcccb.....',
+  '..bccccccb..d...',
+  '..bcdccccb.b....',
+  '..bccccccbb..d..',
+  '..bcccdccb.b....',
+  '..bccccccb...e..',
+  '..bccccccb.b....',
+  '...bcccccbb..d..',
+  '....bccccb......',
+  '.....bbbb.......',
+  '................',
+]);
+
+const torch = sprite(
+  [
+    '............',
+    '.bb.........',
+    '.bcb........',
+    '..bcb.......',
+    '...bcb......',
+    '....bcb.....',
+    '.....bcdd...',
+    '......dee.e.',
+    '.......e....',
+    '..bbbbbbbbbb',
+    '..bccccccccb',
+    '..bbbbbbbbbb',
+  ],
+  [
+    '............',
+    '.bb.........',
+    '.bcb........',
+    '..bcb.......',
+    '...bcb......',
+    '....bcb.....',
+    '.....bcdd.e.',
+    '......dee...',
+    '......e..e..',
+    '..bbbbbbbbbb',
+    '..bccdcccccb',
+    '..bbbbbbbbbb',
+  ],
+);
+
 // 12x12 crew portraits: d = hair, c = skin, a = eyes, b = mouth/uniform, e = insignia/glasses.
 const portraits: Record<string, string[]> = {
   okonkwo: [
@@ -451,5 +518,8 @@ export const SPRITES: Record<string, Sprite> = {
   transport,
   colony,
   reticle,
+  salvager,
+  derelict,
+  torch,
   ...Object.fromEntries(Object.entries(portraits).map(([id, rows]) => [`crew-${id}`, sprite(rows)])),
 };

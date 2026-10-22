@@ -114,10 +114,31 @@ The core trade-off is identical in both games and is the point of sharing it: **
   - frost on the inside of one car.
 - With the organism horror, the cargo is the specimen.
 
-## 5. DEEP CONTRACT: salvage (`scenario: 'salvage'`), later
+## 5. DEEP CONTRACT: salvage (`scenario: 'salvage'`)
 
-Strip a derelict hull section by section, using held ground again: sections are compartments. Cutting faster gains more salvage per second but risks **breaches**, a pressure-loss event that seals a compartment. This one is built last because it overlaps most with extraction and security.
+**Premise.** The Combine Salvage Division tug *Corvid Tithe* has claimed a derelict: the colony transport *Aurelian Gift*, lost thirty-one years ago with 2,400 colonists in cryo, found drifting with her running lights on. Strip her compartment by compartment, from the bow airlock aft to the sealed cargo hold and the drive core. Salvage rights are worth a fortune; the Combine's lawyers are already disputing the insurers'.
 
+**Economy** (held ground again: compartments are sections, threat is structural load)
+- **Cutters** (cutting crews, then rigs, drones, the tug's own lance) are the force. They all cut at the frontier compartment; there is no split.
+- **Shoring** (bracing frames, then foam, then a spine truss) is the garrison. An opened compartment needs bracing equal to its load or it buckles back shut (held ground's drift). Shoring is posted from the airlock aft, and it costs more each time faster than cutters do, so it is the brake (as ammunition is for security).
+- **Income:** cutting into a compartment for the first time pays its salvage as the torch goes in (so a faster cut earns more per second), and every opened compartment that stays open is stripped for a steady rate.
+- **The torch dial** (notch 1–10, the safe line 5). Each notch cuts 20% faster or slower. Above the safe line the derelict's hull takes **stress**, a visible gauge; at or below it the stress bleeds off. Full stress is a **breach**: the frontier compartment vents, its progress is lost, and it is sealed for a minute before anyone can cut there again. Upgrades raise the safe line.
+- **The button:** CUT, a second of torch on the frontier at the dial's notch.
+- **Automation:** WARDEN's cutting pulse (automatic cuts), then the **hull governor**, which runs the torch at the highest notch the stress allows and backs off before a breach (and can be taken back), then stripping drones (strip rate multipliers).
+
+**Signals.** `progress` is salvage recovered on the shared story curve. `deepAccess` comes once the sealed cargo hold is open.
+
+**Story**
+- **Act I:** salvage law, the lawyers' memos, the crew's share schedule, the bow still pressurised after thirty years.
+- **Act II tells,** each with a dull explanation:
+  - the cryo bay's pods are open and empty (an orderly evacuation, the log says, though there is no record of where to);
+  - the galley's emergency rations eaten down to the last tin, thirty years ago or less (a long wait for rescue);
+  - scratches on the inside of a cargo hold hatch (cargo shifting under thrust).
+- **With the organism horror,** the hold is where the colonists went.
+
+**Endings** (lexicon): deliver = tow the *Aurelian Gift* home with the hold sealed; scuttle = cut her drive core loose and let it burn.
+
+**Missions it shares with:** held ground (`src/shared/ground.ts`), the sector column (`src/ui/site.ts`, generalised to take any run of sections), the organism horror's `pressure` hook.
 ## As built (2026-10-20)
 
 **1. Held ground: done** (`src/shared/ground.ts`, `tests/shared/ground.test.ts`). It differs from the sketch in two ways, both found by the pacing bot:
@@ -182,7 +203,7 @@ Strip a derelict hull section by section, using held ground again: sections are 
 2. **Security detachment**, built on held ground. DEEP CONTRACT already supports scenarios, so this proves the engine with the least refactoring. It adds the `HorrorDef.pressure` hook.
 3. **Elderdark site split, then the Keep**, which reuses held ground in the other game. (Done.)
 4. **Haulage.** (Done.)
-5. **Salvage.**
+5. **Salvage.** (Designed 2026-10-21; being built.)
 
 Each mission ships with:
 - its own pacing bot run inside `npm run simulate`, with the same act targets: Act II 45–60m, Act III 2–2.5h, Act IV around 3h, terminus 4–5h;

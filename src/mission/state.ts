@@ -6,12 +6,13 @@ import type { ExtractionFields } from './extraction/state';
 import type { TerraformFields } from './terraform/state';
 import type { SecurityFields } from './security/state';
 import type { HaulageFields } from './haulage/state';
+import type { SalvageFields } from './salvage/state';
 import type { OrganismFields } from './organism/state';
 import type { QuietFields } from './quiet/state';
 import type { CreatureFields } from './creature/state';
 import { HORRORS, SCENARIOS } from './registry';
 
-export type ScenarioId = 'extraction' | 'terraform' | 'security' | 'haulage' | 'overland';
+export type ScenarioId = 'extraction' | 'terraform' | 'security' | 'haulage' | 'overland' | 'salvage';
 export type HorrorId = 'organism' | 'quiet' | 'creature';
 
 /** Everything that varies between missions. Plain data so the future Boardroom layer can author it. */
@@ -73,6 +74,14 @@ export const OVERLAND_MISSION_CONFIG = {
   targetBody: 'The Lift Road: Pit 4 to Port Kessler Lift',
 } satisfies MissionConfig;
 
+/** A salvage contract: the tug Corvid Tithe stripping the derelict colony transport Aurelian Gift. */
+export const SALVAGE_MISSION_CONFIG = {
+  ...DEFAULT_MISSION_CONFIG,
+  scenario: 'salvage',
+  shipName: 'Corvid Tithe',
+  targetBody: 'The derelict Aurelian Gift',
+} satisfies MissionConfig;
+
 /** State every mission has, whatever its scenario or horror. */
 export interface MissionCore {
   config: MissionConfig;
@@ -99,7 +108,7 @@ export interface MissionCore {
   nextLogId: number;
 }
 
-export type ScenarioFields = ExtractionFields | TerraformFields | SecurityFields | HaulageFields<'haulage'> | HaulageFields<'overland'>;
+export type ScenarioFields = ExtractionFields | TerraformFields | SecurityFields | HaulageFields<'haulage'> | HaulageFields<'overland'> | SalvageFields;
 export type HorrorFields = OrganismFields | QuietFields | CreatureFields;
 
 /** A single mission, fully self-contained and JSON-serializable. */
@@ -111,6 +120,7 @@ export type MissionOf<S extends ScenarioId, H extends HorrorId> = MissionCore &
 export type ExtractionMission = MissionCore & ExtractionFields & HorrorFields;
 export type TerraformMission = MissionCore & TerraformFields & HorrorFields;
 export type SecurityMission = MissionCore & SecurityFields & HorrorFields;
+export type SalvageMission = MissionCore & SalvageFields & HorrorFields;
 export type HaulageMission = MissionCore & HaulageFields & HorrorFields;
 export type OrganismMission = MissionCore & ScenarioFields & OrganismFields;
 export type CreatureMission = MissionCore & ScenarioFields & CreatureFields;
@@ -130,6 +140,10 @@ export function isSecurity(m: MissionState): m is SecurityMission {
 /** Either haul: the long haul in space or the overland road. */
 export function isHaulage(m: MissionState): m is HaulageMission {
   return m.scenario === 'haulage' || m.scenario === 'overland';
+}
+
+export function isSalvage(m: MissionState): m is SalvageMission {
+  return m.scenario === 'salvage';
 }
 
 export function isOrganism(m: MissionState): m is OrganismMission {

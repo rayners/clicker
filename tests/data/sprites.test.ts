@@ -40,4 +40,9 @@ describe('sprite table', () => {
     expect(SPRITES.coil!.frames.length).toBeGreaterThan(1);
     expect(SPRITES.reticle!.frames.length).toBeGreaterThan(1);
   });
+
+  it('has accents for salvage: the salvage tug, the derelict, a cutting torch', () => {
+    for (const name of ['salvager', 'derelict', 'torch']) expect(SPRITES[name], name).toBeDefined();
+    expect(SPRITES.torch!.frames.length).toBeGreaterThan(1);
+  });
 });

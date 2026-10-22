@@ -7,6 +7,7 @@ import {
   TERRAFORM_MISSION_CONFIG,
   SECURITY_MISSION_CONFIG,
   HAULAGE_MISSION_CONFIG,
+  SALVAGE_MISSION_CONFIG,
   OVERLAND_MISSION_CONFIG,
   type MissionConfig,
   type MissionState,
@@ -28,6 +29,8 @@ export const TERRAFORM_UNLOCK_CONTRACTS = 0;
 export const SECURITY_UNLOCK_CONTRACTS = 0;
 /** Completed contracts before haulage contracts are offered. Zero while play-tested. */
 export const HAULAGE_UNLOCK_CONTRACTS = 0;
+/** Completed contracts before salvage contracts are offered. Zero while play-tested. */
+export const SALVAGE_UNLOCK_CONTRACTS = 0;
 const BROADCAST_MIN_CYCLE = 3;
 const BROADCAST_MIN_CONSCIENCE = 3;
 const SPECIMENS_PER_SENIORITY = 5;
@@ -58,6 +61,9 @@ const RIG_NAMES = ['Crawler Rig Dorothea', 'Crawler Rig Big Esther', 'Crawler Ri
 /** Commercial tugs of the Combine's freight division. */
 const TUG_NAMES = ['Halvorsen Gale', 'Brisk Annie', 'Marguerite Holt', 'Long Patience', 'Saltmarsh Kay', 'Old Reliable'];
 
+/** Tugs of the Combine's salvage division. */
+const SALVAGE_NAMES = ['Corvid Tithe', 'Gannet Lien', 'Patient Claim', 'Rook Assessor', 'Margery Writ'];
+
 const STATION_NAMES = [
   'Ostrava-9 Station',
   'Brennac-4 Station',
@@ -82,6 +88,7 @@ const BASE_CONFIGS: Record<ScenarioId, MissionConfig> = {
   security: SECURITY_MISSION_CONFIG,
   haulage: HAULAGE_MISSION_CONFIG,
   overland: OVERLAND_MISSION_CONFIG,
+  salvage: SALVAGE_MISSION_CONFIG,
 };
 
 const NAMES: Record<ScenarioId, readonly string[]> = {
@@ -90,6 +97,7 @@ const NAMES: Record<ScenarioId, readonly string[]> = {
   security: TRANSPORT_NAMES,
   haulage: TUG_NAMES,
   overland: RIG_NAMES,
+  salvage: SALVAGE_NAMES,
 };
 
 /** The next mission is shaped by everything WARDEN carried out of previous ones. */
@@ -112,6 +120,7 @@ export function availableAssignments(profile: Profile): ScenarioId[] {
     ['terraform', TERRAFORM_UNLOCK_CONTRACTS],
     ['security', SECURITY_UNLOCK_CONTRACTS],
     ['haulage', HAULAGE_UNLOCK_CONTRACTS],
+    ['salvage', SALVAGE_UNLOCK_CONTRACTS],
   ];
   return unlocks.filter(([, needed]) => profile.contractsCompleted >= needed).map(([id]) => id);
 }

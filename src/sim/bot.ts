@@ -294,7 +294,7 @@ function decide(game: GameState): Action | null {
 
 const PRESS: Record<ScenarioId, Action> = { extraction: { type: 'drill' }, terraform: { type: 'surge' }, security: { type: 'fireSupport' },
   haulage: { type: 'fireThrusters' },
-  overland: { type: 'fireThrusters' } };
+  overland: { type: 'fireThrusters' }, salvage: { type: 'cut' } };
 
 const DEFEND_SECONDS = 5;
 const EARLY_TAPS = 4;

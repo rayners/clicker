@@ -68,7 +68,7 @@ export function createSecurityUi(store: Store): ScenarioUi {
   const systems = createSecuritySystemsPanel(store);
   const upgrades = createUpgradesPanel<SecurityMission>(store, { all: SECURITY_UPGRADES, available: availableSecurityUpgrades });
   const split = createSplit(store);
-  const site = createSite();
+  const site = createSite({ sections: SECTIONS, label: 'Colony sectors' });
   return {
     flow: {
       cells: [
