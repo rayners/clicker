@@ -3,6 +3,8 @@ import { createMission, DEFAULT_MISSION_CONFIG, type MissionState, type Outbreak
 import { HORRORS, horrorProductionMultiplier, horrorPressure } from '../../src/mission/horrors';
 import { healthy, offShift, shiftQuarantine, tickOutbreak, MAX_QUARANTINE } from '../../src/mission/outbreak/spread';
 import type { HorrorHooks } from '../../src/mission/kinds';
+import { CREW } from '../../src/data/crew';
+import { OUTBREAK_BEATS } from '../../src/data/outbreak/story';
 
 const fresh = (patch: Partial<OutbreakMission> = {}): OutbreakMission =>
   ({ ...createMission({ ...DEFAULT_MISSION_CONFIG, horror: 'outbreak' }, 1), ...patch }) as OutbreakMission;
@@ -78,5 +80,24 @@ describe('the outbreak (Strain KA-11)', () => {
     const a = run(fresh({ act: 4, sick: 0.3, turned: 0.2 }), 300, { loseEquipment: (m) => ({ m, name: 'X' }) });
     const b = run(fresh({ act: 4, sick: 0.3, turned: 0.2 }), 300, { loseEquipment: (m) => ({ m, name: 'X' }) });
     expect(a).toEqual(b);
+  });
+
+  it('turns named crew as the turned spread in act four, awake crew first', () => {
+    const awake = { ...fresh().crew, [CREW[0]!.id]: { ...fresh().crew[CREW[0]!.id]!, status: 'awake' as const } };
+    const m = run(fresh({ act: 4, turned: 0.35, crew: awake }), 1);
+    expect(m.crewTurned).toBe(3);
+    expect(m.crew[CREW[0]!.id]!.status).toBe('lost');
+    expect(m.log.filter((e) => e.text.includes('TURNED')).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('keeps every act two tell mundane: no word of turning, the strain or Bioproducts before the discovery', () => {
+    const tells = OUTBREAK_BEATS.filter((b) => b.act === 2).flatMap((b) => b.entries.map((e) => e.text)).join(' ');
+    expect(tells.length).toBeGreaterThan(0);
+    expect(tells).not.toMatch(/\bTURN|KA-11|PALLOR|BIOPRODUCTS/i);
+  });
+
+  it('offers the three endings, in its own words', () => {
+    expect(Object.keys(HORRORS.outbreak.endings).sort()).toEqual(['broadcast', 'deliver', 'scuttle']);
+    expect(HORRORS.outbreak.endings.deliver!.title).toMatch(/SAMPLES/);
   });
 });

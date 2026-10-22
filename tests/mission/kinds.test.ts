@@ -60,6 +60,20 @@ describe('scenarios and horrors are independent (no hard coupling)', () => {
     expect(m.act).toBe(3);
   });
 
+  it('runs the outbreak on a scenario it has never heard of: a flu in act two, the discovery, the turned, and a terminus', () => {
+    let m = composeMission(stubConfig, 1, STUB, HORRORS.outbreak);
+    m = run(m, 1_200, STUB);
+    expect(m.act).toBe(2);
+    m = run(m, 2_400, STUB);
+    expect(m.act).toBe(3);
+    m = run(m, 3 * 3_600, STUB);
+    expect(m.act).toBe(4);
+    expect(m.flags).toContain('terminus');
+    const text = m.log.map((e) => e.text).join('\n');
+    expect(text).toContain('<voidBreach>');
+    expect(text).not.toMatch(/\{[a-zA-Z]+\}/);
+  });
+
   it('runs a scenario under the quiet horror with no story beyond the corporate one', () => {
     let m = createMission({ ...DEFAULT_MISSION_CONFIG, horror: 'quiet' }, 1);
     m = { ...m, lifetimeOre: 1e12 };

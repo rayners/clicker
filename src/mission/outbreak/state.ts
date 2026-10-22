@@ -11,4 +11,6 @@ export interface OutbreakFields {
   recovered: number;
   /** Tenths of the workforce kept isolated. */
   quarantine: number;
+  /** Named crew who have turned (they show as lost). */
+  crewTurned: number;
 }

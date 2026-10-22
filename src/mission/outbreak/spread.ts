@@ -1,4 +1,6 @@
 import { nextRandom } from '../../shared/rng';
+import { CREW } from '../../data/crew';
+import { crewStatus } from '../crew';
 import type { HorrorHooks } from '../kinds';
 import { appendLog } from '../log';
 import type { OutbreakMission } from '../state';
@@ -22,6 +24,10 @@ const MIN_OUTPUT = 0.2;
 const TURNED_PRESSURE = 3;
 /** Chance per second of sabotage, per share turned. */
 const SABOTAGE = 0.02;
+/** A named crew member turns for every tenth of the workforce turned. */
+const CREW_PER_TURNED = 10;
+/** The sick bay doors open: at least this much of the workforce comes out turned. */
+const FIRST_TURNED = 0.02;
 
 const SABOTAGE_LINES = [
   (name: string) => `${name} WRECKED OVERNIGHT. THE ACCESS LOG SHOWS A STAFF BADGE. THE BADGE'S OWNER WAS SIGNED OFF SICK A WEEK AGO.`,
@@ -44,6 +50,29 @@ export const outbreakPressure = (m: OutbreakMission): number => 1 + TURNED_PRESS
 export function shiftQuarantine<M extends OutbreakMission>(m: M, step: 1 | -1): M {
   const quarantine = Math.max(0, Math.min(MAX_QUARANTINE, m.quarantine + step));
   return quarantine === m.quarantine ? m : { ...m, quarantine };
+}
+
+/** Act IV opens with the first of the turned walking out of the sick bay, whatever quarantine managed. */
+export function firstTurned<M extends OutbreakMission>(m: M): M {
+  return m.turned >= FIRST_TURNED ? m : { ...m, turned: FIRST_TURNED };
+}
+
+/** Named crew turn as the turned spread: whoever is awake first, then whoever is left in cryo. */
+function turnCrew<M extends OutbreakMission>(m: M): M {
+  const target = Math.min(CREW.length, Math.floor(m.turned * CREW_PER_TURNED));
+  let next = m;
+  while (next.crewTurned < target) {
+    const living = CREW.filter((c) => crewStatus(next, c.id) !== 'lost');
+    const victim = living.find((c) => next.crew[c.id]?.status === 'awake') ?? living[0];
+    if (!victim) return { ...next, crewTurned: target };
+    const member = next.crew[victim.id]!;
+    next = appendLog(
+      { ...next, crewTurned: next.crewTurned + 1, crew: { ...next.crew, [victim.id]: { ...member, status: 'lost' } } },
+      'anomaly',
+      `${victim.callsign} HAS TURNED. THE BADGE STILL WORKS. WARDEN HAS NOT REVOKED IT.`,
+    );
+  }
+  return next;
 }
 
 export function tickOutbreak<M extends OutbreakMission>(m: M, dt: number, hooks: HorrorHooks): M {
@@ -77,5 +106,5 @@ export function tickOutbreak<M extends OutbreakMission>(m: M, dt: number, hooks:
     }
     next = { ...next, rng };
   }
-  return next;
+  return next.act >= 4 ? turnCrew(next) : next;
 }
