@@ -25,6 +25,11 @@ describe('Elderdark debug jumps', () => {
   it('leaves the game alone for an unknown jump, and lists the ones it knows', () => {
     const g = createForestGame(1, 0);
     expect(applyForestScenario(g, 'nonsense')).toBe(g);
-    expect(FOREST_SCENARIOS).toEqual(['keep', 'keep-deep']);
+    expect(FOREST_SCENARIOS).toEqual(['keep', 'keep-deep', 'veteran']);
+  });
+
+  it('has a veteran jump that opens every site and tier', () => {
+    const g = applyForestScenario(createForestGame(1, 0), 'veteran');
+    expect(g.profile.chartersCompleted).toBeGreaterThanOrEqual(10);
   });
 });

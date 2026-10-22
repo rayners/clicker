@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { seasoned } from '../helpers';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { within, screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
@@ -30,7 +31,7 @@ beforeEach(() => {
 
 describe('Morrowgate Keep on screen', () => {
   it('is reached from the configuration: tear up the charter for one at the Keep, with a confirmation', async () => {
-    const user = setup({}, 'forest');
+    const user = setup({}, 'forest', { profile: seasoned(createForestGame(1, 0)).profile });
     await user.click(screen.getByRole('button', { name: /configuration/i }));
     const dialog = within(screen.getByRole('dialog', { name: /configuration/i }));
     await user.click(dialog.getByRole('button', { name: /charter for morrowgate keep/i }));

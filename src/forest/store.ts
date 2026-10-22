@@ -3,7 +3,7 @@ import type { BuildingId } from '../forest-data/buildings';
 import { createReducerStore, type Store } from '../shared/store';
 import { adjustOrder, buyBuilding, buyOil, buyUpgrade, dispatch, forage, hire, penance, post, toggleStanding } from './company';
 import { advance, createForestGame, type ForestGame, type ForestSettings } from './game';
-import { completeCharter, rewriteCharter, type Ending } from './charter';
+import { completeCharter, rewriteCharter, type Ending, isDragonUnlocked, isWoodUnlocked } from './charter';
 import type { SiteId } from './state';
 import { buyWoodUpgrade, endWood, leaveWood, startWood } from './wood';
 import { buyDragonUpgrade, endDragon, leaveDragon, wakeDragon } from './dragon';
@@ -71,7 +71,7 @@ export function reduce(game: ForestGame, action: ForestAction): ForestGame {
     case 'rewriteCharter':
       return game.mode === 'wood' || game.mode === 'dragon' ? game : rewriteCharter(game, action.site, action.seed);
     case 'startWood':
-      return startWood(game, action.seed);
+      return game.wood || isWoodUnlocked(game.profile) ? startWood(game, action.seed) : game;
     case 'shiftWoodPush':
       return game.wood ? { ...game, wood: { ...game.wood, hunt: shiftPush(game.wood.hunt, action.index, action.step) } } : game;
     case 'toggleWoodDormant':
@@ -85,7 +85,7 @@ export function reduce(game: ForestGame, action: ForestAction): ForestGame {
     case 'endDragon':
       return endDragon(game);
     case 'wakeDragon':
-      return wakeDragon(game, action.seed);
+      return game.dragon || isDragonUnlocked(game.profile) ? wakeDragon(game, action.seed) : game;
     case 'shiftDragonPush':
       return game.dragon ? { ...game, dragon: { ...game.dragon, hunt: shiftPush(game.dragon.hunt, action.index, action.step) } } : game;
     case 'toggleDragonDormant':

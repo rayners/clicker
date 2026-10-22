@@ -8,6 +8,16 @@ export interface Reward {
   grace: number;
 }
 
+/** Charters finished before each site and tier opens (user, 2026-10-22: one to start, the rest unlocked). */
+export const KEEP_UNLOCK_CHARTERS = 1;
+export const WOOD_UNLOCK_CHARTERS = 2;
+export const DRAGON_UNLOCK_CHARTERS = 4;
+
+export const isKeepUnlocked = (p: ForestProfile): boolean => p.chartersCompleted >= KEEP_UNLOCK_CHARTERS;
+export const isWoodUnlocked = (p: ForestProfile): boolean => p.chartersCompleted >= WOOD_UNLOCK_CHARTERS;
+export const isDragonUnlocked = (p: ForestProfile): boolean => p.chartersCompleted >= DRAGON_UNLOCK_CHARTERS;
+const isSiteOpen = (p: ForestProfile, site: SiteId): boolean => site === 'forest' || isKeepUnlocked(p);
+
 const BURN_MIN_CHARTERS = 3;
 const BURN_MIN_GRACE = 3;
 const FRAGMENTS_PER_RENOWN = 2;
@@ -44,12 +54,14 @@ export function completeCharter(game: ForestGame, ending: Ending, seed: number, 
     chartersCompleted: game.profile.chartersCompleted + 1,
     history: [...game.profile.history, { ending, relics: c.lifetimeRelics, dead: c.lifetimeDead, duration: c.elapsed, site: c.site }],
   };
-  const company = createCompany(seed, { number: profile.chartersCompleted + 1, renown: profile.renown, grace: profile.grace }, site);
+  // Checked against the profile with this charter counted: finishing the first one is what opens the Keep.
+  const next = isSiteOpen(profile, site) ? site : 'forest';
+  const company = createCompany(seed, { number: profile.chartersCompleted + 1, renown: profile.renown, grace: profile.grace }, next);
   return { ...game, profile, company };
 }
 
 /** Tears up the charter in hand for a fresh one at another site: the same terms, nothing earned for the one abandoned. */
 export function rewriteCharter(game: ForestGame, site: SiteId, seed: number): ForestGame {
-  if (game.company.site === site) return game;
+  if (game.company.site === site || !isSiteOpen(game.profile, site)) return game;
   return { ...game, company: createCompany(seed, game.company.charter, site) };
 }

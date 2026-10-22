@@ -46,9 +46,9 @@ test('elderdark: keeps its own save, apart from DEEP CONTRACT', async ({ page })
 });
 
 test('elderdark: listen to the wood and lean on a company', async ({ page }) => {
+  // The wood and the dragon open with finished charters; the veteran jump opens them for the test.
+  await page.goto('/forest/?debug=veteran');
   await page.goto('/forest/');
-  await page.evaluate(() => localStorage.removeItem('elderdark.save'));
-  await page.reload();
   await page.getByRole('button', { name: /^configuration$/i }).click();
   await page.getByRole('button', { name: /listen to the wood/i }).click();
   const wood = page.getByRole('region', { name: /the wood/i });
@@ -60,6 +60,8 @@ test('elderdark: listen to the wood and lean on a company', async ({ page }) => 
 });
 
 test('elderdark: write a charter for Morrowgate Keep, buy oil, send a party in and post a blade', async ({ page, isMobile }) => {
+  await page.goto('/forest/?debug=veteran');
+  await page.goto('/forest/');
   await page.getByRole('button', { name: /^configuration$/i }).click();
   const dialog = page.getByRole('dialog', { name: /configuration/i });
   await dialog.getByRole('button', { name: /charter for morrowgate keep/i }).click();
@@ -90,9 +92,9 @@ test('elderdark: write a charter for Morrowgate Keep, buy oil, send a party in a
 });
 
 test('elderdark: wake the dragon and circle a company', async ({ page }) => {
+  // The wood and the dragon open with finished charters; the veteran jump opens them for the test.
+  await page.goto('/forest/?debug=veteran');
   await page.goto('/forest/');
-  await page.evaluate(() => localStorage.removeItem('elderdark.save'));
-  await page.reload();
   await page.getByRole('button', { name: /^configuration$/i }).click();
   await page.getByRole('button', { name: /wake the dragon/i }).click();
   const hoard = page.getByRole('region', { name: /the hoard/i });

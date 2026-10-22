@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { seasoned } from '../helpers';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { within, screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
@@ -28,7 +29,7 @@ beforeEach(() => {
 
 describe('the dragon on screen', () => {
   it('is woken from the configuration', async () => {
-    const user = setup(createForestGame(1, 0));
+    const user = setup(seasoned(createForestGame(1, 0)));
     await user.click(screen.getByRole('button', { name: /^configuration$/i }));
     await user.click(screen.getByRole('button', { name: /wake the dragon/i }));
     expect(store.getState().mode).toBe('dragon');

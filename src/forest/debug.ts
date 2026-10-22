@@ -4,7 +4,7 @@ import { createCompany, type Company } from './state';
 import type { ForestGame } from './game';
 
 /** Developer shortcuts (?debug=keep etc.) for trying a site without hours of play. */
-export const FOREST_SCENARIOS = ['keep', 'keep-deep'] as const;
+export const FOREST_SCENARIOS = ['keep', 'keep-deep', 'veteran'] as const;
 
 const KEEP_DEEP_FLOORS = 5;
 
@@ -30,6 +30,9 @@ function keepDeep(seed: number): Company {
 export function applyForestScenario(game: ForestGame, name: string): ForestGame {
   const seed = game.company.seed;
   switch (name) {
+    // Every site and tier open: for testing what a new Factor cannot reach yet.
+    case 'veteran':
+      return { ...game, profile: { ...game.profile, chartersCompleted: Math.max(10, game.profile.chartersCompleted) } };
     case 'keep':
       return { ...game, company: { ...createCompany(seed, undefined, 'keep'), silver: 400, hired: { blade: 6, mender: 1, scout: 1, mystic: 0, sapper: 0 } } };
     case 'keep-deep':

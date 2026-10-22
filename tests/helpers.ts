@@ -7,3 +7,6 @@ export const tf = (m: MissionState) => m as MissionOf<'terraform', 'organism'>;
 
 /** A game whose profile has finished enough contracts to be offered every kind (unlocks are covered in assignment tests). */
 export const veteran = <G extends { profile: { contractsCompleted: number } }>(g: G): G => ({ ...g, profile: { ...g.profile, contractsCompleted: 10 } });
+
+/** An Elderdark game whose Factor has finished enough charters to open every site and tier. */
+export const seasoned = <G extends { profile: { chartersCompleted: number } }>(g: G): G => ({ ...g, profile: { ...g.profile, chartersCompleted: 10 } });

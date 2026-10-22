@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { seasoned } from '../helpers';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { within, screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
@@ -28,7 +29,7 @@ beforeEach(() => {
 
 describe('the wood on screen', () => {
   it('is reached from the configuration: listen to the wood', async () => {
-    const user = setup(createForestGame(1, 0));
+    const user = setup(seasoned(createForestGame(1, 0)));
     await user.click(screen.getByRole('button', { name: /^configuration$/i }));
     await user.click(screen.getByRole('button', { name: /listen to the wood/i }));
     expect(store.getState().mode).toBe('wood');
@@ -89,5 +90,17 @@ describe('the wood on screen', () => {
     await user.click(woodView().getByRole('button', { name: /confirm/i }));
     expect(store.getState().wood).toBeNull();
     expect(store.getState().profile.legend.wood).toBe(4);
+  });
+});
+
+describe('closed doors in the configuration', () => {
+  it('say how many charters open the Keep, the wood and the dragon', async () => {
+    const user = setup(createForestGame(1, 0));
+    await user.click(screen.getByRole('button', { name: /^configuration$/i }));
+    const keep = screen.getByRole('button', { name: /charter for morrowgate keep/i }) as HTMLButtonElement;
+    expect(keep.disabled).toBe(true);
+    expect(keep.textContent).toMatch(/AFTER 1 CHARTER$/);
+    expect((screen.getByRole('button', { name: /listen to the wood/i }) as HTMLButtonElement).textContent).toMatch(/AFTER 2 CHARTERS/);
+    expect((screen.getByRole('button', { name: /wake the dragon/i }) as HTMLButtonElement).disabled).toBe(true);
   });
 });

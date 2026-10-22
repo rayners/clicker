@@ -1,3 +1,4 @@
+import { seasoned } from '../helpers';
 import { describe, it, expect } from 'vitest';
 import { advance, createForestGame, type ForestGame } from '../../src/forest/game';
 import { buyDragonUpgrade, DRAGON_ADAPTER, DRAGON_COMPANIES, dragonRules, dragonUpgradeCost, leaveDragon, raid, wakeDragon } from '../../src/forest/dragon';
@@ -84,7 +85,7 @@ describe('waking the dragon', () => {
   });
 
   it('takes orders: wake, raid, sleep on the hoard, grow, and return to the ledger', () => {
-    let g = reduce(createForestGame(1, NOW), { type: 'wakeDragon', seed: 3 });
+    let g = reduce(seasoned(createForestGame(1, NOW)), { type: 'wakeDragon', seed: 3 });
     expect(g.mode).toBe('dragon');
     g = reduce(g, { type: 'shiftDragonPush', index: 1, step: 1 });
     expect(g.dragon!.hunt.split[1]).toBe(1);

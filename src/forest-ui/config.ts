@@ -1,4 +1,5 @@
 import { h, setText } from '../shared/ui/dom';
+import { DRAGON_UNLOCK_CHARTERS, isDragonUnlocked, isKeepUnlocked, isWoodUnlocked, KEEP_UNLOCK_CHARTERS, WOOD_UNLOCK_CHARTERS } from '../forest/charter';
 import { createOptOut } from '../shared/telemetry';
 import { forestSaves } from '../forest/save';
 import type { ForestGame } from '../forest/game';
@@ -96,7 +97,10 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
   const elsewhere = () => (store.getState().company.site === 'keep' ? 'forest' : 'keep');
   const labelRewrite = () => {
     const place = elsewhere() === 'keep' ? 'Morrowgate Keep' : 'the forest';
-    setText(rewrite, rewriting ? 'CONFIRM: TEAR UP THIS CHARTER' : `WRITE A CHARTER FOR ${place.toUpperCase()}`);
+    const closed = elsewhere() === 'keep' && !isKeepUnlocked(store.getState().profile);
+    rewrite.disabled = closed;
+    const after = closed ? ` · AFTER ${KEEP_UNLOCK_CHARTERS} CHARTER${KEEP_UNLOCK_CHARTERS === 1 ? '' : 'S'}` : '';
+    setText(rewrite, rewriting ? 'CONFIRM: TEAR UP THIS CHARTER' : `WRITE A CHARTER FOR ${place.toUpperCase()}${after}`);
     rewrite.setAttribute('aria-label', rewriting ? `Confirm: tear up this charter for one at ${place}` : `Write a charter for ${place}`);
   };
   rewrite.addEventListener('click', () => {
@@ -143,6 +147,13 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
     render(game) {
       motion.checked = game.profile.settings.reducedMotion;
       labelRewrite();
+      // Closed tiers say what opens them.
+      const woodOpen = !!game.wood || isWoodUnlocked(game.profile);
+      listen.disabled = !woodOpen;
+      setText(listen, woodOpen ? 'LISTEN TO THE WOOD' : `LISTEN TO THE WOOD · AFTER ${WOOD_UNLOCK_CHARTERS} CHARTERS`);
+      const dragonOpen = !!game.dragon || isDragonUnlocked(game.profile);
+      wake.disabled = !dragonOpen;
+      setText(wake, dragonOpen ? 'WAKE THE DRAGON' : `WAKE THE DRAGON · AFTER ${DRAGON_UNLOCK_CHARTERS} CHARTERS`);
     },
   };
 }

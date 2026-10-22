@@ -66,6 +66,11 @@ In order. Each item has its design written down first, so nothing lives only in 
    - **LATE FEES** (films finished): the camp at the start, the clinic at 1, the insurer at 2, the asylum at 3, crossovers at 4, the Killer's Cut at 2.
    - **DOWN THERE** (seasons finished): one season to start; the Source at 2.
    - Locked content shows what unlocks it, rather than vanishing.
+6b. **(User, 2026-10-22) A walkthrough for every scenario.** "The scenarios need some kind of tutorial or walkthrough to introduce the levers for each game, rules for the scenario, etc. It isn't necessarily obvious how everything fits together."
+   - **A shared guide engine** (`src/shared/guide.ts`, pure): ordered steps, each with a trigger on game state (first seen, first time X is possible, a bottleneck first hit) and text pointing at the lever to use. Each step is done when the player does the thing or dismisses it.
+   - **On screen:** a short boxed tip that points at the control it talks about. One tip at a time, never blocking play, with "Skip guide" in the configuration and a "How this contract works" page (the rules) that can be opened any time.
+   - **Coverage:** every scenario in every game (DEEP CONTRACT's six contracts, Elderdark's forest and Keep, LATE FEES's four tapes, DOWN THERE's zones) and each play-as-the-horror tier.
+   - **State and telemetry:** seen steps are saved per game; telemetry gets `guide_step` and `guide_skipped`.
 7. **(User, 2026-10-22) A second first-tier horror: the outbreak.** A novel disease spreading through the workforce and turning them against the company (zombie/pandemic homage, original IP).
    - It needs a design doc first (`docs/OUTBREAK.md`). It stays decoupled from scenarios through signals, lexicon and hooks.
    - It also needs a rule for which horror a contract gets.
