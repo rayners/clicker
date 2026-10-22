@@ -7,6 +7,7 @@ import { DEEP_UPGRADES } from '../../src/fathom-data/deep-upgrades';
 import { CITIES } from '../../src/fathom-data/breach';
 import { ATTRACTIONS } from '../../src/fathom-data/shallows';
 import { reduce } from '../../src/fathom/store';
+import { applyFathomScenario } from '../../src/fathom/debug';
 import { fathomSaves } from '../../src/fathom/save';
 import { simulateDeep } from '../../src/fathom/bot';
 import { pushOn, shiftPush } from '../../src/shared/hunt';
@@ -107,7 +108,7 @@ describe('answering the Source', () => {
   });
 
   it('takes orders: answer, push, sink, grow, and return to the season', () => {
-    let g = reduce(createFathomGame(1, NOW), { type: 'startDeep', seed: 3 });
+    let g = reduce(applyFathomScenario(createFathomGame(1, NOW), 'veteran'), { type: 'startDeep', seed: 3 });
     expect(g.mode).toBe('deep');
     g = reduce(g, { type: 'shiftDeepPush', index: 1, step: 1 });
     expect(g.deep!.hunt.split[1]).toBe(1);

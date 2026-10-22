@@ -56,7 +56,7 @@ In order. Each item has its design written down first, so nothing lives only in 
    - its play-as-the-horror tier, the Source, on the shared hunt engine (`docs/HORROR-TIER.md`): built 2026-10-21.
 5. **Then the backlog below**, in order: (done 2026-10-21) the Keep's sappers and haulage's tiring crew watches, then the hunter and dragon horror tiers and Legend.
 
-6. **(User, 2026-10-22) One scenario per game at the start; the rest unlock.** Debug jumps stay as the testing route. The ladders:
+6. **(Done 2026-10-22) One scenario per game at the start; the rest unlock.** Debug jumps stay as the testing route. The ladders:
    - **DEEP CONTRACT** (contracts finished):
      - overland at the start;
      - extraction and the long haul at 1 (overland's ending is the promotion to it);

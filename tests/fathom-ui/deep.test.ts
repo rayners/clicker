@@ -6,6 +6,7 @@ import { createFathomGame, type FathomGame } from '../../src/fathom/game';
 import { DEEP_TOWNS, startDeep } from '../../src/fathom/deep';
 import { createFathomStore, type FathomStore } from '../../src/fathom/store';
 import { mountFathom } from '../../src/fathom-ui/app';
+import { applyFathomScenario } from '../../src/fathom/debug';
 import { DEEP_UPGRADES } from '../../src/fathom-data/deep-upgrades';
 
 let store: FathomStore;
@@ -28,7 +29,7 @@ beforeEach(() => {
 
 describe('the Source on screen', () => {
   it('is reached from the configuration: answer the Source', async () => {
-    const user = setup(createFathomGame(1, 0));
+    const user = setup(applyFathomScenario(createFathomGame(1, 0), 'veteran'));
     await user.click(screen.getByRole('button', { name: /^configuration$/i }));
     await user.click(screen.getByRole('button', { name: /answer the source/i }));
     expect(store.getState().mode).toBe('deep');
@@ -90,5 +91,13 @@ describe('the Source on screen', () => {
     await user.click(source().getByRole('button', { name: /confirm/i }));
     expect(store.getState().deep).toBeNull();
     expect(store.getState().profile.legend.deep).toBe(4);
+  });
+
+  it('says how many seasons open the Source before then', async () => {
+    const user = setup(createFathomGame(1, 0));
+    await user.click(screen.getByRole('button', { name: /^configuration$/i }));
+    const answer = screen.getByRole('button', { name: /answer the source/i }) as HTMLButtonElement;
+    expect(answer.disabled).toBe(true);
+    expect(answer.textContent).toMatch(/AFTER 2 SEASONS/);
   });
 });

@@ -7,7 +7,7 @@ import { buyAttraction, hireGuard, sellPass, shiftOpen } from './shallows';
 import { buyBuoy, buyTrawler, shiftRange } from './shelf';
 import { buyModule, hireRepairCrew, shiftStation } from './trench';
 import { buyUpgrade } from './upgrades';
-import { buyDeepUpgrade, endDeep, leaveDeep, startDeep } from './deep';
+import { buyDeepUpgrade, endDeep, isDeepUnlocked, leaveDeep, startDeep } from './deep';
 import { shiftPush, toggleDormant } from '../shared/hunt';
 import type { Outfit } from './state';
 
@@ -90,7 +90,7 @@ export function reduce(game: FathomGame, action: FathomAction): FathomGame {
       return { ...fresh, profile: { ...fresh.profile, settings: game.profile.settings } };
     }
     case 'startDeep':
-      return startDeep(game, action.seed);
+      return game.deep || isDeepUnlocked(game.profile) ? startDeep(game, action.seed) : game;
     case 'leaveDeep':
       return leaveDeep(game);
     case 'endDeep':

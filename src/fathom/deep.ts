@@ -10,6 +10,10 @@ import { tickOutfit } from './tick';
 /** Answer the Source: the sonar turned around. You are what is behind the seam; the seaside towns run themselves. */
 export const DEEP_TOWNS = ['HARROW POINT', 'GULLHAVEN', 'CAPE MORROW'] as const;
 
+/** Seasons finished before the Source can be answered (user, 2026-10-22: the rest unlocked). */
+export const DEEP_UNLOCK_SEASONS = 2;
+export const isDeepUnlocked = (profile: FathomGame['profile']): boolean => profile.seasons >= DEEP_UNLOCK_SEASONS;
+
 /** Where the Source's Legend is kept in the profile. */
 export const LEGEND_KEY = 'deep';
 const START_STRENGTH = 3;

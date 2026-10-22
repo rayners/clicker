@@ -27,7 +27,9 @@ test('down there: sell passes, put umbrellas on the beach and open more of it, a
 test('down there: answer the Source from the configuration and rise under a town', async ({ page }) => {
   await page.goto('/down-there/');
   await page.evaluate(() => localStorage.removeItem('fathom.save'));
-  await page.reload();
+  // The Source opens after two seasons; the veteran jump opens it for the test.
+  await page.goto('/down-there/?debug=veteran');
+  await page.goto('/down-there/');
   await page.getByRole('button', { name: /^configuration$/i }).click();
   await page.getByRole('button', { name: /answer the source/i }).click();
   const source = page.getByRole('region', { name: /the source/i });

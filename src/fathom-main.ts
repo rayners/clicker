@@ -2,6 +2,7 @@ import '@fontsource/vt323';
 import '@fontsource/michroma';
 import './fathom-ui/sonar.css';
 import { catchUp } from './fathom/game';
+import { applyFathomScenario } from './fathom/debug';
 import { fathomSaves } from './fathom/save';
 import { createFathomStore } from './fathom/store';
 import { seasonEvents, seasonProperties } from './fathom/telemetry';
@@ -15,7 +16,10 @@ const AUTOSAVE_MS = 10_000;
 const storage = window.localStorage;
 const seed = (Math.random() * 2 ** 31) | 0;
 const loaded = fathomSaves.loadGame(storage, Date.now(), seed);
-const store = createFathomStore(catchUp(loaded.game, Date.now()));
+// Debug jumps (dev builds only): ?debug=veteran opens what a new outfit cannot reach yet.
+const debug = import.meta.env.DEV ? new URLSearchParams(location.search).get('debug') : null;
+const caught = catchUp(loaded.game, Date.now());
+const store = createFathomStore(debug ? applyFathomScenario(caught, debug) : caught);
 
 mountFathom(document.getElementById('app')!, store);
 

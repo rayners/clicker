@@ -5,6 +5,7 @@ import { FATHOM_UPGRADES } from '../fathom-data/upgrades';
 import { availableUpgrades } from '../fathom/upgrades';
 import { availableEndings, endingRewards, type Ending } from '../fathom/season';
 import { fathomSaves } from '../fathom/save';
+import { DEEP_UNLOCK_SEASONS, isDeepUnlocked } from '../fathom/deep';
 import type { FathomGame } from '../fathom/game';
 import type { Outfit } from '../fathom/state';
 import type { FathomStore } from '../fathom/store';
@@ -187,6 +188,10 @@ export function createConfig(store: FathomStore): { button: HTMLButtonElement; d
     dialog,
     render(game) {
       motion.checked = game.profile.settings.reducedMotion;
+      // A closed door says what opens it.
+      const open = !!game.deep || isDeepUnlocked(game.profile);
+      answer.disabled = !open;
+      setText(answer, open ? 'ANSWER THE SOURCE' : `ANSWER THE SOURCE · AFTER ${DEEP_UNLOCK_SEASONS} SEASONS`);
     },
   };
 }
