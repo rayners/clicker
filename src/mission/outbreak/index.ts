@@ -1,6 +1,7 @@
 import { OUTBREAK_ARCHIVE } from '../../data/outbreak/archive';
 import { OUTBREAK_ENDINGS } from '../../data/outbreak/endings';
 import { OUTBREAK_BEATS } from '../../data/outbreak/story';
+import { CALDERS_LANDING_BEATS } from '../../data/outbreak/calders-landing';
 import type { HorrorDef } from '../kinds';
 import type { MissionState, OutbreakMission } from '../state';
 import { firstTurned, outbreakPressure, outbreakProduction, tickOutbreak } from './spread';
@@ -30,7 +31,7 @@ export const OUTBREAK: HorrorDef = {
   }),
   tick: (m, dt, hooks) => tickOutbreak(o(m), dt, hooks),
   beats: OUTBREAK_BEATS,
-  pairings: {},
+  pairings: { security: CALDERS_LANDING_BEATS },
   archive: OUTBREAK_ARCHIVE,
   endings: OUTBREAK_ENDINGS,
   productionMultiplier: (m) => outbreakProduction(o(m)),

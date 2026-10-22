@@ -1,6 +1,6 @@
 # The outbreak: a second first-tier horror for DEEP CONTRACT
 
-**Status:** design, 2026-10-22. Requested by the user on 2026-10-22: "An additional horror could be zombies/pandemic. Some kind of novel disease taking over workers and turning them against the company."
+**Status:** built, 2026-10-22 (all eight pieces; see docs/ROADMAP.md item 7). Requested by the user on 2026-10-22: "An additional horror could be zombies/pandemic. Some kind of novel disease taking over workers and turning them against the company."
 
 It is a zombie and pandemic homage, with original names. It is a `HorrorDef` beside the organism. It runs in any scenario and knows the scenario only through `StorySignals`, the scenario's lexicon and `HorrorHooks` (CLAUDE.md requirement 6).
 
@@ -83,7 +83,7 @@ This is a rule in `src/core/prestige.ts` (`horrorFor(profile, scenario, seed)`),
   - the lexicon: `{deepPlace}`, `{refuge}`, `{crewNoun}` and so on;
   - `hooks.loseEquipment`.
 - **A scenario knows it only through** `horrorProductionMultiplier` and `horrorPressure`.
-- **Sanctioned pairing (planned):** `pairings.security`, the colony at Calder's Landing that went dark before the detachment arrived. The missing colonists are the first turned. This is the outbreak's counterpart of the organism's nursery pairing.
+- **Sanctioned pairing (built):** `pairings.security`, the colony at Calder's Landing that went dark before the detachment arrived. The missing colonists are the first turned. This is the outbreak's counterpart of the organism's nursery pairing.
 - `tests/mission/kinds.test.ts` already runs every horror against the stub scenario and checks lexicon coverage, so the outbreak joins those tests.
 
 ## UI, guide and telemetry
