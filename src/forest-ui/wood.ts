@@ -7,11 +7,25 @@ import { isWoodUpgradeAvailable, woodUpgradeCost, WOOD_ADAPTER, type WoodHunt } 
 import type { ForestGame } from '../forest/game';
 import type { ForestStore } from '../forest/store';
 import { formatDay } from '../forest/calendar';
+import { createGuideView } from '../shared/ui/guide';
+import { createGuideProgress } from '../shared/guide';
+import { huntGuide } from '../shared/hunt-guide';
 
 /** The companies the wood is watching, by the order they came to Thistlegate. */
 const COMPANY_NAMES = ['THE COMPANY OF THE ASHEN KEY', 'THE GREY LANTERN COMPANY', 'THE BRASS HOUND COMPANY', 'THE ORDER OF THE LONG ROAD'];
 const ACT_NAMES = ['', 'THE CHARTER', 'MARKS', 'THE KEY', 'THE WOOD WAKES'];
 const FEED = 8;
+const GUIDE_KEY = 'elderdark.wood.guide';
+const GUIDE = huntGuide<ForestGame>((g) => (g.mode === 'wood' ? (g.wood?.hunt ?? null) : null), {
+  title: 'THE WOOD',
+  prey: 'company',
+  harvest: 'SAP',
+  notoriety: 'FEAR',
+  root: '.wood:not(.dragon)',
+  push: '[aria-label^="Lean harder on"]',
+  rest: 'SLEEP',
+  growth: 'WHAT THE WOOD BECOMES',
+});
 
 function createCompanyStrip(store: ForestStore, index: number) {
   const name = COMPANY_NAMES[index] ?? `COMPANY ${index + 1}`;
@@ -53,6 +67,7 @@ function createCompanyStrip(store: ForestStore, index: number) {
 export function createWoodView(store: ForestStore): { el: HTMLElement; render(game: ForestGame): void } {
   const back = h('button', { class: 'wood-back', type: 'button', 'aria-label': 'Return to the ledger' }, 'RETURN TO THE LEDGER');
   back.addEventListener('click', () => store.dispatch({ type: 'leaveWood' }));
+  const guide = createGuideView<ForestGame>({ ...GUIDE, progress: createGuideProgress(window.localStorage, GUIDE_KEY) });
   const stat = (label: string, aria: string) => {
     const value = h('dd', { class: 'stat-value', 'aria-label': aria }, '0');
     return { value, el: h('div', { class: 'stat' }, h('dt', { class: 'stat-label' }, label), value) };
@@ -73,13 +88,14 @@ export function createWoodView(store: ForestStore): { el: HTMLElement; render(ga
   const el = h(
     'section',
     { class: 'wood', 'aria-label': 'The wood', hidden: true },
-    h('header', { class: 'wood-head' }, name, back),
+    h('header', { class: 'wood-head' }, name, guide.rulesButton, back),
     h(
       'div',
       { class: 'wood-body' },
       h(
         'div',
         { class: 'wood-col' },
+        guide.el,
         h('dl', { class: 'stats' }, sap.el, hunger.el, fear.el, free.el),
         note,
         ...companies.map((c) => c.el),
@@ -90,6 +106,7 @@ export function createWoodView(store: ForestStore): { el: HTMLElement; render(ga
       ),
       h('div', { class: 'wood-col' }, h('h3', { class: 'panel-subtitle' }, 'WHAT THE WOOD BECOMES'), upgrades),
     ),
+    guide.rulesDialog,
   );
   let shownUpgrades = '';
   let shownFeed = '';
@@ -97,7 +114,7 @@ export function createWoodView(store: ForestStore): { el: HTMLElement; render(ga
   function render(game: ForestGame) {
     el.hidden = game.mode !== 'wood' || !game.wood;
     const w = game.wood;
-    if (el.hidden || !w) return;
+    if (el.hidden || !w) return guide.render(game);
     const hunt = w.hunt;
     setText(sap.value, formatNumber(hunt.dread));
     setText(hunger.value, `${Math.round(hunt.hunger)}%`);
@@ -153,6 +170,8 @@ export function createWoodView(store: ForestStore): { el: HTMLElement; render(ga
       shownFeed = feedKey;
       feed.replaceChildren(...entries.map((e) => h('li', { class: 'wood-entry' }, h('span', { class: 'wood-when' }, `${formatDay(e.t)} · ${e.who}`), ' ', e.text)));
     }
+    // Last, so the controls it points at are labelled.
+    guide.render(game);
   }
 
   return { el, render };

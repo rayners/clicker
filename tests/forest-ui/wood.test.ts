@@ -13,6 +13,7 @@ let store: ForestStore;
 
 function setup(game: ForestGame) {
   document.body.innerHTML = '<div id="app"></div>';
+  localStorage.clear();
   store = createForestStore(game);
   mountForest(document.getElementById('app')!, store);
   return userEvent.setup();
@@ -102,5 +103,20 @@ describe('closed doors in the configuration', () => {
     expect(keep.textContent).toMatch(/AFTER 1 CHARTER$/);
     expect((screen.getByRole('button', { name: /listen to the wood/i }) as HTMLButtonElement).textContent).toMatch(/AFTER 2 CHARTERS/);
     expect((screen.getByRole('button', { name: /wake the dragon/i }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('has its own guide: it starts by pointing at the first company, and moves on once pushed', async () => {
+    const user = setup(inWood());
+    const push = woodView().getAllByRole('button', { name: /lean harder on/i })[0]!;
+    expect(within(woodView().getByRole('region', { name: /guide/i })).getByText('PUSH')).toBeTruthy();
+    expect(push.classList.contains('guide-target')).toBe(true);
+    await user.click(push);
+    expect(within(woodView().getByRole('region', { name: /guide/i })).getByText('HUNGER')).toBeTruthy();
+  });
+
+  it('keeps its rules one tap away in its header', async () => {
+    const user = setup(inWood());
+    await user.click(woodView().getByRole('button', { name: /how this works/i }));
+    expect(screen.getByRole('dialog', { name: /how the wood works/i })).toBeTruthy();
   });
 });

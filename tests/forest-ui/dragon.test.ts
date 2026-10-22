@@ -13,6 +13,7 @@ let store: ForestStore;
 
 function setup(game: ForestGame) {
   document.body.innerHTML = '<div id="app"></div>';
+  localStorage.clear();
   store = createForestStore(game);
   mountForest(document.getElementById('app')!, store);
   return userEvent.setup();
@@ -82,5 +83,20 @@ describe('the dragon on screen', () => {
     await user.click(lair().getByRole('button', { name: /confirm/i }));
     expect(store.getState().dragon).toBeNull();
     expect(store.getState().profile.legend.dragon).toBe(4);
+  });
+
+  it('has its own guide: it starts by pointing at the first company, and moves on once pushed', async () => {
+    const user = setup(awake());
+    const push = lair().getAllByRole('button', { name: /circle closer over/i })[0]!;
+    expect(within(lair().getByRole('region', { name: /guide/i })).getByText('PUSH')).toBeTruthy();
+    expect(push.classList.contains('guide-target')).toBe(true);
+    await user.click(push);
+    expect(within(lair().getByRole('region', { name: /guide/i })).getByText('HUNGER')).toBeTruthy();
+  });
+
+  it('keeps its rules one tap away in its header', async () => {
+    const user = setup(awake());
+    await user.click(lair().getByRole('button', { name: /how this works/i }));
+    expect(screen.getByRole('dialog', { name: /how the dragon works/i })).toBeTruthy();
   });
 });

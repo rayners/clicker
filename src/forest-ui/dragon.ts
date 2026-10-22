@@ -7,11 +7,25 @@ import { DRAGON_ADAPTER, dragonUpgradeCost, isDragonUpgradeAvailable, type Drago
 import type { ForestGame } from '../forest/game';
 import type { ForestStore } from '../forest/store';
 import { formatDay } from '../forest/calendar';
+import { createGuideView } from '../shared/ui/guide';
+import { createGuideProgress } from '../shared/guide';
+import { huntGuide } from '../shared/hunt-guide';
 
 /** The companies the dragon watches, by the order they came to Thistlegate (as the wood counts them). */
 const COMPANY_NAMES = ['THE COMPANY OF THE ASHEN KEY', 'THE GREY LANTERN COMPANY', 'THE BRASS HOUND COMPANY', 'THE ORDER OF THE LONG ROAD'];
 const ACT_NAMES = ['', 'THE CHARTER', 'MARKS', 'THE KEY', 'THE WOOD WAKES'];
 const FEED = 8;
+const GUIDE_KEY = 'elderdark.dragon.guide';
+const GUIDE = huntGuide<ForestGame>((g) => (g.mode === 'dragon' ? (g.dragon?.hunt ?? null) : null), {
+  title: 'THE DRAGON',
+  prey: 'company',
+  harvest: 'HOARD',
+  notoriety: 'SLAYERS',
+  root: '.dragon',
+  push: '[aria-label^="Circle closer over"]',
+  rest: 'SLEEP ON THE HOARD',
+  growth: 'WHAT THE DRAGON BECOMES',
+});
 
 function createCompanyStrip(store: ForestStore, index: number) {
   const name = COMPANY_NAMES[index] ?? `COMPANY ${index + 1}`;
@@ -53,6 +67,7 @@ function createCompanyStrip(store: ForestStore, index: number) {
 export function createDragonView(store: ForestStore): { el: HTMLElement; render(game: ForestGame): void } {
   const back = h('button', { class: 'wood-back', type: 'button', 'aria-label': 'Return to the ledger' }, 'RETURN TO THE LEDGER');
   back.addEventListener('click', () => store.dispatch({ type: 'leaveDragon' }));
+  const guide = createGuideView<ForestGame>({ ...GUIDE, progress: createGuideProgress(window.localStorage, GUIDE_KEY) });
   const stat = (label: string, aria: string) => {
     const value = h('dd', { class: 'stat-value', 'aria-label': aria }, '0');
     return { value, el: h('div', { class: 'stat' }, h('dt', { class: 'stat-label' }, label), value) };
@@ -73,13 +88,14 @@ export function createDragonView(store: ForestStore): { el: HTMLElement; render(
   const el = h(
     'section',
     { class: 'wood dragon', 'aria-label': 'The hoard', hidden: true },
-    h('header', { class: 'wood-head' }, name, back),
+    h('header', { class: 'wood-head' }, name, guide.rulesButton, back),
     h(
       'div',
       { class: 'wood-body' },
       h(
         'div',
         { class: 'wood-col' },
+        guide.el,
         h('dl', { class: 'stats' }, hoard.el, hunger.el, slayers.el, free.el),
         note,
         ...companies.map((c) => c.el),
@@ -90,6 +106,7 @@ export function createDragonView(store: ForestStore): { el: HTMLElement; render(
       ),
       h('div', { class: 'wood-col' }, h('h3', { class: 'panel-subtitle' }, 'WHAT THE DRAGON BECOMES'), upgrades),
     ),
+    guide.rulesDialog,
   );
   let shownUpgrades = '';
   let shownFeed = '';
@@ -97,7 +114,7 @@ export function createDragonView(store: ForestStore): { el: HTMLElement; render(
   function render(game: ForestGame) {
     el.hidden = game.mode !== 'dragon' || !game.dragon;
     const d = game.dragon;
-    if (el.hidden || !d) return;
+    if (el.hidden || !d) return guide.render(game);
     const hunt = d.hunt;
     setText(hoard.value, formatNumber(Math.floor(hunt.dread)));
     setText(hunger.value, `${Math.round(hunt.hunger)}%`);
@@ -151,6 +168,8 @@ export function createDragonView(store: ForestStore): { el: HTMLElement; render(
       shownFeed = feedKey;
       feed.replaceChildren(...entries.map((e) => h('li', { class: 'wood-entry' }, h('span', { class: 'wood-when' }, `${formatDay(e.t)} · ${e.who}`), ' ', e.text)));
     }
+    // Last, so the controls it points at are labelled.
+    guide.render(game);
   }
 
   return { el, render };
