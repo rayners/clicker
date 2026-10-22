@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createGame, GAME_VERSION, tickGame, type GameState } from '../../src/core/game';
 import { reduce } from '../../src/core/store';
 import { BOARDROOM_UNLOCK_CONTRACTS } from '../../src/core/prestige';
-import { charterCost, commission, createBoardroom, floorCost, freeSlot, MAX_SLOTS, START_VALUE } from '../../src/core/boardroom';
+import { charterCost, commission, createBoardroom, DEFAULT_SAFETY, floorCost, freeSlot, INQUIRY_AT, MAX_SLOTS, safetyCost, START_VALUE } from '../../src/core/boardroom';
 import { deserialize, serialize } from '../../src/core/save';
 import { applyScenario } from '../../src/core/debug';
 import { veteran } from '../helpers';
@@ -105,7 +105,7 @@ describe('the Boardroom: delivery', () => {
     expect(b.ledger).toHaveLength(1);
     expect(b.ledger[0]).toMatchObject({ scenario: 'extraction', ending: 'deliver' });
     expect(b.value).toBeGreaterThan(board(g).value);
-    expect(b.lifetimeValue).toBe(b.value - board(g).value);
+    expect(b.value - board(g).value).toBeCloseTo(b.lifetimeValue - safetyCost(board(g)));
     expect(b.log.at(-1)!.text).toMatch(/DELIVERED/);
     expect(freeSlot(b)).toBe(0);
   });
@@ -131,5 +131,53 @@ describe('the Boardroom: delivery', () => {
     let top: GameState = rich;
     for (let i = 0; i < 20; i++) top = reduce(top, { type: 'buyFloor' });
     expect(board(top).slots).toBe(MAX_SLOTS);
+  });
+});
+
+describe('the Boardroom: safety and scrutiny', () => {
+  const chartered = () => reduce(promoted(), { type: 'commission', scenario: 'extraction', seed: 4 });
+
+  it('runs a safety budget dial, applied to every running contract: fewer incidents and more life support the higher it goes', () => {
+    const g = chartered();
+    expect(board(g).safety).toBe(DEFAULT_SAFETY);
+    const low = reduce(reduce(g, { type: 'shiftSafety', step: -1 }), { type: 'shiftSafety', step: -1 });
+    const high = reduce(g, { type: 'shiftSafety', step: 1 });
+    expect(board(low).contracts[0]!.mission.config.incidentMultiplier).toBeGreaterThan(board(g).contracts[0]!.mission.config.incidentMultiplier);
+    expect(board(high).contracts[0]!.mission.config.incidentMultiplier).toBeLessThan(board(g).contracts[0]!.mission.config.incidentMultiplier);
+    let top = g;
+    for (let i = 0; i < 20; i++) top = reduce(top, { type: 'shiftSafety', step: 1 });
+    expect(board(top).safety).toBe(10);
+    expect(board(top).contracts[0]!.mission.config.extraLifeSupport).toBeGreaterThan(board(g).contracts[0]!.mission.config.extraLifeSupport);
+  });
+
+  it('charges the safety budget per running contract per second', () => {
+    const g = chartered();
+    const lean = { ...g, boardroom: { ...board(g), safety: 0 } };
+    expect(board(tickGame(g, 10)).value).toBeLessThan(board(tickGame(lean, 10)).value);
+    expect(safetyCost(board(g))).toBeGreaterThan(0);
+    expect(safetyCost({ ...board(g), contracts: [] })).toBe(0);
+  });
+
+  it('raises scrutiny for every crew member lost and every contract scuttled, and lets it fade', () => {
+    const g = chartered();
+    const c = board(g).contracts[0]!;
+    const id = Object.keys(c.mission.crew)[0]!;
+    const dead = { ...c, mission: { ...c.mission, crew: { ...c.mission.crew, [id]: { ...c.mission.crew[id]!, status: 'lost' as const } } } };
+    const after = tickGame({ ...g, boardroom: { ...board(g), contracts: [dead] } }, 1);
+    expect(board(after).scrutiny).toBeGreaterThan(0);
+    expect(board(tickGame({ ...after, boardroom: { ...board(after), contracts: [] } }, 600)).scrutiny).toBeLessThan(board(after).scrutiny);
+  });
+
+  it('opens an inquiry when scrutiny tops out: a fine, a freeze on new charters, and a memo', () => {
+    const g = promoted();
+    const hot = { ...g, boardroom: { ...board(g), scrutiny: INQUIRY_AT + 1, value: 1e7 } };
+    const after = tickGame(hot, 1);
+    const b = board(after);
+    expect(b.inquiries).toBe(1);
+    expect(b.value).toBeLessThan(1e7);
+    expect(b.frozenFor).toBeGreaterThan(0);
+    expect(b.scrutiny).toBeLessThan(INQUIRY_AT);
+    expect(b.log.at(-1)!.text).toMatch(/INQUIRY/);
+    expect(reduce(after, { type: 'commission', scenario: 'extraction', seed: 4 })).toBe(after);
   });
 });

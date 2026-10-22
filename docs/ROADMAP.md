@@ -98,6 +98,7 @@ In order. Each item has its design written down first, so nothing lives only in 
    - **Designed** (2026-10-22): a layer beside the player's contract, from 10 contracts. Commission real first-tier contracts into office slots, each run headless by its own WARDEN; a safety budget dial, scrutiny and inquiries, divisions, a COO; a slow burn in which the company is the monster (recycled crews from the player's own history, WARDEN's reconditioning signed in this office); three endings to a term. Eight build pieces.
    - **Built:** piece 1, the foundation (`src/core/boardroom.ts`): `BoardroomState`, promotion from 10 contracts, enter and leave (the player's contract waits), contracts chartered into office slots and run headless by their own WARDEN, save v10, `?debug=boardroom`. No screen yet.
    - **Built:** piece 2, delivery: finished contracts close by the standing policy (deliver pays 2.5x the charter plus specimens and samples; scuttle pays a fifth of the charter), go in the Board's ledger and free their office; floors buy more offices (up to six). `missionRecord` now builds every contract record.
+   - **Built:** piece 3, safety and scrutiny: a safety dial (0-10) that scales every running contract's incidents and berths and costs value per contract per second; scrutiny from crew deaths and scuttles, fading over time; an inquiry at 100 (a fifth of value fined, charters frozen for ten minutes).
 
 ## Backlog / ideas
 
