@@ -28,6 +28,24 @@ const SABOTAGE = 0.02;
 const CREW_PER_TURNED = 10;
 /** The sick bay doors open: at least this much of the workforce comes out turned. */
 const FIRST_TURNED = 0.02;
+/** Wellness shortens a flu by this share per level. */
+const WELLNESS_RECOVERY = 0.5;
+/** Screening makes each tenth of quarantine this much more effective per level; contact never quite stops. */
+const SCREENING_FOCUS = 0.5;
+const MIN_CONTACT = 0.05;
+/** Share of the workforce one ward holds, out of reach of turning. */
+const WARD_SIZE = 0.03;
+/** Samples per second per culture tank, the infectiousness each tank adds, and the funding samples bring. */
+const CULTURE_RATE = 0.01;
+const CULTURE_SPREAD = 0.1;
+const SAMPLE_FUNDING = 0.5;
+/** Output while a section is sealed. */
+const LOCKDOWN_OUTPUT = 0.5;
+/** The officer's quarantine: a base, and more for each level of screening and each three wards to back it up. */
+const OFFICER_BASE = 2;
+const OFFICER_PER_SCREENING = 2;
+const OFFICER_WARDS_PER_TENTH = 3;
+const OFFICER_TRIGGER = 0.01;
 
 const SABOTAGE_LINES = [
   (name: string) => `${name} WRECKED OVERNIGHT. THE ACCESS LOG SHOWS A STAFF BADGE. THE BADGE'S OWNER WAS SIGNED OFF SICK A WEEK AGO.`,
@@ -42,7 +60,15 @@ export function offShift(m: OutbreakMission): number {
 }
 
 export function outbreakProduction(m: OutbreakMission): number {
-  return Math.max(MIN_OUTPUT, 1 - OFF_SHIFT_COST * (m.sick + m.turned) - QUARANTINE_COST * m.quarantine);
+  const working = Math.max(MIN_OUTPUT, 1 - OFF_SHIFT_COST * (m.sick + m.turned) - QUARANTINE_COST * m.quarantine);
+  const funding = 1 + SAMPLE_FUNDING * Math.sqrt(Math.floor(m.samples));
+  return working * funding * (m.lockdownFor > 0 ? LOCKDOWN_OUTPUT : 1);
+}
+
+/** What the Infection Control Officer sets the dial to: tight while it is going round, open when it is not. */
+export function officerQuarantine(m: OutbreakMission): number {
+  if (m.exposed + m.sick <= OFFICER_TRIGGER) return 0;
+  return Math.min(MAX_QUARANTINE, OFFICER_BASE + OFFICER_PER_SCREENING * m.screening + Math.floor(m.wards / OFFICER_WARDS_PER_TENTH));
 }
 
 export const outbreakPressure = (m: OutbreakMission): number => 1 + TURNED_PRESSURE * m.turned;
@@ -77,18 +103,23 @@ function turnCrew<M extends OutbreakMission>(m: M): M {
 
 export function tickOutbreak<M extends OutbreakMission>(m: M, dt: number, hooks: HorrorHooks): M {
   if (m.act < 2) return m;
-  const contact = CONTACT * (1 - QUARANTINE_CUT * m.quarantine);
+  if (m.officer) m = { ...m, quarantine: officerQuarantine(m) };
+  const isolation = Math.min(1 - MIN_CONTACT, QUARANTINE_CUT * m.quarantine * (1 + SCREENING_FOCUS * m.screening));
+  const contact = CONTACT * (1 - isolation) * (1 + CULTURE_SPREAD * m.cultures);
   const infected = Math.min(healthy(m), contact * healthy(m) * (m.exposed + m.sick) * dt);
   const showing = (m.exposed * dt) / INCUBATION;
   // Before the discovery it is a flu: the sick get better. After it, they stop coming back; in act IV they turn.
-  const better = m.act < 3 ? (m.sick * dt) / RECOVERY : 0;
-  const turning = m.act >= 4 ? (m.sick * dt) / TURNING : 0;
+  const better = m.act < 3 ? (m.sick * dt * (1 + WELLNESS_RECOVERY * m.wellness)) / RECOVERY : 0;
+  // The sick on ward beds do not turn.
+  const turning = m.act >= 4 ? (Math.max(0, m.sick - m.wards * WARD_SIZE) * dt) / TURNING : 0;
   let next: M = {
     ...m,
     exposed: Math.max(m.act < 3 ? ENDEMIC : 0, m.exposed + infected - showing),
     sick: m.sick + showing - better - turning,
     recovered: m.recovered + better,
     turned: m.turned + turning,
+    samples: m.samples + m.cultures * CULTURE_RATE * dt,
+    lockdownFor: Math.max(0, m.lockdownFor - dt),
   };
   if (next.turned > 0) {
     let rng = next.rng;

@@ -53,7 +53,7 @@ These appear as the contract goes on, in a **SICK BAY** tab. It is named and sty
 3. **Act III: Bioproducts (the temptation).** Culture tanks grow samples, which pay a funding multiplier. Cultures also make the strain more infectious. It is the same bargain the organism's specimens offer: more money, more danger.
 4. **Act IV: lockdown.** A one-off action that seals a section. It costs a lot of output for a short time and resets the turned's progress on held ground. The counterpart of the organism's vents.
 
-**Automation:** a Store upgrade, the Infection Control Officer, takes the quarantine dial and holds it as tight as wards and screening justify. It is the same pattern as the other dial autopilots.
+**Automation:** the Infection Control Officer, a one-off hire in the SICK BAY after the discovery, takes the quarantine dial and holds it as tight as wards and screening justify, and opens it when nothing is going round. It is the same pattern as the other dial autopilots. (A hire rather than a Store upgrade, because Store upgrades belong to scenarios and a horror may not add to them.)
 
 ## Endings (Act V)
 

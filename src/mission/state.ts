@@ -154,6 +154,10 @@ export function isOrganism(m: MissionState): m is OrganismMission {
   return m.horror === 'organism';
 }
 
+export function isOutbreak(m: MissionState): m is OutbreakMission {
+  return m.horror === 'outbreak';
+}
+
 /** Builds a mission from explicit scenario and horror definitions (tests use this with stubs). */
 export function composeMission(config: MissionConfig, seed: number, scenario: ScenarioDef, horror: HorrorDef): MissionState {
   const core: MissionCore = {

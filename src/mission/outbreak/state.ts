@@ -13,4 +13,16 @@ export interface OutbreakFields {
   quarantine: number;
   /** Named crew who have turned (they show as lost). */
   crewTurned: number;
+  /** Bought levels: the Wellness programme (act II), screening and ward beds (after the discovery). */
+  wellness: number;
+  screening: number;
+  wards: number;
+  /** Bioproducts: culture tanks, and the samples they grow. */
+  cultures: number;
+  samples: number;
+  /** Sections sealed so far, and seconds left on the current one. */
+  lockdowns: number;
+  lockdownFor: number;
+  /** The Infection Control Officer holds the quarantine dial. */
+  officer: boolean;
 }

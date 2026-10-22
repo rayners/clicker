@@ -2,17 +2,21 @@ import { buyGenerator, buyRefinery, drill } from '../mission/extraction/economy'
 import { buyUpgrade } from '../mission/extraction/upgrades';
 import { sleepCrew, wakeCrew } from '../mission/crew';
 import { buyContainmentLevel, buyRig, reinforce, vent } from '../mission/organism/containment';
+import { buyCulture, buyScreening, buyWard, buyWellness, hireOfficer, lockdown } from '../mission/outbreak/levers';
+import { shiftQuarantine } from '../mission/outbreak/spread';
 import {
   isExtraction,
   isHaulage,
   isSalvage,
   isOrganism,
+  isOutbreak,
   isSecurity,
   isTerraform,
   type HaulageMission,
   type SalvageMission,
   type MissionState,
   type OrganismMission,
+  type OutbreakMission,
   type SecurityMission,
   type TerraformMission,
 } from '../mission/state';
@@ -71,6 +75,13 @@ export type Action =
   | { type: 'reinforce' }
   | { type: 'buyContainmentLevel' }
   | { type: 'vent' }
+  | { type: 'buyWellness' }
+  | { type: 'buyScreening' }
+  | { type: 'buyWard' }
+  | { type: 'buyCulture' }
+  | { type: 'lockdown' }
+  | { type: 'hireOfficer' }
+  | { type: 'shiftQuarantine'; step: 1 | -1 }
   | { type: 'completeContract'; ending: Ending; seed: number }
   | { type: 'chooseAssignment'; scenario: ScenarioId; seed: number }
   | { type: 'requestReassignment' }
@@ -94,11 +105,19 @@ export type Action =
 /** Horror actions only apply to missions running that horror. */
 const organism = (f: (m: OrganismMission) => OrganismMission) => (m: MissionState) => (isOrganism(m) ? f(m) : m);
 
+const outbreak = (f: (m: OutbreakMission) => OutbreakMission) => (m: MissionState) => (isOutbreak(m) ? f(m) : m);
+
 const MISSION_ACTIONS: Partial<Record<Action['type'], (m: MissionState) => MissionState>> = {
   buyRig: organism(buyRig),
   reinforce: organism(reinforce),
   buyContainmentLevel: organism(buyContainmentLevel),
   vent: organism(vent),
+  buyWellness: outbreak(buyWellness),
+  buyScreening: outbreak(buyScreening),
+  buyWard: outbreak(buyWard),
+  buyCulture: outbreak(buyCulture),
+  lockdown: outbreak(lockdown),
+  hireOfficer: outbreak(hireOfficer),
 };
 
 const terraform = (game: GameState, f: (m: TerraformMission) => MissionState): GameState =>
@@ -220,6 +239,8 @@ export function reduce(game: GameState, action: Action): GameState {
       return game.hunter ? { ...game, hunter: { ...game.hunter, hunt: toggleDormant(game.hunter.hunt) } } : game;
     case 'buyHunterUpgrade':
       return buyHunterUpgrade(game, action.id);
+    case 'shiftQuarantine':
+      return isOutbreak(game.mission) ? { ...game, mission: shiftQuarantine(game.mission, action.step) } : game;
     case 'tick':
       return advance(game, action.dt).game;
     default:
