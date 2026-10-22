@@ -43,7 +43,7 @@ The user gave the go-ahead on 2026-10-22 ("Go ahead with the boardroom layer whe
 
 ### The slow burn: the company is the monster
 
-Pacing targets, in Boardroom play: Act II at 40–75 minutes, Act III at 2–3 hours, Act IV within 4 hours, the end of the term at 4–6 hours. Act triggers are lifetime value and contracts delivered.
+Pacing targets, in Boardroom play: Act II at 40–75 minutes, Act III at 2–3 hours, Act IV within 4 hours, the end of the term at 4–6 hours. Act triggers are contracts delivered (Act II at the first, Act III at five, Act IV at eight), with lifetime value as a backstop; the term ends 75 minutes into Act IV. The Board's contracts run at `BOARD_SPEED` (5) contract-seconds per Board-second, more with Logistics.
 
 - **Act I, the quarter:** dry minutes, KPIs, a welcome from the Chair.
 - **Act II, the manifests:** names from the player's own `profile.history` crews turn up on new rosters. Personnel explains it as a common surname, then as a clerical error.

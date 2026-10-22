@@ -14,12 +14,12 @@ type BoardBeat = Beat<BoardStoryArgs, BoardLogKind>;
 const delivered = (b: BoardroomState) => b.ledger.filter((r) => r.ending === 'deliver').length;
 const ACT_TWO_VALUE = 5e6;
 const ACT_THREE_VALUE = 3e7;
-const ACT_THREE_DELIVERED = 3;
-const ACT_FOUR_VALUE = 1e8;
-const ACT_FOUR_DELIVERED = 6;
+const ACT_THREE_DELIVERED = 5;
+const ACT_FOUR_VALUE = 2e8;
+const ACT_FOUR_DELIVERED = 8;
 /** The term ends this long into the agenda, or once this much value is on the books. */
 const TERM_AFTER = 75 * 60;
-const TERM_VALUE = 3e8;
+const TERM_VALUE = 5e8;
 
 const ACT_1: BoardBeat[] = [
   {

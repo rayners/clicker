@@ -15,7 +15,8 @@
     "icons": "tsx scripts/make-icons.ts",
     "simulate:forest": "tsx scripts/simulate-forest.ts",
     "simulate:fathom": "tsx scripts/simulate-fathom.ts",
-    "simulate:late": "tsx scripts/simulate-late.ts"
+    "simulate:late": "tsx scripts/simulate-late.ts",
+    "simulate:board": "tsx scripts/simulate-board.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",

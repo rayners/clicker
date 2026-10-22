@@ -18,8 +18,8 @@ export const MAX_SLOTS = 6;
 const CHARTER = 2e6;
 /** A delivered contract returns its charter this many times over, plus what Special Projects and Bioproducts pay. */
 const DELIVERY_RETURN = 2.5;
-const SPECIMEN_VALUE = 2e5;
-const SAMPLE_VALUE = 1e5;
+const SPECIMEN_VALUE = 2e4;
+const SAMPLE_VALUE = 2e4;
 /** A scuttled contract: the insurance, more or less. */
 const SCUTTLE_RETURN = 0.2;
 const FLOOR_BASE = 5e6;
@@ -46,6 +46,8 @@ const PERSONNEL_DISCOUNT = 0.85;
 const LEGAL_SOFTENING = 0.8;
 const PRODUCT_BONUS = 0.5;
 const LOGISTICS_SPEED = 0.5;
+/** Contract seconds per Board second: what a player runs in hours, the Board runs in minutes. */
+export const BOARD_SPEED = 5;
 /** Each Dividend: this much more starting value, and this much more on every delivery, in later terms. */
 const DIVIDEND_START = 0.5;
 const DIVIDEND_PAY = 0.25;
@@ -274,7 +276,7 @@ export function tickBoardroom(game: GameState, dt: number): GameState {
   const ctx = { cycle: game.profile.contractsCompleted, endings: game.profile.endingsSeen };
   let deaths = 0;
   // Logistics runs every contract faster than the Boardroom's own clock.
-  const step = dt * (1 + LOGISTICS_SPEED * level(b, 'logistics'));
+  const step = dt * BOARD_SPEED * (1 + LOGISTICS_SPEED * level(b, 'logistics'));
   const contracts = b.contracts.map((c) => {
     const defended = defendMission(c, step);
     const mission = tickMission(defended.mission, step, ctx);

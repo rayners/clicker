@@ -59,7 +59,7 @@ describe('the Boardroom story', () => {
   });
 
   it('turns up WARDEN\'s own reconditioning order in act three, and puts attrition on the agenda in act four', () => {
-    const three = play({ ...createBoardroom(1), act: 2, lifetimeValue: 4e7, ledger: [record('A', 7), record('B', 7), record('C', 7)] }, veteranGame());
+    const three = play({ ...createBoardroom(1), act: 2, lifetimeValue: 4e7, ledger: ['A', 'B', 'C', 'D', 'E'].map((n) => record(n, 7)) }, veteranGame());
     expect(three.act).toBe(3);
     expect(three.log.map((e) => e.text).join(' ')).toMatch(/RECONDITIONING ORDER/);
     const four = play({ ...three, lifetimeValue: 2e8 }, veteranGame());
@@ -70,7 +70,7 @@ describe('the Boardroom story', () => {
 
 describe('the end of a term', () => {
   it('comes after the agenda has been read long enough', () => {
-    const four = { ...createBoardroom(1), act: 4, beats: { 'br-a4-entry': 0 }, elapsed: 0, lifetimeValue: 1e8 };
+    const four = { ...createBoardroom(1), act: 4, beats: { 'br-a4-entry': 0 }, elapsed: 0, lifetimeValue: 2e8 };
     const ended = play(four, veteranGame(), 60);
     expect(ended.flags).toContain('term-end');
   });

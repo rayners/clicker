@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createGame, GAME_VERSION, tickGame, type GameState } from '../../src/core/game';
 import { reduce } from '../../src/core/store';
 import { BOARDROOM_UNLOCK_CONTRACTS } from '../../src/core/prestige';
-import { charterCost, commission, createBoardroom, DEFAULT_SAFETY, deliveryValue, termEndings, divisionCost, floorCost, freeSlot, INQUIRY_AT, MAX_SLOTS, safetyCost, START_VALUE } from '../../src/core/boardroom';
+import { BOARD_SPEED, charterCost, commission, createBoardroom, DEFAULT_SAFETY, deliveryValue, termEndings, divisionCost, floorCost, freeSlot, INQUIRY_AT, MAX_SLOTS, safetyCost, START_VALUE } from '../../src/core/boardroom';
 import { DIVISIONS } from '../../src/data/boardroom/divisions';
 import { createMission, type ScenarioId } from '../../src/mission/state';
 import { missionConfigFor } from '../../src/core/prestige';
@@ -67,7 +67,8 @@ describe('the Boardroom: commissioning contracts', () => {
     let g = reduce(promoted(), { type: 'commission', scenario: 'extraction', seed: 4 });
     for (let i = 0; i < 600; i++) g = tickGame(g, 1);
     const m = board(g).contracts[0]!.mission;
-    expect(m.elapsed).toBe(600);
+    // The Board's clock runs its contracts faster than the contracts' own: a contract a player runs in hours takes the Board minutes.
+    expect(m.elapsed).toBe(600 * BOARD_SPEED);
     expect(m.lifetimeCredits).toBeGreaterThan(0);
     expect(m.upgrades.length + Object.values((m as never as { generators: Record<string, number> }).generators).reduce((a, b) => a + b, 0)).toBeGreaterThan(0);
   });
@@ -233,7 +234,7 @@ describe('the Boardroom: divisions and the COO', () => {
 describe('the Boardroom: the end of the term', () => {
   const atEnd = (patch: Partial<NonNullable<GameState['boardroom']>> = {}) => {
     const g = promoted();
-    return { ...g, boardroom: { ...board(g), flags: ['term-end'], lifetimeValue: 3e8, ...patch } };
+    return { ...g, boardroom: { ...board(g), flags: ['term-end'], lifetimeValue: 5e8, ...patch } };
   };
 
   it('offers Chair the Board and Testify at the end of a term, and Release the minutes only to a veteran board', () => {
