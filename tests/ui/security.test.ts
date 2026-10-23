@@ -118,3 +118,12 @@ describe('a security contract on screen', () => {
     expect(mission().upgrades).toContain(first.id);
   });
 });
+
+describe('what one more of anything adds, on the detachment panel', () => {
+  it('shows push for troopers and fabricators, and says when ammunition is already enough', async () => {
+    const user = setup({ credits: 1e6 });
+    await user.click(screen.getByRole('tab', { name: /systems/i }));
+    expect(screen.getByLabelText(`${TROOPERS[0]!.name} gain`).textContent).toMatch(/PUSH|LINE/);
+    expect(screen.getByLabelText(`${FABRICATORS[0]!.name} gain`).textContent).toBe('+0 · AMMUNITION ENOUGH');
+  });
+});

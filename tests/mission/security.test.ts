@@ -6,6 +6,7 @@ import { FABRICATORS, SECTIONS, TROOPERS } from '../../src/data/security/systems
 import { SECURITY_UPGRADES } from '../../src/data/security/upgrades';
 import {
   ammoDemand,
+  pushGain,
   ammoSupply,
   assaultForce,
   buyFabricator,
@@ -216,5 +217,27 @@ describe('the horror reaches held ground', () => {
     const calm = run(securedTo(3), 300);
     const loose = run(securedTo(3, { act: 4, contacts: 3 }), 300);
     expect(loose.ground[0]!.control).toBeLessThan(calm.ground[0]!.control);
+  });
+});
+
+describe('what one more of anything adds on a security contract', () => {
+  const troops = (n: number) => Object.fromEntries(TROOPERS.map((t, i) => [t.id, i === 0 ? n : 0]));
+  const fabs = (n: number) => Object.fromEntries(FABRICATORS.map((f, i) => [f.id, i === 0 ? n : 0]));
+
+  it('says a trooper adds push at the frontier while there is ammunition for it', () => {
+    const m = fresh({ troopers: troops(10), fabricators: fabs(50) });
+    expect(pushGain(m, { trooper: TROOPERS[0]!.id }).assault).toBeGreaterThan(0);
+  });
+
+  it('says a fabricator adds push only while the assault is short of ammunition', () => {
+    const short = fresh({ troopers: troops(40), fabricators: fabs(0) });
+    expect(pushGain(short, { fabricator: FABRICATORS[0]!.id }).assault).toBeGreaterThan(0);
+    const stocked = fresh({ troopers: troops(2), fabricators: fabs(200) });
+    expect(pushGain(stocked, { fabricator: FABRICATORS[0]!.id }).assault).toBe(0);
+  });
+
+  it('counts what a sentry adds to the line', () => {
+    const m = securedTo(3, { troopers: troops(2), fabricators: fabs(50) });
+    expect(pushGain(m, { sentry: true }).hold).toBeGreaterThan(0);
   });
 });

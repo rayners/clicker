@@ -204,6 +204,17 @@ export function assaultForce(m: MissionState): number {
 
 export const holdForce = (m: MissionState): number => deployment(m).hold;
 
+/** What one more trooper, fabricator or sentry adds to the push at the frontier and to the line, never negative. */
+export function pushGain(m: MissionState, purchase: { trooper: string } | { fabricator: string } | { sentry: true }): { assault: number; hold: number } {
+  const after =
+    'trooper' in purchase
+      ? { ...m, troopers: { ...m.troopers, [purchase.trooper]: (m.troopers[purchase.trooper] ?? 0) + 1 } }
+      : 'fabricator' in purchase
+        ? { ...m, fabricators: { ...m.fabricators, [purchase.fabricator]: (m.fabricators[purchase.fabricator] ?? 0) + 1 } }
+        : { ...m, sentries: m.sentries + 1 };
+  return { assault: Math.max(0, assaultForce(after) - assaultForce(m)), hold: Math.max(0, holdForce(after) - holdForce(m)) };
+}
+
 /** Force stationed on each secured sector, from the landing pad inward. */
 export function garrisons(m: MissionState): number[] {
   let pool = deployment(m).hold;
