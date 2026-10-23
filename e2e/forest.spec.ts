@@ -65,6 +65,7 @@ test('elderdark: write a charter for Morrowgate Keep, buy oil, send a party in a
   await page.getByRole('button', { name: /^configuration$/i }).click();
   const dialog = page.getByRole('dialog', { name: /configuration/i });
   await dialog.getByRole('button', { name: /charter for morrowgate keep/i }).click();
+  await page.waitForTimeout(450);
   await dialog.getByRole('button', { name: /confirm/i }).click();
   await dialog.getByRole('button', { name: /^close$/i }).click();
 

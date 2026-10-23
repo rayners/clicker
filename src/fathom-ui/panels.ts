@@ -1,7 +1,6 @@
-import { confirmedInTime } from '../engine/ui/confirm';
+import { createSettings } from '../engine/ui/settings';
 import { formatNumber } from '../engine/format';
-import { aboutLink, h, setAttr, setText } from '../engine/ui/dom';
-import { createOptOut } from '../engine/telemetry';
+import { h, setAttr, setText } from '../engine/ui/dom';
 import { FATHOM_UPGRADES } from '../fathom-data/upgrades';
 import { availableUpgrades } from '../fathom/upgrades';
 import { availableEndings, endingRewards, type Ending } from '../fathom/season';
@@ -121,94 +120,21 @@ export function createSeam(store: FathomStore) {
   });
 }
 
-/** Settings and the save book. */
+/** Settings and the save book: sound, reduce motion, export/import, and starting over. */
 export function createConfig(store: FathomStore): { button: HTMLButtonElement; dialog: HTMLElement; render(game: FathomGame): void } {
-  const button = h('button', { class: 'cfg-open', type: 'button', 'aria-label': 'Configuration' }, 'CFG');
-  const sound = h('input', { type: 'checkbox', id: 'fa-sound' });
-  const motion = h('input', { type: 'checkbox', id: 'fa-motion' });
-  const share = h('input', { type: 'checkbox', id: 'fa-share' });
-  const code = h('textarea', { class: 'cfg-code', rows: 4, spellcheck: 'false', 'aria-label': 'Save code' });
-  const status = h('p', { class: 'cfg-status', role: 'status' });
-  const exportButton = h('button', { class: 'buy', type: 'button' }, 'EXPORT');
-  const importButton = h('button', { class: 'buy', type: 'button' }, 'IMPORT');
-  const reset = h('button', { class: 'buy cfg-danger', type: 'button', 'aria-label': 'Start a new season from scratch' }, 'START OVER');
-  const close = h('button', { class: 'cfg-close', type: 'button', 'aria-label': 'Close' }, '✕');
-  const dialog = h(
-    'div',
-    { class: 'cfg', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'fa-cfg-title', hidden: true },
-    h(
-      'div',
-      { class: 'cfg-box' },
-      h('div', { class: 'cfg-head' }, h('h2', { class: 'panel-title', id: 'fa-cfg-title' }, 'Configuration'), close),
-      h('label', { class: 'cfg-toggle', for: 'fa-sound' }, sound, ' SOUND'),
-      h('label', { class: 'cfg-toggle', for: 'fa-motion' }, motion, ' REDUCE MOTION'),
-      h('label', { class: 'cfg-toggle', for: 'fa-share' }, share, ' SHARE ANONYMOUS PLAY DATA'),
-      h('p', { class: 'cfg-note' }, 'MILESTONES AND ERRORS ONLY. NO COOKIES, NO PERSONAL DATA.'),
-      aboutLink('cfg-about'),
-      h('h3', { class: 'panel-sub' }, 'THE SAVE BOOK (KEPT ON THIS DEVICE ONLY)'),
-      code,
-      h('div', { class: 'cfg-row' }, exportButton, importButton),
-      status,
-      h('h3', { class: 'panel-sub' }, 'START OVER'),
-      reset,
-    ),
-  );
-  const show = (open: boolean) => {
-    dialog.hidden = !open;
-    setText(status, '');
-    if (open) close.focus();
-  };
-  button.addEventListener('click', () => show(true));
-  close.addEventListener('click', () => show(false));
-  dialog.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') show(false);
-  });
-  const optOut = createOptOut(window.localStorage);
-  share.checked = optOut.sharing();
-  share.addEventListener('change', () => optOut.setSharing(share.checked));
-  motion.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'reducedMotion', value: motion.checked }));
-  sound.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'sound', value: sound.checked }));
-  exportButton.addEventListener('click', () => {
-    code.value = fathomSaves.exportSave(store.getState());
-    code.select();
-    setText(status, 'SAVE CODE WRITTEN. KEEP IT SOMEWHERE SAFE.');
-  });
-  importButton.addEventListener('click', () => {
-    try {
-      store.replace({ ...fathomSaves.importSave(code.value), savedAt: Date.now() });
-      setText(status, 'SAVE IMPORTED.');
-    } catch {
-      setText(status, 'THAT IS NOT A SAVE CODE. NOTHING CHANGED.');
-    }
-  });
-  let pending = false;
-  let pendingAt = 0;
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  reset.addEventListener('click', () => {
-    if (pending && !confirmedInTime(pendingAt)) return;
-    if (!pending) {
-      pending = true;
-      pendingAt = Date.now();
-      setText(reset, 'CONFIRM: START OVER');
-      reset.setAttribute('aria-label', 'Confirm: start over, losing every season');
-      timer = setTimeout(() => {
-        pending = false;
-        setText(reset, 'START OVER');
-        reset.setAttribute('aria-label', 'Start a new season from scratch');
-      }, CONFIRM_TIMEOUT_MS);
-      return;
-    }
-    pending = false;
-    clearTimeout(timer);
-    store.dispatch({ type: 'hardReset', seed: seed(), now: Date.now() });
-    show(false);
-  });
-  return {
-    button,
-    dialog,
-    render(game) {
-      motion.checked = game.profile.settings.reducedMotion;
-      sound.checked = game.profile.settings.sound;
+  const settings = createSettings<FathomGame>({
+    store,
+    saves: fathomSaves,
+    settings: (game) => game.profile.settings,
+    setSetting: (key, value) => store.dispatch({ type: 'setSetting', key, value }),
+    reset: { text: 'START OVER', aria: 'Start a new season from scratch', onConfirm: () => store.dispatch({ type: 'hardReset', seed: seed(), now: Date.now() }) },
+    downloadName: (date) => `down-there-${date}.txt`,
+    words: {
+      button: { text: 'CFG', aria: 'Configuration', className: 'cfg-open' },
+      title: 'Configuration',
+      headingClass: 'panel-sub',
+      saveHeading: 'THE SAVE BOOK (KEPT ON THIS DEVICE ONLY)',
     },
-  };
+  });
+  return { button: settings.button, dialog: settings.dialog, render: settings.render };
 }
