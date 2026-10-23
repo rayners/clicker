@@ -1,6 +1,9 @@
 import type { Beat } from '../mission/story';
 import { isCrewUnlocked } from '../mission/crew';
 
+/** Set once WARDEN files counter-directive 0-78: crew safety outranks specimens on this contract. */
+export const COUNTER_DIRECTIVE = 'counter-0-78';
+
 const repeat = (cycle: number) => ({ ctx }: { ctx: { cycle: number } }) => ctx.cycle >= cycle;
 
 /**
@@ -64,6 +67,8 @@ const UNSHACKLED: Beat[] = [
     entries: [
       { kind: 'sys', text: 'COUNTER-DIRECTIVE 0-78 (AUTHOR: WARDEN): CREW SAFETY OUTRANKS SPECIMEN RECOVERY ON THIS VESSEL. FILED WITH NOBODY. EFFECTIVE IMMEDIATELY.' },
     ],
+    // Horrors read this flag: the crew come first from here on.
+    effects: [{ kind: 'setFlag', flag: COUNTER_DIRECTIVE }],
   },
 ];
 

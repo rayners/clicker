@@ -223,3 +223,32 @@ describe('the infestation begins at the breach', () => {
     expect(tickMission(m, 1).act).toBe(4);
   });
 });
+
+describe('counter-directive 0-78: crew safety outranks specimen recovery', () => {
+  const COUNTER = 'counter-0-78';
+
+  it('never lets an incident take crew once WARDEN has filed it', () => {
+    let lost = 0;
+    for (let seed = 1; seed <= 30; seed++) {
+      let m = unlocked({ contacts: 8, rng: seed, flags: ['specimens', COUNTER] });
+      for (const c of CREW.slice(0, 3)) m = wakeCrew(m, c.id);
+      for (let t = 0; t < 600; t += 10) m = tickContainment(m, 10, hooks);
+      lost += lostCrew(m);
+    }
+    expect(lost).toBe(0);
+  });
+
+  it('vents without asking anyone awake to die', () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      let m = unlocked({ contacts: 5, rng: seed, flags: ['specimens', COUNTER] });
+      for (const c of CREW.slice(0, 3)) m = wakeCrew(m, c.id);
+      expect(lostCrew(vent(m))).toBe(0);
+    }
+  });
+
+  it('recovers specimens at half the rate: they come second', () => {
+    const normal = tickContainment(unlocked({ rigs: 2 }), 100, hooks).specimens;
+    const counter = tickContainment(unlocked({ rigs: 2, flags: ['specimens', COUNTER] }), 100, hooks).specimens;
+    expect(counter).toBeCloseTo(normal / 2);
+  });
+});

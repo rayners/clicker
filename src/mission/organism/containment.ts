@@ -1,5 +1,6 @@
 import { nextRandom } from '../../shared/rng';
 import { CREW } from '../../data/crew';
+import { COUNTER_DIRECTIVE } from '../../data/core-story';
 import { crewStatus } from '../crew';
 import { appendLog, type LogKind } from '../log';
 import type { OrganismMission as MissionState } from '../state';
@@ -124,6 +125,11 @@ function lose<M extends MissionState>(m: M, id: string): M {
   return { ...m, crew: { ...m.crew, [id]: { ...member, status: 'lost' } } };
 }
 
+/** Counter-directive 0-78 is filed: WARDEN keeps the crew out of harm's way, and specimens come second. */
+const crewFirst = (m: MissionState) => m.flags.includes(COUNTER_DIRECTIVE);
+/** Recovery under 0-78: the rigs wait while anyone is in the way. */
+const CREW_FIRST_RECOVERY = 0.5;
+
 function incident<M extends MissionState>(m: M, roll: Roll, hooks: HorrorHooks): M {
   const kind = roll();
   const awake = CREW.filter((c) => m.crew[c.id]?.status === 'awake');
@@ -134,7 +140,7 @@ function incident<M extends MissionState>(m: M, roll: Roll, hooks: HorrorHooks):
     const lost = hooks.loseEquipment(m, roll);
     if (lost) return log(lost.m as M, 'sys', pick(EQUIPMENT_LINES, roll)(lost.name));
   }
-  if (kind < 0.8 && living.length > 0) {
+  if (kind < 0.8 && living.length > 0 && !crewFirst(m)) {
     const victim = pick(awake.length > 0 ? awake : living, roll);
     return log(lose(m, victim.id), 'anomaly', pick(CREW_LINES, roll)(victim.callsign));
   }
@@ -143,7 +149,7 @@ function incident<M extends MissionState>(m: M, roll: Roll, hooks: HorrorHooks):
 
 export function tickContainment<M extends MissionState>(m: M, dt: number, hooks: HorrorHooks): M {
   if (!isSpecialProjectsUnlocked(m) && m.contacts === 0) return m;
-  const recovered = m.rigs * RIG_RATE * dt;
+  const recovered = m.rigs * RIG_RATE * dt * (crewFirst(m) ? CREW_FIRST_RECOVERY : 1);
   let next: M = {
     ...m,
     specimens: m.specimens + recovered,
@@ -172,7 +178,8 @@ export function vent<M extends MissionState>(m: M): M {
   let survivors = 0;
   for (let i = 0; i < m.contacts; i++) if (r.roll() < VENT_CONTACT_SURVIVAL) survivors++;
   let next: M = { ...m, credits: m.credits - cost, vents: m.vents + 1, contacts: survivors };
-  const victims = CREW.filter((c) => m.crew[c.id]?.status === 'awake' && r.roll() < VENT_CREW_LOSS);
+  // Under 0-78 WARDEN clears the decks before it opens them.
+  const victims = crewFirst(m) ? [] : CREW.filter((c) => m.crew[c.id]?.status === 'awake' && r.roll() < VENT_CREW_LOSS);
   for (const v of victims) next = lose(next, v.id);
   next = { ...next, rng: r.state() };
   next = appendLog(next, 'sys', `DECKS VENTED TO VACUUM. MOTION TRACKER: ${m.contacts} CONTACTS -> ${survivors}.`);

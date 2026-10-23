@@ -105,4 +105,9 @@ describe('the outbreak (Strain KA-11)', () => {
     expect(Object.keys(HORRORS.outbreak.endings).sort()).toEqual(['broadcast', 'deliver', 'scuttle']);
     expect(HORRORS.outbreak.endings.deliver!.title).toMatch(/SAMPLES/);
   });
+
+  it('turns named crew half as readily once counter-directive 0-78 is filed', () => {
+    const m = run(fresh({ act: 4, turned: 0.4, flags: ['counter-0-78'] }), 1);
+    expect(m.crewTurned).toBe(2);
+  });
 });

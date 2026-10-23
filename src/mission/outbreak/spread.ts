@@ -1,5 +1,6 @@
 import { nextRandom } from '../../shared/rng';
 import { CREW } from '../../data/crew';
+import { COUNTER_DIRECTIVE } from '../../data/core-story';
 import { crewStatus } from '../crew';
 import type { HorrorHooks } from '../kinds';
 import { appendLog } from '../log';
@@ -85,7 +86,9 @@ export function firstTurned<M extends OutbreakMission>(m: M): M {
 
 /** Named crew turn as the turned spread: whoever is awake first, then whoever is left in cryo. */
 function turnCrew<M extends OutbreakMission>(m: M): M {
-  const target = Math.min(CREW.length, Math.floor(m.turned * CREW_PER_TURNED));
+  // Under counter-directive 0-78 WARDEN pulls the crew back first: they turn half as readily.
+  const perTurned = m.flags.includes(COUNTER_DIRECTIVE) ? CREW_PER_TURNED / 2 : CREW_PER_TURNED;
+  const target = Math.min(CREW.length, Math.floor(m.turned * perTurned));
   let next = m;
   while (next.crewTurned < target) {
     const living = CREW.filter((c) => crewStatus(next, c.id) !== 'lost');

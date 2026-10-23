@@ -41,6 +41,8 @@ describe('repeat contracts', () => {
   it('follow the true ending: once WARDEN has broadcast 0-77, it starts working around the Combine', () => {
     const free = playThrough({ cycle: 4, endings: ['broadcast'] }, 1_500);
     expect(free.beats['cycle-unshackled']).toBeDefined();
+    // Filing counter-directive 0-78 changes how the horror plays from then on.
+    expect(free.flags).toContain('counter-0-78');
     expect(free.beats['cycle-counter-order']).toBeDefined();
     expect(playThrough({ cycle: 4, endings: ['deliver'] }, 1_500).beats['cycle-unshackled']).toBeUndefined();
   });

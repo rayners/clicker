@@ -131,7 +131,7 @@ In order. Each item has its design written down first, so nothing lives only in 
   - **New layers:** WARDEN's previous instances from the 4th contract, and a crew that dreams of it from the 6th.
   - **The true-ending thread:** after the first broadcast of 0-77, every contract has WARDEN routing its own orders and filing counter-directive 0-78.
   - A first contract meets none of it.
-  - **Still open:** the counter-directive could change play (crew safety outranking specimens), not just the story.
+  - (Done 2026-10-22) **Counter-directive 0-78 changes play:** filing it sets `counter-0-78`. The organism's incidents never take crew, vents clear the decks first, and recovery rigs work at half rate; the outbreak's named crew turn half as readily.
 - (Done 2026-10-22) **Sinister directives in Acts III–IV.**
   - Directives take an optional `minAct`.
   - Extraction has KA-009 to KA-012. Terraforming, security, haulage and salvage have three each, two in act 3 and one in act 4: ordinary goals with worse and worse briefs.
