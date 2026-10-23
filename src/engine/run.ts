@@ -27,7 +27,8 @@ export interface GameDef<G, A> {
   catchUp(game: G, now: number): G;
   createStore(game: G): Store<G, A | { type: 'tick'; dt: number }>;
   mount(root: HTMLElement, store: Store<G, A | { type: 'tick'; dt: number }>, visit: Visit): void;
-  telemetry: { diff(prev: G, next: G): TelemetryEvent[]; context(game: G): TelemetryProps };
+  /** Anonymous analytics on the published build (opt-out). Leave it out to send nothing. */
+  telemetry?: { diff(prev: G, next: G): TelemetryEvent[]; context(game: G): TelemetryProps };
   /** Dev builds only: replace the game for `?debug=<jump>`. The whole query string comes along for extras. */
   debug?(game: G, jump: string, params: URLSearchParams): G;
   /** Dev builds only: how many times faster the clock runs, read from the query string. */
@@ -74,13 +75,15 @@ export function runGame<G, A>(def: GameDef<G, A>, env: RunEnv): { store: Store<G
   def.mount(env.root ?? document.getElementById('app')!, store, { fresh, debugging: !!jump });
 
   const optOut = createOptOut(storage);
-  const stopAnalytics = startAnalytics({
-    store: store as Store<G, never>,
-    diff: def.telemetry.diff,
-    context: def.telemetry.context,
-    optOut,
-    allowed: telemetryAllowed({ prod: env.prod, hostname: env.hostname ?? location.hostname, search, optedOut: !optOut.sharing() }),
-  });
+  const stopAnalytics = def.telemetry
+    ? startAnalytics({
+        store: store as Store<G, never>,
+        diff: def.telemetry.diff,
+        context: def.telemetry.context,
+        optOut,
+        allowed: telemetryAllowed({ prod: env.prod, hostname: env.hostname ?? location.hostname, search, optedOut: !optOut.sharing() }),
+      })
+    : () => undefined;
 
   const speed = env.dev && def.speed ? def.speed(search) : 1;
   let last = now;

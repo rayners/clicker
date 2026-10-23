@@ -130,6 +130,12 @@ describe('running a game in the page', () => {
     expect(built.mounted[0]!.debugging).toBe(false);
   });
 
+  it('runs a game that sends no telemetry at all, even on the published build', () => {
+    const { def, mounted } = toy({ telemetry: undefined });
+    ({ stop } = runGame(def, env({ prod: true, hostname: 'example.com' })));
+    expect(mounted).toHaveLength(1);
+  });
+
   it('stops ticking and saving once stopped', () => {
     const storage = memoryStorage();
     const setItem = vi.spyOn(storage, 'setItem');

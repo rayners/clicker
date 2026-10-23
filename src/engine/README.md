@@ -34,7 +34,7 @@ runGame(
     catchUp,                        // advance a loaded game by the time it was away
     createStore: createMyStore,     // createReducerStore(initial, reduce), handling { type: 'tick', dt }
     mount: mountMyGame,             // (root, store, { fresh, debugging }) => void
-    telemetry: { diff: myEvents, context: myProperties },
+    telemetry: { diff: myEvents, context: myProperties }, // optional: leave out to send nothing
     debug: applyMyDebugJump,        // optional, dev builds only: ?debug=<jump>
   },
   { dev: import.meta.env.DEV, prod: import.meta.env.PROD },
