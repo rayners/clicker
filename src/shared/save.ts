@@ -24,6 +24,20 @@ export interface SaveSpec<T> {
   /** Required top-level object fields, for telling a save from arbitrary JSON. */
   required: readonly string[];
   fresh(seed: number, now: number): T;
+  /** After migration: false when the save is damaged in a way the top-level check cannot see (a field missing). */
+  validate?(game: T): boolean;
+}
+
+const kind = (v: unknown) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof v);
+
+/**
+ * Whether `value` has every field a fresh `reference` has, each of the same kind (one level down). Fields that are
+ * null in the reference may hold anything. A save missing a field would otherwise load and break the screen.
+ */
+export function hasShape(value: unknown, reference: object): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return Object.entries(reference).every(([k, ref]) => ref === null || ref === undefined || kind(v[k]) === kind(ref));
 }
 
 export interface SaveSystem<T> {
@@ -34,6 +48,14 @@ export interface SaveSystem<T> {
   exportSave(game: T): string;
   importSave(code: string): T;
 }
+
+const safely = (check: () => boolean): boolean => {
+  try {
+    return check();
+  } catch {
+    return false;
+  }
+};
 
 export function createSaveSystem<T extends object>(spec: SaveSpec<T>): SaveSystem<T> {
   const isRawSave = (value: unknown): value is RawSave => {
@@ -48,7 +70,9 @@ export function createSaveSystem<T extends object>(spec: SaveSpec<T>): SaveSyste
     const raw: unknown = JSON.parse(text);
     if (!isRawSave(raw)) throw new Error(`Not a ${spec.label} save`);
     if (raw.version > spec.version) throw new Error('Save is from a newer version of the game');
-    return migrate(raw, spec.migrations, spec.version) as unknown as T;
+    const game = migrate(raw, spec.migrations, spec.version) as unknown as T;
+    if (spec.validate && !safely(() => spec.validate!(game))) throw new Error(`Damaged ${spec.label} save`);
+    return game;
   };
 
   return {

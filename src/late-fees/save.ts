@@ -1,5 +1,6 @@
-import { createSaveSystem } from '../shared/save';
-import { LATE_VERSION, newLateGame, type LateGame } from './game';
+import { createSaveSystem, hasShape } from '../shared/save';
+import { createLateProfile, LATE_VERSION, newLateGame, type LateGame } from './game';
+import { createRun } from './state';
 
 export const LATE_SAVE_KEY = 'latefees.save';
 
@@ -22,4 +23,5 @@ export const lateSaves = createSaveSystem<LateGame>({
   label: 'LATE FEES',
   required: ['profile', 'run'],
   fresh: newLateGame,
+  validate: (g) => hasShape(g.profile, createLateProfile()) && hasShape(g.run, createRun(g.run.config as Parameters<typeof createRun>[0], 1)),
 });

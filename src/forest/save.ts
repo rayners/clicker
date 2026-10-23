@@ -1,6 +1,6 @@
-import { createSaveSystem } from '../shared/save';
-import { createForestGame, FOREST_VERSION, type ForestGame } from './game';
-import { KEEP } from './state';
+import { createSaveSystem, hasShape } from '../shared/save';
+import { createForestGame, createForestProfile, FOREST_VERSION, type ForestGame } from './game';
+import { createCompany, KEEP } from './state';
 
 const inForest = (company: Record<string, unknown>) => ({
   site: 'forest',
@@ -78,4 +78,5 @@ export const forestSaves = createSaveSystem<ForestGame>({
   label: 'ELDERDARK',
   required: ['profile', 'company'],
   fresh: createForestGame,
+  validate: (g) => hasShape(g.profile, createForestProfile()) && hasShape(g.company, createCompany(1, g.company.charter, g.company.site)),
 });

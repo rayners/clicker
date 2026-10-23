@@ -1,5 +1,6 @@
-import { GAME_VERSION, newGame, type GameState } from './game';
-import { createSaveSystem, migrate, type Migration, type StorageLike } from '../shared/save';
+import { createProfile, GAME_VERSION, newGame, type GameState } from './game';
+import { createSaveSystem, hasShape, migrate, type Migration, type StorageLike } from '../shared/save';
+import { createMission } from '../mission/state';
 
 export { migrate, type StorageLike };
 
@@ -92,6 +93,8 @@ const saves = createSaveSystem<GameState>({
   label: 'DEEP CONTRACT',
   required: ['profile', 'mission'],
   fresh: newGame,
+  // Every field a fresh profile and a fresh contract of the same kind have, so a damaged save never loads.
+  validate: (g) => hasShape(g.profile, createProfile()) && hasShape(g.mission, createMission(g.mission.config, 1)),
 });
 
 export const { serialize, deserialize, saveGame, loadGame, exportSave, importSave } = saves;

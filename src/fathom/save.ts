@@ -1,5 +1,6 @@
-import { createSaveSystem } from '../shared/save';
-import { createFathomGame, FATHOM_VERSION, type FathomGame } from './game';
+import { createSaveSystem, hasShape } from '../shared/save';
+import { createFathomGame, createFathomProfile, FATHOM_VERSION, type FathomGame } from './game';
+import { createOutfit } from './state';
 
 /** Kept whatever the game ends up being called: the key is never shown to players. */
 export const FATHOM_SAVE_KEY = 'fathom.save';
@@ -22,4 +23,5 @@ export const fathomSaves = createSaveSystem<FathomGame>({
   label: 'FATHOM',
   required: ['profile', 'outfit'],
   fresh: createFathomGame,
+  validate: (g) => hasShape(g.profile, createFathomProfile()) && hasShape(g.outfit, createOutfit(1, g.outfit.terms)),
 });
