@@ -1,6 +1,7 @@
 import { createSettings } from '../engine/ui/settings';
 import { createEndingChooser } from '../engine/ui/endings';
-import { formatNumber } from '../engine/format';
+import { createShop } from '../engine/ui/shop';
+import { DOLLARS } from './currency';
 import { h } from '../engine/ui/dom';
 import { FATHOM_UPGRADES } from '../fathom-data/upgrades';
 import { availableUpgrades } from '../fathom/upgrades';
@@ -16,30 +17,18 @@ const seed = () => (Math.random() * 2 ** 31) | 0;
 
 /** Requisitions: what can be bought now, and what has been. */
 export function createStorePanel(store: FathomStore): { el: HTMLElement; render(o: Outfit): void; hasAffordable(o: Outfit): boolean } {
-  const list = h('ul', { class: 'item-list' });
-  const owned = h('ul', { class: 'store-owned' });
-  const el = h('div', { class: 'panel-body' }, h('h2', { class: 'panel-title' }, 'REQUISITIONS'), list, h('h3', { class: 'panel-sub' }, 'BOUGHT'), owned);
-  let shown = '';
-  return {
-    el,
-    hasAffordable: (o) => availableUpgrades(o).some((u) => u.cost <= o.cash),
-    render(o) {
-      const items = availableUpgrades(o);
-      const key = `${items.map((u) => u.id).join(',')}|${o.upgrades.length}`;
-      if (key !== shown) {
-        shown = key;
-        list.replaceChildren(
-          ...items.map((u) => {
-            const buy = h('button', { class: 'buy', type: 'button', 'data-cost': u.cost, 'aria-label': `Buy ${u.name} for $${formatNumber(u.cost)}` }, `BUY $${formatNumber(u.cost)}`);
-            buy.addEventListener('click', () => store.dispatch({ type: 'buyUpgrade', id: u.id }));
-            return h('li', { class: 'item' }, h('div', { class: 'item-head' }, h('span', { class: 'item-name' }, u.name)), h('p', { class: 'item-desc' }, u.description), h('div', { class: 'item-foot' }, buy));
-          }),
-        );
-        owned.replaceChildren(...FATHOM_UPGRADES.filter((u) => o.upgrades.includes(u.id)).map((u) => h('li', {}, u.name)));
-      }
-      for (const b of list.querySelectorAll<HTMLButtonElement>('button[data-cost]')) b.disabled = o.cash < Number(b.dataset.cost);
-    },
-  };
+  return createShop<Outfit, (typeof FATHOM_UPGRADES)[number]>({
+    title: 'REQUISITIONS',
+    all: FATHOM_UPGRADES,
+    available: availableUpgrades,
+    owned: (o) => o.upgrades,
+    funds: (o) => o.cash,
+    currency: DOLLARS,
+    onBuy: (id) => store.dispatch({ type: 'buyUpgrade', id }),
+    className: 'item',
+    rowClass: 'item',
+    headingClass: 'panel-sub',
+  });
 }
 
 const ENDINGS: Record<Ending, { title: string; text: string; reward(r: { standing: number; notes: number }): string }> = {

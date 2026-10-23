@@ -94,6 +94,8 @@ published build only, persistent storage, and the site's service worker.
 | `ui/endings` | `createEndingChooser`: a card for each ending on offer, with its words and reward, each ended by its own two-tap button. |
 | `ui/stepper` | `createStepper`: a − and + around a value, one step per tap; either way can stop at a limit, and the buttons hide while an automation has the control. |
 | `ui/dial` | `createDial`: a stepper between the two sides it trades off (or under one name), an optional meter and line of detail, and an automation that takes it over with a handover button once bought. |
+| `ui/buy-list` | `createBuyList`: rows of things to buy (name, owned, description, notes, a price button that waits until affordable), fixed or changing with the game; `createBuyPanel`: a title and a heading, running total and list per section. Prices are written and spoken in the game's own currency. |
+| `ui/shop` | `createShop`: one-off upgrades on offer now, each bought once, with a list of what has been bought. |
 | `ui/doors` | `createDoors`: a masthead button opening a dialog of doors to a game's other tiers; a closed door says what opens it. |
 | `ui/confirm` | `createConfirmButton`, `confirmedInTime`: two-tap confirms that a double tap cannot pass. |
 | `ui/sprites` | `createSpriteKit`: draws sprites on canvases, tinted from CSS variables so themes re-colour them. |

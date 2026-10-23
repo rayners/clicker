@@ -1,6 +1,6 @@
 import { createDial } from '../engine/ui/dial';
 import { formatNumber } from '../engine/format';
-import { h, setAttr, setText } from '../engine/ui/dom';
+import { h } from '../engine/ui/dom';
 import { createFlow } from '../engine/ui/flow';
 import { ASYLUM_STAFF, WARDS } from '../late-fees-data/asylum';
 import { ASYLUM_UPGRADES } from '../late-fees-data/asylum-upgrades';
@@ -26,6 +26,9 @@ import { FINAL_GIRL_AT } from '../late-fees/story';
 import type { AsylumRun, Run } from '../late-fees/state';
 import type { LateStore } from '../late-fees/store';
 import type { VenueUi } from './venues';
+import { createShop } from '../engine/ui/shop';
+import { DOLLARS, LISTS, unit } from './currency';
+import { createBuyPanel } from '../engine/ui/buy-list';
 
 const AUTO = ASYLUM_UPGRADES.find((u) => u.effect.kind === 'autoSedation')!.id;
 const a = (r: Run) => r as AsylumRun;
@@ -61,111 +64,74 @@ function createDoseDial(store: LateStore): { el: HTMLElement; render(r: AsylumRu
   });
 }
 
-interface Row {
-  el: HTMLLIElement;
-  owned: HTMLElement;
-  rate: HTMLElement;
-  button: HTMLButtonElement;
-}
-
-function row(name: string, description: string, action: () => void): Row {
-  const owned = h('span', { class: 'item-owned', 'aria-label': `${name} owned` }, '0');
-  const rate = h('span', { class: 'item-rate' });
-  const button = h('button', { class: 'buy', type: 'button' });
-  button.addEventListener('click', action);
-  const el = h(
-    'li',
-    { class: 'item' },
-    h('div', { class: 'item-head' }, h('span', { class: 'item-name' }, name), owned),
-    h('p', { class: 'item-desc' }, description),
-    h('div', { class: 'item-foot' }, rate, button),
-  );
-  return { el, owned, rate, button };
-}
-
-function price(r: Row, verb: string, name: string, cost: number, cash: number) {
-  setText(r.button, `${verb.toUpperCase()} $${formatNumber(cost)}`);
-  setAttr(r.button, 'aria-label', `${verb} ${name} for $${formatNumber(cost)}`);
-  r.button.disabled = cash < cost;
-}
-
 const DOOR = 'SECURITY DOOR';
 
-/** Beds, ward staff and the doors that hold. */
 function createWards(store: LateStore): { el: HTMLElement; render(r: AsylumRun): void } {
-  const wards = WARDS.map((def, index) => ({ def, index, ...row(def.name, def.description, () => store.dispatch({ type: 'buyWard', id: def.id })) }));
-  const staffRows = ASYLUM_STAFF.map((def, index) => ({ def, index, ...row(def.name, def.description, () => store.dispatch({ type: 'hireAsylumStaff', id: def.id })) }));
-  const door = row(DOOR, 'A steel door with a wired-glass window. It holds one bad night, and then it has to be replaced. Better locks make it last.', () =>
-    store.dispatch({ type: 'buyDoor' }),
-  );
-  const totalBeds = h('span', { class: 'panel-sub-value' });
-  const totalCalm = h('span', { class: 'panel-sub-value' });
-  const el = h(
-    'div',
-    { class: 'panel-body' },
-    h('h2', { class: 'panel-title' }, 'THE WARDS'),
-    h('h3', { class: 'panel-sub' }, 'STAFF ', totalCalm),
-    h('ul', { class: 'item-list' }, ...staffRows.map((s) => s.el)),
-    h('h3', { class: 'panel-sub' }, 'BEDS ', totalBeds),
-    h('ul', { class: 'item-list' }, ...wards.map((w) => w.el)),
-    h('h3', { class: 'panel-sub' }, 'SECURITY'),
-    h('ul', { class: 'item-list' }, door.el),
-  );
-  return {
-    el,
-    render(r) {
-      setText(totalBeds, `${formatNumber(patients(r))} PATIENTS`);
-      setText(totalCalm, `CALMING ${formatNumber(calmCapacity(r))}`);
-      for (const w of wards) {
-        const shown = isWardRevealed(r, w.index);
-        w.el.hidden = !shown;
-        if (!shown) continue;
-        const n = r.wards[w.def.id] ?? 0;
-        setText(w.owned, String(n));
-        setText(w.rate, `$${formatNumber(wardRate(r, w.def))}/S EA`);
-        price(w, 'Fill', w.def.name, wardCost(w.def, n), r.cash);
-      }
-      for (const s of staffRows) {
-        const shown = isStaffRevealed(r, s.index);
-        s.el.hidden = !shown;
-        if (!shown) continue;
-        const n = r.staff[s.def.id] ?? 0;
-        setText(s.owned, String(n));
-        setText(s.rate, `CALMS ${formatNumber(s.def.calms)} EA`);
-        price(s, 'Hire', s.def.name, staffCost(s.def, n), r.cash);
-      }
-      setText(door.owned, String(r.doors));
-      setText(door.rate, r.doors > 0 ? `${r.doors} STANDING` : 'NONE STANDING');
-      price(door, 'Fit', DOOR, doorCost(r), r.cash);
-    },
-  };
+  return createBuyPanel<AsylumRun>({
+    ...LISTS,
+    title: 'THE WARDS',
+    funds: (r) => r.cash,
+    sections: [
+      {
+        heading: 'STAFF',
+        total: (r) => `CALMING ${formatNumber(calmCapacity(r))}`,
+        items: ASYLUM_STAFF.map((def, index) =>
+          unit<AsylumRun>(def, {
+            verb: 'Hire',
+            owned: (r) => r.staff[def.id] ?? 0,
+            price: (r) => staffCost(def, r.staff[def.id] ?? 0),
+            each: () => `CALMS ${formatNumber(def.calms)} EA`,
+            shown: (r) => isStaffRevealed(r, index),
+            onBuy: () => store.dispatch({ type: 'hireAsylumStaff', id: def.id }),
+          }),
+        ),
+      },
+      {
+        heading: 'BEDS',
+        total: (r) => `${formatNumber(patients(r))} PATIENTS`,
+        items: WARDS.map((def, index) =>
+          unit<AsylumRun>(def, {
+            verb: 'Fill',
+            owned: (r) => r.wards[def.id] ?? 0,
+            price: (r) => wardCost(def, r.wards[def.id] ?? 0),
+            each: (r) => `$${formatNumber(wardRate(r, def))}/S EA`,
+            shown: (r) => isWardRevealed(r, index),
+            onBuy: () => store.dispatch({ type: 'buyWard', id: def.id }),
+          }),
+        ),
+      },
+      {
+        heading: 'SECURITY',
+        items: [
+          unit<AsylumRun>(
+            { id: 'door', name: DOOR, description: 'A steel door with a wired-glass window. It holds one bad night, and then it has to be replaced. Better locks make it last.' },
+            {
+              verb: 'Fit',
+              owned: (r) => r.doors,
+              price: doorCost,
+              each: (r) => (r.doors > 0 ? `${r.doors} STANDING` : 'NONE STANDING'),
+              onBuy: () => store.dispatch({ type: 'buyDoor' }),
+            },
+          ),
+        ],
+      },
+    ],
+  });
 }
 
 function createAsylumStore(store: LateStore): { el: HTMLElement; render(r: AsylumRun): void; hasAffordable(r: AsylumRun): boolean } {
-  const list = h('ul', { class: 'item-list' });
-  const owned = h('ul', { class: 'store-owned' });
-  const el = h('div', { class: 'panel-body' }, h('h2', { class: 'panel-title' }, 'HOSPITAL SUPPLIES'), list, h('h3', { class: 'panel-sub' }, 'BOUGHT'), owned);
-  let shown = '';
-  return {
-    el,
-    hasAffordable: (r) => availableAsylumUpgrades(r).some((u) => u.cost <= r.cash),
-    render(r) {
-      const items = availableAsylumUpgrades(r);
-      const key = `${items.map((u) => u.id).join(',')}|${r.upgrades.length}`;
-      if (key !== shown) {
-        shown = key;
-        list.replaceChildren(
-          ...items.map((u) => {
-            const buy = h('button', { class: 'buy', type: 'button', 'data-cost': u.cost, 'aria-label': `Buy ${u.name} for $${formatNumber(u.cost)}` }, `BUY $${formatNumber(u.cost)}`);
-            buy.addEventListener('click', () => store.dispatch({ type: 'buyUpgrade', id: u.id }));
-            return h('li', { class: 'item' }, h('div', { class: 'item-head' }, h('span', { class: 'item-name' }, u.name)), h('p', { class: 'item-desc' }, u.description), h('div', { class: 'item-foot' }, buy));
-          }),
-        );
-        owned.replaceChildren(...ASYLUM_UPGRADES.filter((u) => r.upgrades.includes(u.id)).map((u) => h('li', {}, u.name)));
-      }
-      for (const b of list.querySelectorAll<HTMLButtonElement>('button[data-cost]')) b.disabled = r.cash < Number(b.dataset.cost);
-    },
-  };
+  return createShop<AsylumRun, (typeof ASYLUM_UPGRADES)[number]>({
+    title: 'HOSPITAL SUPPLIES',
+    all: ASYLUM_UPGRADES,
+    available: availableAsylumUpgrades,
+    owned: (r) => r.upgrades,
+    funds: (r) => r.cash,
+    currency: DOLLARS,
+    onBuy: (id) => store.dispatch({ type: 'buyUpgrade', id }),
+    className: 'item',
+    rowClass: 'item',
+    headingClass: 'panel-sub',
+  });
 }
 
 export function createAsylumUi(store: LateStore): VenueUi {

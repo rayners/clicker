@@ -1,6 +1,6 @@
 import { createDial } from '../engine/ui/dial';
 import { formatNumber } from '../engine/format';
-import { h, setAttr, setText } from '../engine/ui/dom';
+import { h } from '../engine/ui/dom';
 import { createFlow } from '../engine/ui/flow';
 import { BEDS, STAFF } from '../late-fees-data/clinic';
 import { CLINIC_UPGRADES } from '../late-fees-data/clinic-upgrades';
@@ -26,6 +26,9 @@ import {
 import type { ClinicRun, Run } from '../late-fees/state';
 import type { LateStore } from '../late-fees/store';
 import type { VenueUi } from './venues';
+import { createShop } from '../engine/ui/shop';
+import { DOLLARS, LISTS, unit } from './currency';
+import { createBuyPanel } from '../engine/ui/buy-list';
 
 const AUTO = CLINIC_UPGRADES.find((u) => u.effect.kind === 'autoDial')!.id;
 const c = (r: Run) => r as ClinicRun;
@@ -58,113 +61,74 @@ function createRemDial(store: LateStore): { el: HTMLElement; render(r: ClinicRun
   });
 }
 
-interface Row {
-  el: HTMLLIElement;
-  owned: HTMLElement;
-  rate: HTMLElement;
-  button: HTMLButtonElement;
-}
-
-function row(name: string, description: string, action: () => void): Row {
-  const owned = h('span', { class: 'item-owned', 'aria-label': `${name} owned` }, '0');
-  const rate = h('span', { class: 'item-rate' });
-  const button = h('button', { class: 'buy', type: 'button' });
-  button.addEventListener('click', action);
-  const el = h(
-    'li',
-    { class: 'item' },
-    h('div', { class: 'item-head' }, h('span', { class: 'item-name' }, name), owned),
-    h('p', { class: 'item-desc' }, description),
-    h('div', { class: 'item-foot' }, rate, button),
-  );
-  return { el, owned, rate, button };
-}
-
-function price(r: Row, verb: string, name: string, cost: number, cash: number) {
-  setText(r.button, `${verb.toUpperCase()} $${formatNumber(cost)}`);
-  setAttr(r.button, 'aria-label', `${verb} ${name} for $${formatNumber(cost)}`);
-  r.button.disabled = cash < cost;
-}
-
 const SUPPRESSANT = 'SUPPRESSANT';
 
-/** Beds, night staff and the rationed suppressant. */
 function createWard(store: LateStore): { el: HTMLElement; render(r: ClinicRun): void } {
-  const beds = BEDS.map((def, index) => ({ def, index, ...row(def.name, def.description, () => store.dispatch({ type: 'buyBed', id: def.id })) }));
-  const staffRows = STAFF.map((def, index) => ({ def, index, ...row(def.name, def.description, () => store.dispatch({ type: 'hireStaff', id: def.id })) }));
-  const suppressant = row(
-    'DREAM SUPPRESSANT',
-    'An experimental drug that blocks dreaming without stopping sleep. The grant-holder rations it, and asks why you need more.',
-    () => store.dispatch({ type: 'buySuppressant' }),
-  );
-  const totalBeds = h('span', { class: 'panel-sub-value' });
-  const totalWatch = h('span', { class: 'panel-sub-value' });
-  const el = h(
-    'div',
-    { class: 'panel-body' },
-    h('h2', { class: 'panel-title' }, 'THE WARD'),
-    h('h3', { class: 'panel-sub' }, 'NIGHT STAFF ', totalWatch),
-    h('ul', { class: 'item-list' }, ...staffRows.map((s) => s.el)),
-    h('h3', { class: 'panel-sub' }, 'BEDS ', totalBeds),
-    h('ul', { class: 'item-list' }, ...beds.map((b) => b.el)),
-    h('h3', { class: 'panel-sub' }, 'THE PHARMACY'),
-    h('ul', { class: 'item-list' }, suppressant.el),
-  );
-  return {
-    el,
-    render(r) {
-      setText(totalBeds, `${formatNumber(patients(r))} PATIENTS`);
-      setText(totalWatch, `WATCHING ${formatNumber(watchCapacity(r))}`);
-      for (const b of beds) {
-        const shown = isBedRevealed(r, b.index);
-        b.el.hidden = !shown;
-        if (!shown) continue;
-        const n = r.beds[b.def.id] ?? 0;
-        setText(b.owned, String(n));
-        setText(b.rate, `$${formatNumber(bedRate(r, b.def))}/S EA ASLEEP`);
-        price(b, 'Buy', b.def.name, bedCost(b.def, n), r.cash);
-      }
-      for (const s of staffRows) {
-        const shown = isStaffRevealed(r, s.index);
-        s.el.hidden = !shown;
-        if (!shown) continue;
-        const n = r.staff[s.def.id] ?? 0;
-        setText(s.owned, String(n));
-        setText(s.rate, `WATCHES ${formatNumber(s.def.watches)} EA`);
-        price(s, 'Hire', s.def.name, staffCost(s.def, n), r.cash);
-      }
-      setText(suppressant.owned, String(r.suppressant));
-      setText(suppressant.rate, `PROTECTS ${formatNumber(protectedCount(r))} NOW`);
-      price(suppressant, 'Request', SUPPRESSANT, suppressantCost(r), r.cash);
-    },
-  };
+  return createBuyPanel<ClinicRun>({
+    ...LISTS,
+    title: 'THE WARD',
+    funds: (r) => r.cash,
+    sections: [
+      {
+        heading: 'NIGHT STAFF',
+        total: (r) => `WATCHING ${formatNumber(watchCapacity(r))}`,
+        items: STAFF.map((def, index) =>
+          unit<ClinicRun>(def, {
+            verb: 'Hire',
+            owned: (r) => r.staff[def.id] ?? 0,
+            price: (r) => staffCost(def, r.staff[def.id] ?? 0),
+            each: () => `WATCHES ${formatNumber(def.watches)} EA`,
+            shown: (r) => isStaffRevealed(r, index),
+            onBuy: () => store.dispatch({ type: 'hireStaff', id: def.id }),
+          }),
+        ),
+      },
+      {
+        heading: 'BEDS',
+        total: (r) => `${formatNumber(patients(r))} PATIENTS`,
+        items: BEDS.map((def, index) =>
+          unit<ClinicRun>(def, {
+            verb: 'Buy',
+            owned: (r) => r.beds[def.id] ?? 0,
+            price: (r) => bedCost(def, r.beds[def.id] ?? 0),
+            each: (r) => `$${formatNumber(bedRate(r, def))}/S EA ASLEEP`,
+            shown: (r) => isBedRevealed(r, index),
+            onBuy: () => store.dispatch({ type: 'buyBed', id: def.id }),
+          }),
+        ),
+      },
+      {
+        heading: 'THE PHARMACY',
+        items: [
+          unit<ClinicRun>(
+            { id: 'suppressant', name: SUPPRESSANT, description: 'An experimental drug that blocks dreaming without stopping sleep. The grant-holder rations it, and asks why you need more.' },
+            {
+              verb: 'Request',
+              owned: (r) => r.suppressant,
+              price: suppressantCost,
+              each: (r) => `PROTECTS ${formatNumber(protectedCount(r))} NOW`,
+              onBuy: () => store.dispatch({ type: 'buySuppressant' }),
+            },
+          ),
+        ],
+      },
+    ],
+  });
 }
 
 function createClinicStore(store: LateStore): { el: HTMLElement; render(r: ClinicRun): void; hasAffordable(r: ClinicRun): boolean } {
-  const list = h('ul', { class: 'item-list' });
-  const owned = h('ul', { class: 'store-owned' });
-  const el = h('div', { class: 'panel-body' }, h('h2', { class: 'panel-title' }, 'CLINIC SUPPLIES'), list, h('h3', { class: 'panel-sub' }, 'BOUGHT'), owned);
-  let shown = '';
-  return {
-    el,
-    hasAffordable: (r) => availableClinicUpgrades(r).some((u) => u.cost <= r.cash),
-    render(r) {
-      const items = availableClinicUpgrades(r);
-      const key = `${items.map((u) => u.id).join(',')}|${r.upgrades.length}`;
-      if (key !== shown) {
-        shown = key;
-        list.replaceChildren(
-          ...items.map((u) => {
-            const buy = h('button', { class: 'buy', type: 'button', 'data-cost': u.cost, 'aria-label': `Buy ${u.name} for $${formatNumber(u.cost)}` }, `BUY $${formatNumber(u.cost)}`);
-            buy.addEventListener('click', () => store.dispatch({ type: 'buyUpgrade', id: u.id }));
-            return h('li', { class: 'item' }, h('div', { class: 'item-head' }, h('span', { class: 'item-name' }, u.name)), h('p', { class: 'item-desc' }, u.description), h('div', { class: 'item-foot' }, buy));
-          }),
-        );
-        owned.replaceChildren(...CLINIC_UPGRADES.filter((u) => r.upgrades.includes(u.id)).map((u) => h('li', {}, u.name)));
-      }
-      for (const b of list.querySelectorAll<HTMLButtonElement>('button[data-cost]')) b.disabled = r.cash < Number(b.dataset.cost);
-    },
-  };
+  return createShop<ClinicRun, (typeof CLINIC_UPGRADES)[number]>({
+    title: 'CLINIC SUPPLIES',
+    all: CLINIC_UPGRADES,
+    available: availableClinicUpgrades,
+    owned: (r) => r.upgrades,
+    funds: (r) => r.cash,
+    currency: DOLLARS,
+    onBuy: (id) => store.dispatch({ type: 'buyUpgrade', id }),
+    className: 'item',
+    rowClass: 'item',
+    headingClass: 'panel-sub',
+  });
 }
 
 export function createClinicUi(store: LateStore): VenueUi {

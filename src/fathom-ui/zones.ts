@@ -1,6 +1,8 @@
 import { formatNumber } from '../engine/format';
-import { h, setAttr, setText } from '../engine/ui/dom';
+import { h, setText } from '../engine/ui/dom';
 import { createDial } from '../engine/ui/dial';
+import { createBuyList } from '../engine/ui/buy-list';
+import { DOLLARS } from './currency';
 import { ATTRACTIONS, GUARDS } from '../fathom-data/shallows';
 import { TRAWLERS } from '../fathom-data/shelf';
 import { SPECIMENS } from '../fathom-data/open-water';
@@ -31,36 +33,24 @@ interface Item {
 
 /** A list of things to buy: each row shows what you own, what each does, and its price. */
 function itemList(store: FathomStore, items: Item[]): Component {
-  const rows = items.map((item) => {
-    const owned = h('span', { class: 'item-owned', 'aria-label': `${item.name} owned` }, '0');
-    const rate = h('span', { class: 'item-rate' });
-    const buy = h('button', { class: 'buy', type: 'button' });
-    buy.addEventListener('click', () => store.dispatch(item.action));
-    const el = h(
-      'li',
-      { class: 'item' },
-      h('div', { class: 'item-head' }, h('span', { class: 'item-name' }, item.name), owned),
-      h('p', { class: 'item-desc' }, item.description),
-      h('div', { class: 'item-foot' }, rate, buy),
-    );
-    return { item, el, owned, rate, buy };
+  return createBuyList<Outfit>({
+    funds: (o) => o.cash,
+    currency: DOLLARS,
+    className: 'item',
+    rowClass: 'item',
+    items: items.map((item) => ({
+      id: item.name,
+      name: item.name,
+      description: item.description,
+      verb: item.verb.toUpperCase(),
+      owned: (o) => String(item.owned(o)),
+      ownedAria: `${item.name} owned`,
+      notes: [{ read: item.rate }],
+      price: item.cost,
+      shown: item.revealed,
+      onBuy: () => store.dispatch(item.action),
+    })),
   });
-  return {
-    el: h('ul', { class: 'item-list' }, ...rows.map((r) => r.el)),
-    render(o) {
-      for (const r of rows) {
-        const shown = r.item.revealed?.(o) ?? true;
-        r.el.hidden = !shown;
-        if (!shown) continue;
-        const cost = r.item.cost(o);
-        setText(r.owned, String(r.item.owned(o)));
-        setText(r.rate, r.item.rate(o));
-        setText(r.buy, `${r.item.verb.toUpperCase()} $${formatNumber(cost)}`);
-        setAttr(r.buy, 'aria-label', `${r.item.verb} ${r.item.name} for $${formatNumber(cost)}`);
-        r.buy.disabled = o.cash < cost;
-      }
-    },
-  };
 }
 
 interface DialSpec {

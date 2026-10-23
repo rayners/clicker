@@ -79,7 +79,7 @@ describe('the roster', () => {
   it('shows who is ready, out and wounded, and what they cost in wages', async () => {
     const user = setup({ hired: crew({ blade: 5 }), wounded: { ...crew({}), blade: 2 } });
     await user.click(tab(/roster/i));
-    const row = within(screen.getByRole('article', { name: /blades/i }));
+    const row = within(screen.getByRole('listitem', { name: /blades/i }));
     expect(row.getByText(/3 READY/)).toBeTruthy();
     expect(row.getByText(/2 WOUNDED/)).toBeTruthy();
   });

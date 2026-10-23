@@ -850,7 +850,7 @@ button:focus-visible {
   list-style: none;
 }
 
-.upg-done {
+.upg-installed li {
   color: var(--phosphor-dim);
   font-size: 0.85em;
 }

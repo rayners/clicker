@@ -22,6 +22,9 @@ import {
 } from '../late-fees/camp/economy';
 import type { CampRun } from '../late-fees/state';
 import type { LateStore } from '../late-fees/store';
+import { createShop } from '../engine/ui/shop';
+import { DOLLARS, LISTS, unit } from './currency';
+import { createBuyPanel } from '../engine/ui/buy-list';
 
 type ZoneState = 'open' | 'slipping' | 'frontier' | 'closed';
 const HEAD = CAMP_UPGRADES.find((u) => u.effect.kind === 'headCounselor')!.id;
@@ -83,108 +86,74 @@ export function createSplit(store: LateStore): { el: HTMLElement; render(r: Camp
   });
 }
 
-interface Row {
-  el: HTMLLIElement;
-  owned: HTMLElement;
-  rate: HTMLElement;
-  button: HTMLButtonElement;
-}
-
-function row(name: string, description: string, action: () => void): Row {
-  const owned = h('span', { class: 'item-owned', 'aria-label': `${name} owned` }, '0');
-  const rate = h('span', { class: 'item-rate' });
-  const button = h('button', { class: 'buy', type: 'button' });
-  button.addEventListener('click', action);
-  const el = h(
-    'li',
-    { class: 'item' },
-    h('div', { class: 'item-head' }, h('span', { class: 'item-name' }, name), owned),
-    h('p', { class: 'item-desc' }, description),
-    h('div', { class: 'item-foot' }, rate, button),
-  );
-  return { el, owned, rate, button };
-}
-
-function price(r: Row, verb: string, name: string, cost: number, cash: number) {
-  setText(r.button, `${verb.toUpperCase()} $${formatNumber(cost)}`);
-  setAttr(r.button, 'aria-label', `${verb} ${name} for $${formatNumber(cost)}`);
-  r.button.disabled = cash < cost;
-}
-
 const TOWER = 'WATCHTOWER';
 
 /** Staff, lights and watchtowers. */
 export function createStaffPanel(store: LateStore): { el: HTMLElement; render(r: CampRun): void } {
-  const counselors = COUNSELORS.map((def, index) => ({ def, index, ...row(def.name, def.description, () => store.dispatch({ type: 'hire', id: def.id })) }));
-  const lights = LIGHTS.map((def, index) => ({ def, index, ...row(def.name, def.description, () => store.dispatch({ type: 'buyLight', id: def.id })) }));
-  const tower = row(TOWER, 'A platform on stilts with a lamp and a bell. Somebody should be up there. Nobody has to be.', () => store.dispatch({ type: 'buyTower' }));
-  const totalStaff = h('span', { class: 'panel-sub-value' });
-  const totalLight = h('span', { class: 'panel-sub-value' });
-  const el = h(
-    'div',
-    { class: 'panel-body' },
-    h('h2', { class: 'panel-title' }, 'STAFF & SUPPLIES'),
-    h('h3', { class: 'panel-sub' }, 'LIGHT ', totalLight),
-    h('ul', { class: 'item-list' }, ...lights.map((l) => l.el)),
-    h('h3', { class: 'panel-sub' }, 'STAFF ', totalStaff),
-    h('ul', { class: 'item-list' }, ...counselors.map((c) => c.el)),
-    h('h3', { class: 'panel-sub' }, 'THE WATCH'),
-    h('ul', { class: 'item-list' }, tower.el),
-  );
-  return {
-    el,
-    render(r) {
-      setText(totalStaff, formatNumber(staff(r)));
-      setText(totalLight, `${formatNumber(lightSupply(r))} LM`);
-      for (const l of lights) {
-        const shown = isLightRevealed(r, l.index);
-        l.el.hidden = !shown;
-        if (!shown) continue;
-        const n = r.lights[l.def.id] ?? 0;
-        setText(l.owned, String(n));
-        setText(l.rate, `+${formatNumber(l.def.rate)} LM EA`);
-        price(l, 'Buy', l.def.name, lightCost(l.def, n), r.cash);
-      }
-      for (const c of counselors) {
-        const shown = isCounselorRevealed(r, c.index);
-        c.el.hidden = !shown;
-        if (!shown) continue;
-        const n = r.counselors[c.def.id] ?? 0;
-        setText(c.owned, String(n));
-        setText(c.rate, `${formatNumber(counselorForce(r, c.def))} STAFF EA`);
-        price(c, 'Hire', c.def.name, counselorCost(c.def, n), r.cash);
-      }
-      setText(tower.owned, String(r.towers));
-      setText(tower.rate, `WATCHES ${formatNumber(r.towers > 0 ? towerWatch(r) / r.towers : towerWatch({ ...r, towers: 1 }))} EA`);
-      price(tower, 'Build', TOWER, towerCost(r), r.cash);
-    },
-  };
+  return createBuyPanel<CampRun>({
+    ...LISTS,
+    title: 'STAFF & SUPPLIES',
+    funds: (r) => r.cash,
+    sections: [
+      {
+        heading: 'LIGHT',
+        total: (r) => `${formatNumber(lightSupply(r))} LM`,
+        items: LIGHTS.map((def, index) =>
+          unit<CampRun>(def, {
+            verb: 'Buy',
+            owned: (r) => r.lights[def.id] ?? 0,
+            price: (r) => lightCost(def, r.lights[def.id] ?? 0),
+            each: () => `+${formatNumber(def.rate)} LM EA`,
+            shown: (r) => isLightRevealed(r, index),
+            onBuy: () => store.dispatch({ type: 'buyLight', id: def.id }),
+          }),
+        ),
+      },
+      {
+        heading: 'STAFF',
+        total: (r) => formatNumber(staff(r)),
+        items: COUNSELORS.map((def, index) =>
+          unit<CampRun>(def, {
+            verb: 'Hire',
+            owned: (r) => r.counselors[def.id] ?? 0,
+            price: (r) => counselorCost(def, r.counselors[def.id] ?? 0),
+            each: (r) => `${formatNumber(counselorForce(r, def))} STAFF EA`,
+            shown: (r) => isCounselorRevealed(r, index),
+            onBuy: () => store.dispatch({ type: 'hire', id: def.id }),
+          }),
+        ),
+      },
+      {
+        heading: 'THE WATCH',
+        items: [
+          unit<CampRun>(
+            { id: 'tower', name: TOWER, description: 'A platform on stilts with a lamp and a bell. Somebody should be up there. Nobody has to be.' },
+            {
+              verb: 'Build',
+              owned: (r) => r.towers,
+              price: towerCost,
+              each: (r) => `WATCHES ${formatNumber(r.towers > 0 ? towerWatch(r) / r.towers : towerWatch({ ...r, towers: 1 }))} EA`,
+              onBuy: () => store.dispatch({ type: 'buyTower' }),
+            },
+          ),
+        ],
+      },
+    ],
+  });
 }
 
 /** The camp store: supplies and favours, bought once. */
 export function createStorePanel(store: LateStore): { el: HTMLElement; render(r: CampRun): void; hasAffordable(r: CampRun): boolean } {
-  const list = h('ul', { class: 'item-list' });
-  const owned = h('ul', { class: 'store-owned' });
-  const el = h('div', { class: 'panel-body' }, h('h2', { class: 'panel-title' }, 'CAMP STORE'), list, h('h3', { class: 'panel-sub' }, 'BOUGHT'), owned);
-  let shown = '';
-  return {
-    el,
-    hasAffordable: (r) => availableCampUpgrades(r).some((u) => u.cost <= r.cash),
-    render(r) {
-      const items = availableCampUpgrades(r);
-      const key = `${items.map((u) => u.id).join(',')}|${r.upgrades.length}`;
-      if (key !== shown) {
-        shown = key;
-        list.replaceChildren(
-          ...items.map((u) => {
-            const buy = h('button', { class: 'buy', type: 'button', 'data-cost': u.cost, 'aria-label': `Buy ${u.name} for $${formatNumber(u.cost)}` }, `BUY $${formatNumber(u.cost)}`);
-            buy.addEventListener('click', () => store.dispatch({ type: 'buyUpgrade', id: u.id }));
-            return h('li', { class: 'item' }, h('div', { class: 'item-head' }, h('span', { class: 'item-name' }, u.name)), h('p', { class: 'item-desc' }, u.description), h('div', { class: 'item-foot' }, buy));
-          }),
-        );
-        owned.replaceChildren(...CAMP_UPGRADES.filter((u) => r.upgrades.includes(u.id)).map((u) => h('li', {}, u.name)));
-      }
-      for (const b of list.querySelectorAll<HTMLButtonElement>('button[data-cost]')) b.disabled = r.cash < Number(b.dataset.cost);
-    },
-  };
+  return createShop<CampRun, (typeof CAMP_UPGRADES)[number]>({
+    title: 'CAMP STORE',
+    all: CAMP_UPGRADES,
+    available: availableCampUpgrades,
+    owned: (r) => r.upgrades,
+    funds: (r) => r.cash,
+    currency: DOLLARS,
+    onBuy: (id) => store.dispatch({ type: 'buyUpgrade', id }),
+    className: 'item',
+    rowClass: 'item',
+    headingClass: 'panel-sub',
+  });
 }
