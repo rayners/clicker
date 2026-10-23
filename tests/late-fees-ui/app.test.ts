@@ -164,4 +164,10 @@ describe('the setup menu', () => {
     await user.click(box);
     expect(store.getState().profile.settings.sound).toBe(true);
   });
+
+  it('links to the About page and its tip jar from the settings', async () => {
+    const user = setup(playing());
+    await user.click(screen.getByRole('button', { name: /setup/i }));
+    expect((screen.getByRole('link', { name: /about.*tip jar/i }) as HTMLAnchorElement).getAttribute('href')).toBe('../about/');
+  });
 });

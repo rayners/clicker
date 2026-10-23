@@ -279,4 +279,10 @@ describe('configuration', () => {
     await user.click(box);
     expect(store.getState().profile.settings.sound).toBe(true);
   });
+
+  it('links to the About page and its tip jar from the settings', async () => {
+    const user = setup();
+    await user.click(screen.getByRole('button', { name: /configuration/i }));
+    expect((screen.getByRole('link', { name: /about.*tip jar/i }) as HTMLAnchorElement).getAttribute('href')).toBe('../about/');
+  });
 });

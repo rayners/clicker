@@ -2,7 +2,7 @@ import type { GameState } from '../core/game';
 import { HUNTER_LEGEND, BOARDROOM_UNLOCK_CONTRACTS, CREATURE_UNLOCK_CONTRACTS, HUNTER_UNLOCK_CONTRACTS, isBoardroomUnlocked, isCreatureUnlocked, isHunterUnlocked } from '../core/prestige';
 import { exportSave, importSave } from '../core/save';
 import type { Store } from '../core/store';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { aboutLink, h, setAttr, setText } from '../shared/ui/dom';
 import { createOptOut } from '../shared/telemetry';
 
 const CONFIRM_TIMEOUT_MS = 5000;
@@ -40,6 +40,7 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
       h('label', { class: 'cfg-toggle', for: 'cfg-motion' }, motion, ' REDUCE MOTION'),
       h('label', { class: 'cfg-toggle', for: 'cfg-share' }, share, ' SHARE ANONYMOUS PLAY DATA'),
       h('p', { class: 'cfg-note' }, 'MILESTONES AND ERRORS ONLY. NO COOKIES, NO PERSONAL DATA.'),
+      aboutLink('cfg-about'),
       h('h3', { class: 'panel-subtitle' }, 'SAVE DATA (STORED ON THIS DEVICE ONLY)'),
       code,
       h('div', { class: 'cfg-row' }, exportButton, copyButton, downloadButton, importButton),

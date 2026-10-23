@@ -106,4 +106,10 @@ describe('settings dialog', () => {
     await user.click(screen.getByRole('button', { name: /configuration/i }));
     expect(screen.getByRole('button', { name: /accept the hunt/i }).textContent).toBe('THE HUNT · AFTER 5 CONTRACTS OR 3 LEGEND');
   });
+
+  it('links to the About page and its tip jar from the settings', async () => {
+    const user = setup();
+    await user.click(screen.getByRole('button', { name: /configuration/i }));
+    expect((screen.getByRole('link', { name: /about.*tip jar/i }) as HTMLAnchorElement).getAttribute('href')).toBe('../about/');
+  });
 });

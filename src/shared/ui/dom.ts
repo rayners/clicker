@@ -23,3 +23,6 @@ export function setText(el: Element, text: string): void {
 export function setAttr(el: Element, name: string, value: string): void {
   if (el.getAttribute(name) !== value) el.setAttribute(name, value);
 }
+
+/** The link from any game's settings to the About page and its tip jar (every game sits one level below it). */
+export const aboutLink = (className: string): HTMLAnchorElement => h('a', { class: className, href: '../about/' }, 'ABOUT THESE GAMES · TIP JAR') as HTMLAnchorElement;

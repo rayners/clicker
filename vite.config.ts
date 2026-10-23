@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       // The picker at the root; DEEP CONTRACT, CHARTER OF THE ELDERDARK, LATE FEES and the deep-water game each under their own path.
-      input: { picker: 'index.html', contract: 'contract/index.html', forest: 'forest/index.html', lateFees: 'late-fees/index.html', downThere: 'down-there/index.html' },
+      input: { picker: 'index.html', contract: 'contract/index.html', forest: 'forest/index.html', lateFees: 'late-fees/index.html', downThere: 'down-there/index.html', about: 'about/index.html' },
     },
   },
   plugins: [

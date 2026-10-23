@@ -97,7 +97,12 @@ export function mountPicker(root: HTMLElement, storage: Storage): void {
       { class: 'picker' },
       h('h1', { class: 'visually-hidden' }, 'Choose a game'),
       ...doors,
-      h('p', { class: 'picker-foot' }, 'All four run in your browser and save on this device. Add one to your home screen to play offline.'),
+      h(
+        'p',
+        { class: 'picker-foot' },
+        'All four run in your browser and save on this device. Add one to your home screen to play offline. ',
+        h('a', { class: 'picker-about', href: './about/' }, 'About these games · tip jar'),
+      ),
     ),
   );
 }

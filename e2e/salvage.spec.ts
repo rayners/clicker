@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { freshGame } from './helpers';
+import { freshGame, pressMany } from './helpers';
 
 test('salvage: cut the bow airlock open by hand, then turn the torch up', async ({ page, isMobile }) => {
   await freshGame(page, 'salvage');
   const cut = page.getByRole('button', { name: /^cut$/i });
-  for (let i = 0; i < 65; i++) await cut.click();
+  await pressMany(cut, 65);
   await expect(page.getByLabel('Compartments open')).toHaveText(/^1\//);
   const hull = page.getByRole('region', { name: /derelict compartments/i });
   await expect(hull.getByRole('listitem').first()).toHaveAttribute('data-state', /secured|contested/);

@@ -320,6 +320,15 @@ body {
   position: relative;
 }
 
+/* A comfortable tap, inside the footer's one line of small print. */
+.picker-about {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--gilt);
+  touch-action: manipulation;
+}
+
 /* ---------- LATE FEES: the video store ---------- */
 
 .door-latefees {

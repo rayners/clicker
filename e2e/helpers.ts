@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 /** A fresh game opens on the assignment screen; take the named contract. */
 export async function acceptContract(page: Page, kind: 'extraction' | 'terraforming' | 'security' | 'haulage' | 'overland' | 'salvage' = 'extraction') {
@@ -22,4 +22,15 @@ export async function freshGame(page: Page, kind: 'extraction' | 'terraforming' 
   await skipBoot(page);
   await acceptContract(page, kind);
   await page.goto('/contract/');
+}
+
+/**
+ * Press a big action button many times. Playwright's WebKit taps take ~0.4s each, so long runs of presses go
+ * through the button's keyboard path instead (a click with no pointer detail), which the game handles the same way.
+ */
+export async function pressMany(button: Locator, times: number) {
+  await button.click();
+  await button.evaluate((el, n) => {
+    for (let i = 1; i < n; i++) el.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+  }, times);
 }

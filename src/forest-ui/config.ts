@@ -1,4 +1,4 @@
-import { h, setText } from '../shared/ui/dom';
+import { aboutLink, h, setText } from '../shared/ui/dom';
 import { DRAGON_LEGEND, DRAGON_UNLOCK_CHARTERS, isDragonUnlocked, isKeepUnlocked, isWoodUnlocked, KEEP_UNLOCK_CHARTERS, WOOD_UNLOCK_CHARTERS } from '../forest/charter';
 import { createOptOut } from '../shared/telemetry';
 import { forestSaves } from '../forest/save';
@@ -37,6 +37,7 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
       h('label', { class: 'cfg-toggle', for: 'ed-motion' }, motion, ' REDUCE MOTION'),
       h('label', { class: 'cfg-toggle', for: 'ed-share' }, share, ' SHARE ANONYMOUS PLAY DATA'),
       h('p', { class: 'cfg-note' }, 'MILESTONES AND ERRORS ONLY. NO COOKIES, NO PERSONAL DATA.'),
+      aboutLink('cfg-about'),
       h('h3', { class: 'panel-subtitle' }, 'THE SAVE BOOK (KEPT ON THIS DEVICE ONLY)'),
       code,
       h('div', { class: 'cfg-row' }, exportButton, copyButton, importButton),

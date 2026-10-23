@@ -1,5 +1,5 @@
 import { formatNumber } from '../shared/format';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { aboutLink, h, setAttr, setText } from '../shared/ui/dom';
 import { createOptOut } from '../shared/telemetry';
 import { FATHOM_UPGRADES } from '../fathom-data/upgrades';
 import { availableUpgrades } from '../fathom/upgrades';
@@ -125,6 +125,7 @@ export function createConfig(store: FathomStore): { button: HTMLButtonElement; d
       h('label', { class: 'cfg-toggle', for: 'fa-motion' }, motion, ' REDUCE MOTION'),
       h('label', { class: 'cfg-toggle', for: 'fa-share' }, share, ' SHARE ANONYMOUS PLAY DATA'),
       h('p', { class: 'cfg-note' }, 'MILESTONES AND ERRORS ONLY. NO COOKIES, NO PERSONAL DATA.'),
+      aboutLink('cfg-about'),
       h('h3', { class: 'panel-sub' }, 'THE SAVE BOOK (KEPT ON THIS DEVICE ONLY)'),
       code,
       h('div', { class: 'cfg-row' }, exportButton, importButton),

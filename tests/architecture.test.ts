@@ -21,7 +21,8 @@ const edges = files(SRC).flatMap((file) =>
 
 const area = (path: string) => {
   if (path.startsWith('shared/')) return 'shared';
-  if (path.startsWith('picker')) return 'picker';
+  // The About page sits with the picker: shared code only.
+  if (path.startsWith('picker') || path.startsWith('about')) return 'picker';
   if (path.startsWith('late-fees')) return 'late-fees';
   if (path.startsWith('fathom')) return 'fathom';
   if (path.startsWith('forest')) return 'elderdark';

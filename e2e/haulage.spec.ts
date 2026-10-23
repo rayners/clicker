@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { freshGame, skipBoot } from './helpers';
+import { freshGame, skipBoot, pressMany } from './helpers';
 
 test('haulage: push the tug to the first station on its thrusters and get paid', async ({ page, isMobile }) => {
   await freshGame(page, 'haulage');
   const thrusters = page.getByRole('button', { name: /fire thrusters/i });
-  for (let i = 0; i < 35; i++) await thrusters.click();
+  await pressMany(thrusters, 35);
   await expect(page.getByLabel('Legs delivered')).toHaveText('1');
   await expect(page.getByRole('region', { name: /route/i })).toContainText('ANVIL TRANSFER');
   const helm = page.getByRole('region', { name: /helm/i });
@@ -26,7 +26,7 @@ test('overland: the short contract is offered first, and the rig rolls on the en
   await expect(cards.first()).toHaveAccessibleName(/overland/i);
   await cards.first().click();
   const gun = page.getByRole('button', { name: /gun the engine/i });
-  for (let i = 0; i < 30; i++) await gun.click();
+  await pressMany(gun, 30);
   await expect(page.getByLabel('Legs delivered')).toHaveText('1');
   await expect(page.getByRole('region', { name: /route/i })).toContainText('CAUSEWAY DEPOT');
 });

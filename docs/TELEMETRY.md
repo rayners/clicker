@@ -30,6 +30,8 @@ Every event carries the game's context: `game` (`deep-contract` | `elderdark` | 
 
 | Game | Event | Properties |
 |---|---|---|
+| about | `site_opened` | game `about`: the About page was opened |
+| about | `tip_jar_opened` | from (`about`): the Ko-fi tip jar link was followed |
 | picker | `site_opened` | game `picker` only. The front page's one event, so a player's first step carries the outside referrer (`$referring_domain`) |
 | all | `game_opened` | (context only) |
 | all | `$exception` | uncaught errors and unhandled rejections |

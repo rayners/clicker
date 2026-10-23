@@ -2880,3 +2880,13 @@ button:focus-visible {
     width: 100%;
   }
 }
+
+/* The link to the About page and its tip jar. */
+.cfg-about {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--phosphor-hi);
+  letter-spacing: 0.08em;
+  touch-action: manipulation;
+}

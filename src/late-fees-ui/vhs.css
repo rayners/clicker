@@ -1454,3 +1454,13 @@ button:disabled {
     padding-bottom: max(4px, env(safe-area-inset-bottom));
   }
 }
+
+/* The link to the About page and its tip jar. */
+.setup-about {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--cyan);
+  letter-spacing: 0.08em;
+  touch-action: manipulation;
+}

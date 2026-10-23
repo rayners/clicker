@@ -1,0 +1,79 @@
+/* The About page: plain and readable, in the Elderdark ledger's hand, with each game's colour as a thread. */
+
+:root {
+  --bg: #0b0a07;
+  --ink: #eadfc4;
+  --ink-dim: #a6967a;
+  --gilt: #c9a24a;
+  --rubric: #b8432f;
+  --font-hand: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+}
+
+.about {
+  max-width: 38rem;
+  margin: 0 auto;
+  padding: calc(32px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  line-height: 1.55;
+  color: var(--ink);
+  /* The four games as a rule across the top: phosphor, gilt, neon, sonar. */
+  border-top: 4px solid;
+  border-image: linear-gradient(90deg, #5dff8f 0 25%, #c9a24a 25% 50%, #ff2bd6 50% 75%, #34d6d6 75%) 1;
+}
+
+.about-title {
+  margin: 0 0 16px;
+  font-size: 2rem;
+  font-weight: normal;
+  color: var(--gilt);
+}
+
+.about-sub {
+  margin: 28px 0 4px;
+  font-size: 1.2rem;
+  font-weight: normal;
+  font-style: italic;
+  color: var(--gilt);
+}
+
+.about-trust {
+  padding-left: 12px;
+  border-left: 3px solid var(--rubric);
+}
+
+.about a {
+  color: var(--gilt);
+}
+
+.about-tip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--gilt);
+  text-decoration: none;
+  touch-action: manipulation;
+}
+
+.about-tip:active {
+  background: rgba(201, 162, 74, 0.15);
+}
+
+.about-back a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}

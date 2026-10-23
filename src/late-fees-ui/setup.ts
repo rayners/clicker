@@ -1,4 +1,4 @@
-import { h, setText } from '../shared/ui/dom';
+import { aboutLink, h, setText } from '../shared/ui/dom';
 import { createOptOut } from '../shared/telemetry';
 import { lateSaves } from '../late-fees/save';
 import type { LateGame } from '../late-fees/game';
@@ -29,6 +29,7 @@ export function createSetup(store: LateStore): { button: HTMLButtonElement; dial
       h('label', { class: 'setup-toggle', for: 'lf-motion' }, motion, ' REDUCE MOTION (NO TRACKING NOISE)'),
       h('label', { class: 'setup-toggle', for: 'lf-share' }, share, ' SHARE ANONYMOUS PLAY DATA'),
       h('p', { class: 'setup-note' }, 'MILESTONES AND ERRORS ONLY. NO COOKIES, NO PERSONAL DATA.'),
+      aboutLink('setup-about'),
       h('h3', { class: 'panel-sub' }, 'SAVE CODE (KEPT ON THIS DEVICE ONLY)'),
       code,
       h('div', { class: 'setup-row' }, exportButton, importButton),
