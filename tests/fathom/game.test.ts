@@ -1,5 +1,6 @@
+import { OFFLINE_CAP_SECONDS } from '../../src/engine/clock';
 import { describe, it, expect } from 'vitest';
-import { advance, catchUp, createFathomGame, FATHOM_VERSION, OFFLINE_CAP_SECONDS } from '../../src/fathom/game';
+import { advance, catchUp, createFathomGame, FATHOM_VERSION } from '../../src/fathom/game';
 import { availableEndings, completeSeason, endingRewards } from '../../src/fathom/season';
 import { reduce } from '../../src/fathom/store';
 import { fathomSaves, FATHOM_SAVE_KEY } from '../../src/fathom/save';

@@ -1,3 +1,4 @@
+import { createClock } from '../engine/clock';
 import { appendLog } from '../engine/log';
 import { formatDuration, formatNumber } from '../engine/format';
 import { CAMP_CONFIG, createRun, type EntryKind, type KillerId, type Run, type VenueId } from './state';
@@ -5,10 +6,6 @@ import { tickRun } from './tick';
 import { tickCut, type KillerCut } from './cut';
 
 export const LATE_VERSION = 4;
-export const OFFLINE_CAP_SECONDS = 8 * 3600;
-const CATCH_UP_STEP_SECONDS = 1;
-/** Frame gaps longer than this are treated as the player having been away. */
-const LIVE_MAX_DT = 2;
 const ABSENCE_NOTE_SECONDS = 60;
 
 export interface LateSettings {
@@ -70,35 +67,22 @@ export function newLateGame(seed: number, now: number): LateGame {
 /** The Killer's Cut runs three places at once; away from the screen it steps coarsely to keep catch-up cheap. */
 const CUT_CATCH_UP_STEP_SECONDS = 5;
 
-function simulate(game: LateGame, seconds: number): LateGame {
-  if (game.mode === 'cut') {
-    let g = game;
-    const step = seconds > LIVE_MAX_DT ? CUT_CATCH_UP_STEP_SECONDS : seconds;
-    for (let left = seconds; left > 0; left -= step) g = tickCut(g, Math.min(step, left));
-    return g;
-  }
-  if (game.shelf) return game;
-  let run = game.run;
-  for (let left = seconds; left > 0; left -= CATCH_UP_STEP_SECONDS) run = tickRun(run, Math.min(CATCH_UP_STEP_SECONDS, left));
-  return { ...game, run };
-}
+const clock = createClock<LateGame>({
+  tick: (game, dt) => (game.mode === 'cut' ? tickCut(game, dt) : { ...game, run: tickRun(game.run, dt) }),
+  step: (game) => (game.mode === 'cut' ? CUT_CATCH_UP_STEP_SECONDS : 1),
+  // On the shelf, between films, nothing is playing.
+  paused: (game) => game.mode !== 'cut' && game.shelf,
+  noteAway(before, after, seconds) {
+    if (seconds < ABSENCE_NOTE_SECONDS || before.mode === 'cut') return after;
+    const takings = after.run.lifetimeCash - before.run.lifetimeCash;
+    const dead = after.run.bodyCount - before.run.bodyCount;
+    const text = `FAST-FORWARD ▶▶ ${formatDuration(seconds)}: $${formatNumber(takings)} TAKEN, ${formatNumber(dead)} DEAD.`;
+    return { ...after, run: appendLog<EntryKind, Run>(after.run, 'osd', text) };
+  },
+});
 
-function away(game: LateGame, gap: number): LateGame {
-  const seconds = Math.min(gap, OFFLINE_CAP_SECONDS);
-  const g = simulate(game, seconds);
-  if (g === game || seconds < ABSENCE_NOTE_SECONDS || game.mode === 'cut') return g;
-  const takings = g.run.lifetimeCash - game.run.lifetimeCash;
-  const dead = g.run.bodyCount - game.run.bodyCount;
-  const text = `FAST-FORWARD ▶▶ ${formatDuration(seconds)}: $${formatNumber(takings)} TAKEN, ${formatNumber(dead)} DEAD.`;
-  return { ...g, run: appendLog<EntryKind, Run>(g.run, 'osd', text) };
-}
+/** Called by the live loop with real elapsed seconds since the previous frame. */
+export const advance = clock.advance;
 
-export function advance(game: LateGame, dt: number): LateGame {
-  return dt <= LIVE_MAX_DT ? simulate(game, dt) : away(game, dt);
-}
-
-export function catchUp(game: LateGame, now: number): LateGame {
-  const gap = (now - game.savedAt) / 1000;
-  if (gap <= 0) return game;
-  return { ...away(game, gap), savedAt: now };
-}
+/** Called on load: simulate the time since the last save. */
+export const catchUp = clock.catchUp;

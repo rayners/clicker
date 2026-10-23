@@ -22,7 +22,7 @@ const NOW = 1_000_000;
 const creature = () => startCreature(createGame(1, NOW), 7);
 const run = (g: GameState, seconds: number) => {
   let next = g;
-  for (let t = 0; t < seconds; t++) next = advance(next, 1).game;
+  for (let t = 0; t < seconds; t++) next = advance(next, 1);
   return next;
 };
 const ship = (g: GameState, i: number) => g.creature!.hunt.prey[i]!.mission as CreatureMission;
@@ -73,7 +73,7 @@ describe('accepting Special Order 0-77', () => {
   it('is beaten back when a WARDEN vents its decks: a new ship is sent, and the creature must lie low', () => {
     const g = creature();
     const prey = g.creature!.hunt.prey.map((p, i) => (i === 0 ? { ...p, mission: { ...p.mission, flags: ['terminus'] } } : p));
-    const ended = advance({ ...g, creature: { ...g.creature!, hunt: { ...g.creature!.hunt, prey } } }, 1).game;
+    const ended = advance({ ...g, creature: { ...g.creature!, hunt: { ...g.creature!.hunt, prey } } }, 1);
     expect(ended.creature!.hunt.beaten).toBe(1);
     expect(ended.creature!.hunt.prey[0]!.contract).toBe(2);
     expect(ship(ended, 0).flags).not.toContain('terminus');

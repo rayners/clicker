@@ -53,6 +53,7 @@ published build only, persistent storage, and the site's service worker.
 | Module | What it does |
 |---|---|
 | `run` | `runGame`: everything above, from a `GameDef`. |
+| `clock` | `createClock`: a game's `advance` (every frame) and `catchUp` (on load). Time away runs in steps, capped at eight hours, with an optional note of what happened; a clock set back never runs time in reverse. |
 | `store` | `createReducerStore`: a minimal immutable store with subscribe and replace. |
 | `save` | `createSaveSystem`: versioned saves in `localStorage` with ordered migrations, shape checks (`hasShape`), corruption backup, and export/import codes. |
 | `memo` | `memoByState`: caches a value derived from one immutable state. |

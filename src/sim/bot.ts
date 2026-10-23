@@ -447,7 +447,7 @@ export function simulateCreature(options: { seed: number; maxSeconds: number; pa
         game = next;
       }
     }
-    game = advance(game, 1).game;
+    game = advance(game, 1);
   }
   const h = game.creature!.hunt;
   return { harvest: h.harvest, upgrades: Object.values(game.creature!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
@@ -487,7 +487,7 @@ export function simulateHunter(options: { seed: number; maxSeconds: number; pass
         game = next;
       }
     }
-    game = advance(game, 1).game;
+    game = advance(game, 1);
   }
   const h = game.hunter!.hunt;
   return { harvest: h.harvest, upgrades: Object.values(game.hunter!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };

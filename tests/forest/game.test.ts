@@ -1,5 +1,6 @@
+import { OFFLINE_CAP_SECONDS } from '../../src/engine/clock';
 import { describe, it, expect } from 'vitest';
-import { advance, catchUp, createForestGame, FOREST_VERSION, OFFLINE_CAP_SECONDS } from '../../src/forest/game';
+import { advance, catchUp, createForestGame, FOREST_VERSION } from '../../src/forest/game';
 import { reduce, createForestStore } from '../../src/forest/store';
 import { FOREST_SAVE_KEY, forestSaves } from '../../src/forest/save';
 

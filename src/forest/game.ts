@@ -1,3 +1,4 @@
+import { createClock } from '../engine/clock';
 import { appendLog } from '../engine/log';
 import { formatDuration, formatNumber } from '../engine/format';
 import { tickCompany } from './company';
@@ -6,10 +7,6 @@ import { tickWood, type WoodHunt } from './wood';
 import { tickDragon, type DragonHunt } from './dragon';
 
 export const FOREST_VERSION = 11;
-export const OFFLINE_CAP_SECONDS = 8 * 3600;
-const CATCH_UP_STEP_SECONDS = 1;
-/** Frame gaps longer than this are treated as the player having been away. */
-const LIVE_MAX_DT = 2;
 const ABSENCE_NOTE_SECONDS = 60;
 
 export interface ForestSettings {
@@ -59,38 +56,24 @@ export function createForestGame(seed: number, now: number): ForestGame {
 /** The wood runs several companies at once; away from the screen it steps coarsely to keep catch-up cheap. */
 const WOOD_CATCH_UP_STEP_SECONDS = 5;
 
-function simulate(game: ForestGame, seconds: number): ForestGame {
-  if (game.mode === 'wood' || game.mode === 'dragon') {
-    let g = game;
-    const tick = game.mode === 'wood' ? tickWood : tickDragon;
-    const step = seconds > LIVE_MAX_DT ? WOOD_CATCH_UP_STEP_SECONDS : seconds;
-    for (let left = seconds; left > 0; left -= step) g = tick(g, Math.min(step, left));
-    return g;
-  }
-  let company = game.company;
-  for (let left = seconds; left > 0; left -= CATCH_UP_STEP_SECONDS) company = tickCompany(company, Math.min(CATCH_UP_STEP_SECONDS, left));
-  return { ...game, company };
-}
+const hunting = (game: ForestGame) => game.mode === 'wood' || game.mode === 'dragon';
 
-function away(game: ForestGame, gap: number): ForestGame {
-  const seconds = Math.min(gap, OFFLINE_CAP_SECONDS);
-  const g = simulate(game, seconds);
-  if (seconds < ABSENCE_NOTE_SECONDS || game.mode !== 'charter') return g;
-  const relics = g.company.lifetimeRelics - game.company.lifetimeRelics;
-  const silver = g.company.silver - game.company.silver;
-  const sign = silver >= 0 ? '+' : '-';
-  const text = `WHILE THE FACTOR WAS AWAY (${formatDuration(seconds)}): ${formatNumber(relics)} RELICS RECOVERED, ${sign}${formatNumber(Math.abs(silver))} THALERS.`;
-  return { ...g, company: appendLog<EntryKind, Company>(g.company, 'ledger', text) };
-}
+const clock = createClock<ForestGame>({
+  tick: (game, dt) =>
+    game.mode === 'wood' ? tickWood(game, dt) : game.mode === 'dragon' ? tickDragon(game, dt) : { ...game, company: tickCompany(game.company, dt) },
+  step: (game) => (hunting(game) ? WOOD_CATCH_UP_STEP_SECONDS : 1),
+  noteAway(before, after, seconds) {
+    if (seconds < ABSENCE_NOTE_SECONDS || before.mode !== 'charter') return after;
+    const relics = after.company.lifetimeRelics - before.company.lifetimeRelics;
+    const silver = after.company.silver - before.company.silver;
+    const sign = silver >= 0 ? '+' : '-';
+    const text = `WHILE THE FACTOR WAS AWAY (${formatDuration(seconds)}): ${formatNumber(relics)} RELICS RECOVERED, ${sign}${formatNumber(Math.abs(silver))} THALERS.`;
+    return { ...after, company: appendLog<EntryKind, Company>(after.company, 'ledger', text) };
+  },
+});
 
 /** Called by the live loop with real elapsed seconds since the previous frame. */
-export function advance(game: ForestGame, dt: number): ForestGame {
-  return dt <= LIVE_MAX_DT ? simulate(game, dt) : away(game, dt);
-}
+export const advance = clock.advance;
 
 /** Called on load: simulate the time since the last save. */
-export function catchUp(game: ForestGame, now: number): ForestGame {
-  const gap = (now - game.savedAt) / 1000;
-  if (gap <= 0) return game;
-  return { ...away(game, gap), savedAt: now };
-}
+export const catchUp = clock.catchUp;

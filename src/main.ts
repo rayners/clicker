@@ -15,7 +15,7 @@ runGame(
   {
     saveKey: SAVE_KEY,
     saves: { loadGame, saveGame },
-    catchUp: (game, now) => catchUp(game, now).game,
+    catchUp,
     // Dev-only extra: ?grant=N credits on load, with or without a jump.
     createStore: (game) => {
       const grant = import.meta.env.DEV ? new URLSearchParams(location.search).get('grant') : null;

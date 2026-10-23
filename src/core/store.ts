@@ -269,7 +269,7 @@ export function reduce(game: GameState, action: Action): GameState {
     case 'shiftQuarantine':
       return isOutbreak(game.mission) ? { ...game, mission: shiftQuarantine(game.mission, action.step) } : game;
     case 'tick':
-      return advance(game, action.dt).game;
+      return advance(game, action.dt);
     default:
       return game;
   }

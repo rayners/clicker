@@ -14,7 +14,7 @@ const NOW = 1_000_000;
 const hunter = () => startHunter(createGame(1, NOW), 7);
 const run = (g: GameState, seconds: number) => {
   let next = g;
-  for (let t = 0; t < seconds; t++) next = advance(next, 1).game;
+  for (let t = 0; t < seconds; t++) next = advance(next, 1);
   return next;
 };
 const ship = (g: GameState, i: number) => g.hunter!.hunt.prey[i]!.mission as HunterMission;
@@ -62,7 +62,7 @@ describe('accepting the hunt', () => {
   it('is driven off when a crew finally turns on it: the next ship is sent, and the hunter must withdraw', () => {
     const g = hunter();
     const prey = g.hunter!.hunt.prey.map((p, i) => (i === 0 ? { ...p, mission: { ...p.mission, flags: ['terminus'] } } : p));
-    const ended = advance({ ...g, hunter: { ...g.hunter!, hunt: { ...g.hunter!.hunt, prey } } }, 1).game;
+    const ended = advance({ ...g, hunter: { ...g.hunter!, hunt: { ...g.hunter!.hunt, prey } } }, 1);
     expect(ended.hunter!.hunt.beaten).toBe(1);
     expect(ended.hunter!.hunt.prey[0]!.contract).toBe(2);
     expect(pushOn(ended.hunter!.hunt, 0, hunterRules(ended.hunter!))).toBe(0);

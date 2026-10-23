@@ -34,7 +34,7 @@ describe('engine documentation', () => {
 
   it('has a README saying what the engine offers and how a game plugs into it', () => {
     const readme = readFileSync(join(ENGINE, 'README.md'), 'utf8');
-    for (const module of files(ENGINE).map((f) => relative(ENGINE, f).replace(/\.ts$/, ''))) expect(readme).toContain(module);
+    for (const module of files(ENGINE).map((f) => relative(ENGINE, f).replace(/\.ts$/, ''))) expect(readme).toContain(`| \`${module}\` |`);
     expect(readme).toMatch(/runGame/);
   });
 });
