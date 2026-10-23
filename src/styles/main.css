@@ -427,14 +427,14 @@ button:focus-visible {
   color: var(--phosphor-dim);
 }
 
-.alloc-steps {
+.stepper {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) 44px;
   align-items: center;
   width: 100%;
 }
 
-.alloc-step {
+.stepper-step {
   min-height: 44px;
   border: 1px solid var(--phosphor-dim);
   background: transparent;
@@ -442,22 +442,22 @@ button:focus-visible {
   line-height: 1;
 }
 
-.alloc-step:active {
+.stepper-step:active {
   background: var(--phosphor);
   color: var(--bg);
   text-shadow: none;
 }
 
-.alloc-step[hidden] {
+.stepper-step[hidden] {
   display: none;
 }
 
-.alloc[data-auto='true'] .alloc-steps {
+.alloc[data-auto='true'] .stepper {
   grid-template-columns: 1fr;
   min-height: 44px;
 }
 
-.alloc-share {
+.stepper-value {
   text-align: center;
   font-size: 1.5em;
   color: var(--phosphor-hi);
@@ -474,7 +474,8 @@ button:focus-visible {
   animation: flow-pulse 1.2s steps(2, end) infinite;
 }
 
-.alloc-auto {
+.alloc-auto,
+.dial-auto {
   margin: 4px 0 0;
   font-size: 0.75em;
   text-align: center;
@@ -494,7 +495,8 @@ button:focus-visible {
   display: none;
 }
 
-.alloc-auto[hidden] {
+.alloc-auto[hidden],
+.dial-auto[hidden] {
   display: none;
 }
 
@@ -1468,7 +1470,7 @@ button:focus-visible {
     padding: 0;
   }
 
-  .alloc-steps {
+  .stepper {
     grid-area: steps;
   }
 
@@ -1661,7 +1663,8 @@ button:focus-visible {
   color: var(--phosphor-dim);
 }
 
-.alloc-handover {
+.alloc-handover,
+.dial-handover {
   display: block;
   width: 100%;
   min-height: 40px;
@@ -1672,7 +1675,8 @@ button:focus-visible {
   letter-spacing: 0.08em;
 }
 
-.alloc-handover[hidden] {
+.alloc-handover[hidden],
+.dial-handover[hidden] {
   display: none;
 }
 
@@ -1688,53 +1692,53 @@ button:focus-visible {
 
 /* ---------- the force split and the colony sectors (security) ---------- */
 
-.split {
+.dial {
   margin-top: 6px;
   padding: 4px 6px;
   border: 1px solid var(--phosphor-faint);
   font-size: 0.8em;
 }
 
-.split[data-stretched='true'] {
+.dial[data-stretched='true'] {
   border-color: var(--danger);
 }
 
-.split-row {
+.dial-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(150px, 1.4fr) minmax(0, 1fr);
   align-items: center;
   gap: 6px;
 }
 
-.split-side {
+.dial-side {
   display: flex;
   flex-direction: column;
   line-height: 1.1;
 }
 
-.split-side-line {
+.dial-side-right {
   align-items: flex-end;
   text-align: right;
 }
 
-.split-figure {
+.dial-figure {
   color: var(--phosphor-hi);
   font-variant-numeric: tabular-nums;
 }
 
-.split[data-stretched='true'] .split-side-line .split-figure {
+.dial[data-stretched='true'] .dial-side-right .dial-figure {
   color: var(--danger);
   animation: flow-pulse 1s steps(2, end) infinite;
 }
 
-.split-share {
+.stepper-value {
   text-align: center;
   font-size: 1.5em;
   color: var(--phosphor-hi);
   font-variant-numeric: tabular-nums;
 }
 
-.split[data-auto='true'] .alloc-steps {
+.dial[data-auto='true'] .stepper {
   grid-template-columns: 1fr;
   min-height: 44px;
 }
@@ -1856,20 +1860,20 @@ button:focus-visible {
   }
 
   /* The status column is narrow on desktop: figures side by side, the steps underneath. */
-  .split-row {
+  .dial-row {
     grid-template-columns: 1fr 1fr;
     grid-template-areas: 'assault line' 'steps steps';
   }
 
-  .split-row > .split-side:first-child {
+  .dial-row > .dial-side-left {
     grid-area: assault;
   }
 
-  .split-row > .split-side-line {
+  .dial-row > .dial-side-right {
     grid-area: line;
   }
 
-  .split-row > .alloc-steps {
+  .dial-row > .stepper {
     grid-area: steps;
   }
 }
@@ -2211,7 +2215,7 @@ button:focus-visible {
 
 /* ---------- the cutting torch (salvage) ---------- */
 
-.torch[data-strain='true'] .split-side:first-child .split-figure {
+.torch[data-strain='true'] .dial-side-left .dial-figure {
   color: var(--danger);
 }
 
@@ -2219,18 +2223,18 @@ button:focus-visible {
   border-color: var(--danger);
 }
 
-.torch[data-danger='true'] .split-side-line .split-figure {
+.torch[data-danger='true'] .dial-side-right .dial-figure {
   color: var(--danger);
 }
 
-.torch-gauge {
+.dial-bar {
   display: block;
   height: 4px;
   margin-top: 4px;
   border: 1px solid var(--phosphor-faint);
 }
 
-.torch-fill {
+.dial-fill {
   display: block;
   height: 100%;
   width: 0;
@@ -2238,7 +2242,7 @@ button:focus-visible {
   transition: width 0.3s linear;
 }
 
-.torch[data-danger='true'] .torch-fill {
+.torch[data-danger='true'] .dial-fill {
   background: var(--danger);
 }
 
@@ -2248,8 +2252,8 @@ button:focus-visible {
   border-color: var(--danger);
 }
 
-.helm[data-strain='true'] .split-side:first-child .split-figure,
-.helm[data-dry='true'] .split-side-line .split-figure {
+.helm[data-strain='true'] .dial-side-left .dial-figure,
+.helm[data-dry='true'] .dial-side-right .dial-figure {
   color: var(--danger);
 }
 
@@ -2812,7 +2816,7 @@ button:focus-visible {
 
 .br-dial {
   display: grid;
-  grid-template-columns: 1fr 44px 4.5rem 44px;
+  grid-template-columns: 1fr minmax(0, 12rem);
   align-items: center;
   gap: 6px;
 }
@@ -2821,7 +2825,7 @@ button:focus-visible {
   letter-spacing: 0.1em;
 }
 
-.br-dial-value {
+.br-steps .stepper-value {
   text-align: center;
   font-size: 1.3em;
   color: var(--oxblood);

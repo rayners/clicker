@@ -4,6 +4,7 @@ import { cultureCost, lockdownCost, OFFICER_COST, screeningCost, wardCost, welln
 import { MAX_QUARANTINE, outbreakProduction } from '../mission/outbreak/spread';
 import type { OutbreakMission } from '../mission/state';
 import { h, setAttr, setText } from '../engine/ui/dom';
+import { createStepper } from '../engine/ui/stepper';
 
 const pct = (share: number) => `${Math.round(share * 100)}%`;
 
@@ -41,19 +42,19 @@ export function createSickBayPanel(store: Store): { el: HTMLElement; render(m: O
   const wellness = h('span', { class: 'sys-owned' });
   const wellnessButton = buyButton(store, { type: 'buyWellness' });
 
-  const share = h('span', { class: 'split-share', 'aria-label': 'Quarantine' }, '0%');
-  const fewer = h('button', { class: 'alloc-step', type: 'button', 'aria-label': 'Isolate fewer' }, '−');
-  const more = h('button', { class: 'alloc-step', type: 'button', 'aria-label': 'Isolate more' }, '+');
-  fewer.addEventListener('click', () => store.dispatch({ type: 'shiftQuarantine', step: -1 }));
-  more.addEventListener('click', () => store.dispatch({ type: 'shiftQuarantine', step: 1 }));
+  const quarantine = createStepper({
+    value: { aria: 'Quarantine' },
+    less: { label: 'Isolate fewer', onPress: () => store.dispatch({ type: 'shiftQuarantine', step: -1 }) },
+    more: { label: 'Isolate more', onPress: () => store.dispatch({ type: 'shiftQuarantine', step: 1 }) },
+  });
   const output = h('span', { class: 'sys-rate' });
-  const officerNote = h('p', { class: 'alloc-auto' }, 'THE INFECTION CONTROL OFFICER HAS THE DIAL · TIGHT WHILE IT IS GOING ROUND');
+  const officerNote = h('p', { class: 'dial-auto' }, 'THE INFECTION CONTROL OFFICER HAS THE DIAL · TIGHT WHILE IT IS GOING ROUND');
   const dial = h(
     'li',
     { class: 'sys-row sb-dial', role: 'group', 'aria-label': 'Quarantine dial' },
     h('div', { class: 'sys-head' }, h('span', { class: 'sys-name' }, 'QUARANTINE'), output),
     h('p', { class: 'sys-desc' }, 'Staff kept apart do not spread it, and do not work.'),
-    h('div', { class: 'alloc-steps' }, fewer, share, more),
+    quarantine.el,
     officerNote,
   );
   const screening = h('span', { class: 'sys-owned' });
@@ -104,10 +105,9 @@ export function createSickBayPanel(store: Store): { el: HTMLElement; render(m: O
     const isDiscovered = m.act >= 3 && m.flags.includes('outbreak');
     for (const r of discovered) r.hidden = !isDiscovered;
     if (isDiscovered) {
-      setText(share, `${Math.round((m.quarantine / MAX_QUARANTINE) * 100)}%`);
+      quarantine.render(`${Math.round((m.quarantine / MAX_QUARANTINE) * 100)}%`, { less: !m.officer, more: !m.officer });
       setText(output, `OUTPUT x${outbreakProduction(m).toFixed(2)}`);
       officerNote.hidden = !m.officer;
-      fewer.disabled = more.disabled = m.officer;
       setText(screening, `LV ${m.screening}`);
       price(screeningButton, 'BUY', 'Buy screening', screeningCost(m), m.credits);
       setText(wards, `${m.wards} BEDS`);

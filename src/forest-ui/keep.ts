@@ -5,6 +5,7 @@ import { FLOORS, KEEP_NAME } from '../forest-data/keep';
 import { available, frontierFloor, keepFrontier, keepProject, maxStandingRegions, oilPerTrip, OIL_PRICE, postStrength } from '../forest/company';
 import { KEEP, type Company } from '../forest/state';
 import type { ForestStore } from '../forest/store';
+import { createStepper } from '../engine/ui/stepper';
 
 const pct = (x: number) => `${Math.round(x * 100)}%`;
 const lower = (name: string) => name.toLowerCase();
@@ -16,13 +17,14 @@ export function createKeepView(store: ForestStore): { el: HTMLElement; render(c:
   const cleared = h('span', { class: 'odds-value', 'aria-label': 'Cleared' });
   const odds = h('span', { class: 'odds-value', 'aria-label': 'Strength against threat' });
   const counts = CLASSES.map((k) => {
-    const value = h('span', { class: 'order-count', 'aria-label': `${k.plural} for the keep` }, '0');
-    const less = h('button', { class: 'order-step', type: 'button', 'aria-label': `One fewer ${lower(k.name)} for the keep` }, '−');
-    const more = h('button', { class: 'order-step', type: 'button', 'aria-label': `One more ${lower(k.name)} for the keep` }, '+');
-    less.addEventListener('click', () => store.dispatch({ type: 'adjustOrder', region: KEEP, id: k.id, step: -1 }));
-    more.addEventListener('click', () => store.dispatch({ type: 'adjustOrder', region: KEEP, id: k.id, step: 1 }));
-    const el = h('div', { class: 'order-class' }, h('span', { class: 'order-name' }, k.short), h('div', { class: 'order-steps' }, less, value, more));
-    return { k, el, value };
+    const steps = createStepper({
+      className: 'order-steps',
+      value: { aria: `${k.plural} for the keep` },
+      less: { label: `One fewer ${lower(k.name)} for the keep`, onPress: () => store.dispatch({ type: 'adjustOrder', region: KEEP, id: k.id, step: -1 }) },
+      more: { label: `One more ${lower(k.name)} for the keep`, onPress: () => store.dispatch({ type: 'adjustOrder', region: KEEP, id: k.id, step: 1 }) },
+    });
+    const el = h('div', { class: 'order-class' }, h('span', { class: 'order-name' }, k.short), steps.el);
+    return { k, el, steps };
   });
   const forecast = h('p', { class: 'forecast' });
   const oil = h('span', { class: 'oil-value', 'aria-label': 'Lamp oil' });
@@ -54,20 +56,21 @@ export function createKeepView(store: ForestStore): { el: HTMLElement; render(c:
     const name = lower(floor.name);
     const status = h('span', { class: 'floor-status' });
     const garrison = h('span', { class: 'floor-garrison', 'aria-label': `Garrison of ${name}` });
-    const posted = h('span', { class: 'order-count', 'aria-label': `Blades posted on ${name}` });
-    const less = h('button', { class: 'order-step', type: 'button', 'aria-label': `Call a blade back from ${name}` }, '−');
-    const more = h('button', { class: 'order-step', type: 'button', 'aria-label': `Post a blade on ${name}` }, '+');
-    less.addEventListener('click', () => store.dispatch({ type: 'post', floor: i, step: -1 }));
-    more.addEventListener('click', () => store.dispatch({ type: 'post', floor: i, step: 1 }));
+    const posted = createStepper({
+      className: 'order-steps',
+      value: { aria: `Blades posted on ${name}` },
+      less: { label: `Call a blade back from ${name}`, onPress: () => store.dispatch({ type: 'post', floor: i, step: -1 }) },
+      more: { label: `Post a blade on ${name}`, onPress: () => store.dispatch({ type: 'post', floor: i, step: 1 }) },
+    });
     const li = h(
       'li',
       { class: 'floor-row', 'data-floor': floor.id },
       h('span', { class: 'floor-name' }, floor.name),
       status,
       h('span', { class: 'floor-hold' }, 'GARRISON ', garrison),
-      h('div', { class: 'order-steps' }, less, posted, more),
+      posted.el,
     );
-    return { floor, li, status, garrison, posted, less, more };
+    return { floor, li, status, garrison, posted };
   });
   const floorList = h('ul', { class: 'floor-list' }, ...rows.map((r) => r.li));
   const floors = h(
@@ -94,7 +97,7 @@ export function createKeepView(store: ForestStore): { el: HTMLElement; render(c:
       setText(cleared, pct(c.floors[front]!.control));
       setText(odds, `${formatNumber(p.strength)} / ${formatNumber(p.danger)}`);
       card.dataset.odds = p.ratio >= 1 ? 'good' : p.ratio >= 0.6 ? 'risky' : 'grim';
-      for (const x of counts) setText(x.value, String(order[x.k.id]));
+      for (const x of counts) x.steps.render(String(order[x.k.id]));
       setText(
         forecast,
         `EXPECT ~${formatNumber(p.haul)} RELICS IN ${formatDuration(p.duration)}. EACH HAND: ${pct(p.woundRisk)} WOUNDED, ${pct(p.woundRisk * p.deathRisk)} DEAD. BLIGHT +${p.blightPerHand.toFixed(2)} EACH.`,
@@ -125,9 +128,7 @@ export function createKeepView(store: ForestStore): { el: HTMLElement; render(c:
       row.li.dataset.state = state;
       setText(row.status, state === 'frontier' ? `FRONTIER ${pct(s.control)}` : state === 'contested' ? `CONTESTED ${pct(s.control)}` : state === 'held' ? 'HELD' : `LOST ${pct(s.control)}`);
       setText(row.garrison, `${formatNumber(c.posted[i]! * per)} / ${formatNumber(row.floor.threat)}`);
-      setText(row.posted, String(c.posted[i]));
-      row.less.disabled = c.posted[i]! === 0;
-      row.more.disabled = s.control <= 0 || available(c, 'blade') === 0;
+      row.posted.render(String(c.posted[i]), { less: c.posted[i]! > 0, more: s.control > 0 && available(c, 'blade') > 0 });
     }
   }
 

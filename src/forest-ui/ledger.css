@@ -464,7 +464,7 @@ button:focus-visible {
   width: 100%;
 }
 
-.order-step {
+.order-steps .stepper-step {
   min-height: 44px;
   border: 0;
   background: transparent;
@@ -472,11 +472,11 @@ button:focus-visible {
   color: var(--ink-dim);
 }
 
-.order-step:active {
+.order-steps .stepper-step:active {
   color: var(--gilt);
 }
 
-.order-count {
+.order-steps .stepper-value {
   min-width: 1.4em;
   text-align: center;
   font-size: 1.25em;

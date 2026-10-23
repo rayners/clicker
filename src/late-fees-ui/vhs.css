@@ -438,80 +438,94 @@ button:disabled {
 
 /* ---------- the split and the camp zones ---------- */
 
-.split {
+.split,
+.dial {
   padding: 4px 6px;
   border: 1px solid var(--faint);
 }
 
-.split[data-stretched='true'] {
+.split[data-stretched='true'],
+.dial[data-stretched='true'] {
   border-color: var(--rec);
 }
 
-.split-row {
+.split-row,
+.dial-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(150px, 1.4fr) minmax(0, 1fr);
   align-items: center;
   gap: 6px;
 }
 
-.split-side {
+.split-side,
+.dial-side {
   display: flex;
   flex-direction: column;
   line-height: 1.1;
 }
 
-.split-side-watch {
+.split-side-watch,
+.dial-side-right {
   align-items: flex-end;
 }
 
-.split-name {
+.split-name,
+.dial-name {
   font-size: 0.75em;
   letter-spacing: 0.16em;
   color: var(--dim);
 }
 
-.split-figure {
+.split-figure,
+.dial-figure {
   font-variant-numeric: tabular-nums;
 }
 
-.split[data-stretched='true'] .split-side-watch .split-figure {
+.split[data-stretched='true'] .split-side-watch .split-figure,
+.dial[data-stretched='true'] .dial-side-right .dial-figure {
   color: var(--rec);
   animation: blink 1s steps(2, end) infinite;
 }
 
-.split-steps {
+.split-steps,
+.stepper {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) 44px;
   align-items: center;
 }
 
-.split-step {
+.split-step,
+.stepper-step {
   min-height: 44px;
   border: 1px solid var(--dim);
   background: transparent;
   font-size: 1.4em;
 }
 
-.split-step:active {
+.split-step:active,
+.stepper-step:active {
   background: var(--cyan);
   color: var(--bg);
 }
 
-.split-share {
+.split-share,
+.stepper-value {
   text-align: center;
   font-size: 1.5em;
   color: var(--cyan);
   font-variant-numeric: tabular-nums;
 }
 
-.split-auto {
+.split-auto,
+.dial-auto {
   margin: 4px 0 0;
   font-size: 0.8em;
   text-align: center;
   color: var(--dim);
 }
 
-.split-handover {
+.split-handover,
+.dial-handover {
   display: block;
   width: 100%;
   min-height: 40px;
@@ -528,7 +542,8 @@ button:disabled {
 
 /* ---------- the deep-sleep dial (clinic) ---------- */
 
-.debt {
+.debt,
+.dial-meter {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
@@ -536,29 +551,32 @@ button:disabled {
   margin-top: 6px;
 }
 
-.debt-value {
+.debt-value,
+.dial-meter-value {
   font-variant-numeric: tabular-nums;
 }
 
-.debt-bar {
+.debt-bar,
+.dial-bar {
   grid-column: 1 / -1;
   height: 6px;
   border: 1px solid var(--faint);
 }
 
-.debt-fill {
+.debt-fill,
+.dial-fill {
   display: block;
   height: 100%;
   background: var(--cyan);
   transition: width 0.5s ease;
 }
 
-.dial[data-debt='high'] .debt-value {
+.dial[data-debt='high'] .dial-meter-value {
   color: var(--rec);
   animation: blink 1s steps(2, end) infinite;
 }
 
-.dial[data-debt='high'] .debt-fill {
+.dial[data-debt='high'] .dial-fill {
   background: var(--rec);
 }
 
@@ -1272,7 +1290,8 @@ button:disabled {
   .shelf-sign,
   .osd-rec,
   .zone-state,
-  .split-figure {
+  .split-figure,
+  .dial-figure {
     animation: none !important;
   }
 }

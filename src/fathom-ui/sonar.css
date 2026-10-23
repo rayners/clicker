@@ -368,24 +368,24 @@ button:disabled {
   color: var(--dim);
 }
 
-.dial-steps {
+.stepper {
   display: grid;
   grid-template-columns: 44px minmax(64px, auto) 44px;
   align-items: center;
 }
 
-.dial-step {
+.stepper-step {
   min-height: 44px;
   border: 1px solid var(--faint);
   background: transparent;
   font-size: 1.3em;
 }
 
-.dial-step:active {
+.stepper-step:active {
   background: var(--faint);
 }
 
-.dial-value {
+.stepper-value {
   text-align: center;
   font-size: 1.4em;
   color: var(--ink);

@@ -6,6 +6,7 @@ import { available, chartingPerTrip, isRegionOpen, maxStandingRegions, project }
 import type { Company } from '../forest/state';
 import type { ForestStore } from '../forest/store';
 import { createKeepView } from './keep';
+import { createStepper } from '../engine/ui/stepper';
 
 const pct = (x: number) => `${Math.round(x * 100)}%`;
 
@@ -15,13 +16,14 @@ export function createExpeditions(store: ForestStore): { el: HTMLElement; render
     const lower = region.name.toLowerCase();
     // Keep-only hands (sappers) have no place in a forest order.
     const counts = CLASSES.filter((k) => !k.site).map((k) => {
-      const value = h('span', { class: 'order-count', 'aria-label': `${k.plural} for ${lower}` }, '0');
-      const less = h('button', { class: 'order-step', type: 'button', 'aria-label': `One fewer ${k.name.toLowerCase()} for ${lower}` }, '−');
-      const more = h('button', { class: 'order-step', type: 'button', 'aria-label': `One more ${k.name.toLowerCase()} for ${lower}` }, '+');
-      less.addEventListener('click', () => store.dispatch({ type: 'adjustOrder', region: region.id, id: k.id, step: -1 }));
-      more.addEventListener('click', () => store.dispatch({ type: 'adjustOrder', region: region.id, id: k.id, step: 1 }));
-      const el = h('div', { class: 'order-class' }, h('span', { class: 'order-name' }, k.short), h('div', { class: 'order-steps' }, less, value, more));
-      return { k, el, value };
+      const steps = createStepper({
+        className: 'order-steps',
+        value: { aria: `${k.plural} for ${lower}` },
+        less: { label: `One fewer ${k.name.toLowerCase()} for ${lower}`, onPress: () => store.dispatch({ type: 'adjustOrder', region: region.id, id: k.id, step: -1 }) },
+        more: { label: `One more ${k.name.toLowerCase()} for ${lower}`, onPress: () => store.dispatch({ type: 'adjustOrder', region: region.id, id: k.id, step: 1 }) },
+      });
+      const el = h('div', { class: 'order-class' }, h('span', { class: 'order-name' }, k.short), steps.el);
+      return { k, el, steps };
     });
     const odds = h('span', { class: 'odds-value', 'aria-label': 'Strength against danger' });
     const forecast = h('p', { class: 'forecast' });
@@ -63,7 +65,7 @@ export function createExpeditions(store: ForestStore): { el: HTMLElement; render
         continue;
       }
       const order = c.orders[card.region.id]!;
-      for (const x of card.counts) setText(x.value, String(order[x.k.id]));
+      for (const x of card.counts) x.steps.render(String(order[x.k.id]));
       const p = project(c, card.region, order);
       setText(card.odds, `${formatNumber(p.strength)} / ${formatNumber(p.danger)}`);
       card.el.dataset.odds = p.ratio >= 1 ? 'good' : p.ratio >= 0.6 ? 'risky' : 'grim';

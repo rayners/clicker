@@ -11,6 +11,7 @@ import { crewStatus } from '../mission/crew';
 import type { ScenarioId } from '../mission/state';
 import { formatNumber } from '../engine/format';
 import { h, setAttr, setText } from '../engine/ui/dom';
+import { createStepper } from '../engine/ui/stepper';
 
 const KIND: Record<ScenarioId, string> = { extraction: 'EXTRACTION', terraform: 'TERRAFORM', security: 'SECURITY', haulage: 'HAULAGE', overland: 'OVERLAND', salvage: 'SALVAGE' };
 const ACT_NAMES = ['', 'ON SCHEDULE', 'UNDER REVIEW', 'SPECIAL INTEREST', 'LOSSES REPORTED'];
@@ -58,11 +59,12 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
   const contracts = h('div', { class: 'br-contracts', 'aria-label': 'Contracts' });
   let contractsKey = '';
 
-  const share = h('span', { class: 'br-dial-value', 'aria-label': 'Safety budget' }, '0%');
-  const less = h('button', { class: 'br-step', type: 'button', 'aria-label': 'Cut the safety budget' }, '−');
-  const more = h('button', { class: 'br-step', type: 'button', 'aria-label': 'Raise the safety budget' }, '+');
-  less.addEventListener('click', () => store.dispatch({ type: 'shiftSafety', step: -1 }));
-  more.addEventListener('click', () => store.dispatch({ type: 'shiftSafety', step: 1 }));
+  const safety = createStepper({
+    className: 'br-steps',
+    value: { aria: 'Safety budget' },
+    less: { label: 'Cut the safety budget', onPress: () => store.dispatch({ type: 'shiftSafety', step: -1 }) },
+    more: { label: 'Raise the safety budget', onPress: () => store.dispatch({ type: 'shiftSafety', step: 1 }) },
+  });
   const policy = h('button', { class: 'br-policy', type: 'button' });
   policy.addEventListener('click', () => store.dispatch({ type: 'setPolicy', policy: store.getState().boardroom?.policy === 'deliver' ? 'scuttle' : 'deliver' }));
   const floor = h('button', { class: 'br-buy br-floor', type: 'button' });
@@ -109,7 +111,7 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
         'div',
         { class: 'br-col' },
         h('h3', { class: 'br-sub' }, 'POLICY'),
-        h('div', { class: 'br-dial', role: 'group', 'aria-label': 'Safety budget dial' }, h('span', { class: 'br-dial-name' }, 'SAFETY BUDGET'), less, share, more),
+        h('div', { class: 'br-dial', role: 'group', 'aria-label': 'Safety budget dial' }, h('span', { class: 'br-dial-name' }, 'SAFETY BUDGET'), safety.el),
         policy,
         h('h3', { class: 'br-sub' }, 'DIVISIONS'),
         h('ul', { class: 'br-divisions' }, ...divisions.map((x) => x.el)),
@@ -160,7 +162,7 @@ export function createBoardroomView(store: Store): { el: HTMLElement; render(gam
       contracts.replaceChildren(...[...b.contracts].sort((a, x) => a.slot - x.slot).map(card));
     }
 
-    setText(share, `${Math.round((b.safety / MAX_SAFETY_TENTHS) * 100)}%`);
+    safety.render(`${Math.round((b.safety / MAX_SAFETY_TENTHS) * 100)}%`);
     setText(policy, `STANDING POLICY: ${b.policy === 'deliver' ? 'DELIVER' : 'SCUTTLE'}`);
     setAttr(policy, 'aria-label', `Standing policy: ${b.policy}. Tap to change.`);
     const fCost = floorCost(b);

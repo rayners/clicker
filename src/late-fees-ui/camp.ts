@@ -1,3 +1,4 @@
+import { createDial } from '../engine/ui/dial';
 import { formatNumber } from '../engine/format';
 import { h, setAttr, setText } from '../engine/ui/dom';
 import { frontier } from '../engine/ground';
@@ -58,48 +59,28 @@ export function createZones(): { el: HTMLElement; render(r: CampRun): void } {
 
 /** Prep against watch, one tenth per tap; the head counselor can run it. */
 export function createSplit(store: LateStore): { el: HTMLElement; render(r: CampRun): void } {
-  const share = h('span', { class: 'split-share', 'aria-label': 'Prep share' }, '0%');
-  const toWatch = h('button', { class: 'split-step', type: 'button', 'aria-label': 'More on watch' }, '−');
-  const toPrep = h('button', { class: 'split-step', type: 'button', 'aria-label': 'More on prep' }, '+');
-  toWatch.addEventListener('click', () => store.dispatch({ type: 'shiftSplit', step: -1 }));
-  toPrep.addEventListener('click', () => store.dispatch({ type: 'shiftSplit', step: 1 }));
-  const prep = h('span', { class: 'split-figure' });
-  const watch = h('span', { class: 'split-figure' });
-  const auto = h('p', { class: 'split-auto' }, 'HEAD COUNSELOR HAS THE ROSTER · EXACTLY ENOUGH ON WATCH');
-  const handover = h('button', { class: 'split-handover', type: 'button' });
-  handover.addEventListener('click', () => store.dispatch({ type: 'toggleHead' }));
-  const el = h(
-    'section',
-    { class: 'split', 'aria-label': 'Staff split' },
-    h(
-      'div',
-      { class: 'split-row' },
-      h('div', { class: 'split-side' }, h('span', { class: 'split-name' }, 'PREP'), prep),
-      h('div', { class: 'split-steps' }, toWatch, share, toPrep),
-      h('div', { class: 'split-side split-side-watch' }, h('span', { class: 'split-name' }, 'WATCH'), watch),
-    ),
-    auto,
-    handover,
-  );
-  return {
-    el,
-    render(r) {
-      const automated = isHeadCounselorActive(r);
-      const total = staff(r);
-      setText(share, `${automated ? (total > 0 ? Math.round((prepForce(r) / total) * 100) : 0) : r.prepShare * 10}%`);
-      setText(prep, formatNumber(prepForce(r)));
-      const need = watchNeeded(r);
-      setText(watch, `${formatNumber(Math.min(watchForce(r), need))} / ${formatNumber(need)}`);
-      el.dataset.stretched = String(watchForce(r) < need);
-      auto.hidden = !automated;
-      toWatch.hidden = automated;
-      toPrep.hidden = automated;
-      handover.hidden = !r.upgrades.includes(HEAD);
-      const label = automated ? 'Take the roster back' : 'Give the roster to the head counselor';
-      setText(handover, label.toUpperCase());
-      handover.setAttribute('aria-label', label);
+  return createDial<CampRun>({
+    label: 'Staff split',
+    value: {
+      aria: 'Prep share',
+      read: (r) => {
+        const total = staff(r);
+        return `${isHeadCounselorActive(r) ? (total > 0 ? Math.round((prepForce(r) / total) * 100) : 0) : r.prepShare * 10}%`;
+      },
     },
-  };
+    less: { label: 'More on watch', onPress: () => store.dispatch({ type: 'shiftSplit', step: -1 }) },
+    more: { label: 'More on prep', onPress: () => store.dispatch({ type: 'shiftSplit', step: 1 }) },
+    sides: [
+      { name: 'PREP', read: (r) => formatNumber(prepForce(r)) },
+      { name: 'WATCH', read: (r) => `${formatNumber(Math.min(watchForce(r), watchNeeded(r)))} / ${formatNumber(watchNeeded(r))}` },
+    ],
+    automation: {
+      text: 'HEAD COUNSELOR HAS THE ROSTER · EXACTLY ENOUGH ON WATCH',
+      active: isHeadCounselorActive,
+      handover: { available: (r) => r.upgrades.includes(HEAD), onToggle: () => store.dispatch({ type: 'toggleHead' }), take: 'Take the roster back', give: 'Give the roster to the head counselor' },
+    },
+    flags: (r) => ({ stretched: watchForce(r) < watchNeeded(r) }),
+  });
 }
 
 interface Row {

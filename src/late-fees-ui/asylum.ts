@@ -1,3 +1,4 @@
+import { createDial } from '../engine/ui/dial';
 import { formatNumber } from '../engine/format';
 import { h, setAttr, setText } from '../engine/ui/dom';
 import { createFlow } from '../engine/ui/flow';
@@ -40,53 +41,24 @@ function calendar(r: AsylumRun): string {
 }
 
 /** The dose, one notch per tap; agitation and the inspector beside it; the pharmacy can take it. */
-function createDial(store: LateStore): { el: HTMLElement; render(r: AsylumRun): void } {
-  const share = h('span', { class: 'split-share', 'aria-label': 'Sedation' }, '0%');
-  const less = h('button', { class: 'split-step', type: 'button', 'aria-label': 'Less sedation' }, '−');
-  const more = h('button', { class: 'split-step', type: 'button', 'aria-label': 'More sedation' }, '+');
-  less.addEventListener('click', () => store.dispatch({ type: 'shiftSedation', step: -1 }));
-  more.addEventListener('click', () => store.dispatch({ type: 'shiftSedation', step: 1 }));
-  const calm = h('span', { class: 'split-figure' });
-  const rating = h('span', { class: 'split-figure', 'aria-label': "Inspector's rating" });
-  const agitation = h('span', { class: 'debt-value', 'aria-label': 'Agitation' }, '0%');
-  const fill = h('i', { class: 'debt-fill' });
-  const auto = h('p', { class: 'split-auto' }, 'THE PHARMACY HAS THE DIAL · JUST ENOUGH TO KEEP THE WARDS CALM');
-  const handover = h('button', { class: 'split-handover', type: 'button' });
-  handover.addEventListener('click', () => store.dispatch({ type: 'toggleSedation' }));
-  const el = h(
-    'section',
-    { class: 'split dial', 'aria-label': 'Sedation dial' },
-    h(
-      'div',
-      { class: 'split-row' },
-      h('div', { class: 'split-side' }, h('span', { class: 'split-name' }, 'CALM'), calm),
-      h('div', { class: 'split-steps' }, less, share, more),
-      h('div', { class: 'split-side split-side-watch' }, h('span', { class: 'split-name' }, 'INSPECTOR'), rating),
-    ),
-    h('div', { class: 'debt' }, h('span', { class: 'split-name' }, 'AGITATION (AN INCIDENT AT 100%)'), agitation, h('span', { class: 'debt-bar', 'aria-hidden': 'true' }, fill)),
-    auto,
-    handover,
-  );
-  return {
-    el,
-    render(r) {
-      const automated = isAutoSedationActive(r);
-      setText(share, pct(sedationShare(r)));
-      setText(calm, `${pct(coverage(r))} OF ${formatNumber(patients(r))}`);
-      setText(rating, pct(r.rating));
-      setText(agitation, pct(r.agitation));
-      fill.style.width = `${Math.min(100, r.agitation * 100)}%`;
-      el.dataset.debt = r.agitation > 0.7 ? 'high' : 'ok';
-      el.dataset.stretched = String(agitationRate(r) > 0);
-      auto.hidden = !automated;
-      less.hidden = automated;
-      more.hidden = automated;
-      handover.hidden = !r.upgrades.includes(AUTO);
-      const label = automated ? 'Take the dial back' : 'Give the dial to the pharmacy';
-      setText(handover, label.toUpperCase());
-      handover.setAttribute('aria-label', label);
+function createDoseDial(store: LateStore): { el: HTMLElement; render(r: AsylumRun): void } {
+  return createDial<AsylumRun>({
+    label: 'Sedation dial',
+    value: { aria: 'Sedation', read: (r) => pct(sedationShare(r)) },
+    less: { label: 'Less sedation', onPress: () => store.dispatch({ type: 'shiftSedation', step: -1 }) },
+    more: { label: 'More sedation', onPress: () => store.dispatch({ type: 'shiftSedation', step: 1 }) },
+    sides: [
+      { name: 'CALM', read: (r) => `${pct(coverage(r))} OF ${formatNumber(patients(r))}` },
+      { name: 'INSPECTOR', aria: "Inspector's rating", read: (r) => pct(r.rating) },
+    ],
+    meter: { name: 'AGITATION (AN INCIDENT AT 100%)', aria: 'Agitation', read: (r) => r.agitation, text: (r) => pct(r.agitation) },
+    automation: {
+      text: 'THE PHARMACY HAS THE DIAL · JUST ENOUGH TO KEEP THE WARDS CALM',
+      active: isAutoSedationActive,
+      handover: { available: (r) => r.upgrades.includes(AUTO), onToggle: () => store.dispatch({ type: 'toggleSedation' }), take: 'Take the dial back', give: 'Give the dial to the pharmacy' },
     },
-  };
+    flags: (r) => ({ stretched: agitationRate(r) > 0, debt: r.agitation > 0.7 ? 'high' : 'ok' }),
+  });
 }
 
 interface Row {
@@ -223,7 +195,7 @@ export function createAsylumUi(store: LateStore): VenueUi {
       return { ...base, limit: 'beds', highlight: 1, severe: false, note: 'THE WARDS ARE QUIET · FILL MORE BEDS' };
     },
   });
-  const dial = createDial(store);
+  const dial = createDoseDial(store);
   const wards = createWards(store);
   const shop = createAsylumStore(store);
   return {

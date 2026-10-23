@@ -92,6 +92,8 @@ published build only, persistent storage, and the site's service worker.
 | `ui/dialog` | `createDialog`: a modal dialog named after a class you give it, closed by its button or Escape, focus moved in and back; or a choice that must be made (`closable: false`). |
 | `ui/settings` | `createSettings`: the settings button and dialog: sound, reduced motion, the telemetry opt-out, the About link, export/copy/download/import of the save code, sections of the game's own, and a two-tap reset, all in the game's own words. |
 | `ui/endings` | `createEndingChooser`: a card for each ending on offer, with its words and reward, each ended by its own two-tap button. |
+| `ui/stepper` | `createStepper`: a − and + around a value, one step per tap; either way can stop at a limit, and the buttons hide while an automation has the control. |
+| `ui/dial` | `createDial`: a stepper between the two sides it trades off (or under one name), an optional meter and line of detail, and an automation that takes it over with a handover button once bought. |
 | `ui/doors` | `createDoors`: a masthead button opening a dialog of doors to a game's other tiers; a closed door says what opens it. |
 | `ui/confirm` | `createConfirmButton`, `confirmedInTime`: two-tap confirms that a double tap cannot pass. |
 | `ui/sprites` | `createSpriteKit`: draws sprites on canvases, tinted from CSS variables so themes re-colour them. |

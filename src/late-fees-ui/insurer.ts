@@ -1,3 +1,4 @@
+import { createDial } from '../engine/ui/dial';
 import { formatNumber } from '../engine/format';
 import { h, setAttr, setText } from '../engine/ui/dom';
 import { createFlow } from '../engine/ui/flow';
@@ -29,46 +30,22 @@ const i = (r: Run) => r as InsurerRun;
 
 /** The risk-appetite dial: more premium, and a bigger business for Death to notice. */
 function createAppetite(store: LateStore): { el: HTMLElement; render(r: InsurerRun): void } {
-  const share = h('span', { class: 'split-share', 'aria-label': 'Risk appetite' }, '0%');
-  const less = h('button', { class: 'split-step', type: 'button', 'aria-label': 'Less risk' }, '−');
-  const more = h('button', { class: 'split-step', type: 'button', 'aria-label': 'More risk' }, '+');
-  less.addEventListener('click', () => store.dispatch({ type: 'shiftAppetite', step: -1 }));
-  more.addEventListener('click', () => store.dispatch({ type: 'shiftAppetite', step: 1 }));
-  const premium = h('span', { class: 'split-figure' });
-  const danger = h('span', { class: 'split-figure' });
-  const auto = h('p', { class: 'split-auto' }, 'THE ACTUARIAL MAINFRAME SETS THE APPETITE · AS HIGH AS PREVENTION CAN KEEP UP WITH');
-  const handover = h('button', { class: 'split-handover', type: 'button' });
-  handover.addEventListener('click', () => store.dispatch({ type: 'toggleActuary' }));
-  const el = h(
-    'section',
-    { class: 'split', 'aria-label': 'Risk appetite dial' },
-    h(
-      'div',
-      { class: 'split-row' },
-      h('div', { class: 'split-side' }, h('span', { class: 'split-name' }, 'PREMIUMS'), premium),
-      h('div', { class: 'split-steps' }, less, share, more),
-      h('div', { class: 'split-side split-side-watch' }, h('span', { class: 'split-name' }, 'THE DESIGN'), danger),
-    ),
-    auto,
-    handover,
-  );
-  return {
-    el,
-    render(r) {
-      const automated = isActuaryActive(r);
-      setText(share, `${appetite(r) * 10}%`);
-      setText(premium, `$${formatNumber(incomeRate(r))}/S`);
-      setText(danger, `${formatNumber(perMinute(omenRate(r)))} / ${formatNumber(perMinute(prevention(r)))} %/MIN`);
-      el.dataset.stretched = String(!isHeld(r) && r.list.length > 0 && omenRate(r) > 0);
-      auto.hidden = !automated;
-      less.hidden = automated;
-      more.hidden = automated;
-      handover.hidden = !r.upgrades.includes(MAINFRAME);
-      const label = automated ? 'Take the appetite back' : 'Give the appetite to the mainframe';
-      setText(handover, label.toUpperCase());
-      handover.setAttribute('aria-label', label);
+  return createDial<InsurerRun>({
+    label: 'Risk appetite dial',
+    value: { aria: 'Risk appetite', read: (r) => `${appetite(r) * 10}%` },
+    less: { label: 'Less risk', onPress: () => store.dispatch({ type: 'shiftAppetite', step: -1 }) },
+    more: { label: 'More risk', onPress: () => store.dispatch({ type: 'shiftAppetite', step: 1 }) },
+    sides: [
+      { name: 'PREMIUMS', read: (r) => `$${formatNumber(incomeRate(r))}/S` },
+      { name: 'THE DESIGN', read: (r) => `${formatNumber(perMinute(omenRate(r)))} / ${formatNumber(perMinute(prevention(r)))} %/MIN` },
+    ],
+    automation: {
+      text: 'THE ACTUARIAL MAINFRAME SETS THE APPETITE · AS HIGH AS PREVENTION CAN KEEP UP WITH',
+      active: isActuaryActive,
+      handover: { available: (r) => r.upgrades.includes(MAINFRAME), onToggle: () => store.dispatch({ type: 'toggleActuary' }), take: 'Take the appetite back', give: 'Give the appetite to the mainframe' },
     },
-  };
+    flags: (r) => ({ stretched: !isHeld(r) && r.list.length > 0 && omenRate(r) > 0 }),
+  });
 }
 
 /** The list: who is next, how close the design is to finishing them, and how long until it has to move on. */

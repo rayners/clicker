@@ -1,3 +1,4 @@
+import { createDial } from '../engine/ui/dial';
 import { formatNumber } from '../engine/format';
 import { h, setAttr, setText } from '../engine/ui/dom';
 import { createFlow } from '../engine/ui/flow';
@@ -30,56 +31,31 @@ const AUTO = CLINIC_UPGRADES.find((u) => u.effect.kind === 'autoDial')!.id;
 const c = (r: Run) => r as ClinicRun;
 
 /** Light against deep sleep, one tenth per tap; sleep debt; automated monitoring can take it. */
-function createDial(store: LateStore): { el: HTMLElement; render(r: ClinicRun): void } {
-  const share = h('span', { class: 'split-share', 'aria-label': 'Deep sleep share' }, '0%');
-  const less = h('button', { class: 'split-step', type: 'button', 'aria-label': 'Less deep sleep' }, '−');
-  const more = h('button', { class: 'split-step', type: 'button', 'aria-label': 'More deep sleep' }, '+');
-  less.addEventListener('click', () => store.dispatch({ type: 'shiftRem', step: -1 }));
-  more.addEventListener('click', () => store.dispatch({ type: 'shiftRem', step: 1 }));
-  const light = h('span', { class: 'split-figure' });
-  const deep = h('span', { class: 'split-figure' });
-  const debt = h('span', { class: 'debt-value', 'aria-label': 'Sleep debt' }, '0%');
-  const debtFill = h('i', { class: 'debt-fill' });
-  const auto = h('p', { class: 'split-auto' }, 'AUTOMATED MONITORING HAS THE DIAL · AS DEEP AS THE WATCH ALLOWS');
-  const handover = h('button', { class: 'split-handover', type: 'button' });
-  handover.addEventListener('click', () => store.dispatch({ type: 'toggleDial' }));
-  const el = h(
-    'section',
-    { class: 'split dial', 'aria-label': 'Deep-sleep dial' },
-    h(
-      'div',
-      { class: 'split-row' },
-      h('div', { class: 'split-side' }, h('span', { class: 'split-name' }, 'LIGHT SLEEP'), light),
-      h('div', { class: 'split-steps' }, less, share, more),
-      h('div', { class: 'split-side split-side-watch' }, h('span', { class: 'split-name' }, 'DEEP SLEEP'), deep),
-    ),
-    h('div', { class: 'debt' }, h('span', { class: 'split-name' }, `SLEEP DEBT (NEEDS ${Math.round(REM_NEED * 100)}% DEEP)`), debt, h('span', { class: 'debt-bar', 'aria-hidden': 'true' }, debtFill)),
-    auto,
-    handover,
-  );
-  return {
-    el,
-    render(r) {
-      const automated = isAutoDialActive(r);
-      const n = patients(r);
-      setText(share, `${Math.round(remFraction(r) * 100)}%`);
+function createRemDial(store: LateStore): { el: HTMLElement; render(r: ClinicRun): void } {
+  return createDial<ClinicRun>({
+    label: 'Deep-sleep dial',
+    value: { aria: 'Deep sleep share', read: (r) => `${Math.round(remFraction(r) * 100)}%` },
+    less: { label: 'Less deep sleep', onPress: () => store.dispatch({ type: 'shiftRem', step: -1 }) },
+    more: { label: 'More deep sleep', onPress: () => store.dispatch({ type: 'shiftRem', step: 1 }) },
+    sides: [
       // People are whole: round the deep sleepers, and the rest are in light sleep.
-      const asleep = Math.round(remPatients(r));
-      setText(light, formatNumber(n - asleep));
-      setText(deep, `${formatNumber(asleep)} · ${formatNumber(Math.min(asleep, Math.floor(watchCapacity(r) + protectedCount(r))))} WATCHED`);
-      el.dataset.stretched = String(exposed(r) > 0);
-      setText(debt, `${Math.round(r.debt * 100)}%`);
-      debtFill.style.width = `${Math.min(100, r.debt * 50)}%`;
-      el.dataset.debt = r.debt > 1 ? 'high' : 'ok';
-      auto.hidden = !automated;
-      less.hidden = automated;
-      more.hidden = automated;
-      handover.hidden = !r.upgrades.includes(AUTO);
-      const label = automated ? 'Take the dial back' : 'Give the dial to automated monitoring';
-      setText(handover, label.toUpperCase());
-      handover.setAttribute('aria-label', label);
+      { name: 'LIGHT SLEEP', read: (r) => formatNumber(patients(r) - Math.round(remPatients(r))) },
+      {
+        name: 'DEEP SLEEP',
+        read: (r) => {
+          const asleep = Math.round(remPatients(r));
+          return `${formatNumber(asleep)} · ${formatNumber(Math.min(asleep, Math.floor(watchCapacity(r) + protectedCount(r))))} WATCHED`;
+        },
+      },
+    ],
+    meter: { name: `SLEEP DEBT (NEEDS ${Math.round(REM_NEED * 100)}% DEEP)`, aria: 'Sleep debt', read: (r) => r.debt / 2, text: (r) => `${Math.round(r.debt * 100)}%` },
+    automation: {
+      text: 'AUTOMATED MONITORING HAS THE DIAL · AS DEEP AS THE WATCH ALLOWS',
+      active: isAutoDialActive,
+      handover: { available: (r) => r.upgrades.includes(AUTO), onToggle: () => store.dispatch({ type: 'toggleDial' }), take: 'Take the dial back', give: 'Give the dial to automated monitoring' },
     },
-  };
+    flags: (r) => ({ stretched: exposed(r) > 0, debt: r.debt > 1 ? 'high' : 'ok' }),
+  });
 }
 
 interface Row {
@@ -218,7 +194,7 @@ export function createClinicUi(store: LateStore): VenueUi {
       return { ...base, limit: 'beds', highlight: 1, severe: false, note: `${Math.floor(cover - deep)} SPARE WATCH · DEEPEN THE DIAL OR ADD BEDS` };
     },
   });
-  const dial = createDial(store);
+  const dial = createRemDial(store);
   const ward = createWard(store);
   const shop = createClinicStore(store);
   return {

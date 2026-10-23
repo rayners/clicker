@@ -1,5 +1,6 @@
 import { formatNumber } from '../engine/format';
 import { h, setAttr, setText } from '../engine/ui/dom';
+import { createDial } from '../engine/ui/dial';
 import { ATTRACTIONS, GUARDS } from '../fathom-data/shallows';
 import { TRAWLERS } from '../fathom-data/shelf';
 import { SPECIMENS } from '../fathom-data/open-water';
@@ -75,31 +76,15 @@ interface DialSpec {
 
 /** One notch per tap, with what it costs or risks beside it; a requisition can take it over. */
 function dial(store: FathomStore, spec: DialSpec): Component {
-  const value = h('span', { class: 'dial-value', 'aria-label': spec.aria }, '0%');
-  const less = h('button', { class: 'dial-step', type: 'button', 'aria-label': spec.less.label }, '−');
-  const more = h('button', { class: 'dial-step', type: 'button', 'aria-label': spec.more.label }, '+');
-  less.addEventListener('click', () => store.dispatch(spec.less.action));
-  more.addEventListener('click', () => store.dispatch(spec.more.action));
-  const detail = h('span', { class: 'dial-detail' });
-  const auto = h('p', { class: 'dial-auto' }, spec.autoText);
-  const el = h(
-    'section',
-    { class: 'dial', 'aria-label': `${spec.name} dial` },
-    h('div', { class: 'dial-row' }, h('span', { class: 'dial-name' }, spec.name), h('div', { class: 'dial-steps' }, less, value, more)),
-    detail,
-    auto,
-  );
-  return {
-    el,
-    render(o) {
-      const automated = spec.auto(o);
-      setText(value, spec.read(o));
-      setText(detail, spec.detail(o));
-      auto.hidden = !automated;
-      less.hidden = automated;
-      more.hidden = automated;
-    },
-  };
+  return createDial<Outfit>({
+    label: `${spec.name} dial`,
+    name: spec.name,
+    value: { aria: spec.aria, read: spec.read },
+    less: { label: spec.less.label, onPress: () => store.dispatch(spec.less.action) },
+    more: { label: spec.more.label, onPress: () => store.dispatch(spec.more.action) },
+    detail: spec.detail,
+    automation: { text: spec.autoText, active: spec.auto },
+  });
 }
 
 const pct = (x: number) => `${Math.round(x * 100)}%`;

@@ -4,6 +4,7 @@ import { HUMAN_CLIMATE, isAutoBalanced, linePower, lineStates, planetReadings, p
 import { TERRAFORM_UPGRADES } from '../data/terraform/upgrades';
 import type { TerraformMission } from '../mission/state';
 import { h, setText } from '../engine/ui/dom';
+import { createStepper } from '../engine/ui/stepper';
 
 const STATE_TEXT: Record<LineState, string> = {
   'power-limited': 'POWER-LIMITED',
@@ -33,24 +34,23 @@ function mark(line: Line, value: number): string {
 /** One-tap ±10% power steps per line, the spec target beside each, and what is holding each line back. */
 export function createAllocation(store: Store): { el: HTMLElement; render(m: TerraformMission): void } {
   const rows = LINES.map((line) => {
-    const share = h('span', { class: 'alloc-share', 'aria-label': `${title(line.name)} share` }, '0%');
     const target = h('span', { class: 'alloc-target' });
     const state = h('span', { class: 'alloc-state' });
     const reading = h('span', { class: 'alloc-reading' });
-    const less = h('button', { class: 'alloc-step', type: 'button', 'aria-label': `Less power to ${line.name.toLowerCase()}` }, '−');
-    const more = h('button', { class: 'alloc-step', type: 'button', 'aria-label': `More power to ${line.name.toLowerCase()}` }, '+');
-    less.addEventListener('click', () => store.dispatch({ type: 'allocate', line: line.id, step: -1 }));
-    more.addEventListener('click', () => store.dispatch({ type: 'allocate', line: line.id, step: 1 }));
-    const steps = h('div', { class: 'alloc-steps' }, less, share, more);
+    const steps = createStepper({
+      value: { aria: `${title(line.name)} share` },
+      less: { label: `Less power to ${line.name.toLowerCase()}`, onPress: () => store.dispatch({ type: 'allocate', line: line.id, step: -1 }) },
+      more: { label: `More power to ${line.name.toLowerCase()}`, onPress: () => store.dispatch({ type: 'allocate', line: line.id, step: 1 }) },
+    });
     const el = h(
       'div',
       { class: 'alloc-line', 'data-line': line.id },
       h('div', { class: 'alloc-head' }, h('span', { class: 'alloc-name' }, line.short), target),
-      steps,
+      steps.el,
       state,
       reading,
     );
-    return { line, el, share, target, state, reading, less, more, steps };
+    return { line, el, target, state, reading, steps };
   });
   const auto = h('p', { class: 'alloc-auto' }, 'WARDEN BALANCING · ALLOCATION FOLLOWS CORPORATE SPEC');
   // While WARDEN balances, the three lines fold into one summary: nothing to set, so no room spent on steps.
@@ -79,14 +79,12 @@ export function createAllocation(store: Store): { el: HTMLElement; render(m: Ter
     handover.setAttribute('aria-label', label);
     for (const r of rows) {
       const pct = automated ? Math.round((given[r.line.id] / supply) * 100) : m.allocation[r.line.id] * 10;
-      setText(r.share, `${pct}%`);
+      // Removed rather than disabled, so WARDEN's control is unambiguous.
+      r.steps.render(`${pct}%`, { hidden: automated });
       setText(r.target, `SPEC ${Math.round(targets[r.line.id] * 100)}%`);
       setText(r.state, STATE_TEXT[states[r.line.id]]);
       setText(r.reading, `${READING_FORMAT[r.line.id](readings[r.line.id])} ${mark(r.line.id, readings[r.line.id])}`);
       r.el.dataset.state = states[r.line.id];
-      // Removed rather than disabled, so WARDEN's control is unambiguous.
-      r.less.hidden = automated;
-      r.more.hidden = automated;
     }
   }
 
