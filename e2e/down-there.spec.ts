@@ -30,7 +30,7 @@ test('down there: answer the Source from the configuration and rise under a town
   // The Source opens after two seasons; the veteran jump opens it for the test.
   await page.goto('/down-there/?debug=veteran');
   await page.goto('/down-there/');
-  await page.getByRole('button', { name: /^configuration$/i }).click();
+  await page.getByRole('button', { name: /^the seam$/i }).click();
   await page.getByRole('button', { name: /answer the source/i }).click();
   const source = page.getByRole('region', { name: /the source/i });
   await expect(source).toBeVisible();

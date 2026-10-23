@@ -1,6 +1,6 @@
 import { confirmedInTime } from '../shared/ui/confirm';
 import { aboutLink, h, setText } from '../shared/ui/dom';
-import { DRAGON_LEGEND, DRAGON_UNLOCK_CHARTERS, isDragonUnlocked, isKeepUnlocked, isWoodUnlocked, KEEP_UNLOCK_CHARTERS, WOOD_UNLOCK_CHARTERS } from '../forest/charter';
+import { isKeepUnlocked, KEEP_UNLOCK_CHARTERS } from '../forest/charter';
 import { createOptOut } from '../shared/telemetry';
 import { forestSaves } from '../forest/save';
 import type { ForestGame } from '../forest/game';
@@ -22,9 +22,6 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
   const reset = h('button', { class: 'buy cfg-danger', type: 'button', 'aria-label': 'Start a new charter' }, 'START A NEW CHARTER');
   const close = h('button', { class: 'cfg-close', type: 'button', 'aria-label': 'Close' }, '✕');
   // Play as the forest: the ledger turned over (docs/HORROR-TIER.md).
-  const listen = h('button', { class: 'buy', type: 'button', 'aria-label': 'Listen to the wood' }, 'LISTEN TO THE WOOD');
-  // Or play as the dragon under the Heartwood.
-  const wake = h('button', { class: 'buy', type: 'button', 'aria-label': 'Wake the dragon' }, 'WAKE THE DRAGON');
   // Morrowgate Keep instead of the forest (docs/MISSIONS.md): tears up the charter in hand, earning nothing for it.
   const rewrite = h('button', { class: 'buy', type: 'button' });
   const dialog = h(
@@ -45,9 +42,6 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
       status,
       h('h3', { class: 'panel-subtitle' }, 'THE CHARTER'),
       rewrite,
-      h('h3', { class: 'panel-subtitle' }, 'THE WOOD'),
-      listen,
-      wake,
       h('h3', { class: 'panel-subtitle' }, 'BURN THE LEDGER'),
       reset,
     ),
@@ -66,14 +60,6 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
   const optOut = createOptOut(window.localStorage);
   share.checked = optOut.sharing();
   share.addEventListener('change', () => optOut.setSharing(share.checked));
-  listen.addEventListener('click', () => {
-    store.dispatch({ type: 'startWood', seed: (Math.random() * 2 ** 31) | 0 });
-    show(false);
-  });
-  wake.addEventListener('click', () => {
-    store.dispatch({ type: 'wakeDragon', seed: (Math.random() * 2 ** 31) | 0 });
-    show(false);
-  });
   motion.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'reducedMotion', value: motion.checked }));
   sound.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'sound', value: sound.checked }));
   exportButton.addEventListener('click', () => {
@@ -157,12 +143,6 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
       sound.checked = game.profile.settings.sound;
       labelRewrite();
       // Closed tiers say what opens them.
-      const woodOpen = !!game.wood || isWoodUnlocked(game.profile);
-      listen.disabled = !woodOpen;
-      setText(listen, woodOpen ? 'LISTEN TO THE WOOD' : `LISTEN TO THE WOOD · AFTER ${WOOD_UNLOCK_CHARTERS} CHARTERS`);
-      const dragonOpen = !!game.dragon || isDragonUnlocked(game.profile);
-      wake.disabled = !dragonOpen;
-      setText(wake, dragonOpen ? 'WAKE THE DRAGON' : `WAKE THE DRAGON · AFTER ${DRAGON_UNLOCK_CHARTERS} CHARTERS OR ${DRAGON_LEGEND} LEGEND`);
     },
   };
 }

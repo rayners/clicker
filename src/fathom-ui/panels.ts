@@ -7,6 +7,7 @@ import { availableUpgrades } from '../fathom/upgrades';
 import { availableEndings, endingRewards, type Ending } from '../fathom/season';
 import { fathomSaves } from '../fathom/save';
 import { DEEP_UNLOCK_SEASONS, isDeepUnlocked } from '../fathom/deep';
+import { createDoors } from '../shared/ui/doors';
 import type { FathomGame } from '../fathom/game';
 import type { Outfit } from '../fathom/state';
 import type { FathomStore } from '../fathom/store';
@@ -101,6 +102,25 @@ export function createEndPanel(store: FathomStore): { el: HTMLElement; render(ga
   return { el, render };
 }
 
+/** The seam: playing as the Source, behind its own door rather than in the configuration. */
+export function createSeam(store: FathomStore) {
+  return createDoors<FathomGame>({
+    button: { text: '◉', aria: 'The seam', className: 'cfg-open seam-open' },
+    title: 'THE SEAM',
+    doors: [
+      {
+        describe: 'Something at the bottom of the trench has been listening to the towns. Answer it.',
+        render: (g) => {
+          const open = !!g.deep || isDeepUnlocked(g.profile);
+          const text = g.deep ? 'RETURN TO THE SOURCE' : open ? 'ANSWER THE SOURCE' : `ANSWER THE SOURCE · AFTER ${DEEP_UNLOCK_SEASONS} SEASONS`;
+          return { text, aria: 'Answer the Source', disabled: !open };
+        },
+        onOpen: () => store.dispatch({ type: 'startDeep', seed: seed() }),
+      },
+    ],
+  });
+}
+
 /** Settings and the save book. */
 export function createConfig(store: FathomStore): { button: HTMLButtonElement; dialog: HTMLElement; render(game: FathomGame): void } {
   const button = h('button', { class: 'cfg-open', type: 'button', 'aria-label': 'Configuration' }, 'CFG');
@@ -113,8 +133,6 @@ export function createConfig(store: FathomStore): { button: HTMLButtonElement; d
   const importButton = h('button', { class: 'buy', type: 'button' }, 'IMPORT');
   const reset = h('button', { class: 'buy cfg-danger', type: 'button', 'aria-label': 'Start a new season from scratch' }, 'START OVER');
   const close = h('button', { class: 'cfg-close', type: 'button', 'aria-label': 'Close' }, '✕');
-  // Play as the Source: the sonar turned around (docs/HORROR-TIER.md).
-  const answer = h('button', { class: 'buy', type: 'button', 'aria-label': 'Answer the Source' }, 'ANSWER THE SOURCE');
   const dialog = h(
     'div',
     { class: 'cfg', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'fa-cfg-title', hidden: true },
@@ -131,8 +149,6 @@ export function createConfig(store: FathomStore): { button: HTMLButtonElement; d
       code,
       h('div', { class: 'cfg-row' }, exportButton, importButton),
       status,
-      h('h3', { class: 'panel-sub' }, 'THE SOURCE'),
-      answer,
       h('h3', { class: 'panel-sub' }, 'START OVER'),
       reset,
     ),
@@ -165,10 +181,6 @@ export function createConfig(store: FathomStore): { button: HTMLButtonElement; d
       setText(status, 'THAT IS NOT A SAVE CODE. NOTHING CHANGED.');
     }
   });
-  answer.addEventListener('click', () => {
-    store.dispatch({ type: 'startDeep', seed: seed() });
-    show(false);
-  });
   let pending = false;
   let pendingAt = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -197,10 +209,6 @@ export function createConfig(store: FathomStore): { button: HTMLButtonElement; d
     render(game) {
       motion.checked = game.profile.settings.reducedMotion;
       sound.checked = game.profile.settings.sound;
-      // A closed door says what opens it.
-      const open = !!game.deep || isDeepUnlocked(game.profile);
-      answer.disabled = !open;
-      setText(answer, open ? 'ANSWER THE SOURCE' : `ANSWER THE SOURCE · AFTER ${DEEP_UNLOCK_SEASONS} SEASONS`);
     },
   };
 }

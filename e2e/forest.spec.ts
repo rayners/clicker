@@ -49,7 +49,7 @@ test('elderdark: listen to the wood and lean on a company', async ({ page }) => 
   // The wood and the dragon open with finished charters; the veteran jump opens them for the test.
   await page.goto('/forest/?debug=veteran');
   await page.goto('/forest/');
-  await page.getByRole('button', { name: /^configuration$/i }).click();
+  await page.getByRole('button', { name: /beyond the palisade/i }).click();
   await page.getByRole('button', { name: /listen to the wood/i }).click();
   const wood = page.getByRole('region', { name: /the wood/i });
   await expect(wood).toBeVisible();
@@ -95,7 +95,7 @@ test('elderdark: wake the dragon and circle a company', async ({ page }) => {
   // The wood and the dragon open with finished charters; the veteran jump opens them for the test.
   await page.goto('/forest/?debug=veteran');
   await page.goto('/forest/');
-  await page.getByRole('button', { name: /^configuration$/i }).click();
+  await page.getByRole('button', { name: /beyond the palisade/i }).click();
   await page.getByRole('button', { name: /wake the dragon/i }).click();
   const hoard = page.getByRole('region', { name: /the hoard/i });
   await expect(hoard).toBeVisible();

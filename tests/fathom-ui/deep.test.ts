@@ -30,9 +30,9 @@ beforeEach(() => {
 });
 
 describe('the Source on screen', () => {
-  it('is reached from the configuration: answer the Source', async () => {
+  it('is reached through its own door in the masthead, not the configuration: answer the Source', async () => {
     const user = setup(applyFathomScenario(createFathomGame(1, 0), 'veteran'));
-    await user.click(screen.getByRole('button', { name: /^configuration$/i }));
+    await user.click(screen.getByRole('button', { name: /^the seam$/i }));
     await user.click(screen.getByRole('button', { name: /answer the source/i }));
     expect(store.getState().mode).toBe('deep');
     expect(screen.getByRole('region', { name: /the source/i })).toBeTruthy();
@@ -99,6 +99,9 @@ describe('the Source on screen', () => {
   it('says how many seasons open the Source before then', async () => {
     const user = setup(createFathomGame(1, 0));
     await user.click(screen.getByRole('button', { name: /^configuration$/i }));
+    expect(screen.queryByRole('button', { name: /answer the source/i })).toBeNull();
+    await user.click(within(screen.getByRole('dialog', { name: /configuration/i })).getByRole('button', { name: /close/i }));
+    await user.click(screen.getByRole('button', { name: /^the seam$/i }));
     const answer = screen.getByRole('button', { name: /answer the source/i }) as HTMLButtonElement;
     expect(answer.disabled).toBe(true);
     expect(answer.textContent).toMatch(/AFTER 2 SEASONS/);

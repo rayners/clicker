@@ -29,9 +29,9 @@ beforeEach(() => {
 });
 
 describe('the wood on screen', () => {
-  it('is reached from the configuration: listen to the wood', async () => {
+  it('is reached through its own door in the masthead, not the configuration: listen to the wood', async () => {
     const user = setup(seasoned(createForestGame(1, 0)));
-    await user.click(screen.getByRole('button', { name: /^configuration$/i }));
+    await user.click(screen.getByRole('button', { name: /beyond the palisade/i }));
     await user.click(screen.getByRole('button', { name: /listen to the wood/i }));
     expect(store.getState().mode).toBe('wood');
     expect(screen.getByRole('region', { name: /the wood/i })).toBeTruthy();
@@ -102,6 +102,9 @@ describe('closed doors in the configuration', () => {
     const keep = screen.getByRole('button', { name: /charter for morrowgate keep/i }) as HTMLButtonElement;
     expect(keep.disabled).toBe(true);
     expect(keep.textContent).toMatch(/AFTER 1 CHARTER$/);
+    expect(screen.queryByRole('button', { name: /listen to the wood|wake the dragon/i })).toBeNull();
+    await user.click(screen.getByRole('button', { name: /close/i }));
+    await user.click(screen.getByRole('button', { name: /beyond the palisade/i }));
     expect((screen.getByRole('button', { name: /listen to the wood/i }) as HTMLButtonElement).textContent).toMatch(/AFTER 2 CHARTERS/);
     expect((screen.getByRole('button', { name: /wake the dragon/i }) as HTMLButtonElement).disabled).toBe(true);
   });

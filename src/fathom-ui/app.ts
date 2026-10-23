@@ -14,7 +14,7 @@ import type { EntryKind, Outfit } from '../fathom/state';
 import type { FathomStore } from '../fathom/store';
 import { incomeNow } from '../fathom/income';
 import { createBeach, createCoast, createShelf, createStation, createTrench, type Component } from './zones';
-import { createConfig, createEndPanel, createStorePanel } from './panels';
+import { createConfig, createEndPanel, createSeam, createStorePanel } from './panels';
 import { createDeepView } from './deep';
 import { createGuideView } from '../shared/ui/guide';
 import { createFathomSound, SONAR_EVERY, soundCues } from './sound';
@@ -47,6 +47,7 @@ const GUIDE_KEY = 'fathom.guide';
 
 export function mountFathom(root: HTMLElement, store: FathomStore): void {
   const config = createConfig(store);
+  const seam = createSeam(store);
   const deepView = createDeepView(store);
   const sound = createFathomSound();
   root.addEventListener('pointerdown', () => sound.unlock(), { passive: true });
@@ -59,7 +60,7 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
   const banner = h(
     'header',
     { class: 'mast' },
-    h('div', { class: 'mast-line' }, h('span', { class: 'mast-name' }, 'HARROW POINT MARINE SAFETY'), guide.rulesButton, config.button),
+    h('div', { class: 'mast-line' }, h('span', { class: 'mast-name' }, 'HARROW POINT MARINE SAFETY'), guide.rulesButton, seam.button, config.button),
     h('div', { class: 'mast-line' }, season, depthValue),
     h('div', { class: 'sonar', 'aria-hidden': 'true' }, h('i', { class: 'sonar-sweep' })),
   );
@@ -166,7 +167,7 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
 
   root.classList.add('sonar-shell');
   const shell = [banner, status, ...panels.map((p) => p.el), h('div', { class: 'pass-bay' }, guide.el, pass), tabbar];
-  root.replaceChildren(...shell, deepView.el, config.dialog, guide.rulesDialog);
+  root.replaceChildren(...shell, deepView.el, config.dialog, seam.dialog, guide.rulesDialog);
   select('log');
 
   function render(game: FathomGame) {
@@ -181,6 +182,7 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
     root.dataset.motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
     config.render(game);
     deepView.render(game);
+    seam.render(game);
     // Behind the Source, the season is out of reach.
     for (const el of shell) el.toggleAttribute('inert', game.mode !== 'season');
     sound.setEnabled(game.profile.settings.sound);

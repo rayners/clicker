@@ -29,9 +29,9 @@ beforeEach(() => {
 });
 
 describe('the dragon on screen', () => {
-  it('is woken from the configuration', async () => {
+  it('is woken through its own door in the masthead', async () => {
     const user = setup(seasoned(createForestGame(1, 0)));
-    await user.click(screen.getByRole('button', { name: /^configuration$/i }));
+    await user.click(screen.getByRole('button', { name: /beyond the palisade/i }));
     await user.click(screen.getByRole('button', { name: /wake the dragon/i }));
     expect(store.getState().mode).toBe('dragon');
     expect(screen.getByRole('region', { name: /the hoard/i })).toBeTruthy();
