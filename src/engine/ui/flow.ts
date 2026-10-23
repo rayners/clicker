@@ -35,7 +35,10 @@ export interface FlowSpec<S> {
   meterLabel: string;
   rateUnit: string;
   read(state: S): FlowReading;
-  /** Changes when a new run starts, so the first reading of a new run isn't called out as a change. */
+  /**
+   * Something that changes when a new run starts (keep a seed in the run's state for it), so the first reading of a
+   * new run isn't called out as a change.
+   */
   identity(state: S): string;
 }
 

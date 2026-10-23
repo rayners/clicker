@@ -10,6 +10,7 @@ import { defendMission } from '../sim/bot';
 import type { ContractRecord, GameState } from './game';
 import { runBoardStory } from './boardroom-story';
 import { availableAssignments, horrorFor, isBoardroomUnlocked, missionConfigFor, missionRecord } from './prestige';
+import { newStory } from '../engine/story';
 
 /** The Boardroom (docs/BOARDROOM.md): WARDEN promoted to Kessler-Amari headquarters, running contracts in parallel. */
 export const START_VALUE = 5e6;
@@ -117,7 +118,6 @@ export function createBoardroom(seed: number, term = 1, dividends = 0): Boardroo
   return {
     term,
     rng: seed,
-    elapsed: 0,
     value: START_VALUE * (1 + DIVIDEND_START * dividends),
     lifetimeValue: 0,
     slots: START_SLOTS,
@@ -129,12 +129,7 @@ export function createBoardroom(seed: number, term = 1, dividends = 0): Boardroo
     frozenFor: 0,
     divisions: {},
     ledger: [],
-    act: 1,
-    beats: {},
-    lastBeatAt: null,
-    flags: [],
-    log: [],
-    nextLogId: 1,
+    ...newStory(),
   };
 }
 

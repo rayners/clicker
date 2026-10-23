@@ -72,7 +72,7 @@ published build only, persistent storage, and the site's service worker.
 | Module | What it does |
 |---|---|
 | `rng` | `nextRandom`, `randomInt`: mulberry32, with its state as one integer you keep in your game state. |
-| `story` | `runBeats`: fires story beats (at most one per tick, spaced unless urgent) that write log entries and set acts, flags or game actions. `sinceBeat` gives seconds since a beat fired. |
+| `story` | `newStory` makes a run's story fields (spread it into the host); `runBeats` fires story beats (at most one per tick, spaced unless urgent) that write log entries and set acts, flags or game actions. `sinceBeat` gives seconds since a beat fired. |
 | `lexicon` | `interpolate`, `placeholders`: `{placeholder}` text written once and filled from each scenario's phrases. |
 | `log` | `appendLog`: a capped, time-stamped log on any host. |
 | `ground` | Held ground: sections taken at a frontier by `assault`, kept by garrisons (`setGarrison`), slipping back under pressure (`tickGround`). |

@@ -1,6 +1,6 @@
 import { appendLog } from '../engine/log';
 import { randomInt } from '../engine/rng';
-import { runBeats, type StoryHost } from '../engine/story';
+import { newStory, runBeats, type StoryHost } from '../engine/story';
 import { BEATS, UPGRADES, type NoteKind } from './content';
 
 const START_WIRE = 1_000;
@@ -63,13 +63,7 @@ export function createWorks(seed: number, goodwill = 0): Works {
     seed,
     rng: seed,
     goodwill,
-    elapsed: 0,
-    log: [],
-    nextLogId: 0,
-    act: 1,
-    beats: {},
-    lastBeatAt: null,
-    flags: [],
+    ...newStory<NoteKind>(),
   };
   return appendLog<NoteKind, Works>(w, 'note', 'CLIP WORKS. One bench, one spool of wire, and a hand-lettered sign: CLIPS 5¢.');
 }

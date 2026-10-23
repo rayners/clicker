@@ -31,6 +31,9 @@ Fixed in the engine along the way:
 - **The settings' About link** pointed at this site; it can point elsewhere, or be left out.
 - **The one-line guide tip** only worked because each game's stylesheet carried the same rules. They live in
   `src/engine/ui/engine.css` now, which every game imports before its theme.
+- **The story host's seven fields** were spelled out by every game; `newStory()` makes them.
+- **The flow readout's `identity`** needed a run identity nobody had documented; the reference says so now (keep a
+  seed in the run).
 - **Pacing bots** were written out by hand in every game; the engine's `playthrough`, `huntDecider`, `playHunt` and
   `defend` (`src/engine/bot.ts`) replace them, and this game's bot is twenty lines of decisions on top.
 - The screen parts themselves (dialog, settings, ending chooser, stepper, dial, buy lists and shop, tabs, action
@@ -42,10 +45,6 @@ Still open:
 - **Styles.** `engine.css` holds only behaviour. A new game still writes a whole theme before it looks right; a
   neutral default theme for every engine class would let it start from something.
 - **The page.** `index.html`, the PWA manifest and icons are written by hand per game.
-- **The story host.** A game that tells a story must remember seven fields (`act`, `beats`, `lastBeatAt`, `flags`,
-  `log`, `nextLogId`, `elapsed`); a helper that makes them would save the boilerplate.
-- **The flow readout's identity.** It needs something that changes when a new run starts. This game added a `seed`
-  for it; the reference should say so.
 
 ## What its bot found
 

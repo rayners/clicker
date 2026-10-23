@@ -9,6 +9,7 @@ import type { AsylumFields } from './asylum/state';
 import type { PatientFields } from './patient/state';
 import type { KillerDef, VenueDef } from './kinds';
 import { KILLERS, VENUES } from './registry';
+import { newStory } from '../engine/story';
 
 export type VenueId = 'camp' | 'clinic' | 'insurer' | 'asylum';
 export type KillerId = 'drowned' | 'burned' | 'design' | 'patient';
@@ -103,18 +104,12 @@ export function composeRun(config: RunConfig, seed: number, venue: VenueDef, kil
     killer: config.killer,
     seed,
     rng: seed,
-    elapsed: 0,
     cash: 0,
     lifetimeCash: 0,
     upgrades: [],
     bodyCount: 0,
     reputation: 1,
-    act: 1,
-    beats: {},
-    lastBeatAt: null,
-    flags: [],
-    log: [],
-    nextLogId: 1,
+    ...newStory(),
   };
   const blank = { ...core, ...venue.fields(config), ...killer.fields() } as Run;
   return venue.boot(config).reduce<Run>((r, line) => appendLog<EntryKind, Run>(r, 'osd', line), blank);

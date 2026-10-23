@@ -14,6 +14,11 @@ export interface StoryHost<K extends string = string> extends LogHost<K> {
   flags: string[];
 }
 
+/** A fresh story for a new run: act one, no beats or flags, and an empty log counting from one. Spread it into the host. */
+export function newStory<K extends string = string>(): StoryHost<K> {
+  return { elapsed: 0, act: 1, beats: {}, lastBeatAt: null, flags: [], log: [], nextLogId: 1 };
+}
+
 /** What a beat changes besides the log: the act, a flag, or a game-specific action. */
 export type StoryEffect =
   | { kind: 'setAct'; act: number }

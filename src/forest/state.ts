@@ -4,6 +4,7 @@ import { BUILDINGS, type BuildingId } from '../forest-data/buildings';
 import { appendLog, type LogEntry } from '../engine/log';
 import { createGround, type SectionState } from '../engine/ground';
 import { FLOORS, KEEP_NAME } from '../forest-data/keep';
+import { newStory } from '../engine/story';
 
 /** Ledger entry voices: the clerk's own hand, the town and its orders, the hands themselves, and omens. */
 export type EntryKind = 'ledger' | 'town' | 'hand' | 'omen';
@@ -105,7 +106,6 @@ export function createCompany(seed: number, charter: CharterTerms = FIRST_CHARTE
     oil: 0,
     seed,
     rng: seed,
-    elapsed: 0,
     silver: STARTING_SILVER,
     lifetimeSilver: 0,
     relics: 0,
@@ -127,12 +127,7 @@ export function createCompany(seed: number, charter: CharterTerms = FIRST_CHARTE
     woodPush: 0,
     buildings: Object.fromEntries(BUILDINGS.map((b) => [b.id, 0])) as Record<BuildingId, number>,
     upgrades: [],
-    act: 1,
-    beats: {},
-    lastBeatAt: null,
-    flags: [],
-    log: [],
-    nextLogId: 1,
+    ...newStory(),
   };
   return [
     'LEDGER OF THE COMPANY OF THE ASHEN KEY. KEPT AT THISTLEGATE BY THE FACTOR.',

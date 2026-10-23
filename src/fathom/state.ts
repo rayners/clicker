@@ -3,6 +3,7 @@ import type { SectionState } from '../engine/ground';
 import { ATTRACTIONS, GUARDS } from '../fathom-data/shallows';
 import { TRAWLERS } from '../fathom-data/shelf';
 import { SPECIMENS } from '../fathom-data/open-water';
+import { newStory } from '../engine/story';
 
 /** sonar: the outfit's own instruments; town: Harrow Point and its council; crew: your people; attack: what the water takes. */
 export type EntryKind = 'sonar' | 'town' | 'crew' | 'attack';
@@ -100,7 +101,6 @@ export function createOutfit(seed: number, terms: SeasonTerms = FIRST_SEASON): O
     terms: { ...terms },
     seed,
     rng: seed,
-    elapsed: 0,
     cash: 0,
     lifetimeCash: 0,
     attractions: zeroes(ATTRACTIONS),
@@ -133,12 +133,7 @@ export function createOutfit(seed: number, terms: SeasonTerms = FIRST_SEASON): O
     bodyCount: 0,
     attacks: 0,
     upgrades: [],
-    act: 1,
-    beats: {},
-    lastBeatAt: null,
-    flags: [],
-    log: [],
-    nextLogId: 1,
+    ...newStory(),
   };
   return [
     'SONAR ONLINE. DEPTH UNDER THE KEEL: 4 M.',

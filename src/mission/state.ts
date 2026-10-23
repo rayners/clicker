@@ -13,6 +13,7 @@ import type { CreatureFields } from './creature/state';
 import type { HunterFields } from './hunter/state';
 import type { OutbreakFields } from './outbreak/state';
 import { HORRORS, SCENARIOS } from './registry';
+import { newStory } from '../engine/story';
 
 export type ScenarioId = 'extraction' | 'terraform' | 'security' | 'haulage' | 'overland' | 'salvage';
 export type HorrorId = 'organism' | 'quiet' | 'creature' | 'hunter' | 'outbreak';
@@ -166,7 +167,6 @@ export function composeMission(config: MissionConfig, seed: number, scenario: Sc
     horror: config.horror,
     seed,
     rng: seed,
-    elapsed: 0,
     credits: 0,
     lifetimeCredits: 0,
     upgrades: [],
@@ -174,12 +174,7 @@ export function composeMission(config: MissionConfig, seed: number, scenario: Sc
     directive: null,
     directiveResults: {},
     lastDirectiveAt: null,
-    act: 1,
-    beats: {},
-    lastBeatAt: null,
-    flags: [],
-    log: [],
-    nextLogId: 1,
+    ...newStory(),
   };
   const blank = { ...core, ...scenario.fields(config), ...horror.fields() } as MissionState;
   return scenario.boot(config).reduce<MissionState>((m, line) => appendLog(m, 'sys', line), blank);
