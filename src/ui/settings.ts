@@ -1,9 +1,9 @@
-import { confirmedInTime } from '../shared/ui/confirm';
+import { confirmedInTime } from '../engine/ui/confirm';
 import type { GameState } from '../core/game';
 import { exportSave, importSave } from '../core/save';
 import type { Store } from '../core/store';
-import { aboutLink, h, setText } from '../shared/ui/dom';
-import { createOptOut } from '../shared/telemetry';
+import { aboutLink, h, setText } from '../engine/ui/dom';
+import { createOptOut } from '../engine/telemetry';
 
 const CONFIRM_TIMEOUT_MS = 5000;
 

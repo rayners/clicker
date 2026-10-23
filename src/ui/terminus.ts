@@ -1,9 +1,9 @@
 import type { GameState } from '../core/game';
 import { availableEndings, endingRewards, type Ending } from '../core/prestige';
 import type { Store } from '../core/store';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { h, setAttr, setText } from '../engine/ui/dom';
 import { horrorOf, scenarioOf } from '../mission/registry';
-import { interpolate } from '../shared/lexicon';
+import { interpolate } from '../engine/lexicon';
 
 const ENDINGS: Record<Ending, { rewardText: (s: number, c: number) => string }> = {
   deliver: { rewardText: (s) => `+${s} SENIORITY // PERMANENT OUTPUT BONUS` },

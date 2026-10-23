@@ -1,4 +1,4 @@
-import type { GuideRules, GuideStep } from '../shared/guide';
+import type { GuideRules, GuideStep } from '../engine/guide';
 import type { GameState } from '../core/game';
 import { isCrewUnlocked } from '../mission/crew';
 import { isOutbreak, type MissionState, type OutbreakMission, type ScenarioId } from '../mission/state';

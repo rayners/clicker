@@ -2,7 +2,7 @@ import type { Store } from '../core/store';
 import { SALVAGE_UPGRADES } from '../data/salvage/upgrades';
 import { effectiveNotch, isGovernorActive, isSealed, safeLine } from '../mission/salvage/economy';
 import type { SalvageMission } from '../mission/state';
-import { h, setText } from '../shared/ui/dom';
+import { h, setText } from '../engine/ui/dom';
 
 const GOVERNOR = SALVAGE_UPGRADES.find((u) => u.effect.kind === 'governor')!.id;
 

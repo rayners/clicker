@@ -7,7 +7,7 @@ import { applyScenario, debugSpeed, grantCredits, SCENARIOS, storySummary } from
 import { depth } from '../../src/mission/extraction/progress';
 import { progress } from '../../src/mission/terraform/economy';
 import { progress as securityProgress } from '../../src/mission/security/economy';
-import { held } from '../../src/shared/ground';
+import { held } from '../../src/engine/ground';
 import { progress as salvageProgress, shoringHold, holdNeeded } from '../../src/mission/salvage/economy';
 import { isSpecialProjectsUnlocked } from '../../src/mission/organism/containment';
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { memoByState } from '../../src/shared/memo';
+import { memoByState } from '../../src/engine/memo';
 
 describe('memoising a derived value per immutable state', () => {
   it('computes once per state object, and again for a new one', () => {

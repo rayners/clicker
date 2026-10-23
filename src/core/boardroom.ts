@@ -1,11 +1,11 @@
 import { createMission, isOutbreak, type MissionConfig, type MissionState, type ScenarioId } from '../mission/state';
 import { CREW } from '../data/crew';
 import { DIVISIONS, type Division, type DivisionId } from '../data/boardroom/divisions';
-import { nextRandom } from '../shared/rng';
+import { nextRandom } from '../engine/rng';
 import { crewStatus } from '../mission/crew';
 import { tickMission } from '../mission/tick';
-import { appendLog, type LogEntry } from '../shared/log';
-import { formatNumber } from '../shared/format';
+import { appendLog, type LogEntry } from '../engine/log';
+import { formatNumber } from '../engine/format';
 import { defendMission } from '../sim/bot';
 import type { ContractRecord, GameState } from './game';
 import { runBoardStory } from './boardroom-story';

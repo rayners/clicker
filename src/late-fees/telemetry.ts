@@ -1,4 +1,4 @@
-import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../shared/telemetry';
+import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../engine/telemetry';
 import { ZONES } from '../late-fees-data/camp';
 import { BEDS } from '../late-fees-data/clinic';
 import { WARDS } from '../late-fees-data/asylum';

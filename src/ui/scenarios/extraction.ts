@@ -1,4 +1,4 @@
-import { formatNumber } from '../../shared/format';
+import { formatNumber } from '../../engine/format';
 import type { Store } from '../../core/store';
 import { GENERATORS } from '../../data/extraction/generators';
 import { UPGRADES } from '../../data/extraction/upgrades';

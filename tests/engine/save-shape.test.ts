@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { hasShape } from '../../src/shared/save';
+import { hasShape } from '../../src/engine/save';
 import { createGame } from '../../src/core/game';
 import { deserialize as contractDeserialize, serialize as contractSerialize } from '../../src/core/save';
 import { forestSaves } from '../../src/forest/save';

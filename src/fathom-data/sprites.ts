@@ -1,4 +1,4 @@
-import { sprite, type Sprite } from '../shared/pixels';
+import { sprite, type Sprite } from '../engine/pixels';
 
 /** Palette keys: a deep water, b sonar ring, c the fin, d its edge, e the ping. */
 const fin = sprite([

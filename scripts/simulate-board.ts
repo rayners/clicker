@@ -1,5 +1,5 @@
 import { simulateBoard } from '../src/sim/board-bot';
-import { formatDuration, formatNumber } from '../src/shared/format';
+import { formatDuration, formatNumber } from '../src/engine/format';
 
 for (const seed of [1, 7, 42]) {
   const started = performance.now();

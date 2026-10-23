@@ -4,7 +4,7 @@ import { SECURITY_BEATS } from '../../data/security/story';
 import { SECURITY_ARCHIVE } from '../../data/security/archive';
 import { SECURITY_LEXICON } from '../../data/security/lexicon';
 import { SECURITY_CREW_BOOSTS } from '../../data/security/crew-boosts';
-import { createGround, held } from '../../shared/ground';
+import { createGround, held } from '../../engine/ground';
 import type { ScenarioDef } from '../kinds';
 import type { MissionConfig, MissionState, SecurityMission } from '../state';
 import { DEFAULT_ASSAULT_SHARE, progress, tickSecurity } from './economy';

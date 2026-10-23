@@ -1,6 +1,6 @@
-import { formatNumber } from '../shared/format';
-import { h, setAttr, setText } from '../shared/ui/dom';
-import { createFlow } from '../shared/ui/flow';
+import { formatNumber } from '../engine/format';
+import { h, setAttr, setText } from '../engine/ui/dom';
+import { createFlow } from '../engine/ui/flow';
 import { ASYLUM_STAFF, WARDS } from '../late-fees-data/asylum';
 import { ASYLUM_UPGRADES } from '../late-fees-data/asylum-upgrades';
 import {

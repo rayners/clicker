@@ -1,4 +1,4 @@
-import type { GuideRules, GuideStep } from '../shared/guide';
+import type { GuideRules, GuideStep } from '../engine/guide';
 import type { LateGame } from '../late-fees/game';
 import type { Run, VenueId } from '../late-fees/state';
 import { DEFAULT_PREP_SHARE } from '../late-fees/camp/economy';

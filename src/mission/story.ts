@@ -1,8 +1,8 @@
 import type { LogKind } from './log';
 import type { MissionState } from './state';
 import type { StorySignals } from './kinds';
-import type { Lexicon } from '../shared/lexicon';
-import { runBeats as runShared, sinceBeat, type Beat as SharedBeat, type StoryEffect } from '../shared/story';
+import type { Lexicon } from '../engine/lexicon';
+import { runBeats as runShared, sinceBeat, type Beat as SharedBeat, type StoryEffect } from '../engine/story';
 
 /** Seconds between non-urgent beats. */
 export const STORY_MIN_GAP = 20;

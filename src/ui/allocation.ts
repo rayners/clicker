@@ -3,7 +3,7 @@ import { LINES, type Line } from '../data/terraform/systems';
 import { HUMAN_CLIMATE, isAutoBalanced, linePower, lineStates, planetReadings, power, spec, type LineState } from '../mission/terraform/economy';
 import { TERRAFORM_UPGRADES } from '../data/terraform/upgrades';
 import type { TerraformMission } from '../mission/state';
-import { h, setText } from '../shared/ui/dom';
+import { h, setText } from '../engine/ui/dom';
 
 const STATE_TEXT: Record<LineState, string> = {
   'power-limited': 'POWER-LIMITED',

@@ -1,4 +1,4 @@
-import type { TelemetryEvent, TelemetryProps } from '../shared/telemetry';
+import type { TelemetryEvent, TelemetryProps } from '../engine/telemetry';
 import { depth } from './depth';
 import { LEGEND_KEY } from './deep';
 import type { FathomGame } from './game';

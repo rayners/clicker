@@ -1,5 +1,5 @@
-import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../shared/hunt';
-import { nextRandom } from '../shared/rng';
+import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../engine/hunt';
+import { nextRandom } from '../engine/rng';
 import { WOOD_UPGRADES, type WoodEffect } from '../forest-data/wood-upgrades';
 import { defendCompany } from './bot';
 import { tickCompany } from './company';

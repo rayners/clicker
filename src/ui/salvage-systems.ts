@@ -1,9 +1,9 @@
-import { formatNumber } from '../shared/format';
+import { formatNumber } from '../engine/format';
 import type { Store } from '../core/store';
 import { CUTTERS, SHORING } from '../data/salvage/systems';
 import { cutForce, cutterCost, cutterForce, isCutterRevealed, isShoringRevealed, shoringCost, salvageGain, shoringHold } from '../mission/salvage/economy';
 import type { SalvageMission } from '../mission/state';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { h, setAttr, setText } from '../engine/ui/dom';
 
 interface Row {
   el: HTMLLIElement;

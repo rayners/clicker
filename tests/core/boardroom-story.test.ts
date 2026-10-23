@@ -3,7 +3,7 @@ import { createGame, type ContractRecord, type GameState } from '../../src/core/
 import { createBoardroom, type BoardroomState } from '../../src/core/boardroom';
 import { boardLexicon, runBoardStory } from '../../src/core/boardroom-story';
 import { BOARD_BEATS } from '../../src/data/boardroom/story';
-import { placeholders } from '../../src/shared/lexicon';
+import { placeholders } from '../../src/engine/lexicon';
 
 const record = (shipName: string, crewSurvived: number): ContractRecord => ({
   scenario: 'extraction',

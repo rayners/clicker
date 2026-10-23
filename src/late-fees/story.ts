@@ -1,4 +1,4 @@
-import { runBeats, sinceBeat } from '../shared/story';
+import { runBeats, sinceBeat } from '../engine/story';
 import type { RunBeat, Signals, StoryArgs } from './kinds';
 import type { EntryKind, Run } from './state';
 

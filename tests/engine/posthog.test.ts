@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createReducerStore } from '../../src/shared/store';
-import { announce, type OptOut, type TelemetryEvent } from '../../src/shared/telemetry';
+import { createReducerStore } from '../../src/engine/store';
+import { announce, type OptOut, type TelemetryEvent } from '../../src/engine/telemetry';
 
 const posthog = vi.hoisted(() => ({
   init: vi.fn(),
@@ -10,7 +10,7 @@ const posthog = vi.hoisted(() => ({
 }));
 vi.mock('posthog-js', () => ({ default: posthog }));
 
-import { createPostHogSink, POSTHOG_HOST, startAnalytics, trackVisit } from '../../src/shared/posthog';
+import { createPostHogSink, POSTHOG_HOST, startAnalytics, trackVisit } from '../../src/engine/posthog';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 const sharing = (on = true): OptOut & { on: boolean } => {

@@ -1,6 +1,6 @@
-import { formatDuration, formatNumber } from '../shared/format';
-import { h, setText } from '../shared/ui/dom';
-import { createLogView } from '../shared/ui/log';
+import { formatDuration, formatNumber } from '../engine/format';
+import { h, setText } from '../engine/ui/dom';
+import { createLogView } from '../engine/ui/log';
 import type { LateGame } from '../late-fees/game';
 import type { EntryKind } from '../late-fees/state';
 import type { LateStore } from '../late-fees/store';
@@ -12,8 +12,8 @@ import { createSetup } from './setup';
 import { createShelf } from './shelf';
 import { createVenueUis, type VenueUi } from './venues';
 import { createCutView } from './cut';
-import { createGuideView } from '../shared/ui/guide';
-import { createGuideProgress } from '../shared/guide';
+import { createGuideView } from '../engine/ui/guide';
+import { createGuideProgress } from '../engine/guide';
 import { lateGuideRules, lateGuideSteps } from '../late-fees-data/guide';
 
 /** The VCR's tape counter: H:MM:SS. */

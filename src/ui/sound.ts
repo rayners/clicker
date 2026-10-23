@@ -1,7 +1,7 @@
 import type { LogKind } from '../mission/log';
-import { createSynth, humAt, type Hum, type Voice } from '../shared/ui/sound';
+import { createSynth, humAt, type Hum, type Voice } from '../engine/ui/sound';
 
-export type { Hum } from '../shared/ui/sound';
+export type { Hum } from '../engine/ui/sound';
 
 export type Cue = 'click' | 'teletype' | 'chime' | 'drone' | 'ping';
 

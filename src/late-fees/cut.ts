@@ -1,5 +1,5 @@
-import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../shared/hunt';
-import { nextRandom } from '../shared/rng';
+import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../engine/hunt';
+import { nextRandom } from '../engine/rng';
 import { CUT_UPGRADES, type CutEffect } from '../late-fees-data/cut-upgrades';
 import { defend, type Defended } from './defenders';
 import type { LateGame } from './game';

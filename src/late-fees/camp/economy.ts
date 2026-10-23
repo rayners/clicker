@@ -1,8 +1,8 @@
 import { BOOKING_SECONDS, COUNSELORS, FEE_PER_THREAT, LIGHTS, ZONES, type CounselorDef, type LightDef } from '../../late-fees-data/camp';
 import { CAMP_UPGRADES, type CampEffect } from '../../late-fees-data/camp-upgrades';
-import { assault, frontier, isSecured, tickGround } from '../../shared/ground';
-import { formatNumber } from '../../shared/format';
-import { appendLog } from '../../shared/log';
+import { assault, frontier, isSecured, tickGround } from '../../engine/ground';
+import { formatNumber } from '../../engine/format';
+import { appendLog } from '../../engine/log';
 import { killerPressure } from '../killers';
 import type { CampRun as Run, EntryKind } from '../state';
 import type { Signals } from '../kinds';

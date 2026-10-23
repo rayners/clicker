@@ -1,4 +1,4 @@
-import { h } from '../shared/ui/dom';
+import { h } from '../engine/ui/dom';
 
 export interface GameDoor {
   id: 'contract' | 'elderdark' | 'latefees' | 'downthere';

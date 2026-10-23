@@ -1,8 +1,8 @@
 import { isDocked, legDistance, legWindow } from '../mission/haulage/economy';
 import { profileOf } from '../mission/haulage/profiles';
 import type { HaulageMission } from '../mission/state';
-import { formatDuration } from '../shared/format';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { formatDuration } from '../engine/format';
+import { h, setAttr, setText } from '../engine/ui/dom';
 
 const BAR_CELLS = 20;
 

@@ -1,8 +1,8 @@
 import type { CarDef, EngineDef } from '../../data/haulage/systems';
-import { memoByState } from '../../shared/memo';
+import { memoByState } from '../../engine/memo';
 import type { HaulageEffect } from '../../data/haulage/upgrades';
 import { profileOf, type HaulProfile } from './profiles';
-import { formatNumber } from '../../shared/format';
+import { formatNumber } from '../../engine/format';
 import { isCrewEffective } from '../crew';
 import { horrorProductionMultiplier } from '../horrors';
 import { appendLog } from '../log';

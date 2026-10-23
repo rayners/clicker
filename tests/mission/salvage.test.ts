@@ -25,7 +25,7 @@ import {
   toggleGovernor,
   salvageGain,
 } from '../../src/mission/salvage/economy';
-import { frontier, held, isSecured } from '../../src/shared/ground';
+import { frontier, held, isSecured } from '../../src/engine/ground';
 
 type S = MissionOf<'salvage', 'organism'>;
 const fresh = (patch: Partial<S> = {}): S => ({ ...createMission(SALVAGE_MISSION_CONFIG, 1), ...patch });

@@ -1,8 +1,8 @@
 import { COMPARTMENTS, CUTTERS, SALVAGE_SECONDS, SHORING, STRIP_PER_LOAD, type CutterDef, type ShoringDef } from '../../data/salvage/systems';
-import { memoByState } from '../../shared/memo';
+import { memoByState } from '../../engine/memo';
 import { SALVAGE_UPGRADES, type SalvageEffect } from '../../data/salvage/upgrades';
 import { SALVAGE_CREW_BOOSTS } from '../../data/salvage/crew-boosts';
-import { assault, frontier, isSecured, tickGround, type SectionState } from '../../shared/ground';
+import { assault, frontier, isSecured, tickGround, type SectionState } from '../../engine/ground';
 import { isCrewEffective } from '../crew';
 import { horrorPressure, horrorProductionMultiplier } from '../horrors';
 import { appendLog } from '../log';

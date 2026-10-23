@@ -1,6 +1,6 @@
-import { formatNumber } from '../shared/format';
-import { h, setAttr, setText } from '../shared/ui/dom';
-import { createFlow } from '../shared/ui/flow';
+import { formatNumber } from '../engine/format';
+import { h, setAttr, setText } from '../engine/ui/dom';
+import { createFlow } from '../engine/ui/flow';
 import { AGENTS, POLICIES } from '../late-fees-data/insurer';
 import { INSURER_UPGRADES } from '../late-fees-data/insurer-upgrades';
 import {

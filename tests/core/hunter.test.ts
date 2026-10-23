@@ -7,7 +7,7 @@ import { buyHunterUpgrade, hunterRules, hunterUpgradeCost, HUNTER_ADAPTER, HUNTE
 import { HUNTER_UPGRADES } from '../../src/data/hunter/upgrades';
 import { HUNTER_ARMED_AT, HUNTER_DRIVEN_AT } from '../../src/mission/hunter';
 import { simulateHunter } from '../../src/sim/bot';
-import { pushOn, shiftPush } from '../../src/shared/hunt';
+import { pushOn, shiftPush } from '../../src/engine/hunt';
 import type { HunterMission } from '../../src/mission/state';
 
 const NOW = 1_000_000;

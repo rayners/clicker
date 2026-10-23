@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createGuideProgress, nextStep, type GuideStep } from '../../src/shared/guide';
+import { createGuideProgress, nextStep, type GuideStep } from '../../src/engine/guide';
 
 interface S {
   cash: number;

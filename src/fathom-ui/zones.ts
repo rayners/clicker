@@ -1,5 +1,5 @@
-import { formatNumber } from '../shared/format';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { formatNumber } from '../engine/format';
+import { h, setAttr, setText } from '../engine/ui/dom';
 import { ATTRACTIONS, GUARDS } from '../fathom-data/shallows';
 import { TRAWLERS } from '../fathom-data/shelf';
 import { SPECIMENS } from '../fathom-data/open-water';

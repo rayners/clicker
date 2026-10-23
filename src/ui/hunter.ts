@@ -3,13 +3,13 @@ import type { Store } from '../core/store';
 import { hunterUpgradeCost, isHunterUpgradeAvailable, HUNTER_ADAPTER, type HunterHunt } from '../core/hunter';
 import { HUNTER_UPGRADES } from '../data/hunter/upgrades';
 import type { HunterMission, ScenarioId } from '../mission/state';
-import { formatNumber } from '../shared/format';
-import { h, setAttr, setText } from '../shared/ui/dom';
-import { createConfirmButton } from '../shared/ui/confirm';
-import { legendEarned } from '../shared/hunt';
-import { createGuideView } from '../shared/ui/guide';
-import { createGuideProgress } from '../shared/guide';
-import { huntGuide } from '../shared/hunt-guide';
+import { formatNumber } from '../engine/format';
+import { h, setAttr, setText } from '../engine/ui/dom';
+import { createConfirmButton } from '../engine/ui/confirm';
+import { legendEarned } from '../engine/hunt';
+import { createGuideView } from '../engine/ui/guide';
+import { createGuideProgress } from '../engine/guide';
+import { huntGuide } from '../engine/hunt-guide';
 
 const KIND: Record<ScenarioId, string> = { extraction: 'EXTRACTION', terraform: 'TERRAFORM', security: 'SECURITY', haulage: 'HAULAGE', overland: 'OVERLAND', salvage: 'SALVAGE' };
 /** How each crew reads to the hunter, act by act. */

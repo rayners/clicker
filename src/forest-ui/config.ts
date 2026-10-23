@@ -1,7 +1,7 @@
-import { confirmedInTime } from '../shared/ui/confirm';
-import { aboutLink, h, setText } from '../shared/ui/dom';
+import { confirmedInTime } from '../engine/ui/confirm';
+import { aboutLink, h, setText } from '../engine/ui/dom';
 import { isKeepUnlocked, KEEP_UNLOCK_CHARTERS } from '../forest/charter';
-import { createOptOut } from '../shared/telemetry';
+import { createOptOut } from '../engine/telemetry';
 import { forestSaves } from '../forest/save';
 import type { ForestGame } from '../forest/game';
 import type { ForestStore } from '../forest/store';

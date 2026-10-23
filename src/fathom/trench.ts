@@ -1,6 +1,6 @@
 import { CREW_BASE_COST, CREW_COST_GROWTH, CREW_PER_MODULE, FLOOD_LINES, MODULE_BASE_COST, MODULE_COST_GROWTH, MODULE_RATE, SOURCE_NOTCH, TRENCH_AT } from '../fathom-data/trench';
-import { appendLog } from '../shared/log';
-import { nextRandom } from '../shared/rng';
+import { appendLog } from '../engine/log';
+import { nextRandom } from '../engine/rng';
 import { depth } from './depth';
 import { effects } from './upgrades';
 import { incomeMultiplier, type EntryKind, type Outfit } from './state';

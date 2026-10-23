@@ -1,5 +1,5 @@
 import { GENERATORS, type GeneratorDef } from '../../data/extraction/generators';
-import { memoByState } from '../../shared/memo';
+import { memoByState } from '../../engine/memo';
 import { UPGRADES, type UpgradeEffect } from '../../data/extraction/upgrades';
 import { CREW_BOOSTS } from '../../data/extraction/crew-boosts';
 import { isCrewEffective } from '../crew';

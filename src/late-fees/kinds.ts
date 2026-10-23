@@ -1,5 +1,5 @@
-import type { Beat } from '../shared/story';
-import type { Lexicon } from '../shared/lexicon';
+import type { Beat } from '../engine/story';
+import type { Lexicon } from '../engine/lexicon';
 import type { EntryKind, Run, RunConfig } from './state';
 
 /** What a venue tells the story and the killer about itself. Killers read only this, never venue state. */

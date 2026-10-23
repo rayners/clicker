@@ -1,7 +1,7 @@
 import { simulateLate } from '../src/late-fees/bot';
-import { formatDuration, formatNumber } from '../src/shared/format';
+import { formatDuration, formatNumber } from '../src/engine/format';
 import { incomeRate, lightDemand, lightSupply, prepForce, staff } from '../src/late-fees/camp/economy';
-import { held } from '../src/shared/ground';
+import { held } from '../src/engine/ground';
 import type { CampRun } from '../src/late-fees/state';
 
 const trace = process.argv.includes('--trace');

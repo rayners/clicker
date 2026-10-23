@@ -1,8 +1,8 @@
 import type { Store } from '../core/store';
 import { effectiveBurn, fuelForLeg, fuelPrice, isAutopilotActive, isDocked, safeBurn } from '../mission/haulage/economy';
 import type { HaulageMission } from '../mission/state';
-import { formatNumber } from '../shared/format';
-import { h, setText } from '../shared/ui/dom';
+import { formatNumber } from '../engine/format';
+import { h, setText } from '../engine/ui/dom';
 import { profileOf } from '../mission/haulage/profiles';
 import type { HaulWords } from './haul-words';
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createOptOut, createTelemetry, progressEvents, telemetryAllowed, type TelemetryEvent, type TelemetrySink } from '../../src/shared/telemetry';
+import { createOptOut, createTelemetry, progressEvents, telemetryAllowed, type TelemetryEvent, type TelemetrySink } from '../../src/engine/telemetry';
 
 const live = { prod: true, hostname: 'rayners.github.io', search: '', optedOut: false };
 

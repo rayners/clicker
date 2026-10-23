@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { CONFIRM_GAP_MS } from '../../src/shared/ui/confirm';
+import { CONFIRM_GAP_MS } from '../../src/engine/ui/confirm';
 import { describe, it, expect } from 'vitest';
 import { screen, within } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
@@ -8,7 +8,7 @@ import { createStore, type Store } from '../../src/core/store';
 import { exportSave, importSave } from '../../src/core/save';
 import { mountApp } from '../../src/ui/app';
 import { ext } from '../helpers';
-import { createOptOut } from '../../src/shared/telemetry';
+import { createOptOut } from '../../src/engine/telemetry';
 
 let store: Store;
 let root: HTMLElement;

@@ -1,5 +1,5 @@
 import { simulateFathom } from '../src/fathom/bot';
-import { formatDuration, formatNumber } from '../src/shared/format';
+import { formatDuration, formatNumber } from '../src/engine/format';
 import { depth } from '../src/fathom/depth';
 import { citiesHeld } from '../src/fathom/breach';
 

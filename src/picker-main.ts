@@ -6,8 +6,8 @@ import '@fontsource/unifrakturmaguntia';
 import '@fontsource/monoton';
 import './picker/picker.css';
 import { mountPicker } from './picker/picker';
-import { trackVisit } from './shared/posthog';
-import { createOptOut, telemetryAllowed } from './shared/telemetry';
+import { trackVisit } from './engine/posthog';
+import { createOptOut, telemetryAllowed } from './engine/telemetry';
 
 mountPicker(document.getElementById('app')!, window.localStorage);
 

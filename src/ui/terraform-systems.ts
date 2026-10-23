@@ -1,4 +1,4 @@
-import { formatNumber } from '../shared/format';
+import { formatNumber } from '../engine/format';
 import type { Store } from '../core/store';
 import { LINES, PROCESSORS, REACTORS } from '../data/terraform/systems';
 import {
@@ -12,7 +12,7 @@ import {
   reactorCost,
 } from '../mission/terraform/economy';
 import type { TerraformMission } from '../mission/state';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { h, setAttr, setText } from '../engine/ui/dom';
 
 interface Row {
   el: HTMLLIElement;

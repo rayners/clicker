@@ -1,6 +1,6 @@
 import { COUNSELORS, LIGHTS, STAFF_NAMES, ZONES } from '../../late-fees-data/camp';
 import { CAMP_BEATS, CAMP_ENDINGS, CAMP_LEXICON } from '../../late-fees-data/camp-story';
-import { createGround, held } from '../../shared/ground';
+import { createGround, held } from '../../engine/ground';
 import type { VenueDef } from '../kinds';
 import type { CampRun, RunConfig, Run } from '../state';
 import { campSignals, DEFAULT_PREP_SHARE, tickCamp } from './economy';

@@ -1,6 +1,6 @@
 import { CREW } from '../../data/crew';
 import { HUNTER_ACTS, HUNTER_BEATS } from '../../data/hunter/story';
-import { nextRandom } from '../../shared/rng';
+import { nextRandom } from '../../engine/rng';
 import type { HorrorDef } from '../kinds';
 import { appendLog } from '../log';
 import type { HunterMission, MissionState } from '../state';

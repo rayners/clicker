@@ -1,7 +1,7 @@
 import { BEDS, PATIENT_NAMES, REM_MULTIPLIER, STAFF, type BedDef, type StaffDef } from '../../late-fees-data/clinic';
 import { CLINIC_UPGRADES, type ClinicEffect } from '../../late-fees-data/clinic-upgrades';
-import { appendLog } from '../../shared/log';
-import { nextRandom } from '../../shared/rng';
+import { appendLog } from '../../engine/log';
+import { nextRandom } from '../../engine/rng';
 import { killerPressure } from '../killers';
 import type { Signals } from '../kinds';
 import type { ClinicRun as Run, EntryKind } from '../state';

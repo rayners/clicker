@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { nextRandom, randomInt } from '../../src/shared/rng';
+import { nextRandom, randomInt } from '../../src/engine/rng';
 
 describe('seeded rng', () => {
   it('is deterministic for the same seed', () => {

@@ -1,4 +1,4 @@
-import { nextRandom } from '../../shared/rng';
+import { nextRandom } from '../../engine/rng';
 import { CREW } from '../../data/crew';
 import { COUNTER_DIRECTIVE } from '../../data/core-story';
 import { crewStatus } from '../crew';

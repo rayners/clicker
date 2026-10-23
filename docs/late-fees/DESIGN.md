@@ -29,7 +29,7 @@ Code layout, following Elderdark:
 - `src/late-fees-data/` holds content.
 - `src/late-fees-ui/` is the VHS shell.
 - The page is `late-fees/index.html`, with save key `latefees.save`, its own manifest, and a third door on the picker.
-- The architecture test gains a `late-fees` area that may import only `src/shared/`.
+- The architecture test gains a `late-fees` area that may import only `src/engine/`.
 
 ## 3. The three tapes
 
@@ -199,7 +199,7 @@ After enough sequels, the franchise "goes in a new direction": you play **the ki
 
 **Step 6 is done: the Killer's Cut (play as the horror; design in `docs/HORROR-TIER.md`).**
 - **Side B of the shelf:** pick a killer, and it haunts the camp, the clinic and the insurer at once (original or crossover). Each place runs itself, defended by its pacing bot (`src/late-fees/defenders.ts`).
-- **The shared hunt engine** (`src/shared/hunt.ts`) splits the killer's strength across places in ± steps.
+- **The shared hunt engine** (`src/engine/hunt.ts`) splits the killer's strength across places in ± steps.
   - The push becomes the place's killer pressure (minimum 0.1 when left alone).
   - Hunger is spent per step and fed by the dead.
   - Dread buys upgrades: more strength, harder push, patience, appetite, quiet.

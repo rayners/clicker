@@ -9,7 +9,7 @@ import { GENERATORS } from '../../src/data/extraction/generators';
 import { appendLog } from '../../src/mission/log';
 import { depth } from '../../src/mission/extraction/progress';
 import { creditRate, generatorRate, oreRate, refineryCapacity } from '../../src/mission/extraction/economy';
-import { formatNumber } from '../../src/shared/format';
+import { formatNumber } from '../../src/engine/format';
 import { ext } from '../helpers';
 
 let store: Store;

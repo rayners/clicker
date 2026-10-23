@@ -1,4 +1,4 @@
-import { createSaveSystem, hasShape } from '../shared/save';
+import { createSaveSystem, hasShape } from '../engine/save';
 import { createForestGame, createForestProfile, FOREST_VERSION, type ForestGame } from './game';
 import { createCompany, KEEP } from './state';
 

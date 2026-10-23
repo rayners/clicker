@@ -1,5 +1,5 @@
 import { createProfile, GAME_VERSION, newGame, type GameState } from './game';
-import { createSaveSystem, hasShape, migrate, type Migration, type StorageLike } from '../shared/save';
+import { createSaveSystem, hasShape, migrate, type Migration, type StorageLike } from '../engine/save';
 import { createMission } from '../mission/state';
 
 export { migrate, type StorageLike };

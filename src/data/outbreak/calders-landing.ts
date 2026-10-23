@@ -1,6 +1,6 @@
 import type { Beat } from '../../mission/story';
 import type { MissionState, OutbreakMission, SecurityMission } from '../../mission/state';
-import { held } from '../../shared/ground';
+import { held } from '../../engine/ground';
 
 /**
  * Calder's Landing: what the outbreak means on a security contract. The colony went dark before the detachment

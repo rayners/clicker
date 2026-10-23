@@ -1,4 +1,4 @@
-import type { GuideRules, GuideStep } from '../../shared/guide';
+import type { GuideRules, GuideStep } from '../../engine/guide';
 import type { GameState } from '../../core/game';
 
 /** The Boardroom's walkthrough (docs/BOARDROOM.md): the Board's levers in the order they matter. */

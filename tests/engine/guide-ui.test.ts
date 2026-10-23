@@ -2,9 +2,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { screen, within } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
-import { createGuideProgress, type GuideRules, type GuideStep } from '../../src/shared/guide';
-import { createGuideView } from '../../src/shared/ui/guide';
-import { TELEMETRY_EVENT, type TelemetryEvent } from '../../src/shared/telemetry';
+import { createGuideProgress, type GuideRules, type GuideStep } from '../../src/engine/guide';
+import { createGuideView } from '../../src/engine/ui/guide';
+import { TELEMETRY_EVENT, type TelemetryEvent } from '../../src/engine/telemetry';
 
 interface S {
   drills: number;

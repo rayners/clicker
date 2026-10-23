@@ -1,5 +1,5 @@
-import { h, setText } from '../shared/ui/dom';
-import { interpolate } from '../shared/lexicon';
+import { h, setText } from '../engine/ui/dom';
+import { interpolate } from '../engine/lexicon';
 import type { LateGame } from '../late-fees/game';
 import { venueOf } from '../late-fees/registry';
 import { availableEndings, endingFor } from '../late-fees/sequels';

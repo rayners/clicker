@@ -1,4 +1,4 @@
-import type { SectionState } from '../../shared/ground';
+import type { SectionState } from '../../engine/ground';
 
 /** Security detachment state: Combine Security taking a silent colony back, sector by sector. */
 export interface SecurityFields {

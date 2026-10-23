@@ -1,6 +1,6 @@
-import type { SectionState } from '../shared/ground';
-import { frontier } from '../shared/ground';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import type { SectionState } from '../engine/ground';
+import { frontier } from '../engine/ground';
+import { h, setAttr, setText } from '../engine/ui/dom';
 
 type SectorState = 'secured' | 'contested' | 'frontier' | 'lost';
 

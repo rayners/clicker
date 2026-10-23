@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, within } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
-import { createDoors } from '../../src/shared/ui/doors';
+import { createDoors } from '../../src/engine/ui/doors';
 
 interface S {
   open: boolean;

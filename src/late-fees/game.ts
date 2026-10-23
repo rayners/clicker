@@ -1,5 +1,5 @@
-import { appendLog } from '../shared/log';
-import { formatDuration, formatNumber } from '../shared/format';
+import { appendLog } from '../engine/log';
+import { formatDuration, formatNumber } from '../engine/format';
 import { CAMP_CONFIG, createRun, type EntryKind, type KillerId, type Run, type VenueId } from './state';
 import { tickRun } from './tick';
 import { tickCut, type KillerCut } from './cut';

@@ -1,4 +1,4 @@
-import { appendLog as appendShared, LOG_LIMIT, type LogEntry as SharedLogEntry } from '../shared/log';
+import { appendLog as appendShared, LOG_LIMIT, type LogEntry as SharedLogEntry } from '../engine/log';
 import type { MissionCore } from './state';
 
 export type LogKind = 'sys' | 'corp' | 'crew' | 'anomaly';

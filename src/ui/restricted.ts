@@ -9,7 +9,7 @@ import {
   isCreatureUnlocked,
   isHunterUnlocked,
 } from '../core/prestige';
-import { createDoors } from '../shared/ui/doors';
+import { createDoors } from '../engine/ui/doors';
 
 const seed = () => (Math.random() * 2 ** 31) | 0;
 

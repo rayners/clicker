@@ -24,7 +24,7 @@ import {
   toggleTacticalNet,
   trooperCost,
 } from '../../src/mission/security/economy';
-import { frontier, held, isSecured } from '../../src/shared/ground';
+import { frontier, held, isSecured } from '../../src/engine/ground';
 
 type S = MissionOf<'security', 'organism'>;
 const fresh = (patch: Partial<S> = {}): S => ({ ...createMission(SECURITY_MISSION_CONFIG, 1), ...patch });

@@ -1,16 +1,16 @@
 import type { GameState } from '../core/game';
 import type { Store } from '../core/store';
 import { boardDate, contractYears, charterable, charterCost, divisionCost, floorCost, freeSlot, MAX_SLOTS, INQUIRY_AT, termEndings, type BoardContract, type TermEnding } from '../core/boardroom';
-import { createConfirmButton } from '../shared/ui/confirm';
-import { createGuideView } from '../shared/ui/guide';
-import { createGuideProgress } from '../shared/guide';
+import { createConfirmButton } from '../engine/ui/confirm';
+import { createGuideView } from '../engine/ui/guide';
+import { createGuideProgress } from '../engine/guide';
 import { boardGuideRules, boardGuideSteps } from '../data/boardroom/guide';
 import { DIVISIONS } from '../data/boardroom/divisions';
 import { CREW } from '../data/crew';
 import { crewStatus } from '../mission/crew';
 import type { ScenarioId } from '../mission/state';
-import { formatNumber } from '../shared/format';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { formatNumber } from '../engine/format';
+import { h, setAttr, setText } from '../engine/ui/dom';
 
 const KIND: Record<ScenarioId, string> = { extraction: 'EXTRACTION', terraform: 'TERRAFORM', security: 'SECURITY', haulage: 'HAULAGE', overland: 'OVERLAND', salvage: 'SALVAGE' };
 const ACT_NAMES = ['', 'ON SCHEDULE', 'UNDER REVIEW', 'SPECIAL INTEREST', 'LOSSES REPORTED'];

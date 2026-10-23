@@ -5,7 +5,7 @@ import { KILLERS, VENUES } from '../../src/late-fees/registry';
 import { COUNSELORS } from '../../src/late-fees-data/camp';
 import { NIGHT_FROM } from '../../src/late-fees/camp/economy';
 import { CONFRONTATION_AFTER, CREDITS_AFTER, creditsIn } from '../../src/late-fees/story';
-import { placeholders } from '../../src/shared/lexicon';
+import { placeholders } from '../../src/engine/lexicon';
 import type { VenueDef } from '../../src/late-fees/kinds';
 
 type C = RunOf<'camp', 'drowned'>;

@@ -1,5 +1,5 @@
-import { formatNumber } from '../shared/format';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { formatNumber } from '../engine/format';
+import { h, setAttr, setText } from '../engine/ui/dom';
 import { CLASSES } from '../forest-data/classes';
 import { available, hireCost, inField, isHireable, postedBlades } from '../forest/company';
 import type { Company } from '../forest/state';

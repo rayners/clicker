@@ -1,7 +1,7 @@
 import type { ForestGame } from '../forest/game';
 import type { ForestStore } from '../forest/store';
 import { DRAGON_LEGEND, DRAGON_UNLOCK_CHARTERS, isDragonUnlocked, isWoodUnlocked, WOOD_UNLOCK_CHARTERS } from '../forest/charter';
-import { createDoors } from '../shared/ui/doors';
+import { createDoors } from '../engine/ui/doors';
 
 const seed = () => (Math.random() * 2 ** 31) | 0;
 

@@ -1,7 +1,7 @@
 import { ASYLUM_STAFF, PATIENT_NAMES_ASYLUM, WARDS, type StaffDef, type WardDef } from '../../late-fees-data/asylum';
 import { ASYLUM_UPGRADES, type AsylumEffect } from '../../late-fees-data/asylum-upgrades';
-import { appendLog } from '../../shared/log';
-import { nextRandom } from '../../shared/rng';
+import { appendLog } from '../../engine/log';
+import { nextRandom } from '../../engine/rng';
 import { killerPressure } from '../killers';
 import type { Signals } from '../kinds';
 import type { AsylumRun as Run, EntryKind } from '../state';

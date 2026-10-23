@@ -1,4 +1,4 @@
-import type { GuideRules, GuideStep } from '../shared/guide';
+import type { GuideRules, GuideStep } from '../engine/guide';
 import type { ForestGame } from '../forest/game';
 import { TURN_THRESHOLD } from '../forest/company';
 

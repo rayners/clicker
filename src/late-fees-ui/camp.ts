@@ -1,6 +1,6 @@
-import { formatNumber } from '../shared/format';
-import { h, setAttr, setText } from '../shared/ui/dom';
-import { frontier } from '../shared/ground';
+import { formatNumber } from '../engine/format';
+import { h, setAttr, setText } from '../engine/ui/dom';
+import { frontier } from '../engine/ground';
 import { COUNSELORS, LIGHTS, ZONES } from '../late-fees-data/camp';
 import { CAMP_UPGRADES } from '../late-fees-data/camp-upgrades';
 import {

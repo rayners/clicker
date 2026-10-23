@@ -1,7 +1,7 @@
-import { formatNumber } from '../shared/format';
+import { formatNumber } from '../engine/format';
 import type { Store } from '../core/store';
 import type { MissionState } from '../mission/state';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { h, setAttr, setText } from '../engine/ui/dom';
 
 interface UpgradeEntry {
   id: string;

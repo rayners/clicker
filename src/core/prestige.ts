@@ -15,7 +15,7 @@ import {
   type ScenarioId,
 } from '../mission/state';
 import { horrorOf, scenarioOf } from '../mission/registry';
-import { nextRandom } from '../shared/rng';
+import { nextRandom } from '../engine/rng';
 import type { ContractRecord, GameState, Profile } from './game';
 
 export type Ending = 'deliver' | 'scuttle' | 'broadcast';

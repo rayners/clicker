@@ -1,4 +1,4 @@
-import { formatNumber } from '../../shared/format';
+import { formatNumber } from '../../engine/format';
 import type { Store } from '../../core/store';
 import { FABRICATORS, SECTIONS, TROOPERS } from '../../data/security/systems';
 import { SECURITY_UPGRADES } from '../../data/security/upgrades';
@@ -17,8 +17,8 @@ import {
   trooperForce,
 } from '../../mission/security/economy';
 import type { MissionState, SecurityMission } from '../../mission/state';
-import { frontier, held } from '../../shared/ground';
-import { h } from '../../shared/ui/dom';
+import { frontier, held } from '../../engine/ground';
+import { h } from '../../engine/ui/dom';
 import { createSecuritySystemsPanel } from '../security-systems';
 import { createSite } from '../site';
 import { createSplit } from '../split';

@@ -37,7 +37,7 @@ Each zone opens as the outfit reaches deeper. Like Elderdark's regions, a zone k
 - **The Shelf:** fishing licences and salvage. Sonar coverage and trawler wear. Squid and octopus wreck gear rather than people, so the dial is **coverage against upkeep**.
 - **Open Water:** the research station sells specimens and data to the parent company. Pens hold specimens, and smarter specimens pay more and escape more. The dial is **research yield against containment**, a cousin of DEEP CONTRACT's containment that is deliberately more visible.
 - **The Trench:** a pressure station. Going deeper pays more, and hull integrity falls with depth and time. Repair crews and pressure hulls are the brake. The dial is **depth against integrity**, and a breach floods modules.
-- **The Breach:** coastal cities are **held ground** (the shared engine `src/shared/ground.ts`). Kaiju attacks push cities back. Walls hold a city cheaply until a bigger category comes. **Bulwarks** are expensive and need **paired pilots**, who must be compatible (a "link" rating, the drift homage). The dial is **walls against Bulwarks**, and pilots against fatigue.
+- **The Breach:** coastal cities are **held ground** (the shared engine `src/engine/ground.ts`). Kaiju attacks push cities back. Walls hold a city cheaply until a bigger category comes. **Bulwarks** are expensive and need **paired pilots**, who must be compatible (a "link" rating, the drift homage). The dial is **walls against Bulwarks**, and pilots against fatigue.
 
 Every lever is shown on a flow readout (catch ▸ process ▸ income, then later defence ▸ damage ▸ income), the same as the other games.
 
@@ -66,12 +66,12 @@ Each run is the next **season**. What carries over is **Reputation** (contracts 
 
 ## 7. Later: play as the horror
 
-Play **the kaiju**, using the shared hunt engine (`src/shared/hunt.ts`). Several coastal cities, each running its own defence through its bot, are the prey. You pick where to surface. This is the same pattern as the Killer's Cut, the wood and the creature.
+Play **the kaiju**, using the shared hunt engine (`src/engine/hunt.ts`). Several coastal cities, each running its own defence through its bot, are the prey. You pick where to surface. This is the same pattern as the Killer's Cut, the wood and the creature.
 
 ## Architecture
 
 - It follows Elderdark and LATE FEES. `src/fathom/` holds the pure simulation (no DOM, clock or `Math.random()`), `src/fathom-data/` the content, and `src/fathom-ui/` the shell. It has its own page, save key, manifest and picker door.
-- The architecture test gains a `fathom` area that may import only `src/shared/`.
+- The architecture test gains a `fathom` area that may import only `src/engine/`.
 - **The name** is DOWN THERE. The page lives at `/down-there/` and has its picker door.
 
 ## Build order (each step test-first)

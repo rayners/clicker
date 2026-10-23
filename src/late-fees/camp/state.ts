@@ -1,4 +1,4 @@
-import type { SectionState } from '../../shared/ground';
+import type { SectionState } from '../../engine/ground';
 
 /** Camp Blackwater: zones opened at the frontier, kept only while watched and lit. */
 export interface CampFields {

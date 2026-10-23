@@ -20,8 +20,8 @@ const edges = files(SRC).flatMap((file) =>
 );
 
 const area = (path: string) => {
-  if (path.startsWith('shared/')) return 'shared';
-  // The About page sits with the picker: shared code only.
+  if (path.startsWith('engine/')) return 'engine';
+  // The About page sits with the picker: engine code only.
   if (path.startsWith('picker') || path.startsWith('about')) return 'picker';
   if (path.startsWith('late-fees')) return 'late-fees';
   if (path.startsWith('fathom')) return 'fathom';
@@ -29,9 +29,9 @@ const area = (path: string) => {
   return 'deep-contract';
 };
 
-describe('code boundaries between the two games', () => {
-  it('keeps the shared engine free of either game', () => {
-    const leaks = edges.filter(([from, to]) => area(from) === 'shared' && area(to) !== 'shared');
+describe('code boundaries between the engine and the games', () => {
+  it('keeps the engine (src/engine) free of either game', () => {
+    const leaks = edges.filter(([from, to]) => area(from) === 'engine' && area(to) !== 'engine');
     expect(leaks).toEqual([]);
   });
 
@@ -46,19 +46,19 @@ describe('code boundaries between the two games', () => {
   });
 
   it('keeps the game picker out of both games: it only links to them', () => {
-    const leaks = edges.filter(([from, to]) => area(from) === 'picker' && area(to) !== 'shared' && area(to) !== 'picker');
+    const leaks = edges.filter(([from, to]) => area(from) === 'picker' && area(to) !== 'engine' && area(to) !== 'picker');
     expect(leaks).toEqual([]);
   });
 
-  it('keeps LATE FEES to itself and the shared engine, and the other games out of it', () => {
-    const outward = edges.filter(([from, to]) => area(from) === 'late-fees' && area(to) !== 'shared' && area(to) !== 'late-fees');
+  it('keeps LATE FEES to itself and the engine (src/engine), and the other games out of it', () => {
+    const outward = edges.filter(([from, to]) => area(from) === 'late-fees' && area(to) !== 'engine' && area(to) !== 'late-fees');
     const inward = edges.filter(([from, to]) => area(from) !== 'late-fees' && area(to) === 'late-fees');
     expect(outward).toEqual([]);
     expect(inward).toEqual([]);
   });
 
-  it('keeps the deep-water game to itself and the shared engine, and the other games out of it', () => {
-    const outward = edges.filter(([from, to]) => area(from) === 'fathom' && area(to) !== 'shared' && area(to) !== 'fathom');
+  it('keeps the deep-water game to itself and the engine (src/engine), and the other games out of it', () => {
+    const outward = edges.filter(([from, to]) => area(from) === 'fathom' && area(to) !== 'engine' && area(to) !== 'fathom');
     const inward = edges.filter(([from, to]) => area(from) !== 'fathom' && area(to) === 'fathom');
     expect(outward).toEqual([]);
     expect(inward).toEqual([]);

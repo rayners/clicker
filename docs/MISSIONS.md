@@ -12,7 +12,7 @@ Two decisions shape them:
 
 Every mission must give the player a different **balancing problem** (the user's favourite part, "the paperclip game in a good way") and a visible cause and effect for every purchase. Missions are not reskins.
 
-## 1. The shared engine: held ground (`src/shared/ground.ts`)
+## 1. The shared engine: held ground (`src/engine/ground.ts`)
 
 Pure functions, no game imports. A **site** is an ordered list of **sections**: rooms, decks, buildings or floors. Each section has a definition and a state.
 
@@ -138,10 +138,10 @@ The core trade-off is identical in both games and is the point of sharing it: **
 
 **Endings** (lexicon): deliver = tow the *Aurelian Gift* home with the hold sealed; scuttle = cut her drive core loose and let it burn.
 
-**Missions it shares with:** held ground (`src/shared/ground.ts`), the sector column (`src/ui/site.ts`, generalised to take any run of sections), the organism horror's `pressure` hook.
+**Missions it shares with:** held ground (`src/engine/ground.ts`), the sector column (`src/ui/site.ts`, generalised to take any run of sections), the organism horror's `pressure` hook.
 ## As built (2026-10-20)
 
-**1. Held ground: done** (`src/shared/ground.ts`, `tests/shared/ground.test.ts`). It differs from the sketch in two ways, both found by the pacing bot:
+**1. Held ground: done** (`src/engine/ground.ts`, `tests/shared/ground.test.ts`). It differs from the sketch in two ways, both found by the pacing bot:
 - **Contested sectors.** A secured section has a `secured` flag. It stays held, and keeps paying, while it slips; it is lost only when control falls below `LOST_BELOW` (0.5). A full garrison wins contested ground back. Without this, an unguarded sector stopped paying the instant it dipped below 100%.
 - **The frontier is left to the assault.** The section under assault does not also drift back. Otherwise drift and assault cancelled out exactly, and the marines stalled at the sub-levels.
 
@@ -222,7 +222,7 @@ The core trade-off is identical in both games and is the point of sharing it: **
 
 ## Build order
 
-1. **Held ground** in `src/shared/ground.ts`, test-first, with no game attached.
+1. **Held ground** in `src/engine/ground.ts`, test-first, with no game attached.
 2. **Security detachment**, built on held ground. DEEP CONTRACT already supports scenarios, so this proves the engine with the least refactoring. It adds the `HorrorDef.pressure` hook.
 3. **Elderdark site split, then the Keep**, which reuses held ground in the other game. (Done.)
 4. **Haulage.** (Done.)

@@ -1,4 +1,4 @@
-import { createSynth, type Hum, type Voice } from '../shared/ui/sound';
+import { createSynth, type Hum, type Voice } from '../engine/ui/sound';
 import type { Run } from '../late-fees/state';
 
 /** LATE FEES's sound: a tape deck and an analogue synth score. Clicks, stabs, swells, and a bass line that tightens. */

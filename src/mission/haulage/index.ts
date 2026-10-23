@@ -9,7 +9,7 @@ import { OVERLAND_LEXICON } from '../../data/overland/lexicon';
 import type { ArchiveFile, ScenarioDef } from '../kinds';
 import type { DirectiveDef } from '../directives';
 import type { Beat } from '../story';
-import type { Lexicon } from '../../shared/lexicon';
+import type { Lexicon } from '../../engine/lexicon';
 import type { HaulageMission, MissionConfig, MissionState } from '../state';
 import { answeredBeacon, DEFAULT_BURN, progress, tickHaulage, trainValue } from './economy';
 import { LAND_HAUL, SPACE_HAUL, type HaulProfile } from './profiles';

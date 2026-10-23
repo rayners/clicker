@@ -1,5 +1,5 @@
-import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../shared/hunt';
-import { nextRandom } from '../shared/rng';
+import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../engine/hunt';
+import { nextRandom } from '../engine/rng';
 import { CREATURE_UPGRADES, type CreatureEffect } from '../data/creature/upgrades';
 import { CREATURE_ALARM_AT } from '../mission/creature';
 import { createMission, type CreatureMission, type MissionState, type ScenarioId } from '../mission/state';

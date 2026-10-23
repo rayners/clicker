@@ -18,7 +18,7 @@ import {
   KEEP,
   hire,
 } from '../../src/forest/company';
-import { held } from '../../src/shared/ground';
+import { held } from '../../src/engine/ground';
 import { createForestGame } from '../../src/forest/game';
 import { startWood } from '../../src/forest/wood';
 import { forestSaves } from '../../src/forest/save';

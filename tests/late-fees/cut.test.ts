@@ -14,7 +14,7 @@ import { CUT_UPGRADES } from '../../src/late-fees-data/cut-upgrades';
 import { reduce } from '../../src/late-fees/store';
 import { lateSaves } from '../../src/late-fees/save';
 import { simulateCut } from '../../src/late-fees/bot';
-import { shiftPush, pushOn } from '../../src/shared/hunt';
+import { shiftPush, pushOn } from '../../src/engine/hunt';
 
 const NOW = 1_000_000;
 const cut = (killer: 'drowned' | 'burned' | 'design' = 'drowned') => startCut(newLateGame(1, NOW), killer, 7);

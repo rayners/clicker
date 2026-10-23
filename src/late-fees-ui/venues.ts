@@ -1,7 +1,7 @@
-import { formatNumber } from '../shared/format';
-import { h } from '../shared/ui/dom';
-import { createFlow } from '../shared/ui/flow';
-import { frontier } from '../shared/ground';
+import { formatNumber } from '../engine/format';
+import { h } from '../engine/ui/dom';
+import { createFlow } from '../engine/ui/flow';
+import { frontier } from '../engine/ground';
 import { ZONES } from '../late-fees-data/camp';
 import {
   DAY_LENGTH,

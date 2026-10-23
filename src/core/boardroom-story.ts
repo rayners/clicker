@@ -1,6 +1,6 @@
 import { CREW } from '../data/crew';
 import { BOARD_BEATS, type BoardStoryArgs } from '../data/boardroom/story';
-import { runBeats } from '../shared/story';
+import { runBeats } from '../engine/story';
 import type { BoardLogKind, BoardroomState } from './boardroom';
 import type { GameState } from './game';
 

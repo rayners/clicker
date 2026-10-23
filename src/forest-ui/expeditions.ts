@@ -1,5 +1,5 @@
-import { formatDuration, formatNumber } from '../shared/format';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { formatDuration, formatNumber } from '../engine/format';
+import { h, setAttr, setText } from '../engine/ui/dom';
 import { CLASSES, CLASS_IDS } from '../forest-data/classes';
 import { REGIONS } from '../forest-data/regions';
 import { available, chartingPerTrip, isRegionOpen, maxStandingRegions, project } from '../forest/company';

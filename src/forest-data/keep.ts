@@ -1,4 +1,4 @@
-import type { SectionDef } from '../shared/ground';
+import type { SectionDef } from '../engine/ground';
 
 /** A floor of Morrowgate Keep: held ground (threat, reclaim) plus what an assault on it costs and pays. */
 export interface FloorDef extends SectionDef {

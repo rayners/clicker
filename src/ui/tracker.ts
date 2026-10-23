@@ -1,4 +1,4 @@
-import { h, setAttr } from '../shared/ui/dom';
+import { h, setAttr } from '../engine/ui/dom';
 
 const SIZE = 64;
 

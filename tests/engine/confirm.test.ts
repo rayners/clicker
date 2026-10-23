@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest';
-import { createConfirmButton } from '../../src/shared/ui/confirm';
+import { createConfirmButton } from '../../src/engine/ui/confirm';
 
 describe('a two-tap button for things that cannot be undone', () => {
   const make = (onConfirm = vi.fn()) => {

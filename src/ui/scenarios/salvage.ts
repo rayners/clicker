@@ -1,4 +1,4 @@
-import { formatNumber } from '../../shared/format';
+import { formatNumber } from '../../engine/format';
 import type { Store } from '../../core/store';
 import { COMPARTMENTS, CUTTERS, SHORING } from '../../data/salvage/systems';
 import { SALVAGE_UPGRADES } from '../../data/salvage/upgrades';
@@ -17,8 +17,8 @@ import {
   effectiveNotch,
 } from '../../mission/salvage/economy';
 import type { MissionState, SalvageMission } from '../../mission/state';
-import { frontier, held } from '../../shared/ground';
-import { h } from '../../shared/ui/dom';
+import { frontier, held } from '../../engine/ground';
+import { h } from '../../engine/ui/dom';
 import { createSalvageSystemsPanel } from '../salvage-systems';
 import { createSite } from '../site';
 import { createTorch } from '../torch';

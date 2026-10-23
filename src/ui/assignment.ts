@@ -2,7 +2,7 @@ import type { GameState } from '../core/game';
 import { assignmentUnlock, availableAssignments, missionConfigFor } from '../core/prestige';
 import type { Store } from '../core/store';
 import type { ScenarioId } from '../mission/state';
-import { h, setText } from '../shared/ui/dom';
+import { h, setText } from '../engine/ui/dom';
 
 const BRIEFS: Record<ScenarioId, { title: string; name: string; brief: string }> = {
   overland: {

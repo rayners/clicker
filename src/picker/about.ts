@@ -1,5 +1,5 @@
-import { h } from '../shared/ui/dom';
-import { announce } from '../shared/telemetry';
+import { h } from '../engine/ui/dom';
+import { announce } from '../engine/telemetry';
 
 export const TIP_JAR = 'https://ko-fi.com/rayners';
 export const REPOSITORY = 'https://github.com/rayners/clicker';

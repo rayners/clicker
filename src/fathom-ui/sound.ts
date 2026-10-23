@@ -1,4 +1,4 @@
-import { createSynth, type Hum, type Voice } from '../shared/ui/sound';
+import { createSynth, type Hum, type Voice } from '../engine/ui/sound';
 import type { Outfit } from '../fathom/state';
 
 /** DOWN THERE's sound: a sonar console. Pings, a thud for the lost, an alarm for landfall, and a hum that sinks. */

@@ -1,8 +1,8 @@
-import { formatNumber } from '../shared/format';
+import { formatNumber } from '../engine/format';
 import type { Store } from '../core/store';
 import { carCost, carValue, engineCost, engineThrust, incomeGain, isCarRevealed, isEngineRevealed, thrust, trainMass, trainValue } from '../mission/haulage/economy';
 import type { HaulageMission } from '../mission/state';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { h, setAttr, setText } from '../engine/ui/dom';
 import type { HaulProfile } from '../mission/haulage/profiles';
 import type { HaulWords } from './haul-words';
 

@@ -9,7 +9,7 @@ import { WOOD_UPGRADES } from '../../src/forest-data/wood-upgrades';
 import { reduce } from '../../src/forest/store';
 import { forestSaves } from '../../src/forest/save';
 import { simulateWood } from '../../src/forest/bot';
-import { pushOn, shiftPush } from '../../src/shared/hunt';
+import { pushOn, shiftPush } from '../../src/engine/hunt';
 
 const NOW = 1_000_000;
 const wood = () => startWood(createForestGame(1, NOW), 7);

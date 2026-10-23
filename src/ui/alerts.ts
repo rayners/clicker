@@ -1,10 +1,10 @@
-import { formatDuration, formatNumber } from '../shared/format';
+import { formatDuration, formatNumber } from '../engine/format';
 import { CREW } from '../data/crew';
 import { crewNeedingAttention } from '../mission/crew';
 import { directiveDef, directiveProgress } from '../mission/directives';
 import { scenarioOf } from '../mission/registry';
 import type { MissionState } from '../mission/state';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { h, setAttr, setText } from '../engine/ui/dom';
 
 const BAR_CELLS = 12;
 

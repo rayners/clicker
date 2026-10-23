@@ -2,8 +2,8 @@ import '@fontsource/im-fell-english';
 import '@fontsource/im-fell-english/400-italic.css';
 import './picker/about.css';
 import { mountAbout } from './picker/about';
-import { trackVisit } from './shared/posthog';
-import { createOptOut, telemetryAllowed, TELEMETRY_EVENT, type TelemetryEvent } from './shared/telemetry';
+import { trackVisit } from './engine/posthog';
+import { createOptOut, telemetryAllowed, TELEMETRY_EVENT, type TelemetryEvent } from './engine/telemetry';
 
 mountAbout(document.getElementById('app')!);
 

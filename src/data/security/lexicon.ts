@@ -1,4 +1,4 @@
-import type { Lexicon } from '../../shared/lexicon';
+import type { Lexicon } from '../../engine/lexicon';
 
 /** How a security contract names things, for horror text written once for every scenario. */
 export const SECURITY_LEXICON: Lexicon = {

@@ -10,7 +10,7 @@ import { reduce } from '../../src/fathom/store';
 import { applyFathomScenario } from '../../src/fathom/debug';
 import { fathomSaves } from '../../src/fathom/save';
 import { simulateDeep } from '../../src/fathom/bot';
-import { pushOn, shiftPush } from '../../src/shared/hunt';
+import { pushOn, shiftPush } from '../../src/engine/hunt';
 
 const NOW = 1_000_000;
 const deep = () => startDeep(createFathomGame(1, NOW), 7);

@@ -1,8 +1,8 @@
 import { ACCIDENTS, AGENTS, POLICIES, type AgentDef, type PolicyDef } from '../../late-fees-data/insurer';
 import { INSURER_UPGRADES, type InsurerEffect } from '../../late-fees-data/insurer-upgrades';
-import { formatNumber } from '../../shared/format';
-import { appendLog } from '../../shared/log';
-import { nextRandom } from '../../shared/rng';
+import { formatNumber } from '../../engine/format';
+import { appendLog } from '../../engine/log';
+import { nextRandom } from '../../engine/rng';
 import { killerPressure } from '../killers';
 import type { Signals } from '../kinds';
 import type { EntryKind, InsurerRun as Run } from '../state';

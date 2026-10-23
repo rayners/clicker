@@ -11,7 +11,7 @@ import {
   ASSAULT_SECONDS,
   LOST_BELOW,
   type SectionDef,
-} from '../../src/shared/ground';
+} from '../../src/engine/ground';
 
 const DEFS: SectionDef[] = [
   { id: 'pad', name: 'LANDING PAD', threat: 10, reclaim: 0.01 },

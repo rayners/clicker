@@ -1,4 +1,4 @@
-import type { SectionDef } from '../shared/ground';
+import type { SectionDef } from '../engine/ground';
 
 export interface CounselorDef {
   id: string;

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { FATHOM_SPRITES } from '../../src/fathom-data/sprites';
-import { PALETTE_KEYS } from '../../src/shared/pixels';
+import { PALETTE_KEYS } from '../../src/engine/pixels';
 
 describe('the deep-water game\'s sprites', () => {
   for (const [name, s] of Object.entries(FATHOM_SPRITES)) {

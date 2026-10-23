@@ -1,4 +1,4 @@
-import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../shared/telemetry';
+import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../engine/telemetry';
 import { REGIONS } from '../forest-data/regions';
 import { FLOORS } from '../forest-data/keep';
 import { isRegionOpen } from './company';

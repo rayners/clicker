@@ -1,4 +1,4 @@
-import { createReducerStore, type Store } from '../shared/store';
+import { createReducerStore, type Store } from '../engine/store';
 import {
   buyCampUpgrade,
   buyCounselor,
@@ -37,7 +37,7 @@ import {
 import { advance, newLateGame, type LateGame, type LateSettings } from './game';
 import { chooseTape, completeRun, isCutUnlocked, isTapeStocked, tapeFor } from './sequels';
 import { buyCutUpgrade, endCut, leaveCut, startCut } from './cut';
-import { shiftPush, toggleDormant } from '../shared/hunt';
+import { shiftPush, toggleDormant } from '../engine/hunt';
 import type { Ending } from './kinds';
 import type { AsylumRun, CampRun, ClinicRun, InsurerRun, KillerId, Run, VenueId } from './state';
 

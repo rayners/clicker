@@ -1,7 +1,7 @@
 import { DROWNED_ACTS, DROWNED_BEATS, DROWNED_ENDINGS, DROWNED_KILLS } from '../../late-fees-data/drowned';
-import { appendLog } from '../../shared/log';
-import { interpolate } from '../../shared/lexicon';
-import { nextRandom } from '../../shared/rng';
+import { appendLog } from '../../engine/log';
+import { interpolate } from '../../engine/lexicon';
+import { nextRandom } from '../../engine/rng';
 import type { KillerDef } from '../kinds';
 import { actBeats } from '../story';
 import type { EntryKind, Run, RunOf } from '../state';

@@ -1,4 +1,4 @@
-import { sprite, type Sprite } from '../shared/pixels';
+import { sprite, type Sprite } from '../engine/pixels';
 
 /** Palette keys: a shell, b label, c neon title, d spools, e the red REC dot. */
 const tape = sprite([

@@ -15,7 +15,7 @@ import {
 import { CREATURE_UPGRADES } from '../../src/data/creature/upgrades';
 import { CREATURE_ALARM_AT } from '../../src/mission/creature';
 import { simulateCreature } from '../../src/sim/bot';
-import { pushOn, shiftPush } from '../../src/shared/hunt';
+import { pushOn, shiftPush } from '../../src/engine/hunt';
 import type { CreatureMission } from '../../src/mission/state';
 
 const NOW = 1_000_000;

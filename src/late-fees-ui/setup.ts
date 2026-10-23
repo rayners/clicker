@@ -1,6 +1,6 @@
-import { confirmedInTime } from '../shared/ui/confirm';
-import { aboutLink, h, setText } from '../shared/ui/dom';
-import { createOptOut } from '../shared/telemetry';
+import { confirmedInTime } from '../engine/ui/confirm';
+import { aboutLink, h, setText } from '../engine/ui/dom';
+import { createOptOut } from '../engine/telemetry';
 import { lateSaves } from '../late-fees/save';
 import type { LateGame } from '../late-fees/game';
 import type { LateStore } from '../late-fees/store';

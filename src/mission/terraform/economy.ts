@@ -1,4 +1,4 @@
-import { memoByState } from '../../shared/memo';
+import { memoByState } from '../../engine/memo';
 import {
   COLONIST_WAVES,
   LINES,

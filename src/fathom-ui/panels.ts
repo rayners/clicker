@@ -1,13 +1,13 @@
-import { confirmedInTime } from '../shared/ui/confirm';
-import { formatNumber } from '../shared/format';
-import { aboutLink, h, setAttr, setText } from '../shared/ui/dom';
-import { createOptOut } from '../shared/telemetry';
+import { confirmedInTime } from '../engine/ui/confirm';
+import { formatNumber } from '../engine/format';
+import { aboutLink, h, setAttr, setText } from '../engine/ui/dom';
+import { createOptOut } from '../engine/telemetry';
 import { FATHOM_UPGRADES } from '../fathom-data/upgrades';
 import { availableUpgrades } from '../fathom/upgrades';
 import { availableEndings, endingRewards, type Ending } from '../fathom/season';
 import { fathomSaves } from '../fathom/save';
 import { DEEP_UNLOCK_SEASONS, isDeepUnlocked } from '../fathom/deep';
-import { createDoors } from '../shared/ui/doors';
+import { createDoors } from '../engine/ui/doors';
 import type { FathomGame } from '../fathom/game';
 import type { Outfit } from '../fathom/state';
 import type { FathomStore } from '../fathom/store';

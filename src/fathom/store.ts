@@ -1,4 +1,4 @@
-import { createReducerStore, type Store } from '../shared/store';
+import { createReducerStore, type Store } from '../engine/store';
 import { buildBulwark, buildWall, hirePilot } from './breach';
 import { advance, createFathomGame, type FathomGame, type FathomSettings } from './game';
 import { buyPen, catchSpecimen, shiftEnhancement } from './open-water';
@@ -8,7 +8,7 @@ import { buyBuoy, buyTrawler, shiftRange } from './shelf';
 import { buyModule, hireRepairCrew, shiftStation } from './trench';
 import { buyUpgrade } from './upgrades';
 import { buyDeepUpgrade, endDeep, isDeepUnlocked, leaveDeep, startDeep } from './deep';
-import { shiftPush, toggleDormant } from '../shared/hunt';
+import { shiftPush, toggleDormant } from '../engine/hunt';
 import type { Outfit } from './state';
 
 export type FathomAction =

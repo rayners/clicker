@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { createHunt, type HuntState } from '../../src/shared/hunt';
-import { nextStep } from '../../src/shared/guide';
-import { huntGuide, type HuntWords } from '../../src/shared/hunt-guide';
+import { createHunt, type HuntState } from '../../src/engine/hunt';
+import { nextStep } from '../../src/engine/guide';
+import { huntGuide, type HuntWords } from '../../src/engine/hunt-guide';
 
 const WORDS: HuntWords = {
   title: 'THE WOOD',

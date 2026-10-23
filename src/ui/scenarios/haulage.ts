@@ -1,4 +1,4 @@
-import { formatNumber } from '../../shared/format';
+import { formatNumber } from '../../engine/format';
 import type { Store } from '../../core/store';
 import type { HaulProfile } from '../../mission/haulage/profiles';
 import type { HaulWords } from '../haul-words';
@@ -19,7 +19,7 @@ import {
   legDistance,
 } from '../../mission/haulage/economy';
 import type { HaulageMission, MissionState } from '../../mission/state';
-import { h } from '../../shared/ui/dom';
+import { h } from '../../engine/ui/dom';
 import { createHaulageSystemsPanel } from '../haulage-systems';
 import { createHelm } from '../helm';
 import { createRoute } from '../route';

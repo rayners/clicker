@@ -1,4 +1,4 @@
-import type { Lexicon } from '../../shared/lexicon';
+import type { Lexicon } from '../../engine/lexicon';
 
 /** How the overland haul names things. It runs without a horror, but every scenario supplies the full set of words. */
 export const OVERLAND_LEXICON: Lexicon = {

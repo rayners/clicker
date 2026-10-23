@@ -1,4 +1,4 @@
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { h, setAttr, setText } from '../engine/ui/dom';
 import { availableEndings, endingRewards, type Ending } from '../forest/charter';
 import type { ForestGame } from '../forest/game';
 import type { ForestStore } from '../forest/store';

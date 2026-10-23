@@ -4,7 +4,7 @@ import { CROSSOVERS, chooseTape, completeRun, endingFor, runConfigFor, TAPES } f
 import { KILLERS, VENUES } from '../../src/late-fees/registry';
 import { lateSaves } from '../../src/late-fees/save';
 import { simulateLate } from '../../src/late-fees/bot';
-import { placeholders, interpolate } from '../../src/shared/lexicon';
+import { placeholders, interpolate } from '../../src/engine/lexicon';
 import type { Ending } from '../../src/late-fees/kinds';
 import type { KillerId, VenueId } from '../../src/late-fees/state';
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { framePixels, corruptFrame, PALETTE_KEYS } from '../../src/shared/pixels';
+import { framePixels, corruptFrame, PALETTE_KEYS } from '../../src/engine/pixels';
 
 const frame = ['.ab.', 'cddc', '.ee.'];
 

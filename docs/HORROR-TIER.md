@@ -19,7 +19,7 @@ So in the horror tier, several first-tier runs (**prey**) play at once, each def
 
 This is also exactly what the Boardroom needs, since it runs many missions headlessly. The architecture rules already in place (pure, serializable, instance-able runs with no DOM, clock or globals) were written for it.
 
-## The shared engine (`src/shared/hunt.ts`)
+## The shared engine (`src/engine/hunt.ts`)
 
 Game-agnostic, pure, test-first. A **hunt** holds several prey, plus the horror's own economy.
 
@@ -162,7 +162,7 @@ Added 2026-10-21 with the fourth game.
 
 ## Legend: prestige across hunts (built 2026-10-21)
 
-Legend works the same way in every game, with the engine part in `src/shared/hunt.ts`.
+Legend works the same way in every game, with the engine part in `src/engine/hunt.ts`.
 
 - **Ending a hunt.** A hunt can be ended at any time, behind a two-tap confirmation. Ending turns its lifetime harvest into Legend: floor(√(harvest ÷ 25)), so 100 → 2, 300 → 3, 900 → 6.
 - **Where it's kept.** Each horror keeps its own Legend in its game's profile (`profile.legend[horror]`). Legend survives everything except a hard reset.
@@ -171,7 +171,7 @@ Legend works the same way in every game, with the engine part in `src/shared/hun
 - **Telemetry:** `hunt_ended` (horror, harvest, legend earned).
 - **Saves:** each game gains `profile.legend`. That is DEEP CONTRACT v8, Elderdark v11, LATE FEES v4 and DOWN THERE v4.
 - **As built:**
-  - Every hunt screen has an END THE HUNT (END THE CUT on the tape) button through the shared two-tap `createConfirmButton` (`src/shared/ui/confirm.ts`).
+  - Every hunt screen has an END THE HUNT (END THE CUT on the tape) button through the shared two-tap `createConfirmButton` (`src/engine/ui/confirm.ts`).
   - Each screen's title shows the Legend that horror has carried.
   - LATE FEES keeps Legend per killer.
   - The hunter's notoriety was renamed Stories.
@@ -226,7 +226,7 @@ Legend works the same way in every game, with the engine part in `src/shared/hun
 
 ## Build order
 
-1. **The hunt engine** (`src/shared/hunt.ts`), test-first, with no game attached. It covers push, hunger, notoriety, dormancy and growth, and drives stub prey.
+1. **The hunt engine** (`src/engine/hunt.ts`), test-first, with no game attached. It covers push, hunger, notoriety, dormancy and growth, and drives stub prey.
 2. **LATE FEES: The Killer's Cut**, the first real prey adapters:
    - the three venues, with their bots as defenders;
    - a controllable killer;
@@ -245,7 +245,7 @@ Legend works the same way in every game, with the engine part in `src/shared/hun
 
 ## Walkthrough
 
-Every tier shows the shared hunt guide (`src/shared/hunt-guide.ts`): push, hunger, the harvest, notoriety and Legend as each comes up, plus a rules page, all in the tier's own words (`HuntWords`). **A new tier supplies its words and mounts the guide in its view.**
+Every tier shows the shared hunt guide (`src/engine/hunt-guide.ts`): push, hunger, the harvest, notoriety and Legend as each comes up, plus a rules page, all in the tier's own words (`HuntWords`). **A new tier supplies its words and mounts the guide in its view.**
 
 ## Legend as a key
 
@@ -253,4 +253,4 @@ A game's second tier also opens on Legend from its first: the hunter after 3 Leg
 
 ## Where the tiers are entered
 
-Each game's tiers sit behind a door of their own in the masthead (`src/shared/ui/doors.ts`), not in the settings: RESTRICTED FILES in DEEP CONTRACT (with the Boardroom; every file reads RESTRICTED · CLEARANCE REQUIRED until the first contract is done), Beyond the palisade in Elderdark, The seam in DOWN THERE. LATE FEES keeps its shelf.
+Each game's tiers sit behind a door of their own in the masthead (`src/engine/ui/doors.ts`), not in the settings: RESTRICTED FILES in DEEP CONTRACT (with the Boardroom; every file reads RESTRICTED · CLEARANCE REQUIRED until the first contract is done), Beyond the palisade in Elderdark, The seam in DOWN THERE. LATE FEES keeps its shelf.

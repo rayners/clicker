@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createSynth, humAt, type Hum, type Voice } from '../../src/shared/ui/sound';
+import { createSynth, humAt, type Hum, type Voice } from '../../src/engine/ui/sound';
 
 /** A stand-in AudioContext that records what was started and stopped. */
 const started: number[] = [];

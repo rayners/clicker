@@ -1,7 +1,7 @@
 import { BURNED_ACTS, BURNED_BEATS, BURNED_ENDINGS, BURNED_KILLS } from '../../late-fees-data/burned';
-import { appendLog } from '../../shared/log';
-import { interpolate } from '../../shared/lexicon';
-import { nextRandom } from '../../shared/rng';
+import { appendLog } from '../../engine/log';
+import { interpolate } from '../../engine/lexicon';
+import { nextRandom } from '../../engine/rng';
 import type { KillerDef } from '../kinds';
 import { actBeats } from '../story';
 import type { EntryKind, Run, RunOf } from '../state';

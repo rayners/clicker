@@ -1,8 +1,8 @@
 import { CLASS_IDS, type ClassId } from '../forest-data/classes';
 import { REGIONS } from '../forest-data/regions';
 import { BUILDINGS, type BuildingId } from '../forest-data/buildings';
-import { appendLog, type LogEntry } from '../shared/log';
-import { createGround, type SectionState } from '../shared/ground';
+import { appendLog, type LogEntry } from '../engine/log';
+import { createGround, type SectionState } from '../engine/ground';
 import { FLOORS, KEEP_NAME } from '../forest-data/keep';
 
 /** Ledger entry voices: the clerk's own hand, the town and its orders, the hands themselves, and omens. */

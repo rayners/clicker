@@ -51,7 +51,7 @@ import {
   trooperCost,
   trooperForce,
 } from '../mission/security/economy';
-import { held as heldCount } from '../shared/ground';
+import { held as heldCount } from '../engine/ground';
 import { COMPARTMENTS, CUTTERS, SHORING } from '../data/salvage/systems';
 import {
   availableSalvageUpgrades,
@@ -65,7 +65,7 @@ import {
   shoringCost,
   shoringHold,
 } from '../mission/salvage/economy';
-import { frontier } from '../shared/ground';
+import { frontier } from '../engine/ground';
 import { profileOf } from '../mission/haulage/profiles';
 import {
   availableHaulageUpgrades,

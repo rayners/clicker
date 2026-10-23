@@ -1,4 +1,4 @@
-import { formatDuration, formatNumber } from '../shared/format';
+import { formatDuration, formatNumber } from '../engine/format';
 import { appendLog } from './log';
 import type { MissionState } from './state';
 import type { ScenarioDef } from './kinds';

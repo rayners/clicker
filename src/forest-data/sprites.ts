@@ -1,4 +1,4 @@
-import { sprite, type Sprite } from '../shared/pixels';
+import { sprite, type Sprite } from '../engine/pixels';
 
 /**
  * Woodcut-style accents. Palette keys: a faint wash, b dim ink, c ink, d gilt, e rubric red.

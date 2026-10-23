@@ -1,4 +1,4 @@
-import { memoByState } from '../../shared/memo';
+import { memoByState } from '../../engine/memo';
 import {
   BOUNTY_SECONDS,
   FABRICATORS,
@@ -10,8 +10,8 @@ import {
 } from '../../data/security/systems';
 import { SECURITY_UPGRADES, type SecurityEffect } from '../../data/security/upgrades';
 import { SECURITY_CREW_BOOSTS } from '../../data/security/crew-boosts';
-import { assault, frontier, isSecured, tickGround, type SectionState } from '../../shared/ground';
-import { formatNumber } from '../../shared/format';
+import { assault, frontier, isSecured, tickGround, type SectionState } from '../../engine/ground';
+import { formatNumber } from '../../engine/format';
 import { isCrewEffective } from '../crew';
 import { horrorPressure, horrorProductionMultiplier } from '../horrors';
 import { appendLog } from '../log';

@@ -1,9 +1,9 @@
-import { formatNumber } from '../shared/format';
+import { formatNumber } from '../engine/format';
 import type { Action, Store } from '../core/store';
 import { cultureCost, lockdownCost, OFFICER_COST, screeningCost, wardCost, wellnessCost } from '../mission/outbreak/levers';
 import { MAX_QUARANTINE, outbreakProduction } from '../mission/outbreak/spread';
 import type { OutbreakMission } from '../mission/state';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { h, setAttr, setText } from '../engine/ui/dom';
 
 const pct = (share: number) => `${Math.round(share * 100)}%`;
 

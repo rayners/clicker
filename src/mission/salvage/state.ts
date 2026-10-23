@@ -1,4 +1,4 @@
-import type { SectionState } from '../../shared/ground';
+import type { SectionState } from '../../engine/ground';
 
 /** Salvage state: the tug Corvid Tithe stripping a derelict colony transport compartment by compartment. */
 export interface SalvageFields {

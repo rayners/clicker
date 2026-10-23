@@ -1,6 +1,6 @@
 import { ATTRACTIONS, GUARDS, SWIMMERS, type AttractionDef, type GuardDef } from '../fathom-data/shallows';
-import { appendLog } from '../shared/log';
-import { nextRandom } from '../shared/rng';
+import { appendLog } from '../engine/log';
+import { nextRandom } from '../engine/rng';
 import { effects } from './upgrades';
 import { coverMultiplier, incomeMultiplier, type EntryKind, type Outfit } from './state';
 

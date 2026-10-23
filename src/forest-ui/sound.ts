@@ -1,4 +1,4 @@
-import { createSynth, type Hum, type Voice } from '../shared/ui/sound';
+import { createSynth, type Hum, type Voice } from '../engine/ui/sound';
 import type { Company } from '../forest/state';
 
 /** Elderdark's sound: the counting-house and the wood. A quill, a bell for the dead, a sour chord, a bright one. */

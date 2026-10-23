@@ -1,4 +1,4 @@
-import { runBeats, sinceBeat, type Beat } from '../shared/story';
+import { runBeats, sinceBeat, type Beat } from '../engine/story';
 import { BREACH_FLAG } from './breach';
 import { depth } from './depth';
 import { boats } from './shelf';

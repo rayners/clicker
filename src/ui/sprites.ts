@@ -1,5 +1,5 @@
 import { SPRITES } from '../data/sprites';
-import { createSpriteKit, type Palette } from '../shared/ui/sprites';
+import { createSpriteKit, type Palette } from '../engine/ui/sprites';
 
 const LOST_CORRUPTION = 0.9;
 

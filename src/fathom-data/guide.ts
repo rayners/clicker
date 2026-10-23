@@ -1,4 +1,4 @@
-import type { GuideRules, GuideStep } from '../shared/guide';
+import type { GuideRules, GuideStep } from '../engine/guide';
 import type { FathomGame } from '../fathom/game';
 import { DEFAULT_ENHANCE, DEFAULT_OPEN, DEFAULT_RANGE, DEFAULT_STATION_DEPTH } from '../fathom/state';
 import { isShelfOpen } from '../fathom/shelf';

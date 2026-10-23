@@ -1,4 +1,4 @@
-import { formatNumber } from '../../shared/format';
+import { formatNumber } from '../../engine/format';
 import type { Store } from '../../core/store';
 import { PROCESSORS, REACTORS } from '../../data/terraform/systems';
 import { TERRAFORM_UPGRADES } from '../../data/terraform/upgrades';
@@ -17,7 +17,7 @@ import {
 import type { MissionState, TerraformMission } from '../../mission/state';
 import { createAllocation } from '../allocation';
 import { createColony } from '../colony';
-import { h } from '../../shared/ui/dom';
+import { h } from '../../engine/ui/dom';
 import { createTerraformSystemsPanel } from '../terraform-systems';
 import { createUpgradesPanel } from '../upgrades';
 import type { MonitorRow, ScenarioUi } from './types';

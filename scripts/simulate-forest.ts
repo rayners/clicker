@@ -1,5 +1,5 @@
 import { simulateForest } from '../src/forest/bot';
-import { formatDuration, formatNumber } from '../src/shared/format';
+import { formatDuration, formatNumber } from '../src/engine/format';
 import { REGIONS } from '../src/forest-data/regions';
 
 import { FLOORS } from '../src/forest-data/keep';

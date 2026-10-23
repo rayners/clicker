@@ -1,5 +1,5 @@
 import type { DirectiveDef } from './directives';
-import type { Lexicon } from '../shared/lexicon';
+import type { Lexicon } from '../engine/lexicon';
 import type { MissionConfig, MissionState } from './state';
 import type { Beat } from './story';
 

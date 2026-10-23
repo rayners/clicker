@@ -1,7 +1,7 @@
-import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../shared/hunt';
-import { appendLog } from '../shared/log';
-import { nextRandom } from '../shared/rng';
-import { formatNumber } from '../shared/format';
+import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../engine/hunt';
+import { appendLog } from '../engine/log';
+import { nextRandom } from '../engine/rng';
+import { formatNumber } from '../engine/format';
 import { CLASS_IDS } from '../forest-data/classes';
 import { DRAGON_UPGRADES, type DragonEffect } from '../forest-data/dragon-upgrades';
 import { defendCompany } from './bot';

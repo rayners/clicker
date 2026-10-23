@@ -1,4 +1,4 @@
-import { formatNumber } from '../shared/format';
+import { formatNumber } from '../engine/format';
 import type { Store } from '../core/store';
 import {
   containmentLevelCost,
@@ -11,11 +11,11 @@ import {
 } from '../mission/organism/containment';
 import { awakeCount } from '../mission/crew';
 import type { OrganismMission as MissionState } from '../mission/state';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { h, setAttr, setText } from '../engine/ui/dom';
 import { createTracker } from './tracker';
 import { ORGANISM_PANEL } from '../data/organism/panel';
 import { scenarioOf } from '../mission/registry';
-import { interpolate } from '../shared/lexicon';
+import { interpolate } from '../engine/lexicon';
 
 function row(name: string, desc: string, value: HTMLElement, foot: HTMLElement, button: HTMLButtonElement) {
   return h(

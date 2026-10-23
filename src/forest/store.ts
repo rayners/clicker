@@ -1,13 +1,13 @@
 import type { ClassId } from '../forest-data/classes';
 import type { BuildingId } from '../forest-data/buildings';
-import { createReducerStore, type Store } from '../shared/store';
+import { createReducerStore, type Store } from '../engine/store';
 import { adjustOrder, buyBuilding, buyOil, buyUpgrade, dispatch, forage, hire, penance, post, toggleStanding } from './company';
 import { advance, createForestGame, type ForestGame, type ForestSettings } from './game';
 import { completeCharter, rewriteCharter, type Ending, isDragonUnlocked, isWoodUnlocked } from './charter';
 import type { SiteId } from './state';
 import { buyWoodUpgrade, endWood, leaveWood, startWood } from './wood';
 import { buyDragonUpgrade, endDragon, leaveDragon, wakeDragon } from './dragon';
-import { shiftPush, toggleDormant } from '../shared/hunt';
+import { shiftPush, toggleDormant } from '../engine/hunt';
 
 export type ForestAction =
   | { type: 'forage' }

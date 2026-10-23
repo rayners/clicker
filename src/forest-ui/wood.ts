@@ -1,15 +1,15 @@
-import { formatNumber } from '../shared/format';
-import { h, setAttr, setText } from '../shared/ui/dom';
-import { createConfirmButton } from '../shared/ui/confirm';
-import { legendEarned } from '../shared/hunt';
+import { formatNumber } from '../engine/format';
+import { h, setAttr, setText } from '../engine/ui/dom';
+import { createConfirmButton } from '../engine/ui/confirm';
+import { legendEarned } from '../engine/hunt';
 import { WOOD_UPGRADES } from '../forest-data/wood-upgrades';
 import { isWoodUpgradeAvailable, woodUpgradeCost, WOOD_ADAPTER, type WoodHunt } from '../forest/wood';
 import type { ForestGame } from '../forest/game';
 import type { ForestStore } from '../forest/store';
 import { formatDay } from '../forest/calendar';
-import { createGuideView } from '../shared/ui/guide';
-import { createGuideProgress } from '../shared/guide';
-import { huntGuide } from '../shared/hunt-guide';
+import { createGuideView } from '../engine/ui/guide';
+import { createGuideProgress } from '../engine/guide';
+import { huntGuide } from '../engine/hunt-guide';
 
 /** The companies the wood is watching, by the order they came to Thistlegate. */
 const COMPANY_NAMES = ['THE COMPANY OF THE ASHEN KEY', 'THE GREY LANTERN COMPANY', 'THE BRASS HOUND COMPANY', 'THE ORDER OF THE LONG ROAD'];

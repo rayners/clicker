@@ -2,14 +2,14 @@ import { CLASSES, CLASS_IDS, type ClassId } from '../forest-data/classes';
 import { REGIONS, type RegionDef } from '../forest-data/regions';
 import { BUILDINGS, type BuildingId } from '../forest-data/buildings';
 import { FOREST_UPGRADES, type ForestEffect, type ForestUpgrade } from '../forest-data/upgrades';
-import { nextRandom } from '../shared/rng';
-import { formatNumber } from '../shared/format';
-import { appendLog } from '../shared/log';
+import { nextRandom } from '../engine/rng';
+import { formatNumber } from '../engine/format';
+import { appendLog } from '../engine/log';
 import { runForestStory } from './story';
-import { sinceBeat } from '../shared/story';
+import { sinceBeat } from '../engine/story';
 import { emptyComposition, KEEP, type Company, type Composition, type EntryKind, type Party } from './state';
 import { FLOORS, type FloorDef } from '../forest-data/keep';
-import { assault, frontier as groundFrontier, setGarrison, tickGround } from '../shared/ground';
+import { assault, frontier as groundFrontier, setGarrison, tickGround } from '../engine/ground';
 
 export { KEEP };
 

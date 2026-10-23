@@ -1,6 +1,6 @@
 import { ESCAPE_LINES, OPEN_WATER_AT, PEN_BASE_COST, PEN_COST_GROWTH, PEN_HOLDS, SPECIMENS, type SpecimenDef } from '../fathom-data/open-water';
-import { appendLog } from '../shared/log';
-import { nextRandom } from '../shared/rng';
+import { appendLog } from '../engine/log';
+import { nextRandom } from '../engine/rng';
 import { depth } from './depth';
 import { effects } from './upgrades';
 import { incomeMultiplier, type EntryKind, type Outfit } from './state';

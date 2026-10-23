@@ -1,4 +1,4 @@
-import { formatNumber } from '../shared/format';
+import { formatNumber } from '../engine/format';
 import type { Store } from '../core/store';
 import { CREW } from '../data/crew';
 import { awakeCount, crewStatus, maxAwake } from '../mission/crew';
@@ -10,7 +10,7 @@ function boostText(m: MissionState, id: string, fatigueRelief?: number): string 
   const text = scenarioOf(m).crewBoostText[id] ?? (fatigueRelief !== undefined ? `CREW FATIGUE x${fatigueRelief}` : '');
   return `> ${text}`;
 }
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { h, setAttr, setText } from '../engine/ui/dom';
 
 const BAR_CELLS = 10;
 

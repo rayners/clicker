@@ -1,4 +1,4 @@
-import type { Lexicon } from '../shared/lexicon';
+import type { Lexicon } from '../engine/lexicon';
 import type { EndingText, RunBeat } from '../late-fees/kinds';
 import { patients } from '../late-fees/asylum/economy';
 import type { AsylumRun, Run } from '../late-fees/state';

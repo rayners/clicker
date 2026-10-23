@@ -1,4 +1,4 @@
-import { PALETTE_KEYS, sprite, type Sprite } from '../shared/pixels';
+import { PALETTE_KEYS, sprite, type Sprite } from '../engine/pixels';
 
 export { PALETTE_KEYS, type Sprite };
 

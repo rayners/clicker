@@ -1,16 +1,16 @@
-import { formatNumber } from '../shared/format';
-import { createConfirmButton } from '../shared/ui/confirm';
-import { legendEarned } from '../shared/hunt';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { formatNumber } from '../engine/format';
+import { createConfirmButton } from '../engine/ui/confirm';
+import { legendEarned } from '../engine/hunt';
+import { h, setAttr, setText } from '../engine/ui/dom';
 import { CUT_UPGRADES } from '../late-fees-data/cut-upgrades';
 import { CUT_ADAPTER, cutUpgradeCost, isCutUpgradeAvailable, type KillerCut } from '../late-fees/cut';
 import type { LateGame } from '../late-fees/game';
 import { KILLERS } from '../late-fees/registry';
 import type { LateStore } from '../late-fees/store';
 import { tapeCounter } from './app';
-import { createGuideView } from '../shared/ui/guide';
-import { createGuideProgress } from '../shared/guide';
-import { huntGuide } from '../shared/hunt-guide';
+import { createGuideView } from '../engine/ui/guide';
+import { createGuideProgress } from '../engine/guide';
+import { huntGuide } from '../engine/hunt-guide';
 
 const ACT_NAMES = ['', 'OPENING KILL', 'BODY COUNT', 'THE FINAL GIRL', 'THE CONFRONTATION'];
 const FEED = 8;

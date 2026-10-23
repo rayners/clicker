@@ -1,6 +1,6 @@
 import { BUOY_BASE_COST, BUOY_COST_GROWTH, BUOY_REACH, SHELF_OPENS_AT, SHELF_TAKERS, TRAWLERS, type TrawlerDef } from '../fathom-data/shelf';
-import { appendLog } from '../shared/log';
-import { nextRandom } from '../shared/rng';
+import { appendLog } from '../engine/log';
+import { nextRandom } from '../engine/rng';
 import { depth } from './depth';
 import { effects } from './upgrades';
 import { incomeMultiplier, type EntryKind, type Outfit } from './state';

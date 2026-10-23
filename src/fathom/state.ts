@@ -1,5 +1,5 @@
-import { appendLog, type LogEntry } from '../shared/log';
-import type { SectionState } from '../shared/ground';
+import { appendLog, type LogEntry } from '../engine/log';
+import type { SectionState } from '../engine/ground';
 import { ATTRACTIONS, GUARDS } from '../fathom-data/shallows';
 import { TRAWLERS } from '../fathom-data/shelf';
 import { SPECIMENS } from '../fathom-data/open-water';

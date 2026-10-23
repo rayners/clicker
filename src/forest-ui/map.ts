@@ -1,7 +1,7 @@
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { h, setAttr, setText } from '../engine/ui/dom';
 import { frontier, keepFrontier } from '../forest/company';
 import { FLOORS } from '../forest-data/keep';
-import { held } from '../shared/ground';
+import { held } from '../engine/ground';
 import type { Company } from '../forest/state';
 
 const BAR_CELLS = 16;

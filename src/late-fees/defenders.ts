@@ -1,5 +1,5 @@
 import { COUNSELORS, LIGHTS, ZONES } from '../late-fees-data/camp';
-import { held } from '../shared/ground';
+import { held } from '../engine/ground';
 import {
   availableCampUpgrades,
   counselorCost,

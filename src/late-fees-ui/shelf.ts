@@ -1,4 +1,4 @@
-import { h } from '../shared/ui/dom';
+import { h } from '../engine/ui/dom';
 import type { LateGame } from '../late-fees/game';
 import { CROSSOVERS, CUT_UNLOCK_FILMS, isCutUnlocked, isTapeStocked, ORIGINALS, runConfigFor, tapeUnlock, type TapeDef } from '../late-fees/sequels';
 import type { LateStore } from '../late-fees/store';

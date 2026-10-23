@@ -1,4 +1,4 @@
-import { h } from '../shared/ui/dom';
+import { h } from '../engine/ui/dom';
 
 /** WARDEN waking up for the first time. Upbeat corporate, like everything in act 1. */
 export const BOOT_LINES: readonly string[] = [

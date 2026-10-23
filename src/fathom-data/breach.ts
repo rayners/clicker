@@ -1,4 +1,4 @@
-import type { SectionDef } from '../shared/ground';
+import type { SectionDef } from '../engine/ground';
 
 /** The coast the Breach comes ashore on, nearest first. Threat triples with each city; kaiju categories multiply it. */
 const THREAT_GROWTH = 3;

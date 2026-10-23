@@ -1,4 +1,4 @@
-import { createSaveSystem, hasShape } from '../shared/save';
+import { createSaveSystem, hasShape } from '../engine/save';
 import { createFathomGame, createFathomProfile, FATHOM_VERSION, type FathomGame } from './game';
 import { createOutfit } from './state';
 

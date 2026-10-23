@@ -4,7 +4,7 @@ import { tickMission } from '../../src/mission/tick';
 import { HORRORS, SCENARIOS } from '../../src/mission/registry';
 import { horrorPressure } from '../../src/mission/horrors';
 import { CREATURE_ALARM_AT } from '../../src/mission/creature';
-import { placeholders } from '../../src/shared/lexicon';
+import { placeholders } from '../../src/engine/lexicon';
 
 type C = MissionOf<'extraction', 'creature'>;
 const config = { ...DEFAULT_MISSION_CONFIG, horror: 'creature' as const };

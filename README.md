@@ -67,7 +67,7 @@ Dev builds have debug jumps (e.g. `/contract/?debug=act4`, `/forest/?debug=keep`
 ## Layout
 
 - `index.html`, `src/picker/`: the front page that picks a game, and the About page.
-- `src/shared/`: engine code every game uses (saves, store, story engine, held-ground and hunt engines, walkthrough,
+- `src/engine/`: engine code every game uses (saves, store, story engine, held-ground and hunt engines, walkthrough,
   sound, sprites, telemetry). It imports nothing from the games, and no game imports another.
 - DEEP CONTRACT:
   - `src/mission/`: one self-contained, JSON-serializable contract (scenarios × horrors, crew, directives, story).

@@ -1,5 +1,5 @@
-import { appendLog } from '../shared/log';
-import { formatDuration, formatNumber } from '../shared/format';
+import { appendLog } from '../engine/log';
+import { formatDuration, formatNumber } from '../engine/format';
 import { tickCompany } from './company';
 import { createCompany, type Company, type EntryKind } from './state';
 import { tickWood, type WoodHunt } from './wood';

@@ -4,7 +4,7 @@ import { tickMission } from '../../src/mission/tick';
 import { HORRORS, SCENARIOS } from '../../src/mission/registry';
 import { HUNTER_ARMED_AT, HUNTER_DRIVEN_AT } from '../../src/mission/hunter';
 import { TROOPERS } from '../../src/data/security/systems';
-import { placeholders } from '../../src/shared/lexicon';
+import { placeholders } from '../../src/engine/lexicon';
 
 type H = MissionOf<'security', 'hunter'>;
 const config = { ...SECURITY_MISSION_CONFIG, horror: 'hunter' as const };

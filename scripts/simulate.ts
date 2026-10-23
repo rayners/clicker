@@ -1,5 +1,5 @@
 import { simulateRun } from '../src/sim/bot';
-import { formatDuration } from '../src/shared/format';
+import { formatDuration } from '../src/engine/format';
 import { scenarioOf } from '../src/mission/registry';
 import { isOrganism, isOutbreak, type HorrorId, type ScenarioId } from '../src/mission/state';
 

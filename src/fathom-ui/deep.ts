@@ -1,15 +1,15 @@
-import { formatNumber } from '../shared/format';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { formatNumber } from '../engine/format';
+import { h, setAttr, setText } from '../engine/ui/dom';
 import { DEEP_UPGRADES } from '../fathom-data/deep-upgrades';
 import { DEEP_ADAPTER, deepUpgradeCost, isDeepUpgradeAvailable, type DeepHunt } from '../fathom/deep';
-import { legendEarned } from '../shared/hunt';
-import { createConfirmButton } from '../shared/ui/confirm';
+import { legendEarned } from '../engine/hunt';
+import { createConfirmButton } from '../engine/ui/confirm';
 import type { FathomGame } from '../fathom/game';
 import type { FathomStore } from '../fathom/store';
 import { seasonClock } from './app';
-import { createGuideView } from '../shared/ui/guide';
-import { createGuideProgress } from '../shared/guide';
-import { huntGuide } from '../shared/hunt-guide';
+import { createGuideView } from '../engine/ui/guide';
+import { createGuideProgress } from '../engine/guide';
+import { huntGuide } from '../engine/hunt-guide';
 
 const ACT_NAMES = ['', 'THE SEASON', 'SIGHTINGS', 'THE SOURCE', 'LANDFALL'];
 const FEED = 8;

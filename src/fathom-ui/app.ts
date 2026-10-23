@@ -1,7 +1,7 @@
-import { formatNumber } from '../shared/format';
-import { h, setText } from '../shared/ui/dom';
-import { createFlow } from '../shared/ui/flow';
-import { createLogView } from '../shared/ui/log';
+import { formatNumber } from '../engine/format';
+import { h, setText } from '../engine/ui/dom';
+import { createFlow } from '../engine/ui/flow';
+import { createLogView } from '../engine/ui/log';
 import { depth } from '../fathom/depth';
 import { exposed, inWater, passPrice } from '../fathom/shallows';
 import { blindShare, boats, isShelfOpen } from '../fathom/shelf';
@@ -16,9 +16,9 @@ import { incomeNow } from '../fathom/income';
 import { createBeach, createCoast, createShelf, createStation, createTrench, type Component } from './zones';
 import { createConfig, createEndPanel, createSeam, createStorePanel } from './panels';
 import { createDeepView } from './deep';
-import { createGuideView } from '../shared/ui/guide';
+import { createGuideView } from '../engine/ui/guide';
 import { createFathomSound, SONAR_EVERY, soundCues } from './sound';
-import { createGuideProgress } from '../shared/guide';
+import { createGuideProgress } from '../engine/guide';
 import { fathomGuideRules, fathomGuideSteps } from '../fathom-data/guide';
 
 /** The season clock: days of the season, as the log stamps them. */

@@ -10,7 +10,7 @@ import type { Company } from '../../src/forest/state';
 import { CLASSES } from '../../src/forest-data/classes';
 import { chartingPerTrip, hireCost, project } from '../../src/forest/company';
 import { REGIONS } from '../../src/forest-data/regions';
-import { createOptOut } from '../../src/shared/telemetry';
+import { createOptOut } from '../../src/engine/telemetry';
 
 let store: ForestStore;
 

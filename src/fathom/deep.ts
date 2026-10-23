@@ -1,6 +1,6 @@
-import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../shared/hunt';
-import { nextRandom } from '../shared/rng';
-import { isSecured } from '../shared/ground';
+import { createHunt, legendEarned, tickHunt, type HuntRules, type HuntState, type PreyAdapter } from '../engine/hunt';
+import { nextRandom } from '../engine/rng';
+import { isSecured } from '../engine/ground';
 import { DEEP_UPGRADES, type DeepEffect } from '../fathom-data/deep-upgrades';
 import { defendOutfit } from './bot';
 import type { FathomGame } from './game';

@@ -5,7 +5,7 @@ with real players and to catch errors on devices we don't test on.
 
 ## Rules
 
-- **Published site only.** `telemetryAllowed` (`src/shared/telemetry.ts`) refuses dev builds, localhost and LAN hosts,
+- **Published site only.** `telemetryAllowed` (`src/engine/telemetry.ts`) refuses dev builds, localhost and LAN hosts,
   and any `?debug=` URL.
 - **Opt-out.** The "SHARE ANONYMOUS PLAY DATA" box in either game's settings is one switch per device
   (localStorage `clicker.telemetry`). It is checked when each event is sent, so turning it off takes effect immediately.
@@ -18,7 +18,7 @@ with real players and to catch errors on devices we don't test on.
 - **Out of the simulation.** Events are derived by diffing successive store states (`src/core/telemetry.ts`,
   `src/forest/telemetry.ts`, both pure). Nothing under `src/mission/` or the forest simulation calls PostHog.
 - **The walkthrough is the one exception to state diffs:** its progress is kept per device, outside the save, so the
-  guide view announces `guide_step` and `guide_skipped` on the document (`announce` in `src/shared/telemetry.ts`) and
+  guide view announces `guide_step` and `guide_skipped` on the document (`announce` in `src/engine/telemetry.ts`) and
   `startAnalytics` forwards them through the same opt-out gate.
 - **Never in the way.** The SDK is a lazily loaded chunk; events buffer (bounded) until it arrives; sink failures are
   swallowed; offline means events are simply lost.

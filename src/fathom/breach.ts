@@ -19,9 +19,9 @@ import {
   WALL_COST_GROWTH,
   WALL_HOLD,
 } from '../fathom-data/breach';
-import { assault, frontier, held, isSecured, tickGround, type SectionDef, type SectionState } from '../shared/ground';
-import { appendLog } from '../shared/log';
-import { nextRandom } from '../shared/rng';
+import { assault, frontier, held, isSecured, tickGround, type SectionDef, type SectionState } from '../engine/ground';
+import { appendLog } from '../engine/log';
+import { nextRandom } from '../engine/rng';
 import { effects } from './upgrades';
 import { incomeMultiplier, type EntryKind, type Outfit } from './state';
 

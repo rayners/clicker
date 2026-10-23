@@ -7,8 +7,8 @@ import { fathomSaves } from './fathom/save';
 import { createFathomStore } from './fathom/store';
 import { seasonEvents, seasonProperties } from './fathom/telemetry';
 import { mountFathom } from './fathom-ui/app';
-import { startAnalytics } from './shared/posthog';
-import { createOptOut, telemetryAllowed } from './shared/telemetry';
+import { startAnalytics } from './engine/posthog';
+import { createOptOut, telemetryAllowed } from './engine/telemetry';
 
 const TICK_MS = 100;
 const AUTOSAVE_MS = 10_000;

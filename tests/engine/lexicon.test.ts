@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { interpolate, placeholders } from '../../src/shared/lexicon';
+import { interpolate, placeholders } from '../../src/engine/lexicon';
 
 describe('lexicon', () => {
   it('lists the placeholders a text uses', () => {

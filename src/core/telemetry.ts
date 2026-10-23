@@ -1,6 +1,6 @@
 import { CREW } from '../data/crew';
 import { TESTIFY_CONSCIENCE } from './boardroom';
-import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../shared/telemetry';
+import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../engine/telemetry';
 import type { GameState } from './game';
 import { SECTIONS } from '../data/security/systems';
 import { COMPARTMENTS } from '../data/salvage/systems';

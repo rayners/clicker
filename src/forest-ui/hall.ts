@@ -1,5 +1,5 @@
-import { formatNumber } from '../shared/format';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { formatNumber } from '../engine/format';
+import { h, setAttr, setText } from '../engine/ui/dom';
 import { BUILDINGS } from '../forest-data/buildings';
 import { availableUpgrades, buildingCost, PENANCE_AMOUNT, penanceCost } from '../forest/company';
 import { FOREST_UPGRADES } from '../forest-data/upgrades';

@@ -1,4 +1,4 @@
-import { runBeats, sinceBeat, type Beat } from '../shared/story';
+import { runBeats, sinceBeat, type Beat } from '../engine/story';
 import { REGIONS } from '../forest-data/regions';
 import type { Company, EntryKind } from './state';
 

@@ -1,6 +1,6 @@
 import { CREW } from '../../data/crew';
 import { CREATURE_ACTS, CREATURE_BEATS } from '../../data/creature/story';
-import { nextRandom } from '../../shared/rng';
+import { nextRandom } from '../../engine/rng';
 import { crewStatus } from '../crew';
 import type { HorrorDef } from '../kinds';
 import { appendLog } from '../log';

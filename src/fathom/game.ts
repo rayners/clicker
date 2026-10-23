@@ -1,5 +1,5 @@
-import { appendLog } from '../shared/log';
-import { formatDuration, formatNumber } from '../shared/format';
+import { appendLog } from '../engine/log';
+import { formatDuration, formatNumber } from '../engine/format';
 import { createOutfit, type EntryKind, type Outfit } from './state';
 import { tickOutfit } from './tick';
 import { tickDeep, type DeepHunt } from './deep';

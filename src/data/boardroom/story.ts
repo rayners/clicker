@@ -1,5 +1,5 @@
-import type { Beat } from '../../shared/story';
-import { sinceBeat } from '../../shared/story';
+import type { Beat } from '../../engine/story';
+import { sinceBeat } from '../../engine/story';
 import type { BoardLogKind, BoardroomState } from '../../core/boardroom';
 
 /**

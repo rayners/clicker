@@ -32,7 +32,7 @@ import {
 import { allocate, buyProcessor, buyReactor, buyTerraformUpgrade, surge, thawWave, toggleBalancer } from '../mission/terraform/economy';
 import type { Line } from '../data/terraform/systems';
 import { advance, newGame, type GameState, type Settings } from './game';
-import { createReducerStore, type Listener as SharedListener, type Store as SharedStore } from '../shared/store';
+import { createReducerStore, type Listener as SharedListener, type Store as SharedStore } from '../engine/store';
 import { chooseAssignment, completeContract, isCreatureUnlocked, isHunterUnlocked, type Ending } from './prestige';
 import type { ScenarioId } from '../mission/state';
 import type { DivisionId } from '../data/boardroom/divisions';
@@ -41,7 +41,7 @@ import { buyCar, buyEngine, buyHaulageUpgrade, fireThrusters, refuel, setBurn, t
 import { buyCreatureUpgrade, endCreature, leaveCreature, startCreature } from './creature';
 import { buyDivision, buyFloor, commission, endTerm, enterBoardroom, leaveBoardroom, setPolicy, shiftSafety, type BoardPolicy, type TermEnding } from './boardroom';
 import { buyHunterUpgrade, endHunter, leaveHunter, startHunter } from './hunter';
-import { shiftPush, toggleDormant } from '../shared/hunt';
+import { shiftPush, toggleDormant } from '../engine/hunt';
 
 export type Action =
   | { type: 'drill' }

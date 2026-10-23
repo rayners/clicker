@@ -9,7 +9,7 @@ import { createMission, TERRAFORM_MISSION_CONFIG, type MissionOf } from '../../s
 import { PROCESSORS, REACTORS } from '../../src/data/terraform/systems';
 import { TERRAFORM_UPGRADES } from '../../src/data/terraform/upgrades';
 import { incomeRate, power, specMatch, surgePower } from '../../src/mission/terraform/economy';
-import { formatNumber } from '../../src/shared/format';
+import { formatNumber } from '../../src/engine/format';
 
 type T = MissionOf<'terraform', 'organism'>;
 let store: Store;

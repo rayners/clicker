@@ -8,7 +8,7 @@ import { mountLate } from '../../src/late-fees-ui/app';
 import { COUNSELORS, LIGHTS, ZONES } from '../../src/late-fees-data/camp';
 import { CAMP_UPGRADES } from '../../src/late-fees-data/camp-upgrades';
 import { NIGHT_FROM } from '../../src/late-fees/camp/economy';
-import { createOptOut } from '../../src/shared/telemetry';
+import { createOptOut } from '../../src/engine/telemetry';
 import type { CampRun } from '../../src/late-fees/state';
 
 let store: LateStore;

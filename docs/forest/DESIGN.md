@@ -136,7 +136,7 @@ The pacing targets mirror DEEP CONTRACT (about 1h / 2.5h / 3h / 4.5h) and are en
 
 | Step | Status |
 |---|---|
-| 1. Shared engine and multi-page build | done: `src/shared/` (format, rng, save system, store, log, story engine, lexicon, pixels, flow, monitor, log view, sprite kit, dom). `tests/architecture.test.ts` enforces the boundaries. |
+| 1. Shared engine and multi-page build | done: `src/engine/` (format, rng, save system, store, log, story engine, lexicon, pixels, flow, monitor, log view, sprite kit, dom). `tests/architecture.test.ts` enforces the boundaries. |
 | 2. Company simulation | done |
 | 3. Ledger UI | done |
 | 4. Requisitions, Quartermaster, Act I | done |

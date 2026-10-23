@@ -24,7 +24,7 @@ import {
   NIGHT_FROM,
   DAY_LENGTH,
 } from '../../src/late-fees/camp/economy';
-import { frontier, held, isSecured } from '../../src/shared/ground';
+import { frontier, held, isSecured } from '../../src/engine/ground';
 
 type C = RunOf<'camp', 'drowned'>;
 const fresh = (patch: Partial<C> = {}): C => ({ ...createRun(CAMP_CONFIG, 1), ...patch });

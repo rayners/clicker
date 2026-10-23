@@ -1,4 +1,4 @@
-import { createSaveSystem, hasShape } from '../shared/save';
+import { createSaveSystem, hasShape } from '../engine/save';
 import { createLateProfile, LATE_VERSION, newLateGame, type LateGame } from './game';
 import { createRun } from './state';
 

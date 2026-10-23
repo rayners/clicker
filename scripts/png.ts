@@ -1,6 +1,6 @@
 import { deflateSync } from 'node:zlib';
 import { SPRITES } from '../src/data/sprites';
-import type { Sprite } from '../src/shared/pixels';
+import type { Sprite } from '../src/engine/pixels';
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
   let c = n;

@@ -4,7 +4,7 @@ import { SALVAGE_BEATS } from '../../data/salvage/story';
 import { SALVAGE_ARCHIVE } from '../../data/salvage/archive';
 import { SALVAGE_LEXICON } from '../../data/salvage/lexicon';
 import { SALVAGE_CREW_BOOSTS } from '../../data/salvage/crew-boosts';
-import { createGround, held } from '../../shared/ground';
+import { createGround, held } from '../../engine/ground';
 import type { ScenarioDef } from '../kinds';
 import type { MissionConfig, MissionState, SalvageMission } from '../state';
 import { DEFAULT_NOTCH, progress, tickSalvage } from './economy';

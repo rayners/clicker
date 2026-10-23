@@ -1,4 +1,4 @@
-import { formatNumber } from '../shared/format';
+import { formatNumber } from '../engine/format';
 import type { Store } from '../core/store';
 import { FABRICATORS, TROOPERS } from '../data/security/systems';
 import {
@@ -14,7 +14,7 @@ import {
   trooperForce,
 } from '../mission/security/economy';
 import type { SecurityMission } from '../mission/state';
-import { h, setAttr, setText } from '../shared/ui/dom';
+import { h, setAttr, setText } from '../engine/ui/dom';
 
 interface Row {
   el: HTMLLIElement;

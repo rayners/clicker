@@ -2,7 +2,7 @@ import { createMission, DEFAULT_MISSION_CONFIG, type MissionOf, type HorrorId, t
 import { tickMission } from '../mission/tick';
 import { appendLog } from '../mission/log';
 import { scenarioOf } from '../mission/registry';
-import { formatDuration, formatNumber } from '../shared/format';
+import { formatDuration, formatNumber } from '../engine/format';
 import { tickCreature, type CreatureHunt } from './creature';
 import { tickHunter, type HunterHunt } from './hunter';
 import { tickBoardroom, type BoardroomState } from './boardroom';

@@ -24,7 +24,7 @@ import {
   watchCapacity,
   REM_NEED,
 } from '../../src/late-fees/clinic/economy';
-import { placeholders } from '../../src/shared/lexicon';
+import { placeholders } from '../../src/engine/lexicon';
 
 type K = RunOf<'clinic', 'burned'>;
 const fresh = (patch: Partial<K> = {}): K => ({ ...createRun(CLINIC_CONFIG, 1), ...patch });

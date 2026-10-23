@@ -1,4 +1,4 @@
-import { appendLog, type LogEntry } from '../shared/log';
+import { appendLog, type LogEntry } from '../engine/log';
 import type { CampFields } from './camp/state';
 import type { DrownedFields } from './drowned/state';
 import type { ClinicFields } from './clinic/state';

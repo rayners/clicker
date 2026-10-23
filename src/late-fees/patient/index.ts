@@ -1,7 +1,7 @@
 import { PATIENT_ACTS, PATIENT_BEATS, PATIENT_ENDINGS, PATIENT_KILLS } from '../../late-fees-data/patient';
-import { appendLog } from '../../shared/log';
-import { interpolate } from '../../shared/lexicon';
-import { nextRandom } from '../../shared/rng';
+import { appendLog } from '../../engine/log';
+import { interpolate } from '../../engine/lexicon';
+import { nextRandom } from '../../engine/rng';
 import type { KillerDef } from '../kinds';
 import { actBeats } from '../story';
 import type { EntryKind, Run, RunOf } from '../state';

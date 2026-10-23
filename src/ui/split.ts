@@ -2,8 +2,8 @@ import type { Store } from '../core/store';
 import { SECURITY_UPGRADES } from '../data/security/upgrades';
 import { assaultForce, force, holdForce, holdNeeded, isTacticalNetActive } from '../mission/security/economy';
 import type { SecurityMission } from '../mission/state';
-import { formatNumber } from '../shared/format';
-import { h, setText } from '../shared/ui/dom';
+import { formatNumber } from '../engine/format';
+import { h, setText } from '../engine/ui/dom';
 
 const NET = SECURITY_UPGRADES.find((u) => u.effect.kind === 'tacticalNet')!.id;
 

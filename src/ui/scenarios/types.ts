@@ -1,13 +1,13 @@
 import type { GameState } from '../../core/game';
 import type { Action } from '../../core/store';
 import type { MissionState } from '../../mission/state';
-import type { FlowSpec as SharedFlowSpec } from '../../shared/ui/flow';
-import type { MonitorRow as SharedMonitorRow } from '../../shared/ui/monitor';
+import type { FlowSpec as SharedFlowSpec } from '../../engine/ui/flow';
+import type { MonitorRow as SharedMonitorRow } from '../../engine/ui/monitor';
 
 /** Flow readout and monitor shapes are shared engine types, specialised to a mission here. */
 export type FlowSpec = SharedFlowSpec<MissionState>;
 export type MonitorRow = SharedMonitorRow<MissionState>;
-export type { FlowCell, FlowReading } from '../../shared/ui/flow';
+export type { FlowCell, FlowReading } from '../../engine/ui/flow';
 
 export interface StatSpec {
   label: string;

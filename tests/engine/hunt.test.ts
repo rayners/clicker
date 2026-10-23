@@ -8,7 +8,7 @@ import {
   toggleDormant,
   type HuntRules,
   type PreyAdapter,
-} from '../../src/shared/hunt';
+} from '../../src/engine/hunt';
 
 /** A stub prey: people die in proportion to the push, defenders get better with notoriety, it ends at a fixed time. */
 interface Stub {

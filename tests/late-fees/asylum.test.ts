@@ -22,7 +22,7 @@ import {
   toggleAutoSedation,
   wardCost,
 } from '../../src/late-fees/asylum/economy';
-import { placeholders } from '../../src/shared/lexicon';
+import { placeholders } from '../../src/engine/lexicon';
 import { newLateGame } from '../../src/late-fees/game';
 import { chooseTape } from '../../src/late-fees/sequels';
 import { reduce } from '../../src/late-fees/store';

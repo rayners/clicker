@@ -1,5 +1,5 @@
-import { formatDuration } from '../shared/format';
-import { h, setText } from '../shared/ui/dom';
+import { formatDuration } from '../engine/format';
+import { h, setText } from '../engine/ui/dom';
 import { CLASSES, CLASS_IDS } from '../forest-data/classes';
 import { REGIONS } from '../forest-data/regions';
 import { KEEP, type Company, type Party } from '../forest/state';

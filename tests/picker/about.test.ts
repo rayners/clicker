@@ -4,7 +4,7 @@ import { screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 import { mountAbout, REPOSITORY, TIP_JAR } from '../../src/picker/about';
 import { mountPicker } from '../../src/picker/picker';
-import { TELEMETRY_EVENT, type TelemetryEvent } from '../../src/shared/telemetry';
+import { TELEMETRY_EVENT, type TelemetryEvent } from '../../src/engine/telemetry';
 
 const mount = () => {
   document.body.innerHTML = '<div id="app"></div>';

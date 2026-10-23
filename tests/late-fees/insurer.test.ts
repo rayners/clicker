@@ -19,7 +19,7 @@ import {
   toggleActuary,
   DUE_SECONDS,
 } from '../../src/late-fees/insurer/economy';
-import { placeholders } from '../../src/shared/lexicon';
+import { placeholders } from '../../src/engine/lexicon';
 
 type I = RunOf<'insurer', 'design'>;
 const fresh = (patch: Partial<I> = {}): I => ({ ...createRun(INSURER_CONFIG, 1), ...patch });
