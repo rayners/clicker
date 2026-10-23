@@ -936,8 +936,8 @@ button:disabled {
 }
 
 .deep-back,
-.deep-sink,
-.deep-step {
+.deep-sleep,
+.deep-steps .stepper-step {
   min-height: 44px;
   padding: 0 12px;
   border: 1px solid rgba(52, 214, 214, 0.4);
@@ -948,7 +948,7 @@ button:disabled {
   touch-action: manipulation;
 }
 
-.deep-sink {
+.deep-sleep {
   width: 100%;
   margin-top: 8px;
 }
@@ -977,7 +977,7 @@ button:disabled {
   color: var(--dim);
 }
 
-.deep-town {
+.deep-prey {
   display: grid;
   gap: 4px;
   margin-bottom: 6px;
@@ -986,12 +986,13 @@ button:disabled {
   background: rgba(3, 18, 26, 0.85);
 }
 
-.deep-town[data-pushed='true'] {
+.deep-prey[data-pushed='true'] {
   border-color: var(--ping);
   box-shadow: 0 0 12px rgba(255, 196, 64, 0.25);
 }
 
-.deep-row {
+.deep-row,
+.deep-up-head {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -1026,18 +1027,18 @@ button:disabled {
   align-items: center;
 }
 
-.deep-step {
+.deep-steps .stepper-step {
   padding: 0;
   font-size: 1.3em;
 }
 
-.deep-push {
+.deep-steps .stepper-value {
   text-align: center;
   font-size: 1.4em;
   color: var(--ping);
 }
 
-.deep-upgrades,
+.deep-up-list,
 .deep-feed {
   margin: 0;
   padding: 0;
@@ -1050,7 +1051,7 @@ button:disabled {
   border: 1px solid rgba(52, 214, 214, 0.2);
 }
 
-.deep-desc {
+.deep-up-desc {
   margin: 2px 0 4px;
   font-size: 0.9em;
   color: var(--dim);

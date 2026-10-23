@@ -1112,7 +1112,7 @@ button:focus-visible {
   color: var(--ink-dim);
 }
 
-.wood-company {
+.wood-prey {
   display: grid;
   gap: 4px;
   margin-bottom: 6px;
@@ -1121,12 +1121,13 @@ button:focus-visible {
   background: rgba(10, 16, 7, 0.85);
 }
 
-.wood-company[data-pushed='true'] {
+.wood-prey[data-pushed='true'] {
   border-color: var(--blight);
   box-shadow: 0 0 10px rgba(125, 154, 90, 0.3);
 }
 
-.wood-row {
+.wood-row,
+.wood-up-head {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -1167,7 +1168,7 @@ button:focus-visible {
   align-items: center;
 }
 
-.wood-step {
+.wood-steps .stepper-step {
   min-height: 44px;
   border: 1px solid rgba(125, 154, 90, 0.5);
   background: transparent;
@@ -1175,13 +1176,13 @@ button:focus-visible {
   color: inherit;
 }
 
-.wood-push {
+.wood-steps .stepper-value {
   text-align: center;
   font-size: 1.4em;
   color: var(--blight);
 }
 
-.wood-upgrades,
+.wood-up-list,
 .wood-feed {
   margin: 0;
   padding: 0;
@@ -1194,7 +1195,7 @@ button:focus-visible {
   border: 1px solid rgba(125, 154, 90, 0.25);
 }
 
-.wood-desc {
+.wood-up-desc {
   margin: 2px 0 4px;
   font-size: 0.9em;
   font-style: italic;
@@ -1241,24 +1242,24 @@ button:focus-visible {
 
 .wood.dragon .wood-name,
 .wood.dragon .wood-note,
-.wood.dragon .wood-push {
+.wood.dragon .wood-steps .stepper-value {
   color: var(--gilt);
   text-shadow: 0 0 10px rgba(201, 162, 74, 0.35);
 }
 
-.wood.dragon .wood-company,
+.wood.dragon .wood-prey,
 .wood.dragon .wood-upgrade,
 .wood.dragon .wood-back,
 .wood.dragon .wood-sleep,
-.wood.dragon .wood-step {
+.wood.dragon .wood-steps .stepper-step {
   border-color: rgba(201, 162, 74, 0.35);
 }
 
-.wood.dragon .wood-company {
+.wood.dragon .wood-prey {
   background: rgba(16, 10, 6, 0.85);
 }
 
-.wood.dragon .wood-company[data-pushed='true'] {
+.wood.dragon .wood-prey[data-pushed='true'] {
   border-color: var(--rubric);
   box-shadow: 0 0 12px rgba(184, 67, 47, 0.35);
 }

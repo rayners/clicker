@@ -525,7 +525,8 @@ button:disabled {
 }
 
 .split-handover,
-.dial-handover {
+.dial-handover,
+.cut-sleep {
   display: block;
   width: 100%;
   min-height: 40px;
@@ -1357,7 +1358,7 @@ button:disabled {
   gap: 6px;
 }
 
-.cut-place {
+.cut-prey {
   display: grid;
   gap: 4px;
   padding: 6px 8px;
@@ -1365,13 +1366,12 @@ button:disabled {
   background: rgba(20, 4, 8, 0.8);
 }
 
-.cut-place[data-pushed='true'] {
+.cut-prey[data-pushed='true'] {
   border-color: var(--rec);
   box-shadow: 0 0 10px rgba(255, 50, 70, 0.3);
 }
 
-.cut-place-head,
-.cut-place-mid {
+.cut-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1399,7 +1399,6 @@ button:disabled {
 
 /* How much the place has worked out: the final girl's bar. */
 .cut-alarm {
-  flex: 0 0 35%;
   height: 6px;
   border: 1px solid var(--faint);
 }

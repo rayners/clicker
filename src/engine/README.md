@@ -77,6 +77,7 @@ published build only, persistent storage, and the site's service worker.
 | `log` | `appendLog`: a capped, time-stamped log on any host. |
 | `ground` | Held ground: sections taken at a frontier by `assault`, kept by garrisons (`setGarrison`), slipping back under pressure (`tickGround`). |
 | `hunt` | The play-as-the-horror engine: strength split across several self-defending prey, hunger, harvest, notoriety and Legend (`createHunt`, `shiftPush`, `tickHunt`, `legendEarned`). |
+| `ui/hunt-view` | `createHuntView`: the whole play-as-the-horror screen for any hunt (stats, a strip and stepper per prey, sleep and wake, ending for Legend, upgrades, a feed), in the game's words and classes. |
 | `hunt-guide` | `huntGuide`: walkthrough steps and a rules page for any hunt, in the game's own words (`HuntWords`). |
 | `guide` | Walkthrough steps that each show when they apply and go once done (`nextStep`), with progress kept per device (`createGuideProgress`). |
 | `pixels` | Palette-indexed pixel art (`sprite`, `framePixels`) and deterministic glitching (`corruptFrame`). |

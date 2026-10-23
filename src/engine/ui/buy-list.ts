@@ -129,7 +129,8 @@ export function createBuyList<S>(options: BuyListOptions<S>): { el: HTMLUListEle
         row.button.hidden = cost === null;
         if (cost === null) return;
         const verb = item.verb ?? 'BUY';
-        setText(row.button, `${verb}${currency.separator ?? ' '}${currency.text(cost)}`);
+        // An empty verb leaves just the price on the button.
+        setText(row.button, verb ? `${verb}${currency.separator ?? ' '}${currency.text(cost)}` : currency.text(cost));
         setAttr(row.button, 'aria-label', `${item.ariaVerb ?? capital(verb)} ${item.ariaName ?? item.name} for ${currency.spoken(cost)}`);
         row.button.disabled = options.funds(s) < cost || !(item.can?.(s) ?? true);
       });
