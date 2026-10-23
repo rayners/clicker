@@ -111,9 +111,28 @@ describe('settings dialog', () => {
   });
 
   it('says both ways into the hunt while it is closed: contracts, or Legend as the creature', async () => {
-    const user = setup();
-    await user.click(screen.getByRole('button', { name: /configuration/i }));
+    const user = setup((g) => ({ ...g, profile: { ...g.profile, contractsCompleted: 1 } }));
+    await user.click(screen.getByRole('button', { name: /restricted files/i }));
     expect(screen.getByRole('button', { name: /accept the hunt/i }).textContent).toBe('THE HUNT · AFTER 5 CONTRACTS OR 3 LEGEND');
+  });
+
+  it('keeps the horror tiers out of the settings: they have their own door', async () => {
+    const dialog = await open(setup());
+    expect(dialog.queryByRole('button', { name: /special order|the hunt|promotion/i })).toBeNull();
+  });
+
+  it('names nothing on a first contract: every restricted file reads RESTRICTED until one contract is done', async () => {
+    const user = setup();
+    await user.click(screen.getByRole('button', { name: /restricted files/i }));
+    const files = within(screen.getByRole('dialog', { name: /restricted files/i }));
+    const doors = files.getAllByRole('button', { name: /restricted: clearance required/i });
+    expect(doors).toHaveLength(3);
+    expect(doors.every((d) => (d as HTMLButtonElement).disabled && d.textContent === 'RESTRICTED · CLEARANCE REQUIRED')).toBe(true);
+    // Only what a player can see: the tier views themselves sit hidden in the page until opened.
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let visible = '';
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) if (!n.parentElement?.closest('[hidden]')) visible += ` ${n.textContent}`;
+    expect(visible).not.toMatch(/SPECIAL ORDER 0-77|THE HUNT|BOARDROOM/);
   });
 
   it('links to the About page and its tip jar from the settings', async () => {

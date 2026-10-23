@@ -32,13 +32,14 @@ beforeEach(() => {
 });
 
 describe('the BOARDROOM on screen', () => {
-  it('is offered from the configuration once promoted, and says what opens it before that', async () => {
-    const user = setup(createGame(1, 0));
-    await user.click(screen.getByRole('button', { name: /configuration/i }));
+  it('is offered from the restricted files once promoted, and says what opens it before that', async () => {
+    const g = createGame(1, 0);
+    const user = setup({ ...g, profile: { ...g.profile, contractsCompleted: 1 } });
+    await user.click(screen.getByRole('button', { name: /restricted files/i }));
     expect(screen.getByRole('button', { name: new RegExp(`BOARDROOM · AFTER ${BOARDROOM_UNLOCK_CONTRACTS} CONTRACTS`, 'i') })).toHaveProperty('disabled', true);
     document.body.innerHTML = '';
     const vet = setup(veteran(createGame(1, 0)));
-    await vet.click(screen.getByRole('button', { name: /configuration/i }));
+    await vet.click(screen.getByRole('button', { name: /restricted files/i }));
     await vet.click(screen.getByRole('button', { name: /accept promotion/i }));
     expect(store.getState().mode).toBe('boardroom');
     expect(screen.getByRole('region', { name: /the boardroom/i }).hidden).toBe(false);

@@ -42,7 +42,7 @@ test('phone tab bar switches panels and the drill stays reachable', async ({ pag
 });
 
 test('accept Special Order 0-77 and stalk a contract as the creature', async ({ page }) => {
-  await page.getByRole('button', { name: /system configuration/i }).click();
+  await page.getByRole('button', { name: /restricted files/i }).click();
   await page.getByRole('button', { name: /accept special order 0-77/i }).click();
   const view = page.getByRole('region', { name: /special order 0-77/i });
   await expect(view).toBeVisible();
@@ -53,8 +53,8 @@ test('accept Special Order 0-77 and stalk a contract as the creature', async ({ 
   await expect(view).toBeHidden();
 });
 
-test('the hunt can be accepted from the configuration, and the hunter lets a crew see it', async ({ page }) => {
-  await page.getByRole('button', { name: /system configuration/i }).click();
+test('the hunt can be accepted from the restricted files, and the hunter lets a crew see it', async ({ page }) => {
+  await page.getByRole('button', { name: /restricted files/i }).click();
   await page.getByRole('button', { name: /accept the hunt/i }).click();
   const hunt = page.getByRole('region', { name: /the hunt/i });
   await expect(hunt).toBeVisible();

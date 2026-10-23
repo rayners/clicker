@@ -1,9 +1,8 @@
 import { confirmedInTime } from '../shared/ui/confirm';
 import type { GameState } from '../core/game';
-import { HUNTER_LEGEND, BOARDROOM_UNLOCK_CONTRACTS, CREATURE_UNLOCK_CONTRACTS, HUNTER_UNLOCK_CONTRACTS, isBoardroomUnlocked, isCreatureUnlocked, isHunterUnlocked } from '../core/prestige';
 import { exportSave, importSave } from '../core/save';
 import type { Store } from '../core/store';
-import { aboutLink, h, setAttr, setText } from '../shared/ui/dom';
+import { aboutLink, h, setText } from '../shared/ui/dom';
 import { createOptOut } from '../shared/telemetry';
 
 const CONFIRM_TIMEOUT_MS = 5000;
@@ -23,12 +22,6 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
   const resetButton = h('button', { class: 'buy cfg-danger', type: 'button' }, 'HARD RESET');
   const reassignButton = h('button', { class: 'buy', type: 'button' }, 'REQUEST REASSIGNMENT');
   const close = h('button', { class: 'cfg-close', type: 'button', 'aria-label': 'Close' }, 'X');
-  // Play as the creature (docs/HORROR-TIER.md).
-  const specialOrder = h('button', { class: 'buy cfg-danger', type: 'button', 'aria-label': 'Accept Special Order 0-77' }, 'SPECIAL ORDER 0-77: ACCEPT');
-  // Play as the hunter: a second horror tier, beside the creature.
-  const theHunt = h('button', { class: 'buy cfg-danger', type: 'button', 'aria-label': 'Accept the hunt' }, 'THE HUNT: ACCEPT');
-  // The second tier: WARDEN promoted to headquarters (docs/BOARDROOM.md).
-  const promotion = h('button', { class: 'buy', type: 'button' }, 'ACCEPT PROMOTION');
 
   const dialog = h(
     'div',
@@ -48,10 +41,6 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
       status,
       h('h3', { class: 'panel-subtitle' }, 'CONTRACT'),
       reassignButton,
-      h('h3', { class: 'panel-subtitle' }, 'RESTRICTED'),
-      specialOrder,
-      theHunt,
-      promotion,
       h('h3', { class: 'panel-subtitle' }, 'DANGER'),
       resetButton,
     ),
@@ -148,35 +137,8 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
     show(false);
   });
 
-  specialOrder.addEventListener('click', () => {
-    store.dispatch({ type: 'startCreature', seed: (Math.random() * 2 ** 31) | 0 });
-    show(false);
-  });
-
-  theHunt.addEventListener('click', () => {
-    store.dispatch({ type: 'startHunter', seed: (Math.random() * 2 ** 31) | 0 });
-    show(false);
-  });
-
-  promotion.addEventListener('click', () => {
-    store.dispatch({ type: 'enterBoardroom', seed: (Math.random() * 2 ** 31) | 0 });
-    show(false);
-  });
-
   function render(game: GameState) {
     reassignButton.disabled = !!game.assigning;
-    const promoted = !!game.boardroom || isBoardroomUnlocked(game.profile);
-    promotion.disabled = !promoted;
-    const promotionText = game.boardroom ? 'THE BOARDROOM: RETURN' : promoted ? 'THE BOARDROOM: ACCEPT PROMOTION' : `THE BOARDROOM · AFTER ${BOARDROOM_UNLOCK_CONTRACTS} CONTRACTS`;
-    setText(promotion, promotionText);
-    setAttr(promotion, 'aria-label', game.boardroom ? 'Return to the Boardroom' : promoted ? 'Accept promotion' : promotionText.toLowerCase());
-    const huntOpen = !!game.hunter || isHunterUnlocked(game.profile);
-    theHunt.disabled = !huntOpen;
-    setText(theHunt, game.hunter ? 'THE HUNT: RESUME' : huntOpen ? 'THE HUNT: ACCEPT' : `THE HUNT · AFTER ${HUNTER_UNLOCK_CONTRACTS} CONTRACTS OR ${HUNTER_LEGEND} LEGEND`);
-    // Closed tiers say what opens them.
-    const creatureOpen = !!game.creature || isCreatureUnlocked(game.profile);
-    specialOrder.disabled = !creatureOpen;
-    setText(specialOrder, game.creature ? 'SPECIAL ORDER 0-77: RESUME' : creatureOpen ? 'SPECIAL ORDER 0-77: ACCEPT' : `SPECIAL ORDER 0-77 · AFTER ${CREATURE_UNLOCK_CONTRACTS} CONTRACTS`);
     sound.checked = game.profile.settings.sound;
     motion.checked = game.profile.settings.reducedMotion;
   }

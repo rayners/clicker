@@ -29,9 +29,9 @@ beforeEach(() => {
 });
 
 describe('the creature on screen', () => {
-  it('is reached from the configuration: accept Special Order 0-77', async () => {
+  it('is reached from the restricted files in the masthead: accept Special Order 0-77', async () => {
     const user = setup(veteran(createGame(1, 0)));
-    await user.click(screen.getByRole('button', { name: /system configuration/i }));
+    await user.click(screen.getByRole('button', { name: /restricted files/i }));
     await user.click(screen.getByRole('button', { name: /accept special order 0-77/i }));
     expect(store.getState().mode).toBe('creature');
     expect(screen.getByRole('region', { name: /special order 0-77/i })).toBeTruthy();

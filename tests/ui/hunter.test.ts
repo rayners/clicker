@@ -29,9 +29,9 @@ beforeEach(() => {
 });
 
 describe('the hunter on screen', () => {
-  it('is reached from the configuration: accept the hunt', async () => {
+  it('is reached from the restricted files in the masthead: accept the hunt', async () => {
     const user = setup(veteran(createGame(1, 0)));
-    await user.click(screen.getByRole('button', { name: /system configuration/i }));
+    await user.click(screen.getByRole('button', { name: /restricted files/i }));
     await user.click(screen.getByRole('button', { name: /accept the hunt/i }));
     expect(store.getState().mode).toBe('hunter');
     expect(screen.getByRole('region', { name: /the hunt/i })).toBeTruthy();
@@ -86,9 +86,10 @@ describe('the hunter on screen', () => {
     expect(store.getState().profile.legend.hunter).toBe(4);
   });
 
-  it('says how many contracts unlock the restricted orders before they open', async () => {
-    const user = setup(createGame(1, 0));
-    await user.click(screen.getByRole('button', { name: /system configuration/i }));
+  it('says how many contracts unlock the restricted orders before they open, once the first contract is done', async () => {
+    const g = createGame(1, 0);
+    const user = setup({ ...g, profile: { ...g.profile, contractsCompleted: 1 } });
+    await user.click(screen.getByRole('button', { name: /restricted files/i }));
     const hunt = screen.getByRole('button', { name: /accept the hunt/i }) as HTMLButtonElement;
     expect(hunt.disabled).toBe(true);
     expect(hunt.textContent).toMatch(/AFTER 5 CONTRACTS/);

@@ -26,6 +26,7 @@ import { createSettings } from './settings';
 import { createCreatureView } from './creature';
 import { createHunterView } from './hunter';
 import { createBoardroomView } from './boardroom';
+import { createRestricted } from './restricted';
 import { createAssignment } from './assignment';
 import { createAlerts } from './alerts';
 import { createSound, cueForLog, MAX_PRINTED_LINES, PRINT_SECONDS, PRINT_STAGGER } from './sound';
@@ -80,6 +81,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const creatureView = createCreatureView(store);
   const hunterView = createHunterView(store);
   const boardroomView = createBoardroomView(store);
+  const restricted = createRestricted(store);
   const assignment = createAssignment(store);
   // iOS only allows audio to start inside a user gesture.
   root.addEventListener('pointerdown', () => sound.unlock(), { passive: true });
@@ -98,6 +100,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
       h('span', { class: 'brand-mark', 'aria-hidden': 'true' }, 'K/A'),
       h('span', { class: 'brand-name' }, 'KESSLER-AMARI COMBINE'),
       guide.rulesButton,
+      restricted.button,
       settings.button,
     ),
     h('div', { class: 'mast-line' }, h('span', { class: 'mast-ship-wrap' }, vesselBit, shipName), clock),
@@ -281,7 +284,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
 
   root.classList.add('shell');
   const shell = [masthead, status, ...panels.map((p) => p.el), drillBay, tabbar];
-  root.replaceChildren(...shell, settings.dialog, assignment.el, creatureView.el, hunterView.el, boardroomView.el, guide.rulesDialog);
+  root.replaceChildren(...shell, settings.dialog, restricted.dialog, assignment.el, creatureView.el, hunterView.el, boardroomView.el, guide.rulesDialog);
   selectTab('ops');
   let palette = readPalette(root);
   paintAll(root);
@@ -314,6 +317,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     guide.render(game);
     hunterView.render(game);
     boardroomView.render(game);
+    restricted.render(game);
     // Behind a full-screen layer (a horror tier, the Boardroom, choosing a contract) the contract is out of reach.
     const covered = game.mode !== 'mission' || !!game.assigning;
     for (const el of shell) el.toggleAttribute('inert', covered);
