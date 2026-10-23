@@ -1,10 +1,9 @@
-import { h, setAttr, setText } from '../engine/ui/dom';
+import { h, setAttr } from '../engine/ui/dom';
+import { createEndingChooser } from '../engine/ui/endings';
 import { availableEndings, endingRewards, type Ending } from '../forest/charter';
 import type { ForestGame } from '../forest/game';
 import type { ForestStore } from '../forest/store';
 import type { SiteId } from '../forest/state';
-
-const CONFIRM_TIMEOUT_MS = 5000;
 
 const ENDINGS: Record<Ending, { title: string; text: string; reward(r: { renown: number; grace: number }): string }> = {
   sell: {
@@ -26,8 +25,6 @@ const ENDINGS: Record<Ending, { title: string; text: string; reward(r: { renown:
 
 /** The end of a charter: what the Factor does with the Key. */
 export function createReckoning(store: ForestStore): { el: HTMLElement; render(game: ForestGame): void } {
-  let pending: Ending | null = null;
-  let timer: ReturnType<typeof setTimeout> | undefined;
   let site: SiteId = 'forest';
   const sites = (['forest', 'keep'] as const).map((id) => {
     const label = id === 'keep' ? 'Morrowgate Keep' : 'the forest';
@@ -38,35 +35,15 @@ export function createReckoning(store: ForestStore): { el: HTMLElement; render(g
     });
     return { id, button };
   });
-
-  const cards = (Object.keys(ENDINGS) as Ending[]).map((ending) => {
-    const def = ENDINGS[ending];
-    const reward = h('p', { class: 'reckon-reward' });
-    const button = h('button', { class: 'buy reckon-go', type: 'button' });
-    button.addEventListener('click', () => {
-      if (pending !== ending) {
-        pending = ending;
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          pending = null;
-          render(store.getState());
-        }, CONFIRM_TIMEOUT_MS);
-        render(store.getState());
-        return;
-      }
-      pending = null;
-      clearTimeout(timer);
-      store.dispatch({ type: 'completeCharter', ending, seed: (Math.random() * 2 ** 31) | 0, site });
-    });
-    const el = h(
-      'section',
-      { class: 'sys-row reckon-card', 'aria-label': def.title },
-      h('h3', { class: 'reckon-title' }, def.title),
-      h('p', { class: 'sys-desc' }, def.text),
-      reward,
-      button,
-    );
-    return { ending, el, reward, button };
+  const chooser = createEndingChooser<ForestGame, Ending>({
+    endings: Object.keys(ENDINGS) as Ending[],
+    available: availableEndings,
+    words: (game, ending) => ({ title: ENDINGS[ending].title, text: ENDINGS[ending].text, reward: ENDINGS[ending].reward(endingRewards(game)[ending]) }),
+    confirm: 'END THE CHARTER',
+    onChoose: (ending) => store.dispatch({ type: 'completeCharter', ending, seed: (Math.random() * 2 ** 31) | 0, site }),
+    className: 'reckon',
+    cardClass: 'sys-row',
+    textClass: 'sys-desc',
   });
 
   const el = h(
@@ -75,21 +52,12 @@ export function createReckoning(store: ForestStore): { el: HTMLElement; render(g
     h('h2', { class: 'panel-title' }, 'The Reckoning'),
     h('p', { class: 'reckon-intro' }, 'THE CHARTER HAS COME DUE. THE COMPANY HOLDS THE KEY, OR WHAT THERE IS OF IT. THIS CHOICE ENDS THE CHARTER.'),
     h('div', { class: 'reckon-site' }, h('span', { class: 'reckon-site-label' }, 'THE NEXT CHARTER DELVES '), ...sites.map((s) => s.button)),
-    ...cards.map((c) => c.el),
+    chooser.el,
   );
 
   function render(game: ForestGame) {
     for (const s of sites) setAttr(s.button, 'aria-pressed', String(s.id === site));
-    const offered = availableEndings(game);
-    const rewards = endingRewards(game);
-    for (const card of cards) {
-      card.el.hidden = !offered.includes(card.ending);
-      setText(card.reward, ENDINGS[card.ending].reward(rewards[card.ending]));
-      const confirming = pending === card.ending;
-      setText(card.button, confirming ? 'CONFIRM: END THE CHARTER' : ENDINGS[card.ending].title);
-      setAttr(card.button, 'aria-label', confirming ? 'Confirm: end the charter' : ENDINGS[card.ending].title.toLowerCase());
-      card.el.classList.toggle('is-pending', confirming);
-    }
+    chooser.render(game);
   }
 
   return { el, render };

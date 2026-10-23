@@ -1,36 +1,37 @@
 import { h, setText } from '../engine/ui/dom';
-import { createConfirmButton } from '../engine/ui/confirm';
+import { createEndingChooser } from '../engine/ui/endings';
 import { interpolate } from '../engine/lexicon';
 import type { LateGame } from '../late-fees/game';
 import { venueOf } from '../late-fees/registry';
 import { availableEndings, endingFor } from '../late-fees/sequels';
+import type { Ending } from '../late-fees/kinds';
 import type { LateStore } from '../late-fees/store';
+
+const ENDINGS: readonly Ending[] = ['kill', 'sell', 'burn'];
 
 /** Roll credits: who is left, and how this film ends (which decides the sequel). */
 export function createCredits(store: LateStore): { el: HTMLElement; render(game: LateGame): void } {
   const stakes = h('p', { class: 'credits-stakes' });
-  const list = h('div', { class: 'credits-endings' });
-  const el = h('div', { class: 'panel-body' }, h('h2', { class: 'panel-title' }, 'ROLL CREDITS'), stakes, list);
-  let shown = '';
+  const chooser = createEndingChooser<LateGame, Ending>({
+    endings: ENDINGS,
+    available: availableEndings,
+    words(game, ending) {
+      const r = game.run;
+      const e = endingFor(r, ending);
+      return { title: e.title, text: interpolate(e.text, { ...venueOf(r).lexicon, nextPart: String(r.config.part + 1) }), reward: '' };
+    },
+    confirm: 'ROLL THE SEQUEL',
+    onChoose: (ending) => store.dispatch({ type: 'completeRun', ending, seed: (Math.random() * 2 ** 31) | 0 }),
+    className: 'credits',
+    cardClass: 'credits-ending',
+    textClass: 'item-desc',
+  });
+  const el = h('div', { class: 'panel-body' }, h('h2', { class: 'panel-title' }, 'ROLL CREDITS'), stakes, chooser.el);
   return {
     el,
     render(game) {
-      const r = game.run;
-      setText(stakes, venueOf(r).stakes(r));
-      const endings = availableEndings(game);
-      const key = `${r.seed}:${endings.join(',')}`;
-      if (key === shown) return;
-      shown = key;
-      const words = { ...venueOf(r).lexicon, nextPart: String(r.config.part + 1) };
-      list.replaceChildren(
-        ...endings.map((id) => {
-          const e = endingFor(r, id);
-          // Ending the film is for good, so it takes a second tap.
-          const go = createConfirmButton({ className: 'buy credits-go', onConfirm: () => store.dispatch({ type: 'completeRun', ending: id, seed: (Math.random() * 2 ** 31) | 0 }) });
-          go.label(e.title, e.title);
-          return h('section', { class: 'credits-ending' }, h('p', { class: 'item-desc' }, interpolate(e.text, words)), go.el);
-        }),
-      );
+      setText(stakes, venueOf(game.run).stakes(game.run));
+      chooser.render(game);
     },
   };
 }

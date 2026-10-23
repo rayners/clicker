@@ -11,16 +11,23 @@ export const CONFIRM_GAP_MS = 400;
 export const confirmedInTime = (armedAt: number, now: number = Date.now()): boolean => now - armedAt >= CONFIRM_GAP_MS;
 
 /** A button for something that cannot be undone: the first tap asks, the second acts, and the ask lapses. */
-export function createConfirmButton(options: { className: string; onConfirm(): void; timeoutMs?: number }) {
+export function createConfirmButton(options: {
+  className: string;
+  onConfirm(): void;
+  timeoutMs?: number;
+  /** Called as it arms (true) and as the ask lapses or is answered (false). */
+  onArm?(armed: boolean): void;
+}) {
   const el = h('button', { class: options.className, type: 'button' });
   let aria = '';
   let text = '';
+  let confirmText = '';
   let pending = false;
   let armedAt = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const show = () => {
     const lower = aria.charAt(0).toLowerCase() + aria.slice(1);
-    setText(el, pending ? `CONFIRM: ${text}` : text);
+    setText(el, pending ? `CONFIRM: ${confirmText || text}` : text);
     setAttr(el, 'aria-label', pending ? `Confirm: ${lower}` : aria);
   };
   el.addEventListener('click', () => {
@@ -32,20 +39,24 @@ export function createConfirmButton(options: { className: string; onConfirm(): v
       timer = setTimeout(() => {
         pending = false;
         show();
+        options.onArm?.(false);
       }, options.timeoutMs ?? 5000);
       show();
+      options.onArm?.(true);
       return;
     }
     pending = false;
     show();
+    options.onArm?.(false);
     options.onConfirm();
   });
   return {
     el,
-    /** Set what it says; kept while a confirmation is pending. */
-    label(nextAria: string, nextText: string) {
+    /** Set what it says, and optionally what it says while waiting for the second tap; kept while pending. */
+    label(nextAria: string, nextText: string, nextConfirm = '') {
       aria = nextAria;
       text = nextText;
+      confirmText = nextConfirm;
       show();
     },
   };

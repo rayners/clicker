@@ -46,4 +46,23 @@ describe('a two-tap button for things that cannot be undone', () => {
     expect(onConfirm).toHaveBeenCalledTimes(1);
     vi.useRealTimers();
   });
+
+  it('can say something of its own while it waits for the second tap', () => {
+    const b = createConfirmButton({ className: 'x', onConfirm: vi.fn() });
+    b.label('Deliver the cargo', 'EXECUTE', 'END CONTRACT');
+    b.el.click();
+    expect(b.el.textContent).toBe('CONFIRM: END CONTRACT');
+    expect(b.el.getAttribute('aria-label')).toBe('Confirm: deliver the cargo');
+  });
+
+  it('tells the game when it is armed and when the ask lapses, e.g. to highlight a card', () => {
+    vi.useFakeTimers();
+    const armed: boolean[] = [];
+    const b = createConfirmButton({ className: 'x', onConfirm: vi.fn(), timeoutMs: 1000, onArm: (on) => armed.push(on) });
+    b.label('End', 'END');
+    b.el.click();
+    vi.advanceTimersByTime(1500);
+    vi.useRealTimers();
+    expect(armed).toEqual([true, false]);
+  });
 });

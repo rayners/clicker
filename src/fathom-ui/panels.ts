@@ -1,6 +1,7 @@
 import { createSettings } from '../engine/ui/settings';
+import { createEndingChooser } from '../engine/ui/endings';
 import { formatNumber } from '../engine/format';
-import { h, setAttr, setText } from '../engine/ui/dom';
+import { h } from '../engine/ui/dom';
 import { FATHOM_UPGRADES } from '../fathom-data/upgrades';
 import { availableUpgrades } from '../fathom/upgrades';
 import { availableEndings, endingRewards, type Ending } from '../fathom/season';
@@ -11,7 +12,6 @@ import type { FathomGame } from '../fathom/game';
 import type { Outfit } from '../fathom/state';
 import type { FathomStore } from '../fathom/store';
 
-const CONFIRM_TIMEOUT_MS = 5000;
 const seed = () => (Math.random() * 2 ** 31) | 0;
 
 /** Requisitions: what can be bought now, and what has been. */
@@ -62,43 +62,18 @@ const ENDINGS: Record<Ending, { title: string; text: string; reward(r: { standin
 
 /** The season's end: what the outfit does with the seam. */
 export function createEndPanel(store: FathomStore): { el: HTMLElement; render(game: FathomGame): void } {
-  let pending: Ending | null = null;
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const cards = (Object.keys(ENDINGS) as Ending[]).map((ending) => {
-    const def = ENDINGS[ending];
-    const reward = h('p', { class: 'end-reward' });
-    const button = h('button', { class: 'buy end-go', type: 'button' });
-    button.addEventListener('click', () => {
-      if (pending !== ending) {
-        pending = ending;
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          pending = null;
-          render(store.getState());
-        }, CONFIRM_TIMEOUT_MS);
-        render(store.getState());
-        return;
-      }
-      pending = null;
-      clearTimeout(timer);
-      store.dispatch({ type: 'completeSeason', ending, seed: seed() });
-    });
-    const el = h('section', { class: 'item end-card', 'aria-label': def.title }, h('h3', { class: 'end-title' }, def.title), h('p', { class: 'item-desc' }, def.text), reward, button);
-    return { ending, el, reward, button };
+  const chooser = createEndingChooser<FathomGame, Ending>({
+    endings: Object.keys(ENDINGS) as Ending[],
+    available: availableEndings,
+    words: (game, ending) => ({ title: ENDINGS[ending].title, text: ENDINGS[ending].text, reward: ENDINGS[ending].reward(endingRewards(game)[ending]) }),
+    confirm: 'END THE SEASON',
+    onChoose: (ending) => store.dispatch({ type: 'completeSeason', ending, seed: seed() }),
+    className: 'end',
+    cardClass: 'item',
+    textClass: 'item-desc',
   });
-  const el = h('div', { class: 'panel-body' }, h('h2', { class: 'panel-title' }, "THE SEASON'S END"), h('p', { class: 'zone-desc' }, 'THE SEAM IS STILL OPEN. THIS CHOICE ENDS THE SEASON.'), ...cards.map((c) => c.el));
-  function render(game: FathomGame) {
-    const offered = availableEndings(game);
-    const rewards = endingRewards(game);
-    for (const card of cards) {
-      card.el.hidden = !offered.includes(card.ending);
-      setText(card.reward, ENDINGS[card.ending].reward(rewards[card.ending]));
-      const confirming = pending === card.ending;
-      setText(card.button, confirming ? 'CONFIRM: END THE SEASON' : ENDINGS[card.ending].title);
-      setAttr(card.button, 'aria-label', confirming ? 'Confirm: end the season' : ENDINGS[card.ending].title.toLowerCase());
-    }
-  }
-  return { el, render };
+  const el = h('div', { class: 'panel-body' }, h('h2', { class: 'panel-title' }, "THE SEASON'S END"), h('p', { class: 'zone-desc' }, 'THE SEAM IS STILL OPEN. THIS CHOICE ENDS THE SEASON.'), chooser.el);
+  return { el, render: chooser.render };
 }
 
 /** The seam: playing as the Source, behind its own door rather than in the configuration. */

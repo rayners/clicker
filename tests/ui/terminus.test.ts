@@ -1,3 +1,4 @@
+import { confirmPause } from '../helpers';
 // @vitest-environment jsdom
 import { describe, it, expect } from 'vitest';
 import { screen, within } from '@testing-library/dom';
@@ -35,13 +36,14 @@ describe('terminus panel', () => {
     expect(screen.queryByRole('region', { name: /broadcast/i })).toBeNull();
   });
 
-  it('asks for confirmation, then ends the contract and starts the next', async () => {
+  it('asks for confirmation (a second, unhurried tap), then ends the contract and starts the next', async () => {
     const user = setup(terminus);
     await user.click(tab(/terminus/i)!);
     const button = within(screen.getByRole('region', { name: /deliver the cargo/i })).getByRole('button');
     await user.click(button);
     expect(store.getState().profile.contractsCompleted).toBe(0);
     expect(button.textContent).toMatch(/confirm/i);
+    await confirmPause();
     await user.click(button);
     expect(store.getState().profile.contractsCompleted).toBe(1);
     expect(store.getState().mission.act).toBe(1);
