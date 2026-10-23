@@ -1,4 +1,5 @@
 import { COMPARTMENTS, CUTTERS, SALVAGE_SECONDS, SHORING, STRIP_PER_LOAD, type CutterDef, type ShoringDef } from '../../data/salvage/systems';
+import { memoByState } from '../../shared/memo';
 import { SALVAGE_UPGRADES, type SalvageEffect } from '../../data/salvage/upgrades';
 import { SALVAGE_CREW_BOOSTS } from '../../data/salvage/crew-boosts';
 import { assault, frontier, isSecured, tickGround, type SectionState } from '../../shared/ground';
@@ -66,7 +67,8 @@ function applyEffect(r: Multipliers, e: SalvageEffect): void {
   }
 }
 
-function multipliers(m: MissionState): Multipliers {
+// Asked many times a tick (once per processor, generator, car...), so worked out once per mission state.
+const multipliers = memoByState((m: MissionState): Multipliers => {
   const r: Multipliers = {
     cutPower: 1,
     autoCut: 0,
@@ -80,7 +82,7 @@ function multipliers(m: MissionState): Multipliers {
   for (const u of SALVAGE_UPGRADES) if (m.upgrades.includes(u.id)) applyEffect(r, u.effect);
   for (const [id, boost] of Object.entries(SALVAGE_CREW_BOOSTS)) if (isCrewEffective(m, id)) applyEffect(r, boost.effect);
   return r;
-}
+});
 
 // ---------- purchases ----------
 

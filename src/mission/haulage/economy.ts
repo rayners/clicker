@@ -1,4 +1,5 @@
 import type { CarDef, EngineDef } from '../../data/haulage/systems';
+import { memoByState } from '../../shared/memo';
 import type { HaulageEffect } from '../../data/haulage/upgrades';
 import { profileOf, type HaulProfile } from './profiles';
 import { formatNumber } from '../../shared/format';
@@ -79,7 +80,8 @@ function applyEffect(r: Multipliers, e: HaulageEffect): void {
   }
 }
 
-function multipliers(m: MissionState): Multipliers {
+// Asked many times a tick (once per processor, generator, car...), so worked out once per mission state.
+const multipliers = memoByState((m: MissionState): Multipliers => {
   const r: Multipliers = {
     thrusters: 1,
     autoThrusters: 0,
@@ -97,7 +99,7 @@ function multipliers(m: MissionState): Multipliers {
   for (const u of p.upgrades) if (m.upgrades.includes(u.id)) applyEffect(r, u.effect);
   for (const [id, boost] of Object.entries(p.crewBoosts)) if (isCrewEffective(m, id)) applyEffect(r, boost.effect);
   return r;
-}
+});
 
 // ---------- purchases ----------
 

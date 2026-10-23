@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createGame, tickGame, catchUp, advance, OFFLINE_CAP_SECONDS } from '../../src/core/game';
+import { startCreature } from '../../src/core/creature';
 import { buyGenerator } from '../../src/mission/extraction/economy';
 import { GENERATORS } from '../../src/data/extraction/generators';
 import { ext } from '../helpers';
@@ -61,6 +62,15 @@ describe('offline catch-up', () => {
   });
 });
 
+describe('offline catch-up stays quick enough for a phone', () => {
+  it('catches up eight hours away as the creature (three contracts at once) in a few seconds at most', () => {
+    const g = startCreature(createGame(1, NOW), 3);
+    const t0 = performance.now();
+    catchUp({ ...g, savedAt: 0 }, 8 * 3600 * 1000);
+    expect(performance.now() - t0).toBeLessThan(10_000);
+  }, 60_000);
+});
+
 describe('advance (the live loop)', () => {
   it('ticks normally for short frame gaps', () => {
     const g = createGame(5, NOW);
@@ -80,6 +90,12 @@ describe('advance (the live loop)', () => {
     const g = createGame(5, NOW);
     const { game } = advance(g, 3600);
     expect(game.mission.log.at(-1)!.text).toMatch(/1h 0m/);
+  });
+
+  it('ignores time running backwards (the device clock was set back), in every mode', () => {
+    const g = createGame(5, NOW);
+    expect(advance(g, -3600).game).toBe(g);
+    expect(advance(g, 0).game).toBe(g);
   });
 
   it('does not log brief absences', () => {

@@ -1,3 +1,4 @@
+import { memoByState } from '../../shared/memo';
 import {
   COLONIST_WAVES,
   LINES,
@@ -91,7 +92,8 @@ function applyEffect(r: Multipliers, e: TerraformEffect): void {
   }
 }
 
-function multipliers(m: MissionState): Multipliers {
+// Asked many times a tick (once per processor, generator, car...), so worked out once per mission state.
+const multipliers = memoByState((m: MissionState): Multipliers => {
   const r: Multipliers = {
     surge: 1,
     autoSurge: 0,
@@ -104,7 +106,7 @@ function multipliers(m: MissionState): Multipliers {
   for (const u of TERRAFORM_UPGRADES) if (m.upgrades.includes(u.id)) applyEffect(r, u.effect);
   for (const [id, boost] of Object.entries(TERRAFORM_CREW_BOOSTS)) if (isCrewEffective(m, id)) applyEffect(r, boost.effect);
   return r;
-}
+});
 
 export function reactorCost(def: ReactorDef, owned: number): number {
   return Math.ceil(def.baseCost * REACTOR_COST_GROWTH ** owned);

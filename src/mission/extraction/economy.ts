@@ -1,4 +1,5 @@
 import { GENERATORS, type GeneratorDef } from '../../data/extraction/generators';
+import { memoByState } from '../../shared/memo';
 import { UPGRADES, type UpgradeEffect } from '../../data/extraction/upgrades';
 import { CREW_BOOSTS } from '../../data/extraction/crew-boosts';
 import { isCrewEffective } from '../crew';
@@ -49,13 +50,14 @@ function applyEffect(result: Multipliers, e: UpgradeEffect): void {
   }
 }
 
-function multipliers(m: MissionState): Multipliers {
+// Asked many times a tick (once per processor, generator, car...), so worked out once per mission state.
+const multipliers = memoByState((m: MissionState): Multipliers => {
   const global = horrorProductionMultiplier(m) * m.config.productionMultiplier;
   const result: Multipliers = { click: 1, clickRateShare: 0, autoDrill: 0, global, refinery: 1, generator: {} };
   for (const u of UPGRADES) if (m.upgrades.includes(u.id)) applyEffect(result, u.effect);
   for (const [id, boost] of Object.entries(CREW_BOOSTS)) if (isCrewEffective(m, id)) applyEffect(result, boost.effect);
   return result;
-}
+});
 
 export function clickPower(m: MissionState): number {
   const mult = multipliers(m);

@@ -8,7 +8,7 @@ import { tickHunter, type HunterHunt } from './hunter';
 import { tickBoardroom, type BoardroomState } from './boardroom';
 
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
-const CATCH_UP_STEP_SECONDS = 1;
+const CATCH_UP_STEP_SECONDS = 5;
 /** Frame gaps longer than this are treated as the player having been away. */
 const LIVE_MAX_DT = 2;
 const ABSENCE_LOG_THRESHOLD = 60;
@@ -151,6 +151,8 @@ export function catchUp(game: GameState, now: number): { game: GameState; elapse
 
 /** Called by the live loop with real elapsed time since the previous frame. */
 export function advance(game: GameState, dt: number): { game: GameState; offlineSeconds: number } {
+  // A clock set back (or corrected by the network) gives a negative gap: time does not run in reverse.
+  if (!(dt > 0)) return { game, offlineSeconds: 0 };
   if (dt <= LIVE_MAX_DT) return { game: tickGame(game, dt), offlineSeconds: 0 };
   const { game: g, elapsed } = simulateAbsence(game, dt);
   return { game: g, offlineSeconds: elapsed };

@@ -1,3 +1,4 @@
+import { memoByState } from '../../shared/memo';
 import {
   BOUNTY_SECONDS,
   FABRICATORS,
@@ -79,7 +80,8 @@ function applyEffect(r: Multipliers, e: SecurityEffect): void {
   }
 }
 
-function multipliers(m: MissionState): Multipliers {
+// Asked many times a tick (once per processor, generator, car...), so worked out once per mission state.
+const multipliers = memoByState((m: MissionState): Multipliers => {
   const r: Multipliers = {
     support: 1,
     autoSupport: 0,
@@ -94,7 +96,7 @@ function multipliers(m: MissionState): Multipliers {
   for (const u of SECURITY_UPGRADES) if (m.upgrades.includes(u.id)) applyEffect(r, u.effect);
   for (const [id, boost] of Object.entries(SECURITY_CREW_BOOSTS)) if (isCrewEffective(m, id)) applyEffect(r, boost.effect);
   return r;
-}
+});
 
 // ---------- purchases ----------
 
