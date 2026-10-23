@@ -19,7 +19,9 @@ export const UPGRADES: readonly Upgrade[] = [
   { id: 'longer-spools', name: 'Longer spools', description: 'Each spool of wire runs 1,500 inches.', cost: 80, after: 500 },
   { id: 'wire-buyer', name: 'Standing wire order', description: 'Buys a spool whenever the bench runs dry.', cost: 200, after: 1_000 },
   { id: 'jingle', name: 'A jingle', description: 'Half again as many people want clips.', cost: 500, after: 2_000 },
-  { id: 'megaclippers', name: 'Megaclippers', description: 'Autoclippers bend three times as fast.', cost: 5_000, after: 20_000 },
+  { id: 'megaclippers', name: 'Megaclippers', description: 'Autoclippers bend three times as fast.', cost: 1_500, after: 20_000 },
+  { id: 'night-shift', name: 'A night shift', description: 'The bench never stops. Autoclippers bend twice as much.', cost: 6_000, after: 100_000 },
+  { id: 'factory', name: 'The factory', description: 'A building on the edge of town, full of benches. Autoclippers bend four times as much.', cost: 25_000, after: 300_000 },
 ];
 
 export const BEATS: readonly Beat<{ w: Works }, NoteKind>[] = [

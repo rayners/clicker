@@ -17,6 +17,7 @@
     "simulate:fathom": "tsx scripts/simulate-fathom.ts",
     "simulate:late": "tsx scripts/simulate-late.ts",
     "simulate:board": "tsx scripts/simulate-board.ts",
+    "simulate:clips": "tsx scripts/simulate-clips.ts",
     "screenshots": "tsx scripts/screenshots.ts",
     "docs": "typedoc"
   },

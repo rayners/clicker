@@ -12,13 +12,17 @@ const WIRE_COST_MAX = 32;
 /** Seconds between moves in the wire price. */
 const WIRE_DRIFT_SECONDS = 10;
 /** Clips a second people want at five cents, before marketing. */
-const BASE_DEMAND = 5;
+const BASE_DEMAND = 20;
 const BASE_PRICE = 0.05;
-const MARKETING_GAIN = 1.1;
+const MARKETING_GAIN = 1.6;
+/** How sharply demand answers price: at 2, the best price is twice what the wire in a clip costs. */
+const ELASTICITY = 2;
 const AUTOCLIPPER_BASE = 5;
 const AUTOCLIPPER_GROWTH = 1.1;
 const MARKETING_BASE = 100;
 const STORY_GAP = 30;
+/** Most spools the standing order buys in one go. */
+const MAX_ORDER_SPOOLS = 100;
 /** Extra demand per point of good will carried from earlier works. */
 const GOODWILL_DEMAND = 0.25;
 
@@ -73,10 +77,11 @@ export function createWorks(seed: number, goodwill = 0): Works {
 const has = (w: Works, id: string) => w.upgrades.includes(id);
 
 /** Clips a second people will buy at the current price. */
-export const demand = (w: Works): number => BASE_DEMAND * MARKETING_GAIN ** w.marketing * (has(w, 'jingle') ? 1.5 : 1) * (1 + GOODWILL_DEMAND * w.goodwill) * (BASE_PRICE / w.price);
+export const demand = (w: Works): number => BASE_DEMAND * MARKETING_GAIN ** w.marketing * (has(w, 'jingle') ? 1.5 : 1) * (1 + GOODWILL_DEMAND * w.goodwill) * (BASE_PRICE / w.price) ** ELASTICITY;
 
 /** Clips a second from each autoclipper. */
-export const clipperRate = (w: Works): number => (has(w, 'sharper-dies') ? 1.5 : 1) * (has(w, 'megaclippers') ? 3 : 1);
+export const clipperRate = (w: Works): number =>
+  (has(w, 'sharper-dies') ? 1.5 : 1) * (has(w, 'megaclippers') ? 3 : 1) * (has(w, 'night-shift') ? 2 : 1) * (has(w, 'factory') ? 4 : 1);
 
 export const autoclipperCost = (w: Works): number => AUTOCLIPPER_BASE * AUTOCLIPPER_GROWTH ** w.autoclippers;
 export const marketingCost = (w: Works): number => MARKETING_BASE * 2 ** w.marketing;
@@ -92,7 +97,11 @@ export function shiftPrice(w: Works, step: 1 | -1): Works {
 }
 
 export function buyWire(w: Works): Works {
-  if (w.funds < w.wireCost) return w;
+  if (w.funds < w.wireCost) {
+    // Never stuck: with nothing on the bench or the shelf, the merchant cuts as much wire as the money covers.
+    if (w.wire >= 1 || w.unsold >= 1 || w.funds <= 0) return w;
+    return { ...w, funds: 0, wire: w.wire + Math.floor((w.funds / w.wireCost) * spool(w)) };
+  }
   return { ...w, funds: w.funds - w.wireCost, wire: w.wire + spool(w) };
 }
 
@@ -132,7 +141,15 @@ export function tickWorks(w: Works, dt: number): Works {
   let next: Works = { ...w, elapsed: w.elapsed + dt, wire: w.wire - bent, unsold: w.unsold + bent, made: w.made + bent };
   const sold = Math.min(next.unsold, demand(next) * dt);
   next = { ...next, unsold: next.unsold - sold, funds: next.funds + sold * next.price };
-  if (next.wire < 1 && has(next, 'wire-buyer')) next = buyWire(next);
+  // The standing order keeps a second's bending on the bench, as far as the funds go.
+  if (has(next, 'wire-buyer')) {
+    const need = Math.max(1, next.autoclippers * clipperRate(next));
+    for (let i = 0; i < MAX_ORDER_SPOOLS && next.wire < need; i++) {
+      const bought = buyWire(next);
+      if (bought === next) break;
+      next = bought;
+    }
+  }
   next = driftWire(next, dt);
   return runBeats<NoteKind, Works, { w: Works }>(next, BEATS, { w: next }, { minGap: STORY_GAP });
 }

@@ -15,6 +15,7 @@ was fixed in the engine rather than worked around here.
 | `src/clips/works.ts` | The simulation: pure `(works, …) => works` functions and `tickWorks`. |
 | `src/clips/content.ts` | Upgrades, story beats, the walkthrough and its rules. |
 | `src/clips/game.ts` | The saved game: save system, clock, ending, reducer and store. |
+| `src/clips/bot.ts` | The pacing bot, on the engine's `playthrough` (`npm run simulate:clips`, `tests/clips/pacing.test.ts`). |
 | `src/clips-ui/app.ts` | The screen, made of engine parts only. |
 | `src/clips-ui/clips.css` | Its theme over the engine's classes. |
 | `src/clips-main.ts`, `clips/index.html` | The page: one `runGame` call, with no telemetry. |
@@ -30,6 +31,8 @@ Fixed in the engine along the way:
 - **The settings' About link** pointed at this site; it can point elsewhere, or be left out.
 - **The one-line guide tip** only worked because each game's stylesheet carried the same rules. They live in
   `src/engine/ui/engine.css` now, which every game imports before its theme.
+- **Pacing bots** were written out by hand in every game; the engine's `playthrough`, `huntDecider`, `playHunt` and
+  `defend` (`src/engine/bot.ts`) replace them, and this game's bot is twenty lines of decisions on top.
 - The screen parts themselves (dialog, settings, ending chooser, stepper, dial, buy lists and shop, tabs, action
   button and shell) were extracted from the four games while this was being built, and CLIP WORKS was the first to
   use each.
@@ -41,7 +44,15 @@ Still open:
 - **The page.** `index.html`, the PWA manifest and icons are written by hand per game.
 - **The story host.** A game that tells a story must remember seven fields (`act`, `beats`, `lastBeatAt`, `flags`,
   `log`, `nextLogId`, `elapsed`); a helper that makes them would save the boilerplate.
-- **Pacing.** There is no bot or pacing test here yet; the engine has no shared bot harness (the four games each
-  have their own).
 - **The flow readout's identity.** It needs something that changes when a new run starts. This game added a `seed`
   for it; the reference should say so.
+
+## What its bot found
+
+Writing the pacing bot found two faults in the game itself, both fixed:
+
+- **A softlock.** With the bench dry, nothing on the shelf and a spool out of reach, nothing could ever happen
+  again. Now the merchant cuts as much wire as the money covers.
+- **A flat economy.** With demand falling exactly as fast as the price rose, income was the same at any price and
+  more autoclippers earned nothing. Demand now answers price more sharply, so the best price is about twice what the
+  wire in a clip costs, and marketing and the late upgrades carry the run to a million in two or three hours.

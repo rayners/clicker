@@ -60,6 +60,7 @@ more, and has the tip jar.
 | `npm run simulate:board` | The same for the Boardroom. |
 | `npm run simulate:forest [keep] [hours]` | The same for Elderdark. |
 | `npm run simulate:late [venue] [killer]` | The same for LATE FEES. |
+| `npm run simulate:clips` | The same for CLIP WORKS. |
 | `npm run build` | Typecheck and static build to `dist/` (with service worker). |
 | `npm run icons` | Regenerate the PWA icons from the pixel sprites. |
 | `npm run screenshots` | Retake the README screenshots from a running dev server. |

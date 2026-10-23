@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   autoclipperCost,
+  clipperRate,
   buyAutoclipper,
   buyMarketing,
   buyUpgrade,
@@ -60,6 +61,13 @@ describe('the clip works', () => {
     expect(buyWire(works({ funds: 1 }))).toEqual(works({ funds: 1 }));
   });
 
+  it('never leaves the works stuck: with the bench dry, nothing to sell and a spool out of reach, it buys what wire the money covers', () => {
+    const w = buyWire(works({ wire: 0, unsold: 0, funds: 10, wireCost: 20 }));
+    expect(w.wire).toBe(500);
+    expect(w.funds).toBe(0);
+    expect(buyWire(works({ wire: 0, unsold: 5, funds: 10, wireCost: 20 })).wire).toBe(0);
+  });
+
   it('lets the wire price drift, deterministically from the seed', () => {
     const a = tickWorks(works(), 120);
     const b = tickWorks(works(), 120);
@@ -98,6 +106,16 @@ describe('the clip works', () => {
   it('keeps buying wire on its own once the wire buyer is installed and the spool runs out', () => {
     const w = tickWorks(works({ wire: 0, funds: 100, upgrades: ['wire-buyer'] }), 1);
     expect(w.wire).toBeGreaterThan(0);
+  });
+
+  it('keeps a fast bench in wire once the standing order is in, buying as many spools as a busy second needs', () => {
+    const w = tickWorks(works({ wire: 0, funds: 1e7, autoclippers: 1_000, upgrades: ['wire-buyer', 'megaclippers', 'night-shift', 'factory'], price: 10 }), 1);
+    expect(w.wire).toBeGreaterThanOrEqual(clipperRate(w) * w.autoclippers);
+  });
+
+  it('grows late with a night shift and then a factory, each multiplying what the autoclippers bend', () => {
+    expect(clipperRate(works({ upgrades: ['night-shift'] }))).toBe(2 * clipperRate(works()));
+    expect(clipperRate(works({ upgrades: ['factory'] }))).toBe(4 * clipperRate(works()));
   });
 
   it('tells its story as it grows: a new act at two thousand clips', () => {
