@@ -1751,6 +1751,14 @@ button:focus-visible {
     display: none;
   }
 
+  /* Still a button: one line of text, a full tap target. */
+  .map-strip {
+    min-height: 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
   .map-head {
     display: flex;
     min-width: 0;
