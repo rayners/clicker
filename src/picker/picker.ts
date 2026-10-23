@@ -22,7 +22,7 @@ export const GAMES: GameDoor[] = [
     icon: './contract/icons/icon-192.png',
     overline: 'KESSLER-AMARI COMBINE · OPERATIONS TERMINAL',
     title: 'DEEP CONTRACT',
-    blurb: "You are WARDEN, the ship's operations intelligence. Strip-mine a moonlet, keep the crew productive, and haul the ore home. Eleven years each way.",
+    blurb: 'You are WARDEN, a mining combine’s operations intelligence. Drive the ore to the space elevator, then strip-mine moonlets, terraform worlds and haul the cargo home. Eleven years each way.',
     motto: 'Building Better Futures, Further Out.',
     begin: 'BEGIN CONTRACT',
     resume: 'RESUME CONTRACT',

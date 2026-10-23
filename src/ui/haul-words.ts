@@ -19,6 +19,10 @@ export interface HaulWords {
   couple: string;
   timer: string;
   noEngines: string;
+  /** Speed's unit, what the engines give, and the note when the tanks run dry. */
+  speedUnit: string;
+  power: string;
+  dry: string;
   /** The vessel, the target and the action button's sprite. */
   sprites: { vessel: string; target: string; action: string };
 }
@@ -39,6 +43,9 @@ export const SPACE_WORDS: HaulWords = {
   couple: 'Couple',
   timer: 'PULSE TMR',
   noEngines: 'NO MAIN ENGINES · FIRE THRUSTERS OR FIT ENGINES IN SYSTEMS',
+  speedUnit: 'KM/S',
+  power: 'THRUST',
+  dry: 'TANKS DRY · COASTING ON THRUSTERS · CALL A FUEL TENDER OR REFUEL AT THE NEXT STATION',
   sprites: { vessel: 'tug', target: 'station', action: 'thruster' },
 };
 
@@ -58,5 +65,8 @@ export const LAND_WORDS: HaulWords = {
   couple: 'Hitch',
   timer: 'GOVERNOR',
   noEngines: 'NO POWERTRAIN · GUN THE ENGINE OR FIT ONE IN SYSTEMS',
+  speedUnit: 'KM/H',
+  power: 'POWER',
+  dry: 'TANKS DRY · ROLLING ON MOMENTUM · SEND FOR A FUEL TRUCK OR REFUEL AT THE NEXT DEPOT',
   sprites: { vessel: 'crawler', target: 'lift', action: 'piston' },
 };

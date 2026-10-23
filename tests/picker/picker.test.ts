@@ -47,4 +47,8 @@ describe('the game picker', () => {
     mountPicker(document.getElementById('app')!, broken);
     expect(link(/deep contract/i).textContent).toMatch(/begin/i);
   });
+
+  it('describes the contract a new DEEP CONTRACT player actually starts on: the road to the lift', () => {
+    expect(GAMES.find((g) => g.id === 'contract')!.blurb).toMatch(/road|lift|elevator/i);
+  });
 });

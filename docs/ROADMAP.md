@@ -174,15 +174,15 @@ Two subagent passes at the user's request: an adversarial QA run and a design re
 - (Done: a 400 ms gap) A double tap passes every two-step confirm, including HARD RESET (no minimum delay between taps).
 - (Done for the opening screens, with an e2e check; party steppers and the Killer's Cut buttons still to check) Tap targets under 44 px: DEEP CONTRACT's CFG, Elderdark's config, every "Skip guide", Elderdark's party steppers, the Killer's Cut buttons.
 - (Done) DEEP CONTRACT first load on touch: the tap that skips the boot also taps the assignment button beneath it.
-- Suspected: the haulage "fuel at stations" guide step loses its target between stations; IPv6 loopback is not treated as local by `telemetryAllowed`; blocked storage throws at startup.
+- Suspected: (done: it points at the helm) the haulage "fuel at stations" guide step loses its target between stations; IPv6 loopback is not treated as local by `telemetryAllowed`; blocked storage throws at startup.
 
 ### Design
-- Sideways (844×390), all four games: a guide tip makes the tab bar row about 190 px tall.
+- (Done) Sideways (844×390), all four games: a guide tip makes the tab bar row about 190 px tall.
 - Elderdark upright: panels get about 50 px; the masthead, map, stats and tip take the rest.
 - DEEP CONTRACT upright: the guide tip takes about 110 px on every tab, even ones it is not about.
-- Overland, the first contract: space words on a road haul (thrusters, KM/S, thrust, the HAUL guide steps).
-- Picker: DEEP CONTRACT's door describes extraction, but new players start on the overland haul.
-- Elderdark config on a phone: locked-feature buttons overflow and their unlock conditions are clipped.
+- (Done: road words on screen and in its own guide steps) Overland, the first contract: space words on a road haul (thrusters, KM/S, thrust, the HAUL guide steps).
+- (Done) Picker: DEEP CONTRACT's door describes extraction, but new players start on the overland haul.
+- (Done, with an e2e check) Elderdark config on a phone: locked-feature buttons overflow and their unlock conditions are clipped.
 - Terraform and security status block overflows on phones; monitor strips show through.
 - Boardroom: the minutes are buried under the divisions; value has no net rate; charters give no expected return; cards cannot be dropped into.
 - Outbreak Act IV: the SICK BAY keeps its Act II order; the sick-bay guide step stays until Wellness is bought.

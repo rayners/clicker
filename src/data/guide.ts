@@ -23,7 +23,7 @@ const HAUL: Step[] = [
     title: 'GET MOVING',
     text: 'Tap the big button to push the train along by hand. Freight pays by the kilometre as it moves, so moving is earning.',
     target: ACTION,
-    show: on(['overland', 'haulage']),
+    show: on('haulage'),
     done: (g) => g.mission.lifetimeCredits > 0,
   },
   {
@@ -31,7 +31,7 @@ const HAUL: Step[] = [
     title: 'ENGINES AND CARS',
     text: 'In SYSTEMS, engines add thrust (speed) and cars add freight (pay per kilometre). Cars are heavy: more of them slows the train unless the engines keep up.',
     target: SYSTEMS,
-    show: on(['overland', 'haulage']),
+    show: on('haulage'),
     done: (g) => count(m(g).engines) > 0,
   },
   {
@@ -39,15 +39,51 @@ const HAUL: Step[] = [
     title: 'THE BURN',
     text: 'The dial sets how hard the engines run. Hotter is faster and makes the delivery windows, but burns fuel by the square and, past the strain line, damages the freight.',
     target: '[aria-label="Helm"]',
-    show: (g) => on(['overland', 'haulage'])(g) && count(m(g).engines) > 0,
+    show: (g) => on('haulage')(g) && count(m(g).engines) > 0,
     done: (g) => m(g).burn !== 5,
   },
   {
     id: 'haul-fuel',
     title: 'FUEL AT STATIONS',
     text: 'Fuel is cheap at a station and dear on the road. Refuel for the whole next leg while docked; a dry train only coasts.',
-    target: '[aria-label="Refuel for the next leg"]',
-    show: (g) => on(['overland', 'haulage'])(g) && (m(g).leg as number) > 0,
+    target: '[aria-label="Helm"]',
+    show: (g) => on('haulage')(g) && (m(g).leg as number) > 0,
+    done: () => false,
+  },
+];
+
+/** The overland haul is the same machine on a road, so the same steps in its own words. */
+const ROAD: Step[] = [
+  {
+    id: 'road-push',
+    title: 'GET MOVING',
+    text: 'Tap the big button to gun the engine by hand. Freight pays by the kilometre as it moves, so moving is earning.',
+    target: ACTION,
+    show: on('overland'),
+    done: (g) => g.mission.lifetimeCredits > 0,
+  },
+  {
+    id: 'road-rig',
+    title: 'POWERTRAIN AND TRAILERS',
+    text: 'In SYSTEMS, the powertrain adds power (speed) and trailers add freight (pay per kilometre). Trailers are heavy: more of them slows the rig unless the powertrain keeps up.',
+    target: SYSTEMS,
+    show: on('overland'),
+    done: (g) => count(m(g).engines) > 0,
+  },
+  {
+    id: 'road-throttle',
+    title: 'THE THROTTLE',
+    text: 'The throttle sets how hard the rig runs. Harder is faster and makes the delivery windows, but drinks fuel by the square and, past the strain line, damages the freight.',
+    target: '[aria-label="Helm"]',
+    show: (g) => on('overland')(g) && count(m(g).engines) > 0,
+    done: (g) => m(g).burn !== 5,
+  },
+  {
+    id: 'road-fuel',
+    title: 'FUEL AT DEPOTS',
+    text: 'Fuel is cheap at a depot and dear on the road. Fill up for the whole next leg while you are stopped; a dry rig only rolls.',
+    target: '[aria-label="Helm"]',
+    show: (g) => on('overland')(g) && (m(g).leg as number) > 0,
     done: () => false,
   },
 ];
@@ -235,7 +271,7 @@ const OUTBREAK: Step[] = [
 ];
 
 const BY_SCENARIO: Record<ScenarioId, Step[]> = {
-  overland: HAUL,
+  overland: ROAD,
   haulage: HAUL,
   extraction: EXTRACTION,
   terraform: TERRAFORM,

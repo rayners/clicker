@@ -60,7 +60,7 @@ export function createHaulageSystemsPanel(store: Store, profile: HaulProfile, wo
   );
 
   function render(m: HaulageMission) {
-    setText(totalThrust, `${formatNumber(thrust(m))} THRUST`);
+    setText(totalThrust, `${formatNumber(thrust(m))} ${words.power}`);
     setText(totalFreight, `${formatNumber(trainValue(m))} CR/KM · ${formatNumber(trainMass(m))} T`);
     for (const e of engines) {
       const revealed = isEngineRevealed(m, e.index);
@@ -68,7 +68,7 @@ export function createHaulageSystemsPanel(store: Store, profile: HaulProfile, wo
       if (!revealed) continue;
       const count = m.engines[e.def.id] ?? 0;
       setText(e.owned, String(count));
-      setText(e.rate, `+${formatNumber(engineThrust(m, e.def))} THRUST EA`);
+      setText(e.rate, `+${formatNumber(engineThrust(m, e.def))} ${words.power} EA`);
       showGain(e, incomeGain(m, { engine: e.def.id }), m.fuel <= 0 ? 'NO FUEL ABOARD' : 'NOTHING TO HAUL');
       price(e, words.fit, e.def.name, engineCost(e.def, count), m.credits);
     }

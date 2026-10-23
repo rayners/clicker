@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { createGame } from '../../src/core/game';
 import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
-import { createMission, HAULAGE_MISSION_CONFIG, type MissionOf } from '../../src/mission/state';
+import { createMission, OVERLAND_MISSION_CONFIG, HAULAGE_MISSION_CONFIG, type MissionOf } from '../../src/mission/state';
 import { CARS, ENGINES, stationName } from '../../src/data/haulage/systems';
 import { HAULAGE_UPGRADES } from '../../src/data/haulage/upgrades';
 import { fuelForLeg } from '../../src/mission/haulage/economy';
@@ -133,5 +133,18 @@ describe('what one more engine or car adds, on the haulage panel', () => {
     const user2 = setup({ engines: blank().engines, cars: { ...blank().cars, hopper: 400 }, fuel: 1e6 });
     await user2.click(screen.getByRole('tab', { name: /systems/i }));
     expect(screen.getAllByText('+0 CR/S · TOO HEAVY FOR THE ENGINES').length).toBeGreaterThan(0);
+  });
+
+  it('talks road, not space, on the overland haul: speed in KM/H, power not thrust, and a fuel truck when the tanks run dry', async () => {
+    document.body.innerHTML = '<div id="app"></div>';
+    const g = createGame(1, 0);
+    const road = { ...createMission(OVERLAND_MISSION_CONFIG, 1), fuel: 0, engines: { ...createMission(OVERLAND_MISSION_CONFIG, 1).engines, [Object.keys(createMission(OVERLAND_MISSION_CONFIG, 1).engines)[0]!]: 1 } };
+    store = createStore({ ...g, mission: road as never });
+    mountApp(document.getElementById('app')!, store);
+    const text = () => document.body.textContent ?? '';
+    expect(text()).toMatch(/KM\/H/);
+    expect(text()).not.toMatch(/KM\/S|THRUSTERS|STATION/);
+    await userEvent.setup().click(screen.getByRole('tab', { name: /systems/i }));
+    expect(text()).not.toMatch(/THRUST/);
   });
 });

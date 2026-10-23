@@ -1558,3 +1558,12 @@ button:focus-visible {
   letter-spacing: 0.08em;
   touch-action: manipulation;
 }
+
+/* Long buttons in the configuration (closed doors say what opens them) wrap rather than run off a phone. */
+.cfg .buy {
+  max-width: 100%;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  white-space: normal;
+  text-align: left;
+}

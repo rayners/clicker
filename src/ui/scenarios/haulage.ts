@@ -38,7 +38,7 @@ function monitorRows(profile: HaulProfile, words: HaulWords): MonitorRow[] {
     period: 1,
     running: (m) => autoThrusterRate(s(m)) > 0,
     count: (m) => `${formatNumber(autoThrusterRate(s(m)))} BURST/S`,
-    output: (m) => `${formatNumber(autoThrusterRate(s(m)) * thrusterPower(s(m)))} KM/S`,
+    output: (m) => `${formatNumber(autoThrusterRate(s(m)) * thrusterPower(s(m)))} ${words.speedUnit}`,
   },
   ...profile.engines.map((e, i) => ({
     id: e.id,
@@ -67,7 +67,7 @@ export function createHaulageUi(store: Store, profile: HaulProfile, words: HaulW
   return {
     flow: {
       cells: [
-        { label: 'SPEED', aria: 'Speed', unit: 'KM/S' },
+        { label: 'SPEED', aria: 'Speed', unit: words.speedUnit },
         { label: 'FREIGHT', aria: 'Freight value', unit: 'CR/KM' },
         { label: 'INCOME', aria: 'Income', unit: 'CR/S' },
       ],
@@ -91,7 +91,7 @@ export function createHaulageUi(store: Store, profile: HaulProfile, words: HaulW
           return { ...base, limit: 'thrust', highlight: 0, severe: false, note: words.noEngines };
         }
         if (m.fuel <= 0) {
-          return { ...base, limit: 'fuel', highlight: 0, severe: true, note: 'TANKS DRY · COASTING ON THRUSTERS · CALL A FUEL TENDER OR REFUEL AT THE NEXT STATION' };
+          return { ...base, limit: 'fuel', highlight: 0, severe: true, note: words.dry };
         }
         if (burn > safeBurn(m)) {
           return { ...base, limit: 'strain', highlight: 1, severe: true, note: `${words.dial} ${burn} PAST THE STRAIN LINE (${safeBurn(m)}) · FREIGHT TAKING DAMAGE` };
@@ -107,7 +107,7 @@ export function createHaulageUi(store: Store, profile: HaulProfile, words: HaulW
     stats: [
       { label: 'CREDITS', aria: 'Credits', read: (m) => formatNumber(m.credits) },
       { label: 'LEGS', aria: 'Legs delivered', read: (m) => String(s(m).leg) },
-      { label: 'THRUST', aria: 'Total thrust', read: (m) => formatNumber(thrust(s(m))) },
+      { label: words.power, aria: `Total ${words.power.toLowerCase()}`, read: (m) => formatNumber(thrust(s(m))) },
     ],
     action: {
       label: words.action,

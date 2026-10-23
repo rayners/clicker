@@ -26,3 +26,17 @@ for (const [name, open] of PAGES) {
     expect(small).toEqual([]);
   });
 }
+
+test('Elderdark: every button in the configuration fits on a phone, so a closed door can say what opens it', async ({ page }, info) => {
+  test.skip(info.project.name !== 'iphone', 'phone layout only');
+  await page.goto('/forest/');
+  await page.getByRole('button', { name: /configuration/i }).click();
+  const width = page.viewportSize()!.width;
+  const over = await page.evaluate((w) =>
+    [...document.querySelectorAll('.cfg button')]
+      .filter((b) => (b as HTMLElement).offsetParent !== null)
+      .map((b) => ({ label: b.textContent?.trim() ?? '', right: Math.round(b.getBoundingClientRect().right) }))
+      .filter((b) => b.right > w),
+  width);
+  expect(over).toEqual([]);
+});

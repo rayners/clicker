@@ -39,4 +39,13 @@ describe('the DEEP CONTRACT guide', () => {
     expect(guideRules(at({ act: 2 })).sections.map((x) => x.heading)).not.toContain('THE OUTBREAK');
     expect(guideRules(at({ act: 3, flags: ['outbreak'] })).sections.map((x) => x.heading)).toContain('THE OUTBREAK');
   });
+
+  it('walks the overland haul through in road words: throttle, powertrain and trailers, depots', () => {
+    const g = on('overland');
+    const words = guideSteps(g).map((st) => `${st.title} ${st.text}`).join(' ');
+    expect(words).toMatch(/THROTTLE/i);
+    expect(words).toMatch(/TRAILER/i);
+    expect(words).toMatch(/DEPOT/i);
+    expect(words).not.toMatch(/\bBURN\b|THRUST|STATION|\bCARS\b/i);
+  });
 });
