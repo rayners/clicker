@@ -8,6 +8,7 @@ export const SALVAGE_LEXICON: Lexicon = {
   voidDepth: 'BEHIND THE CARGO HOLD BULKHEAD',
   sampleRequest: 'Special Projects asks that the Aurelian Gift\'s cargo hold be opened only in the presence of WARDEN, and that its contents be catalogued, not handled.',
   voidBreach: 'THE CARGO HOLD BULKHEAD PARTS. THE HOLD IS FULL TO THE DECKHEAD WITH SOMETHING GROWN, NOT STOWED. THE MANIFEST LISTS AGRICULTURAL SUPPLIES.',
+  rigReach: 'fed through the parted cargo hold bulkhead',
   warmStructure: 'CARGO HOLD AMBIENT 309 K ON A SHIP WITH NO POWER. HUMIDITY 96%. THE FRAMES HAVE BEEN BUILT OVER.',
   cheerfulTweak: 'Cheerier claim-filed chimes.',
   targetCode: 'AG-31',

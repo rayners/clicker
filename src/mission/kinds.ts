@@ -62,6 +62,8 @@ export interface HorrorDef {
   archive: readonly ArchiveFile[];
   /** Title and text for each ending this horror offers at the terminus (lexicon placeholders allowed). */
   endings: Readonly<Record<string, { title: string; text: string }>>;
+  /** Wording for the horror's own panel (lexicon placeholders allowed). */
+  panel?: Readonly<Record<string, string>>;
   /** Multiplies the scenario's output (e.g. Special Projects funding). */
   productionMultiplier(m: MissionState): number;
   /** How hard the horror pushes back on ground a scenario holds (1 = mundane). Scenarios without ground ignore it. */

@@ -8,6 +8,7 @@ export const SECURITY_LEXICON: Lexicon = {
   voidDepth: 'BENEATH SUB-LEVEL 4',
   sampleRequest: 'Special Projects requests that any biological material encountered in the sub-levels be left undisturbed and reported.',
   voidBreach: 'BREACHING TEAM CUTS THROUGH THE SUB-LEVEL 4 BULKHEAD. CHAMBER BEYOND IS NOT ON THE COLONY PLANS.',
+  rigReach: 'sent through the breach below sub-level 4',
   warmStructure: 'SUB-LEVEL 3 AMBIENT 309 K. HUMIDITY 96%. THE WALLS HAVE BEEN BUILT OVER.',
   cheerfulTweak: 'Cheerier squad radio chimes.',
   targetCode: 'LV-1201',

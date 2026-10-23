@@ -13,6 +13,9 @@ import { awakeCount } from '../mission/crew';
 import type { OrganismMission as MissionState } from '../mission/state';
 import { h, setAttr, setText } from '../shared/ui/dom';
 import { createTracker } from './tracker';
+import { ORGANISM_PANEL } from '../data/organism/panel';
+import { scenarioOf } from '../mission/registry';
+import { interpolate } from '../shared/lexicon';
 
 function row(name: string, desc: string, value: HTMLElement, foot: HTMLElement, button: HTMLButtonElement) {
   return h(
@@ -36,6 +39,7 @@ export function createProjectsPanel(store: Store): { el: HTMLElement; render(m: 
   const rigs = h('span', { class: 'sys-owned', 'aria-label': 'Recovery rigs' });
   const rigRate = h('span', { class: 'sys-rate' });
   const rigButton = actionButton(store, 'buyRig');
+  const rigDesc = h('p', { class: 'sys-desc' });
   const integrity = h('div', {
     class: 'pj-meter',
     role: 'meter',
@@ -67,7 +71,13 @@ export function createProjectsPanel(store: Store): { el: HTMLElement; render(m: 
       'ul',
       { class: 'sys-list' },
       row('SPECIMENS IN CONTAINMENT', 'Special Projects funds every specimen held aboard. Do not open the containers.', specimens, funding, h('button', { class: 'buy', type: 'button', hidden: true })),
-      row('RECOVERY RIG', 'Remote retrieval arm lowered into the void. Comes back heavier.', rigs, rigRate, rigButton),
+      h(
+        'li',
+        { class: 'sys-row' },
+        h('div', { class: 'sys-head' }, h('span', { class: 'sys-name' }, 'RECOVERY RIG'), rigs),
+        rigDesc,
+        h('div', { class: 'sys-foot' }, rigRate, rigButton),
+      ),
       h(
         'li',
         { class: 'sys-row' },
@@ -82,6 +92,7 @@ export function createProjectsPanel(store: Store): { el: HTMLElement; render(m: 
   function render(m: MissionState) {
     setText(specimens, String(Math.floor(m.specimens)));
     setText(funding, `FUNDING x${fundingMultiplier(m).toFixed(2)}`);
+    setText(rigDesc, interpolate(ORGANISM_PANEL.rig, scenarioOf(m).lexicon));
     setText(rigs, String(m.rigs));
     setText(rigRate, `${formatNumber(m.rigs * RIG_RATE * 60)} /MIN`);
     const rCost = rigCost(m);

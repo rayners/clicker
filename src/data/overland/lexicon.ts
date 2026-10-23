@@ -8,6 +8,7 @@ export const OVERLAND_LEXICON: Lexicon = {
   voidDepth: 'UNDER THE SALT CRUST',
   sampleRequest: 'Special Projects asks that the rig not stop on the salt flats for any reason.',
   voidBreach: 'THE RIG BREAKS THROUGH THE SALT CRUST INTO A VOID. SOMETHING BELOW IS WARM.',
+  rigReach: 'lowered through the salt crust',
   warmStructure: 'GROUND TEMPERATURE UNDER THE SALT FLATS 309 K. THE CRUST IS HOLLOW.',
   cheerfulTweak: 'Cheerier depot horns.',
   targetCode: 'KS-LIFT',

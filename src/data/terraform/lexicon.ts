@@ -8,6 +8,7 @@ export const TERRAFORM_LEXICON: Lexicon = {
   voidDepth: '3 KM BENEATH THE AQUIFER',
   sampleRequest: 'Special Projects requests all deep aquifer water be retained untreated.',
   voidBreach: 'AQUIFER TAP A-1 BREAKS INTO A CHAMBER BENEATH THE RESERVOIR. VOID ENCOUNTERED.',
+  rigReach: 'lowered down aquifer tap A-1 into the chamber',
   warmStructure: 'COLONY DISTRICT 1 PRESSURISED. INTERNAL TEMPERATURE HOLDING AT 304 K. HEATERS: OFF.',
   cheerfulTweak: 'Cheerier station chimes.',
   targetCode: 'KA-T-88',

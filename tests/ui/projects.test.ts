@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { createGame } from '../../src/core/game';
 import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
-import type { MissionOf } from '../../src/mission/state';
+import { createMission, DEFAULT_MISSION_CONFIG, type MissionOf } from '../../src/mission/state';
 
 type MissionState = MissionOf<'extraction', 'organism'>;
 
@@ -48,6 +48,16 @@ describe('special projects panel', () => {
     expect(mission().integrity).toBe(65);
     await user.click(screen.getByRole('button', { name: /upgrade containment/i }));
     expect(mission().containmentLevel).toBe(1);
+  });
+
+  it('says where the recovery rig goes in the contract\'s own words: the cargo hold on a salvage, not the void', async () => {
+    const user = setup();
+    const salvage = createMission({ ...DEFAULT_MISSION_CONFIG, scenario: 'salvage' }, 1);
+    store.replace({ ...store.getState(), mission: { ...salvage, ...unlocked } });
+    await user.click(tab(/special projects/i)!);
+    const panel = within(screen.getByRole('tabpanel', { name: /special projects/i }));
+    expect(panel.getByText(/retrieval arm .*cargo hold/i)).toBeTruthy();
+    expect(panel.queryByText(/void/i)).toBeNull();
   });
 
   it('offers venting only when something is loose, warning about awake crew', async () => {

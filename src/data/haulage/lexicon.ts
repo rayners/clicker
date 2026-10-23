@@ -8,6 +8,7 @@ export const HAULAGE_LEXICON: Lexicon = {
   voidDepth: 'INSIDE CONTAINER KA-77',
   sampleRequest: 'Special Projects reminds the crew that container KA-77 is not to be opened, weighed, scanned or discussed on an open channel.',
   voidBreach: 'THE BEACON IS A HULL. A CARGO HAULER OF OUR OWN CLASS, OPEN TO SPACE. ITS MANIFEST LISTS ONE SEALED CONTAINER, KA-77. THE CONTAINER IS NOT ABOARD.',
+  rigReach: 'worked into car 3 through the service hatch',
   warmStructure: 'CAR 3 INTERIOR 309 K, IN AN UNHEATED HOLD. FROST ON THE INSIDE OF THE HATCH. HUMIDITY 96%.',
   cheerfulTweak: 'Cheerier docking chimes.',
   targetCode: 'KA-77',

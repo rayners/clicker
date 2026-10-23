@@ -1,6 +1,7 @@
 import { ORGANISM_BEATS } from '../../data/organism/story';
 import { ORGANISM_ARCHIVE } from '../../data/organism/archive';
 import { ORGANISM_ENDINGS } from '../../data/organism/endings';
+import { ORGANISM_PANEL } from '../../data/organism/panel';
 import { NURSERY_BEATS } from '../../data/organism/nursery';
 import type { HorrorDef } from '../kinds';
 import type { MissionState, OrganismMission } from '../state';
@@ -27,6 +28,7 @@ export const ORGANISM: HorrorDef = {
   pairings: { terraform: NURSERY_BEATS },
   archive: ORGANISM_ARCHIVE,
   endings: ORGANISM_ENDINGS,
+  panel: ORGANISM_PANEL,
   productionMultiplier: (m) => fundingMultiplier(o(m)),
   pressure: (m) => organismPressure(o(m)),
   applyEffect: (m, action) => (action === 'breach' ? breach(o(m)) : m),

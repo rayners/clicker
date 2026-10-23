@@ -8,6 +8,7 @@ export const EXTRACTION_LEXICON: Lexicon = {
   voidDepth: '3,200 M',
   sampleRequest: 'Special Projects requests all deep core be retained unprocessed.',
   voidBreach: 'BORE B-1 BREACH AT 3,212 M. VOID ENCOUNTERED.',
+  rigReach: 'lowered into the void below bore B-1',
   warmStructure: 'HABITAT H-1 PRESSURISED. INTERNAL TEMPERATURE HOLDING AT 304 K. HEATERS: OFF.',
   cheerfulTweak: 'Cheerier drone status lights.',
   targetCode: 'LV-0919',

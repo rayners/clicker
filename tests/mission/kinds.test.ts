@@ -9,6 +9,7 @@ const horrorTexts = (h: (typeof HORRORS)[keyof typeof HORRORS]) => [
   ...h.beats.flatMap((b) => b.entries.map((e) => e.text)),
   ...h.archive.flatMap((f) => [f.title, ...f.body]),
   ...Object.values(h.endings).flatMap((e) => [e.title, e.text]),
+  ...Object.values(h.panel ?? {}),
 ];
 
 /** A scenario with no economy at all: progress simply rises with time, and every phrase is a marker. */
