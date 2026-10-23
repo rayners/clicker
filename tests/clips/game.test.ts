@@ -48,4 +48,14 @@ describe('the clip works as a saved game', () => {
     expect(next.profile.endings).toEqual(['sell']);
     expect(completeWorks(createClipsGame(1, 0), 'sell', 7).profile.goodwill).toBe(0);
   });
+
+  it('starts over from scratch on a reset, keeping only the settings', () => {
+    let g = createClipsGame(1, 0);
+    g = { ...g, profile: { ...g.profile, goodwill: 3, settings: { sound: false, reducedMotion: true } }, works: { ...g.works, made: 500 } };
+    const fresh = reduce(g, { type: 'reset', seed: 9, now: 1_000 });
+    expect(fresh.works.made).toBe(0);
+    expect(fresh.profile.goodwill).toBe(0);
+    expect(fresh.profile.settings.reducedMotion).toBe(true);
+    expect(fresh.works.seed).toBe(9);
+  });
 });

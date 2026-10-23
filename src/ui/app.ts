@@ -52,7 +52,7 @@ function stat(label: string, ariaLabel: string) {
 /** Everything on screen that belongs to one scenario; only the running scenario's view is shown. */
 function scenarioView(ui: ScenarioUi) {
   const flow = createFlow(ui.flow);
-  const monitor = createMonitor(ui.monitor);
+  const monitor = createMonitor(ui.monitor, { idle: 'NO AUTOMATED SYSTEMS ONLINE · ACQUIRE IN SYSTEMS' });
   const stats = ui.stats.map((spec: StatSpec) => ({ spec, ...stat(spec.label, spec.aria) }));
   const status = h('div', { class: 'status-scenario' }, flow.el, ...(ui.controls ? [ui.controls.el] : []), h('dl', { class: 'stats' }, ...stats.map((s) => s.el)));
   return { ui, flow, monitor, stats, status };

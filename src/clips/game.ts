@@ -84,6 +84,7 @@ export type ClipsAction =
   | { type: 'buyMarketing' }
   | { type: 'buyUpgrade'; id: string }
   | { type: 'complete'; ending: Ending; seed: number }
+  | { type: 'reset'; seed: number; now: number }
   | { type: 'setSetting'; key: keyof ClipsProfile['settings']; value: boolean }
   | { type: 'tick'; dt: number };
 
@@ -106,6 +107,10 @@ export function reduce(game: ClipsGame, action: ClipsAction): ClipsGame {
       return works(game, buyUpgrade(w, action.id));
     case 'complete':
       return completeWorks(game, action.ending, action.seed);
+    case 'reset': {
+      const fresh = createClipsGame(action.seed, action.now);
+      return { ...fresh, profile: { ...fresh.profile, settings: game.profile.settings } };
+    }
     case 'setSetting':
       return { ...game, profile: { ...game.profile, settings: { ...game.profile.settings, [action.key]: action.value } } };
     case 'tick':

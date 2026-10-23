@@ -1,5 +1,6 @@
 import '@fontsource/vt323';
 import '@fontsource/monoton';
+import './engine/ui/engine.css';
 import './late-fees-ui/vhs.css';
 import { catchUp } from './late-fees/game';
 import { applyLateScenario } from './late-fees/debug';

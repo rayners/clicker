@@ -1,5 +1,6 @@
 import '@fontsource/vt323';
 import '@fontsource/michroma';
+import './engine/ui/engine.css';
 import './styles/main.css';
 import './styles/crt.css';
 import { catchUp } from './core/game';

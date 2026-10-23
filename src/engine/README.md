@@ -7,6 +7,12 @@ this style would need again belongs here. Anything with a game's names, numbers 
 Full API reference: the generated pages at <https://rayners.github.io/clicker/engine/> (`npm run docs` builds them
 locally). Every export carries a doc comment, and `tests/engine/docs.test.ts` keeps it that way.
 
+## Example
+
+CLIP WORKS (`src/clips/`, played at `/clips/`) is a whole game built from this README and the reference alone:
+the classic paperclip loop. Read [its README](../clips/README.md) for the layout of a small game and for the gaps
+building it showed.
+
 ## Ground rules
 
 - **Simulation code is pure.** Everything outside `ui/`, `run`, `posthog` and `telemetry`'s browser helpers is
@@ -40,6 +46,9 @@ runGame(
   { dev: import.meta.env.DEV, prod: import.meta.env.PROD },
 );
 ```
+
+Import `engine/ui/engine.css` before your theme: it holds what the engine's parts need to behave (layout and
+states, no colours). Your stylesheet dresses the same classes.
 
 `runGame` loads the save, catches up the time away, applies a dev-only debug jump, and mounts the game. It then keeps
 the game running: a wall-clock tick (time with the phone asleep still counts), autosave every ten seconds and on

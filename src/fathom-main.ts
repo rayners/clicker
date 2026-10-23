@@ -1,5 +1,6 @@
 import '@fontsource/vt323';
 import '@fontsource/michroma';
+import './engine/ui/engine.css';
 import './fathom-ui/sonar.css';
 import { catchUp } from './fathom/game';
 import { applyFathomScenario } from './fathom/debug';

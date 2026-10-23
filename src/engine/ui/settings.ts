@@ -72,6 +72,8 @@ export interface SettingsOptions<G> {
   downloadName?(date: string): string;
   /** Sections of the game's own, between the save and the reset (another contract, another site). */
   sections?: readonly { heading: string; content: readonly HTMLElement[] }[];
+  /** Where the About link goes and what it says (default: this site's About page and tip jar), or false for none. */
+  about?: { href: string; text: string } | false;
   words?: Partial<SettingsWords>;
 }
 
@@ -156,7 +158,9 @@ export function createSettings<G extends { savedAt: number }>(
     motion.el,
     share.el,
     h('p', { class: `${w.className}-note` }, w.shareNote),
-    aboutLink(`${w.className}-about`),
+    ...(options.about === false
+      ? []
+      : [options.about ? h('a', { class: `${w.className}-about`, href: options.about.href }, options.about.text) : aboutLink(`${w.className}-about`)]),
     heading(w.saveHeading),
     code,
     h('div', { class: `${w.className}-row` }, ...buttons),

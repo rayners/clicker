@@ -12,7 +12,7 @@ const WIRE_COST_MAX = 32;
 /** Seconds between moves in the wire price. */
 const WIRE_DRIFT_SECONDS = 10;
 /** Clips a second people want at five cents, before marketing. */
-const BASE_DEMAND = 2;
+const BASE_DEMAND = 5;
 const BASE_PRICE = 0.05;
 const MARKETING_GAIN = 1.1;
 const AUTOCLIPPER_BASE = 5;
@@ -37,6 +37,8 @@ export interface Works extends StoryHost<NoteKind> {
   autoclippers: number;
   marketing: number;
   upgrades: string[];
+  /** The seed this works started from: a new run, a new seed. */
+  seed: number;
   rng: number;
   /** Good will from earlier works, for more customers from the start. */
   goodwill: number;
@@ -54,6 +56,7 @@ export function createWorks(seed: number, goodwill = 0): Works {
     autoclippers: 0,
     marketing: 0,
     upgrades: [],
+    seed,
     rng: seed,
     goodwill,
     elapsed: 0,

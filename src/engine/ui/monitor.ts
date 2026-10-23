@@ -17,9 +17,9 @@ export interface MonitorRow<S> {
 
 
 /** Every automated system currently working, each with a looping work-cycle bar. */
-export function createMonitor<S>(rows: readonly MonitorRow<S>[]): { el: HTMLElement; render(state: S): void } {
+export function createMonitor<S>(rows: readonly MonitorRow<S>[], options: { idle?: string } = {}): { el: HTMLElement; render(state: S): void } {
   const list = h('ul', { class: 'mon-list' });
-  const idle = h('p', { class: 'mon-idle' }, 'NO AUTOMATED SYSTEMS ONLINE · ACQUIRE IN SYSTEMS');
+  const idle = h('p', { class: 'mon-idle' }, options.idle ?? 'NOTHING AUTOMATED YET');
   const el = h('section', { class: 'monitor', 'aria-label': 'Operations monitor' }, list, idle);
   const items = new Map<string, { li: HTMLLIElement; count: HTMLElement; out: HTMLElement }>();
   let shown = '';

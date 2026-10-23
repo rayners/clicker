@@ -1153,11 +1153,6 @@ button:disabled {
 /* ---------- the guide: a tracking-label tip over the whistle, and the rules card ---------- */
 
 .guide {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: 'title skip' 'text ok';
-  align-items: center;
-  gap: 2px 8px;
   margin-bottom: 6px;
   padding: 4px 8px;
   border: 1px solid var(--cyan);
@@ -1170,14 +1165,12 @@ button:disabled {
 }
 
 .guide-title {
-  grid-area: title;
   margin: 0;
   letter-spacing: 0.18em;
   color: var(--cyan);
 }
 
 .guide-text {
-  grid-area: text;
   margin: 0;
   line-height: 1.15;
   color: var(--ink);
@@ -1191,7 +1184,6 @@ button:disabled {
 }
 
 .guide-ok {
-  grid-area: ok;
   min-height: 44px;
   padding: 0 12px;
   border-color: var(--cyan);
@@ -1199,7 +1191,6 @@ button:disabled {
 
 /* Quiet but still a full tap target: the tip should not crowd the screen. */
 .guide-skip {
-  grid-area: skip;
   min-height: 44px;
   padding: 0 8px;
   border: 0;
@@ -1487,66 +1478,3 @@ button:disabled {
   touch-action: manipulation;
 }
 
-/* ---------- the guide tip as one line until tapped (overrides the older grid above) ---------- */
-
-.guide {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.guide-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  min-height: 44px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  touch-action: manipulation;
-}
-
-.guide-line::after {
-  content: '▾';
-  flex: none;
-  margin-left: auto;
-  opacity: 0.7;
-}
-
-.guide[data-open='true'] .guide-line::after {
-  content: '▴';
-}
-
-.guide-line .guide-title {
-  flex: none;
-}
-
-.guide-line .guide-text {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.guide[data-open='true'] .guide-text {
-  order: 2;
-  flex-basis: 100%;
-  white-space: normal;
-}
-
-.guide-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 8px;
-}
-
-.guide-actions[hidden] {
-  display: none;
-}

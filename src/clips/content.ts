@@ -1,3 +1,4 @@
+import type { GuideRules, GuideStep } from '../engine/guide';
 import type { Beat } from '../engine/story';
 import type { Works } from './works';
 
@@ -47,3 +48,21 @@ export const BEATS: readonly Beat<{ w: Works }, NoteKind>[] = [
     urgent: true,
   },
 ];
+
+/** The walkthrough: each lever as it first matters. */
+export const GUIDE_STEPS: readonly GuideStep<Works>[] = [
+  { id: 'make', title: 'MAKE A CLIP', text: 'Tap the big button to bend an inch of wire into a clip. Clips sell on their own at the price you set.', target: '.make', show: () => true, done: (w) => w.made >= 10 },
+  { id: 'price', title: 'PRICE', text: 'Cheaper clips sell faster; dearer ones earn more each. Find the price where the pile stays small.', target: '.price', show: (w) => w.made >= 10, done: (w) => w.price !== 0.05 },
+  { id: 'wire', title: 'WIRE', text: 'Every clip is an inch of wire. Buy a spool in WORKS before the bench runs dry; its price moves.', show: (w) => w.wire < 500, done: (w) => w.wire > 1_000 || w.autoclippers > 0 },
+  { id: 'clippers', title: 'AUTOCLIPPERS', text: 'An autoclipper bends a clip a second for you. Each costs a little more than the last.', show: (w) => w.funds >= 5, done: (w) => w.autoclippers > 0 },
+];
+
+export const GUIDE_RULES: GuideRules = {
+  title: 'HOW CLIP WORKS WORKS',
+  sections: [
+    { heading: 'CLIPS', text: 'Each clip takes an inch of wire. Make them by hand, or buy autoclippers to make them for you.' },
+    { heading: 'SALES', text: 'People buy clips every second. How many depends on the price and on marketing; what you earn is what they buy times the price.' },
+    { heading: 'WIRE', text: 'Wire comes by the spool, and its price drifts every ten seconds. Buy low if you can wait.' },
+    { heading: 'THE MILLION', text: 'At a million clips, sell the works or hand it on, and start again with good will: more customers from the first day.' },
+  ],
+};

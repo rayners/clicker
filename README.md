@@ -22,6 +22,9 @@ Four horror idle games that run entirely in the browser, on a phone or a desktop
 
 Each game also has a tier where you play as the horror, unlocked by finishing runs.
 
+There is also **CLIP WORKS** (`/clips/`), the classic paperclip game, built from the engine's documentation alone as
+its example ([`src/clips/README.md`](src/clips/README.md)).
+
 <p align="center">
   <img src="docs/screenshots/elderdark.jpg" alt="CHARTER OF THE ELDERDARK: the company ledger at the start of a charter" width="260">
   <img src="docs/screenshots/late-fees.jpg" alt="LATE FEES: the horror new releases shelf" width="260">
@@ -80,6 +83,7 @@ Dev builds have debug jumps (e.g. `/contract/?debug=act4`, `/forest/?debug=keep`
   - `src/sim/`: the pacing bots used by `tests/sim/pacing.test.ts`.
 - `src/forest/`, `src/forest-data/`, `src/forest-ui/`: Elderdark (simulation, content, ledger UI).
 - `src/late-fees/`, `src/late-fees-data/`, `src/late-fees-ui/`: LATE FEES (venues × killers, content, VHS UI).
+- `src/clips/`, `src/clips-ui/`: CLIP WORKS, the engine's example game (engine imports only).
 - `src/fathom/`, `src/fathom-data/`, `src/fathom-ui/`: DOWN THERE (working title FATHOM in code; sonar UI).
 
 ## Docs

@@ -19,7 +19,7 @@ export function createLogView<K extends string>(options: LogViewOptions): {
   render(entries: readonly LogEntry<K>[], run: string): LogEntry<K>[];
 } {
   const el = h('ol', { class: 'log', role: 'log', 'aria-live': 'polite', 'aria-label': options.label });
-  let lastId = 0;
+  let lastId = -Infinity;
   let currentRun = '';
 
   function render(entries: readonly LogEntry<K>[], run: string) {
@@ -27,7 +27,7 @@ export function createLogView<K extends string>(options: LogViewOptions): {
     if (run !== currentRun) {
       currentRun = run;
       el.replaceChildren();
-      lastId = 0;
+      lastId = -Infinity;
     }
     const fresh = entries.filter((e) => e.id > lastId);
     if (fresh.length === 0) return fresh;

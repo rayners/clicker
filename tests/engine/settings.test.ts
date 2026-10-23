@@ -87,6 +87,16 @@ describe('the settings dialog', () => {
     expect(dialog.getByRole('link', { name: /about/i })).toBeTruthy();
   });
 
+  it('can point its About link elsewhere, or leave it out, for a game hosted somewhere else', async () => {
+    const { user } = mount({ about: { href: 'https://example.com/about', text: 'ABOUT THIS GAME' } });
+    const dialog = await open(user);
+    expect(dialog.getByRole('link', { name: 'ABOUT THIS GAME' }).getAttribute('href')).toBe('https://example.com/about');
+    document.body.replaceChildren();
+    const none = mount({ about: false });
+    const bare = await open(none.user);
+    expect(bare.queryByRole('link')).toBeNull();
+  });
+
   it('exports a save code, copies it, and imports one, replacing the game', async () => {
     const { user } = mount();
     const dialog = await open(user);
