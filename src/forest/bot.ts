@@ -1,6 +1,6 @@
 import { CLASSES, CLASS_IDS, type ClassId } from '../forest-data/classes';
 import { DRAGON_UPGRADES } from '../forest-data/dragon-upgrades';
-import { DRAGON_ADAPTER, dragonUpgradeCost, isDragonUpgradeAvailable, wakeDragon } from './dragon';
+import { DRAGON_ADAPTER, dragonUpgradeCost, isDragonUpgradeAvailable, wakeDragon, type DragonHunt } from './dragon';
 import { REGIONS } from '../forest-data/regions';
 import {
   appraisalRate,
@@ -25,10 +25,11 @@ import {
 } from './company';
 import { FLOORS } from '../forest-data/keep';
 import { advance, createForestGame, type ForestGame } from './game';
-import { isWoodUpgradeAvailable, startWood, woodUpgradeCost, WOOD_ADAPTER } from './wood';
+import { isWoodUpgradeAvailable, startWood, woodUpgradeCost, WOOD_ADAPTER, type WoodHunt } from './wood';
 import { WOOD_UPGRADES } from '../forest-data/wood-upgrades';
 import { reduce, type ForestAction } from './store';
 import { createCompany, type Company, type Composition, type SiteId } from './state';
+import { defend, huntDecider, playHunt, playthrough } from '../engine/bot';
 
 export interface ForestSimOptions {
   seed: number;
@@ -244,72 +245,43 @@ function frontierWork(c: Company, frontierIndex: number): ForestAction | null {
   return null;
 }
 
-/** Seconds between a defending Factor's check-ins, and its forage taps per second while still tapping hard. */
-const DEFEND_SECONDS = 5;
-const EARLY_TAPS = 4;
-const LATE_TAPS = 0.1;
-const EARLY_SECONDS = 20 * 60;
-
 /** A company run by its Factor's bot, for the play-as-the-wood tier: taps, and every few seconds clears what it can. */
 export function defendCompany<P extends { company: Company; taps: number; decideIn: number }>(p: P, dt: number): P {
-  let game = { company: p.company } as ForestGame;
-  let taps = p.taps + dt * (p.company.elapsed < EARLY_SECONDS ? EARLY_TAPS : LATE_TAPS);
-  while (taps >= 1) {
-    game = reduce(game, { type: 'forage' });
-    taps -= 1;
-  }
-  let decideIn = p.decideIn - dt;
-  if (decideIn <= 0) {
-    decideIn += DEFEND_SECONDS;
-    for (let i = 0; i < 30; i++) {
-      const action = decide(game);
-      if (!action) break;
-      const next = reduce(game, action);
-      if (next === game) break;
-      game = next;
-    }
-  }
-  return { ...p, company: game.company, taps, decideIn };
+  const step = defend(p, { company: p.company } as ForestGame, dt, { elapsed: (g) => g.company.elapsed, press: { type: 'forage' } as const, reduce, decide });
+  return { ...p, company: step.game.company, taps: step.taps, decideIn: step.decideIn };
 }
 
 /** A sensible, greedy player. Not optimal: taps for the first stretch, then checks in periodically. */
 export function simulateForest(options: ForestSimOptions): ForestSimResult {
   const { seed, maxSeconds, activeTaps = 4, activeSeconds = 20 * 60, decisionInterval = 5, site = 'forest' } = options;
   const blank = createForestGame(seed, 0);
-  let game = site === 'forest' ? blank : { ...blank, company: createCompany(seed, undefined, site) };
+  const game = site === 'forest' ? blank : { ...blank, company: createCompany(seed, undefined, site) };
   const floorAt: Record<string, number> = {};
   const heldAt: Record<number, number> = { 1: 0 };
-  const actAt: Record<number, number> = { 1: 0 };
   const openedAt: Record<string, number> = { [REGIONS[0]!.id]: 0 };
-  let terminusAt: number | undefined;
-  for (let t = 1; t <= maxSeconds; t++) {
-    const taps = t <= activeSeconds ? activeTaps : t % 10 === 0 ? 1 : 0;
-    for (let i = 0; i < taps; i++) game = reduce(game, { type: 'forage' });
-    if (t % decisionInterval === 0) {
-      for (let i = 0; i < 30; i++) {
-        const action = decide(game);
-        if (!action) break;
-        const next = reduce(game, action);
-        if (next === game) break;
-        game = next;
-      }
-    }
-    game = reduce(game, { type: 'tick', dt: 1 });
-    const c = game.company;
-    if (actAt[c.act] === undefined) {
-      actAt[c.act] = t;
-      heldAt[c.act] = c.floors.filter((f) => f.secured).length;
-    }
-    for (const r of REGIONS) if (openedAt[r.id] === undefined && isRegionOpen(c, r)) openedAt[r.id] = t;
-    c.floors.forEach((f, i) => {
-      if (f.secured && floorAt[FLOORS[i]!.id] === undefined) floorAt[FLOORS[i]!.id] = t;
-    });
-    if (terminusAt === undefined && c.flags.includes('terminus')) {
-      terminusAt = t;
-      break;
-    }
-  }
-  return { actAt, openedAt, floorAt, heldAt, terminusAt, final: game };
+  const run = playthrough<ForestGame, ForestAction>({
+    start: game,
+    reduce,
+    press: { type: 'forage' },
+    decide,
+    tick: (g, dt) => reduce(g, { type: 'tick', dt }),
+    act: (g) => g.company.act,
+    done: (g) => g.company.flags.includes('terminus'),
+    maxSeconds,
+    activeTaps,
+    activeSeconds,
+    decisionInterval,
+    maxDecisions: 30,
+    onStep: (g, t) => {
+      const c = g.company;
+      if (heldAt[c.act] === undefined) heldAt[c.act] = c.floors.filter((f) => f.secured).length;
+      for (const r of REGIONS) if (openedAt[r.id] === undefined && isRegionOpen(c, r)) openedAt[r.id] = t;
+      c.floors.forEach((f, i) => {
+        if (f.secured && floorAt[FLOORS[i]!.id] === undefined) floorAt[FLOORS[i]!.id] = t;
+      });
+    },
+  });
+  return { actAt: run.actAt, openedAt, floorAt, heldAt, terminusAt: run.doneAt, final: run.final };
 }
 
 export interface WoodSimOptions {
@@ -320,69 +292,39 @@ export interface WoodSimOptions {
 }
 
 /** A sensible wood: grow what sap allows, lean on the least alarmed companies, sleep when the town is too afraid. */
-function decideWood(game: ForestGame): ForestAction | null {
-  const w = game.wood!;
-  const h = w.hunt;
-  const upgrade = WOOD_UPGRADES.find((u) => isWoodUpgradeAvailable(w, u.id) && woodUpgradeCost(w, u.id) <= h.dread);
-  if (upgrade) return { type: 'buyWoodUpgrade', id: upgrade.id };
-  if (!h.dormant && h.notoriety > 4) return { type: 'toggleWoodDormant' };
-  if (h.dormant && h.notoriety < 1) return { type: 'toggleWoodDormant' };
-  const used = h.split.reduce((a, b) => a + b, 0);
-  if (used < h.strength) {
-    const order = h.prey.map((p, i) => ({ i, alarm: WOOD_ADAPTER.alarm(p) + h.split[i]! * 0.2 })).sort((a, b) => a.alarm - b.alarm);
-    return { type: 'shiftWoodPush', index: order[0]!.i, step: 1 };
-  }
-  return null;
-}
+const decideWood = huntDecider<ForestGame, WoodHunt['hunt']['prey'][number], ForestAction>({
+  hunt: (g) => g.wood!.hunt,
+  upgrade: (g) => WOOD_UPGRADES.find((u) => isWoodUpgradeAvailable(g.wood!, u.id) && woodUpgradeCost(g.wood!, u.id) <= g.wood!.hunt.dread)?.id ?? null,
+  // Read at call time: the hunts import this module, so their adapters are not defined yet while it loads.
+  alarm: (p) => WOOD_ADAPTER.alarm(p),
+  buy: (id) => ({ type: 'buyWoodUpgrade', id }),
+  toggle: () => ({ type: 'toggleWoodDormant' }),
+  push: (index) => ({ type: 'shiftWoodPush', index, step: 1 }),
+});
 
-/** The dragon bot: grow, sleep on the hoard when the slayers gather, raid the companies with the fullest vaults. */
-function decideDragon(game: ForestGame): ForestAction | null {
-  const d = game.dragon!;
-  const h = d.hunt;
-  const upgrade = DRAGON_UPGRADES.find((u) => isDragonUpgradeAvailable(d, u.id) && dragonUpgradeCost(d, u.id) <= h.dread);
-  if (upgrade) return { type: 'buyDragonUpgrade', id: upgrade.id };
-  if (!h.dormant && h.notoriety > 4) return { type: 'toggleDragonDormant' };
-  if (h.dormant && h.notoriety < 1) return { type: 'toggleDragonDormant' };
-  const used = h.split.reduce((a, b) => a + b, 0);
-  if (used < h.strength) {
-    const order = h.prey.map((p, i) => ({ i, score: DRAGON_ADAPTER.alarm(p) + h.split[i]! * 0.2 })).sort((a, b) => a.score - b.score);
-    return { type: 'shiftDragonPush', index: order[0]!.i, step: 1 };
-  }
-  return null;
-}
+/** The dragon bot: grow, sleep on the hoard when the slayers gather, raid the companies it has troubled least. */
+const decideDragon = huntDecider<ForestGame, DragonHunt['hunt']['prey'][number], ForestAction>({
+  hunt: (g) => g.dragon!.hunt,
+  upgrade: (g) => DRAGON_UPGRADES.find((u) => isDragonUpgradeAvailable(g.dragon!, u.id) && dragonUpgradeCost(g.dragon!, u.id) <= g.dragon!.hunt.dread)?.id ?? null,
+  alarm: (p) => DRAGON_ADAPTER.alarm(p),
+  buy: (id) => ({ type: 'buyDragonUpgrade', id }),
+  toggle: () => ({ type: 'toggleDragonDormant' }),
+  push: (index) => ({ type: 'shiftDragonPush', index, step: 1 }),
+});
+
+const huntResult = (game: ForestGame, h: { harvest: number; beaten: number }, bought: Record<string, number>) => ({
+  harvest: h.harvest,
+  upgrades: Object.values(bought).reduce((a, b) => a + b, 0),
+  beaten: h.beaten,
+  final: game,
+});
 
 export function simulateDragon(options: WoodSimOptions): { harvest: number; upgrades: number; beaten: number; final: ForestGame } {
-  let game = wakeDragon(createForestGame(options.seed, 0), options.seed);
-  for (let t = 1; t <= options.maxSeconds; t++) {
-    if (!options.passive && t % 5 === 0) {
-      for (let i = 0; i < 20; i++) {
-        const action = decideDragon(game);
-        if (!action) break;
-        const next = reduce(game, action);
-        if (next === game) break;
-        game = next;
-      }
-    }
-    game = advance(game, 1);
-  }
-  const h = game.dragon!.hunt;
-  return { harvest: h.harvest, upgrades: Object.values(game.dragon!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
+  const game = playHunt<ForestGame, ForestAction>({ start: wakeDragon(createForestGame(options.seed, 0), options.seed), reduce, decide: options.passive ? null : decideDragon, tick: advance, seconds: options.maxSeconds });
+  return huntResult(game, game.dragon!.hunt, game.dragon!.bought);
 }
 
 export function simulateWood(options: WoodSimOptions): { harvest: number; upgrades: number; beaten: number; final: ForestGame } {
-  let game = startWood(createForestGame(options.seed, 0), options.seed);
-  for (let t = 1; t <= options.maxSeconds; t++) {
-    if (!options.passive && t % 5 === 0) {
-      for (let i = 0; i < 20; i++) {
-        const action = decideWood(game);
-        if (!action) break;
-        const next = reduce(game, action);
-        if (next === game) break;
-        game = next;
-      }
-    }
-    game = advance(game, 1);
-  }
-  const h = game.wood!.hunt;
-  return { harvest: h.harvest, upgrades: Object.values(game.wood!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
+  const game = playHunt<ForestGame, ForestAction>({ start: startWood(createForestGame(options.seed, 0), options.seed), reduce, decide: options.passive ? null : decideWood, tick: advance, seconds: options.maxSeconds });
+  return huntResult(game, game.wood!.hunt, game.wood!.bought);
 }

@@ -83,6 +83,7 @@ import {
   trainValue,
 } from '../mission/haulage/economy';
 import { SECTIONS } from '../data/security/systems';
+import { defend, huntDecider, playHunt, playthrough } from '../engine/bot';
 
 export interface SimOptions {
   seed: number;
@@ -382,31 +383,16 @@ const PRESS: Record<ScenarioId, Action> = { extraction: { type: 'drill' }, terra
   haulage: { type: 'fireThrusters' },
   overland: { type: 'fireThrusters' }, salvage: { type: 'cut' } };
 
-const DEFEND_SECONDS = 5;
-const EARLY_TAPS = 4;
-const LATE_TAPS = 0.1;
-const EARLY_SECONDS = 20 * 60;
-
 /** A contract's own WARDEN, played by the bot: taps early, then buys every few seconds. Prey for the creature. */
 export function defendMission<P extends { mission: MissionState; taps: number; decideIn: number }>(p: P, dt: number): P {
-  let game: GameState = { ...createGame(0, 0), mission: p.mission };
-  let taps = p.taps + dt * (p.mission.elapsed < EARLY_SECONDS ? EARLY_TAPS : LATE_TAPS);
-  while (taps >= 1) {
-    game = reduce(game, PRESS[p.mission.scenario]);
-    taps -= 1;
-  }
-  let decideIn = p.decideIn - dt;
-  if (decideIn <= 0) {
-    decideIn += DEFEND_SECONDS;
-    for (let i = 0; i < 20; i++) {
-      const action = decide(game);
-      if (!action) break;
-      const next = reduce(game, action);
-      if (next === game) break;
-      game = next;
-    }
-  }
-  return { ...p, mission: game.mission, taps, decideIn };
+  const step = defend<GameState, Action>(p, { ...createGame(0, 0), mission: p.mission }, dt, {
+    elapsed: (g) => g.mission.elapsed,
+    press: PRESS[p.mission.scenario],
+    reduce,
+    decide,
+    maxDecisions: 20,
+  });
+  return { ...p, mission: step.game.mission, taps: step.taps, decideIn: step.decideIn };
 }
 
 /** Ease off a ship before its WARDEN works it out; go back once it has mostly forgotten. */
@@ -414,85 +400,46 @@ const EASE_OFF_AT = 0.8;
 const RETURN_AT = 0.4;
 
 /** A sensible creature: grows when it can, lies low when notorious, stalks the ship least likely to vent. */
-function decideCreature(game: GameState): Action | null {
-  const c = game.creature!;
-  const h = c.hunt;
-  const upgrade = CREATURE_UPGRADES.find((u) => isCreatureUpgradeAvailable(c, u.id) && creatureUpgradeCost(c, u.id) <= h.dread);
-  if (upgrade) return { type: 'buyCreatureUpgrade', id: upgrade.id };
-  if (!h.dormant && h.notoriety > 4) return { type: 'toggleCreatureDormant' };
-  if (h.dormant && h.notoriety < 1) return { type: 'toggleCreatureDormant' };
-  const alarm = (p: CreaturePrey) => CREATURE_ADAPTER.alarm(p);
-  const wary = h.prey.findIndex((p, i) => alarm(p) >= EASE_OFF_AT && h.split[i]! > 0);
-  if (wary >= 0) return { type: 'shiftCreaturePush', index: wary, step: -1 };
-  const used = h.split.reduce((a, b) => a + b, 0);
-  if (used < h.strength) {
-    const order = h.prey
-      .map((p, i) => ({ i, score: alarm(p) + h.split[i]! * 0.2, ready: h.split[i]! > 0 ? alarm(p) < EASE_OFF_AT : alarm(p) < RETURN_AT }))
-      .filter((x) => x.ready)
-      .sort((a, b) => a.score - b.score);
-    if (order[0]) return { type: 'shiftCreaturePush', index: order[0].i, step: 1 };
-  }
-  return null;
-}
-
-export function simulateCreature(options: { seed: number; maxSeconds: number; passive?: boolean }): { harvest: number; upgrades: number; beaten: number; final: GameState } {
-  let game = startCreature(createGame(options.seed, 0), options.seed);
-  for (let t = 1; t <= options.maxSeconds; t++) {
-    if (!options.passive && t % 5 === 0) {
-      for (let i = 0; i < 20; i++) {
-        const action = decideCreature(game);
-        if (!action) break;
-        const next = reduce(game, action);
-        if (next === game) break;
-        game = next;
-      }
-    }
-    game = advance(game, 1);
-  }
-  const h = game.creature!.hunt;
-  return { harvest: h.harvest, upgrades: Object.values(game.creature!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
-}
+const decideCreature = huntDecider<GameState, CreaturePrey, Action>({
+  hunt: (g) => g.creature!.hunt,
+  upgrade: (g) => CREATURE_UPGRADES.find((u) => isCreatureUpgradeAvailable(g.creature!, u.id) && creatureUpgradeCost(g.creature!, u.id) <= g.creature!.hunt.dread)?.id ?? null,
+  // Read at call time: the hunt modules import this one, so their adapters are not defined yet while it loads.
+  alarm: (p) => CREATURE_ADAPTER.alarm(p),
+  buy: (id) => ({ type: 'buyCreatureUpgrade', id }),
+  toggle: () => ({ type: 'toggleCreatureDormant' }),
+  push: (index) => ({ type: 'shiftCreaturePush', index, step: 1 }),
+  pull: (index) => ({ type: 'shiftCreaturePush', index, step: -1 }),
+  wary: { easeOffAt: EASE_OFF_AT, returnAt: RETURN_AT },
+});
 
 /** The hunter bot: the creature's play, in the hunter's band. Stalk the calmest ship, step away before a crew can drive it off. */
-function decideHunter(game: GameState): Action | null {
-  const c = game.hunter!;
-  const h = c.hunt;
-  const upgrade = HUNTER_UPGRADES.find((u) => isHunterUpgradeAvailable(c, u.id) && hunterUpgradeCost(c, u.id) <= h.dread);
-  if (upgrade) return { type: 'buyHunterUpgrade', id: upgrade.id };
-  if (!h.dormant && h.notoriety > 4) return { type: 'toggleHunterDormant' };
-  if (h.dormant && h.notoriety < 1) return { type: 'toggleHunterDormant' };
-  const alarm = (p: HunterPrey) => HUNTER_ADAPTER.alarm(p);
-  const wary = h.prey.findIndex((p, i) => alarm(p) >= EASE_OFF_AT && h.split[i]! > 0);
-  if (wary >= 0) return { type: 'shiftHunterPush', index: wary, step: -1 };
-  const used = h.split.reduce((a, b) => a + b, 0);
-  if (used < h.strength) {
-    const order = h.prey
-      .map((p, i) => ({ i, score: alarm(p) + h.split[i]! * 0.2, ready: h.split[i]! > 0 ? alarm(p) < EASE_OFF_AT : alarm(p) < RETURN_AT }))
-      .filter((x) => x.ready)
-      .sort((a, b) => a.score - b.score);
-    if (order[0]) return { type: 'shiftHunterPush', index: order[0].i, step: 1 };
-  }
-  return null;
+const decideHunter = huntDecider<GameState, HunterPrey, Action>({
+  hunt: (g) => g.hunter!.hunt,
+  upgrade: (g) => HUNTER_UPGRADES.find((u) => isHunterUpgradeAvailable(g.hunter!, u.id) && hunterUpgradeCost(g.hunter!, u.id) <= g.hunter!.hunt.dread)?.id ?? null,
+  alarm: (p) => HUNTER_ADAPTER.alarm(p),
+  buy: (id) => ({ type: 'buyHunterUpgrade', id }),
+  toggle: () => ({ type: 'toggleHunterDormant' }),
+  push: (index) => ({ type: 'shiftHunterPush', index, step: 1 }),
+  pull: (index) => ({ type: 'shiftHunterPush', index, step: -1 }),
+  wary: { easeOffAt: EASE_OFF_AT, returnAt: RETURN_AT },
+});
+
+const huntResult = (game: GameState, h: { harvest: number; beaten: number }, bought: Record<string, number>) => ({
+  harvest: h.harvest,
+  upgrades: Object.values(bought).reduce((a, b) => a + b, 0),
+  beaten: h.beaten,
+  final: game,
+});
+
+export function simulateCreature(options: { seed: number; maxSeconds: number; passive?: boolean }): { harvest: number; upgrades: number; beaten: number; final: GameState } {
+  const game = playHunt<GameState, Action>({ start: startCreature(createGame(options.seed, 0), options.seed), reduce, decide: options.passive ? null : decideCreature, tick: advance, seconds: options.maxSeconds });
+  return huntResult(game, game.creature!.hunt, game.creature!.bought);
 }
 
 export function simulateHunter(options: { seed: number; maxSeconds: number; passive?: boolean }): { harvest: number; upgrades: number; beaten: number; final: GameState } {
-  let game = startHunter(createGame(options.seed, 0), options.seed);
-  for (let t = 1; t <= options.maxSeconds; t++) {
-    if (!options.passive && t % 5 === 0) {
-      for (let i = 0; i < 20; i++) {
-        const action = decideHunter(game);
-        if (!action) break;
-        const next = reduce(game, action);
-        if (next === game) break;
-        game = next;
-      }
-    }
-    game = advance(game, 1);
-  }
-  const h = game.hunter!.hunt;
-  return { harvest: h.harvest, upgrades: Object.values(game.hunter!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
+  const game = playHunt<GameState, Action>({ start: startHunter(createGame(options.seed, 0), options.seed), reduce, decide: options.passive ? null : decideHunter, tick: advance, seconds: options.maxSeconds });
+  return huntResult(game, game.hunter!.hunt, game.hunter!.bought);
 }
-
 export function simulateRun(options: SimOptions): SimResult {
   const { seed, maxSeconds, scenario = 'extraction', seniority = 0, activeClicks = 4, activeSeconds = 20 * 60, decisionInterval = 5 } =
     options;
@@ -500,31 +447,20 @@ export function simulateRun(options: SimOptions): SimResult {
   const profile = seniority > 0 ? { ...createProfile(), seniority, contractsCompleted: 1, endingsSeen: ['deliver'] } : game.profile;
   const config = { ...missionConfigFor(profile, scenario), ...(options.horror ? { horror: options.horror } : {}) };
   game = { ...game, profile, mission: createMission(config, seed) };
-  const press = PRESS[scenario];
-  const actAt: Record<number, number> = { 1: 0 };
-  let terminusAt: number | undefined;
-
-  for (let t = 1; t <= maxSeconds; t++) {
-    const clicks = t <= activeSeconds ? activeClicks : t % 10 === 0 ? 1 : 0;
-    for (let c = 0; c < clicks; c++) game = reduce(game, press);
-    if (t % decisionInterval === 0) {
-      // Several purchases per check-in, like a player clearing affordable buttons.
-      for (let i = 0; i < 20; i++) {
-        const action = decide(game);
-        if (!action) break;
-        const next = reduce(game, action);
-        if (next === game) break;
-        game = next;
-      }
-    }
-    game = tickGame(game, 1);
-    if (options.trace && t % 600 === 0) options.trace(game, t);
-    const act = game.mission.act;
-    if (actAt[act] === undefined) actAt[act] = t;
-    if (terminusAt === undefined && game.mission.flags.includes('terminus')) {
-      terminusAt = t;
-      break;
-    }
-  }
-  return { actAt, terminusAt, final: game };
+  const run = playthrough<GameState, Action>({
+    start: game,
+    reduce,
+    press: PRESS[scenario],
+    // Several purchases per check-in, like a player clearing affordable buttons.
+    decide,
+    tick: tickGame,
+    act: (g) => g.mission.act,
+    done: (g) => g.mission.flags.includes('terminus'),
+    maxSeconds,
+    activeTaps: activeClicks,
+    activeSeconds,
+    decisionInterval,
+    trace: options.trace,
+  });
+  return { actAt: run.actAt, terminusAt: run.doneAt, final: run.final };
 }

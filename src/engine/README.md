@@ -81,6 +81,7 @@ published build only, persistent storage, and the site's service worker.
 | `hunt-guide` | `huntGuide`: walkthrough steps and a rules page for any hunt, in the game's own words (`HuntWords`). |
 | `guide` | Walkthrough steps that each show when they apply and go once done (`nextStep`), with progress kept per device (`createGuideProgress`). |
 | `pixels` | Palette-indexed pixel art (`sprite`, `framePixels`) and deterministic glitching (`corruptFrame`). |
+| `bot` | Pacing bots: `playthrough` (a sensible player who taps early and checks in later, timing each act, the end and any milestones), `huntDecider` and `playHunt` (the horror bot), `defend` (a prey run played by its own bot), and `applyDecisions`. |
 | `format` | `formatNumber`, `formatDuration`, `formatClock`. |
 
 ### Telemetry

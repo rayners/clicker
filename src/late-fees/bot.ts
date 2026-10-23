@@ -1,5 +1,6 @@
 import { advance, createLateGame, newLateGame, type LateGame } from './game';
-import { CUT_ADAPTER, cutUpgradeCost, isCutUpgradeAvailable, startCut } from './cut';
+import { CUT_ADAPTER, cutUpgradeCost, isCutUpgradeAvailable, startCut, type KillerCut } from './cut';
+import { huntDecider, playHunt, playthrough } from '../engine/bot';
 import { CUT_UPGRADES } from '../late-fees-data/cut-upgrades';
 import { runConfigFor } from './sequels';
 import { createRun, type KillerId, type VenueId } from './state';
@@ -38,30 +39,21 @@ export function simulateLate(options: LateSimOptions): LateSimResult {
     boxOffice: sequels,
     history: Array.from({ length: sequels }, () => ({ venue, killer, title: '', ending: 'kill', bodyCount: 0, duration: 0 })),
   };
-  let game: LateGame = { ...base, profile, run: createRun(runConfigFor(profile, venue, killer), seed) };
-  const actAt: Record<number, number> = { 1: 0 };
-  let terminusAt: number | undefined;
-  for (let t = 1; t <= maxSeconds; t++) {
-    const clicks = t <= activeSeconds ? activeClicks : t % 10 === 0 ? 1 : 0;
-    for (let c = 0; c < clicks; c++) game = reduce(game, PRESS[venue]);
-    if (t % decisionInterval === 0) {
-      for (let i = 0; i < 20; i++) {
-        const action = DECIDE[game.run.venue](game);
-        if (!action) break;
-        const next = reduce(game, action);
-        if (next === game) break;
-        game = next;
-      }
-    }
-    game = { ...game, run: tickRun(game.run, 1) };
-    if (options.trace && t % 600 === 0) options.trace(game, t);
-    if (actAt[game.run.act] === undefined) actAt[game.run.act] = t;
-    if (game.run.flags.includes('terminus')) {
-      terminusAt = t;
-      break;
-    }
-  }
-  return { actAt, terminusAt, final: game };
+  const run = playthrough<LateGame, LateAction>({
+    start: { ...base, profile, run: createRun(runConfigFor(profile, venue, killer), seed) },
+    reduce,
+    press: PRESS[venue],
+    decide: (g) => DECIDE[g.run.venue](g),
+    tick: (g, dt) => ({ ...g, run: tickRun(g.run, dt) }),
+    act: (g) => g.run.act,
+    done: (g) => g.run.flags.includes('terminus'),
+    maxSeconds,
+    activeTaps: activeClicks,
+    activeSeconds,
+    decisionInterval,
+    trace: options.trace,
+  });
+  return { actAt: run.actAt, terminusAt: run.doneAt, final: run.final };
 }
 
 export interface CutSimOptions {
@@ -79,41 +71,24 @@ export interface CutSimResult {
   final: LateGame;
 }
 
-/** Notoriety at which the horror bot goes to ground, and where it wakes again. */
-const HIDE_ABOVE = 4;
-const WAKE_BELOW = 1;
-
 /** A sensible killer: buy what dread allows, push the least alarmed places, lie low when too notorious. */
-function decideCut(game: LateGame): LateAction | null {
-  const cut = game.cut!;
-  const h = cut.hunt;
-  const upgrade = CUT_UPGRADES.find((u) => isCutUpgradeAvailable(cut, u.id) && cutUpgradeCost(cut, u.id) <= h.dread);
-  if (upgrade) return { type: 'buyCutUpgrade', id: upgrade.id };
-  if (!h.dormant && h.notoriety > HIDE_ABOVE) return { type: 'toggleCutDormant' };
-  if (h.dormant && h.notoriety < WAKE_BELOW) return { type: 'toggleCutDormant' };
-  const used = h.split.reduce((a, b) => a + b, 0);
-  if (used < h.strength) {
-    // The place that has worked out the least about you.
-    const order = h.prey.map((p, i) => ({ i, alarm: CUT_ADAPTER.alarm(p) + h.split[i]! * 0.2 })).sort((a, b) => a.alarm - b.alarm);
-    return { type: 'shiftCutPush', index: order[0]!.i, step: 1 };
-  }
-  return null;
-}
+const decideCut = huntDecider<LateGame, KillerCut['hunt']['prey'][number], LateAction>({
+  hunt: (g) => g.cut!.hunt,
+  upgrade: (g) => CUT_UPGRADES.find((u) => isCutUpgradeAvailable(g.cut!, u.id) && cutUpgradeCost(g.cut!, u.id) <= g.cut!.hunt.dread)?.id ?? null,
+  alarm: CUT_ADAPTER.alarm,
+  buy: (id) => ({ type: 'buyCutUpgrade', id }),
+  toggle: () => ({ type: 'toggleCutDormant' }),
+  push: (index) => ({ type: 'shiftCutPush', index, step: 1 }),
+});
 
 export function simulateCut(options: CutSimOptions): CutSimResult {
-  let game = startCut(newLateGame(options.seed, 0), options.killer, options.seed);
-  for (let t = 1; t <= options.maxSeconds; t++) {
-    if (!options.passive && t % 5 === 0) {
-      for (let i = 0; i < 20; i++) {
-        const action = decideCut(game);
-        if (!action) break;
-        const next = reduce(game, action);
-        if (next === game) break;
-        game = next;
-      }
-    }
-    game = advance(game, 1);
-  }
+  const game = playHunt<LateGame, LateAction>({
+    start: startCut(newLateGame(options.seed, 0), options.killer, options.seed),
+    reduce,
+    decide: options.passive ? null : decideCut,
+    tick: advance,
+    seconds: options.maxSeconds,
+  });
   const h = game.cut!.hunt;
   return { harvest: h.harvest, upgrades: Object.values(game.cut!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
 }

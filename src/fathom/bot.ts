@@ -5,7 +5,7 @@ import { CITIES } from '../fathom-data/breach';
 import { SOURCE_NOTCH } from '../fathom-data/trench';
 import { activeBulwarks, bulwarkCost, defence, isBreachOpen, pilotCost, wallCost } from './breach';
 import { advance, createFathomGame, type FathomGame } from './game';
-import { DEEP_ADAPTER, deepUpgradeCost, isDeepUpgradeAvailable, startDeep } from './deep';
+import { DEEP_ADAPTER, deepUpgradeCost, isDeepUpgradeAvailable, startDeep, type DeepHunt } from './deep';
 import { DEEP_UPGRADES } from '../fathom-data/deep-upgrades';
 import { contained, isAutoEnhanceActive, isOpenWaterOpen, penCost, specimenCost, specimens } from './open-water';
 import { attractionCost, attractionRate, guardCost, isAttractionRevealed, isAutoOpenActive, isGuardRevealed, swimmers, watch } from './shallows';
@@ -14,6 +14,7 @@ import { reduce, type FathomAction } from './store';
 import { crewCost, hullRate, isAutoStationActive, isTrenchOpen, moduleCost } from './trench';
 import { availableUpgrades } from './upgrades';
 import type { Outfit } from './state';
+import { defend, huntDecider, playHunt, playthrough } from '../engine/bot';
 
 /** Pilot fatigue past which the bot hires a reserve to rotate in. */
 const FATIGUE_LINE = 0.3;
@@ -120,92 +121,44 @@ function decide(game: FathomGame): FathomAction | null {
   return income(o);
 }
 
-/** A sensible, greedy player: taps for the first stretch, then checks in every few seconds. */
-const DEFEND_SECONDS = 5;
-const EARLY_TAPS = 4;
-const LATE_TAPS = 0.1;
-const EARLY_SECONDS = 20 * 60;
-
 /** A town's own outfit, played by the bot: sells passes early, then buys every few seconds. Prey for the Source. */
 export function defendOutfit<P extends { outfit: Outfit; taps: number; decideIn: number }>(p: P, dt: number): P {
-  let game = { outfit: p.outfit } as FathomGame;
-  let taps = p.taps + dt * (p.outfit.elapsed < EARLY_SECONDS ? EARLY_TAPS : LATE_TAPS);
-  while (taps >= 1) {
-    game = reduce(game, { type: 'sellPass' });
-    taps -= 1;
-  }
-  let decideIn = p.decideIn - dt;
-  if (decideIn <= 0) {
-    decideIn += DEFEND_SECONDS;
-    for (let i = 0; i < 30; i++) {
-      const action = decide(game);
-      if (!action) break;
-      const next = reduce(game, action);
-      if (next === game) break;
-      game = next;
-    }
-  }
-  return { ...p, outfit: game.outfit, taps, decideIn };
+  const step = defend(p, { outfit: p.outfit } as FathomGame, dt, { elapsed: (g) => g.outfit.elapsed, press: { type: 'sellPass' } as const, reduce, decide });
+  return { ...p, outfit: step.game.outfit, taps: step.taps, decideIn: step.decideIn };
 }
 
 /** The horror bot: buys what it can, sinks when the sightings mount, pushes the least alarmed town. */
-function decideDeep(game: FathomGame): FathomAction | null {
-  const d = game.deep!;
-  const h = d.hunt;
-  const upgrade = DEEP_UPGRADES.find((u) => isDeepUpgradeAvailable(d, u.id) && deepUpgradeCost(d, u.id) <= h.dread);
-  if (upgrade) return { type: 'buyDeepUpgrade', id: upgrade.id };
-  if (!h.dormant && h.notoriety > 4) return { type: 'toggleDeepDormant' };
-  if (h.dormant && h.notoriety < 1) return { type: 'toggleDeepDormant' };
-  const used = h.split.reduce((a, b) => a + b, 0);
-  if (used < h.strength) {
-    const order = h.prey.map((p, i) => ({ i, alarm: DEEP_ADAPTER.alarm(p) + h.split[i]! * 0.2 })).sort((a, b) => a.alarm - b.alarm);
-    return { type: 'shiftDeepPush', index: order[0]!.i, step: 1 };
-  }
-  return null;
-}
+const decideDeep = huntDecider<FathomGame, DeepHunt['hunt']['prey'][number], FathomAction>({
+  hunt: (g) => g.deep!.hunt,
+  upgrade: (g) => DEEP_UPGRADES.find((u) => isDeepUpgradeAvailable(g.deep!, u.id) && deepUpgradeCost(g.deep!, u.id) <= g.deep!.hunt.dread)?.id ?? null,
+  // Read at call time: deep.ts imports this module, so DEEP_ADAPTER is not defined yet while it loads.
+  alarm: (p) => DEEP_ADAPTER.alarm(p),
+  buy: (id) => ({ type: 'buyDeepUpgrade', id }),
+  toggle: () => ({ type: 'toggleDeepDormant' }),
+  push: (index) => ({ type: 'shiftDeepPush', index, step: 1 }),
+});
 
 export function simulateDeep(options: { seed: number; maxSeconds: number; passive?: boolean }): { harvest: number; upgrades: number; beaten: number; final: FathomGame } {
-  let game = startDeep(createFathomGame(options.seed, 0), options.seed);
-  for (let t = 1; t <= options.maxSeconds; t++) {
-    if (!options.passive && t % 5 === 0) {
-      for (let i = 0; i < 20; i++) {
-        const action = decideDeep(game);
-        if (!action) break;
-        const next = reduce(game, action);
-        if (next === game) break;
-        game = next;
-      }
-    }
-    game = advance(game, 1);
-  }
+  const game = playHunt<FathomGame, FathomAction>({ start: startDeep(createFathomGame(options.seed, 0), options.seed), reduce, decide: options.passive ? null : decideDeep, tick: advance, seconds: options.maxSeconds });
   const h = game.deep!.hunt;
   return { harvest: h.harvest, upgrades: Object.values(game.deep!.bought).reduce((a, b) => a + b, 0), beaten: h.beaten, final: game };
 }
 
 export function simulateFathom(options: FathomSimOptions): FathomSimResult {
   const { seed, maxSeconds, activeTaps = 4, activeSeconds = 20 * 60, decisionInterval = 5 } = options;
-  let game = createFathomGame(seed, 0);
-  const actAt: Record<number, number> = { 1: 0 };
-  let terminusAt: number | undefined;
-  for (let t = 1; t <= maxSeconds; t++) {
-    const taps = t <= activeSeconds ? activeTaps : t % 10 === 0 ? 1 : 0;
-    for (let i = 0; i < taps; i++) game = reduce(game, { type: 'sellPass' });
-    if (t % decisionInterval === 0) {
-      for (let i = 0; i < 30; i++) {
-        const action = decide(game);
-        if (!action) break;
-        const next = reduce(game, action);
-        if (next === game) break;
-        game = next;
-      }
-    }
-    game = reduce(game, { type: 'tick', dt: 1 });
-    const o = game.outfit;
-    if (actAt[o.act] === undefined) actAt[o.act] = t;
-    if (terminusAt === undefined && o.flags.includes('terminus')) {
-      terminusAt = t;
-      break;
-    }
-  }
-  return { actAt, terminusAt, final: game };
+  const run = playthrough<FathomGame, FathomAction>({
+    start: createFathomGame(seed, 0),
+    reduce,
+    press: { type: 'sellPass' },
+    decide,
+    tick: (g, dt) => reduce(g, { type: 'tick', dt }),
+    act: (g) => g.outfit.act,
+    done: (g) => g.outfit.flags.includes('terminus'),
+    maxSeconds,
+    activeTaps,
+    activeSeconds,
+    decisionInterval,
+    maxDecisions: 30,
+  });
+  return { actAt: run.actAt, terminusAt: run.doneAt, final: run.final };
 }

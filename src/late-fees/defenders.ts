@@ -55,6 +55,7 @@ import {
 import type { LateGame } from './game';
 import type { AsylumRun, CampRun, ClinicRun, InsurerRun, Run, VenueId } from './state';
 import { reduce, type LateAction } from './store';
+import { defend as defendRun } from '../engine/bot';
 
 const MIN_PREP_SHARE = 3;
 
@@ -222,12 +223,6 @@ export const DECIDE: Record<VenueId, (game: LateGame) => LateAction | null> = { 
 export const PRESS: Record<VenueId, LateAction> = { camp: { type: 'whistle' }, clinic: { type: 'reading' }, insurer: { type: 'sell' }, asylum: { type: 'rounds' } };
 
 
-/** Seconds between a defender's check-ins, and its presses per second while it is still clicking hard. */
-const DECISION_SECONDS = 5;
-const EARLY_PRESSES = 4;
-const LATE_PRESSES = 0.1;
-const EARLY_SECONDS = 20 * 60;
-
 /** A run defended by its venue's bot: presses the big button, and every few seconds clears the affordable buttons. */
 export interface Defended {
   run: Run;
@@ -238,22 +233,12 @@ export interface Defended {
 }
 
 export function defend(d: Defended, dt: number): Defended {
-  let game = { run: d.run, shelf: false } as LateGame;
-  let presses = d.presses + dt * (d.run.elapsed < EARLY_SECONDS ? EARLY_PRESSES : LATE_PRESSES);
-  while (presses >= 1) {
-    game = reduce(game, PRESS[game.run.venue]);
-    presses -= 1;
-  }
-  let decideIn = d.decideIn - dt;
-  if (decideIn <= 0) {
-    decideIn += DECISION_SECONDS;
-    for (let i = 0; i < 20; i++) {
-      const action = DECIDE[game.run.venue](game);
-      if (!action) break;
-      const next = reduce(game, action);
-      if (next === game) break;
-      game = next;
-    }
-  }
-  return { run: game.run, presses, decideIn };
+  const step = defendRun({ taps: d.presses, decideIn: d.decideIn }, { run: d.run, shelf: false } as LateGame, dt, {
+    elapsed: (g) => g.run.elapsed,
+    press: PRESS[d.run.venue],
+    reduce,
+    decide: (g) => DECIDE[g.run.venue](g),
+    maxDecisions: 20,
+  });
+  return { run: step.game.run, presses: step.taps, decideIn: step.decideIn };
 }
