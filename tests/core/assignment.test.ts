@@ -60,6 +60,13 @@ describe('choosing a contract assignment', () => {
     expect(reduce(fresh, { type: 'cancelReassignment' })).toBe(fresh);
   });
 
+  it('ignores a reassignment request while a contract is being chosen (a new game, or after one ends)', () => {
+    const fresh = newGame(1, NOW);
+    expect(reduce(fresh, { type: 'requestReassignment' })).toBe(fresh);
+    const renewal = { ...createGame(1, NOW), assigning: 'renewal' as const };
+    expect(reduce(renewal, { type: 'requestReassignment' })).toBe(renewal);
+  });
+
   it('abandoning a contract by reassignment grants nothing and does not count as completed', () => {
     const playing = { ...createGame(1, NOW), assigning: 'reassign' as const };
     const next = reduce(playing, { type: 'chooseAssignment', scenario: 'overland', seed: 9 });

@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { createGame, newGame, type GameState } from '../../src/core/game';
 import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
-import { veteran } from '../helpers';
+import { veteran, confirmPause } from '../helpers';
 
 let store: Store;
 
@@ -48,6 +48,7 @@ describe('assignment screen', () => {
     const request = screen.getByRole('button', { name: /request reassignment/i });
     await user.click(request);
     expect(store.getState().assigning).toBe(false);
+    await confirmPause();
     await user.click(request);
     expect(store.getState().assigning).toBe('reassign');
     await user.click(within(dialog()!).getByRole('button', { name: /cancel/i }));

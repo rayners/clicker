@@ -1,3 +1,4 @@
+import { confirmedInTime } from '../shared/ui/confirm';
 import { aboutLink, h, setText } from '../shared/ui/dom';
 import { createOptOut } from '../shared/telemetry';
 import { lateSaves } from '../late-fees/save';
@@ -67,10 +68,13 @@ export function createSetup(store: LateStore): { button: HTMLButtonElement; dial
     }
   });
   let pending = false;
+  let pendingAt = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
   erase.addEventListener('click', () => {
+    if (pending && !confirmedInTime(pendingAt)) return;
     if (!pending) {
       pending = true;
+      pendingAt = Date.now();
       setText(erase, 'CONFIRM: ERASE EVERYTHING');
       erase.setAttribute('aria-label', 'Confirm: erase the tape and the whole franchise');
       timer = setTimeout(() => {

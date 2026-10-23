@@ -1,3 +1,4 @@
+import { confirmedInTime } from '../shared/ui/confirm';
 import type { GameState } from '../core/game';
 import { HUNTER_LEGEND, BOARDROOM_UNLOCK_CONTRACTS, CREATURE_UNLOCK_CONTRACTS, HUNTER_UNLOCK_CONTRACTS, isBoardroomUnlocked, isCreatureUnlocked, isHunterUnlocked } from '../core/prestige';
 import { exportSave, importSave } from '../core/save';
@@ -57,8 +58,10 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
   );
 
   let resetPending = false;
+  let resetPendingAt = 0;
   let resetTimer: ReturnType<typeof setTimeout> | undefined;
   let reassignPending = false;
+  let reassignPendingAt = 0;
   let reassignTimer: ReturnType<typeof setTimeout> | undefined;
 
   const show = (open: boolean) => {
@@ -106,8 +109,10 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
     }
   });
   resetButton.addEventListener('click', () => {
+    if (resetPending && !confirmedInTime(resetPendingAt)) return;
     if (!resetPending) {
       resetPending = true;
+      resetPendingAt = Date.now();
       setText(resetButton, 'CONFIRM: ERASE EVERYTHING');
       clearTimeout(resetTimer);
       resetTimer = setTimeout(() => {
@@ -124,8 +129,10 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
   });
 
   reassignButton.addEventListener('click', () => {
+    if (reassignPending && !confirmedInTime(reassignPendingAt)) return;
     if (!reassignPending) {
       reassignPending = true;
+      reassignPendingAt = Date.now();
       setText(reassignButton, 'CONFIRM: ABANDON THIS CONTRACT?');
       clearTimeout(reassignTimer);
       reassignTimer = setTimeout(() => {
@@ -157,6 +164,7 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
   });
 
   function render(game: GameState) {
+    reassignButton.disabled = !!game.assigning;
     const promoted = !!game.boardroom || isBoardroomUnlocked(game.profile);
     promotion.disabled = !promoted;
     const promotionText = game.boardroom ? 'THE BOARDROOM: RETURN' : promoted ? 'THE BOARDROOM: ACCEPT PROMOTION' : `THE BOARDROOM · AFTER ${BOARDROOM_UNLOCK_CONTRACTS} CONTRACTS`;

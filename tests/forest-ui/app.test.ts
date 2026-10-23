@@ -1,3 +1,4 @@
+import { confirmPause } from '../helpers';
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest';
 import { within, screen } from '@testing-library/dom';
@@ -210,6 +211,7 @@ describe('configuration', () => {
     expect((dialog.getByRole('textbox', { name: /save code/i }) as HTMLTextAreaElement).value.length).toBeGreaterThan(50);
     await user.click(dialog.getByRole('button', { name: /start a new charter/i }));
     expect(company().silver).toBe(777);
+    await confirmPause();
     await user.click(dialog.getByRole('button', { name: /confirm/i }));
     expect(company().silver).not.toBe(777);
   });
@@ -252,6 +254,7 @@ describe('the reckoning', () => {
     const go = within(sell).getByRole('button', { name: /sell the key/i });
     await user.click(go);
     expect(store.getState().profile.chartersCompleted).toBe(0);
+    await confirmPause();
     await user.click(within(sell).getByRole('button', { name: /confirm/i }));
     expect(store.getState().profile.chartersCompleted).toBe(1);
     expect(company().charter.number).toBe(2);

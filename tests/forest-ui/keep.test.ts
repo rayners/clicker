@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { seasoned } from '../helpers';
+import { seasoned, confirmPause } from '../helpers';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { within, screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
@@ -36,6 +36,7 @@ describe('Morrowgate Keep on screen', () => {
     const dialog = within(screen.getByRole('dialog', { name: /configuration/i }));
     await user.click(dialog.getByRole('button', { name: /charter for morrowgate keep/i }));
     expect(company().site).toBe('forest');
+    await confirmPause();
     await user.click(dialog.getByRole('button', { name: /confirm/i }));
     expect(company().site).toBe('keep');
     expect(dialog.getByRole('button', { name: /charter for the forest/i })).toBeTruthy();
@@ -97,6 +98,7 @@ describe('Morrowgate Keep on screen', () => {
     const panel = within(screen.getByRole('tabpanel', { name: /reckoning/i }));
     await user.click(panel.getByRole('button', { name: /next charter: morrowgate keep/i }));
     await user.click(panel.getByRole('button', { name: /sell the key/i }));
+    await confirmPause();
     await user.click(panel.getByRole('button', { name: /confirm/i }));
     expect(company().site).toBe('keep');
     expect(company().charter.number).toBe(2);

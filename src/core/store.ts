@@ -220,7 +220,8 @@ export function reduce(game: GameState, action: Action): GameState {
     case 'chooseAssignment':
       return chooseAssignment(game, action.scenario, action.seed);
     case 'requestReassignment':
-      return { ...game, assigning: 'reassign' };
+      // Only from a running contract: a new game or a finished contract is already choosing.
+      return game.assigning ? game : { ...game, assigning: 'reassign' };
     case 'cancelReassignment':
       return game.assigning === 'reassign' ? { ...game, assigning: false } : game;
     case 'completeContract':

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { seasoned } from '../helpers';
+import { seasoned, confirmPause } from '../helpers';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { within, screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
@@ -88,6 +88,7 @@ describe('the wood on screen', () => {
     const user = setup(inWood({ harvest: 400 }));
     await user.click(woodView().getByRole('button', { name: /end the hunt for 4 legend/i }));
     expect(store.getState().wood).not.toBeNull();
+    await confirmPause();
     await user.click(woodView().getByRole('button', { name: /confirm/i }));
     expect(store.getState().wood).toBeNull();
     expect(store.getState().profile.legend.wood).toBe(4);

@@ -6,7 +6,7 @@ import { createGame, type GameState } from '../../src/core/game';
 import { startHunter } from '../../src/core/hunter';
 import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
-import { veteran } from '../helpers';
+import { veteran, confirmPause } from '../helpers';
 import { HUNTER_UPGRADES } from '../../src/data/hunter/upgrades';
 
 let store: Store;
@@ -80,6 +80,7 @@ describe('the hunter on screen', () => {
     const user = setup(hunting({ harvest: 400 }));
     await user.click(view().getByRole('button', { name: /end the hunt for 4 legend/i }));
     expect(store.getState().hunter).not.toBeNull();
+    await confirmPause();
     await user.click(view().getByRole('button', { name: /^confirm/i }));
     expect(store.getState().hunter).toBeNull();
     expect(store.getState().profile.legend.hunter).toBe(4);

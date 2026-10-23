@@ -1,3 +1,4 @@
+import { confirmedInTime } from '../shared/ui/confirm';
 import { formatNumber } from '../shared/format';
 import { aboutLink, h, setAttr, setText } from '../shared/ui/dom';
 import { createOptOut } from '../shared/telemetry';
@@ -169,10 +170,13 @@ export function createConfig(store: FathomStore): { button: HTMLButtonElement; d
     show(false);
   });
   let pending = false;
+  let pendingAt = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
   reset.addEventListener('click', () => {
+    if (pending && !confirmedInTime(pendingAt)) return;
     if (!pending) {
       pending = true;
+      pendingAt = Date.now();
       setText(reset, 'CONFIRM: START OVER');
       reset.setAttribute('aria-label', 'Confirm: start over, losing every season');
       timer = setTimeout(() => {

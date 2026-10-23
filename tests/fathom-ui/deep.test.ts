@@ -1,3 +1,4 @@
+import { confirmPause } from '../helpers';
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest';
 import { within, screen } from '@testing-library/dom';
@@ -89,6 +90,7 @@ describe('the Source on screen', () => {
     const end = source().getByRole('button', { name: /end the hunt for 4 legend/i });
     await user.click(end);
     expect(store.getState().deep).not.toBeNull();
+    await confirmPause();
     await user.click(source().getByRole('button', { name: /confirm/i }));
     expect(store.getState().deep).toBeNull();
     expect(store.getState().profile.legend.deep).toBe(4);

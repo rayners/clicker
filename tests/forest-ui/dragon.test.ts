@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { seasoned } from '../helpers';
+import { seasoned, confirmPause } from '../helpers';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { within, screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
@@ -80,6 +80,7 @@ describe('the dragon on screen', () => {
     const user = setup(awake({ harvest: 400 }));
     await user.click(lair().getByRole('button', { name: /end the hunt for 4 legend/i }));
     expect(store.getState().dragon).not.toBeNull();
+    await confirmPause();
     await user.click(lair().getByRole('button', { name: /confirm/i }));
     expect(store.getState().dragon).toBeNull();
     expect(store.getState().profile.legend.dragon).toBe(4);

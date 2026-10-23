@@ -177,7 +177,10 @@ export function commission(game: GameState, scenario: ScenarioId, seed: number):
   const slot = freeSlot(b);
   const cost = charterCost(b, scenario);
   if (slot === null || b.value < cost || b.frozenFor > 0) return game;
-  const config = safeConfig({ ...missionConfigFor(game.profile, scenario), horror: horrorFor(game.profile, scenario, seed) }, game, b.safety);
+  // The draw's "not three in a row" reads the Board's own charters too, delivered and running, not just the player's.
+  const running = b.contracts.map((c) => missionRecord(c.mission, 'running'));
+  const record = { ...game.profile, history: [...game.profile.history, ...b.ledger, ...running] };
+  const config = safeConfig({ ...missionConfigFor(game.profile, scenario), horror: horrorFor(record, scenario, seed) }, game, b.safety);
   const contract: BoardContract = { slot, mission: createMission(config, seed), taps: 0, decideIn: 0, lost: 0 };
   return { ...game, boardroom: { ...b, value: b.value - cost, contracts: [...b.contracts, contract] } };
 }

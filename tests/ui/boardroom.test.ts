@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { createGame, type GameState } from '../../src/core/game';
 import { createStore, type Store } from '../../src/core/store';
 import { mountApp } from '../../src/ui/app';
-import { veteran } from '../helpers';
+import { veteran, confirmPause } from '../helpers';
 import { BOARDROOM_UNLOCK_CONTRACTS } from '../../src/core/prestige';
 import { createBoardroom } from '../../src/core/boardroom';
 
@@ -86,6 +86,7 @@ describe('the BOARDROOM on screen', () => {
     expect(ending.queryByRole('button', { name: /release the minutes/i })).toBeNull();
     await user.click(ending.getByRole('button', { name: /^chair the board/i }));
     expect(store.getState().profile.boardTerms).toBe(0);
+    await confirmPause();
     await user.click(ending.getByRole('button', { name: /confirm/i }));
     expect(store.getState().profile.dividends).toBe(1);
     expect(board().term).toBe(2);

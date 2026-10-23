@@ -1,3 +1,4 @@
+import { confirmPause } from '../helpers';
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest';
 import { within, screen } from '@testing-library/dom';
@@ -117,6 +118,7 @@ describe('the deep-water game on screen', () => {
     await user.click(tab(/season's end/i)!);
     const end = panel(/season's end/i);
     await user.click(end.getByRole('button', { name: /close the breach/i }));
+    await confirmPause();
     await user.click(end.getByRole('button', { name: /confirm/i }));
     expect(store.getState().profile.seasons).toBe(1);
     expect(outfit().terms.season).toBe(2);

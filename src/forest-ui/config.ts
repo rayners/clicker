@@ -1,3 +1,4 @@
+import { confirmedInTime } from '../shared/ui/confirm';
 import { aboutLink, h, setText } from '../shared/ui/dom';
 import { DRAGON_LEGEND, DRAGON_UNLOCK_CHARTERS, isDragonUnlocked, isKeepUnlocked, isWoodUnlocked, KEEP_UNLOCK_CHARTERS, WOOD_UNLOCK_CHARTERS } from '../forest/charter';
 import { createOptOut } from '../shared/telemetry';
@@ -124,10 +125,13 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
   });
 
   let pending = false;
+  let pendingAt = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
   reset.addEventListener('click', () => {
+    if (pending && !confirmedInTime(pendingAt)) return;
     if (!pending) {
       pending = true;
+      pendingAt = Date.now();
       setText(reset, 'CONFIRM: BURN IT ALL');
       reset.setAttribute('aria-label', 'Confirm: start a new charter, losing this one');
       timer = setTimeout(() => {

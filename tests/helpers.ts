@@ -13,3 +13,6 @@ export const seasoned = <G extends { profile: { chartersCompleted: number } }>(g
 
 /** A LATE FEES member with enough films behind them to rent every tape and flip side B. */
 export const member = <G extends { profile: { sequels: number } }>(g: G): G => ({ ...g, profile: { ...g.profile, sequels: 10 } });
+
+/** Two-tap confirms ignore a second tap that comes too soon (a double tap); wait long enough before confirming. */
+export const confirmPause = (): Promise<void> => new Promise((r) => setTimeout(r, 450));

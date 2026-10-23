@@ -312,3 +312,20 @@ describe('the Boardroom never strands a term', () => {
     expect(board(tickGame(running, 1)).value).toBeLessThan(charterCost(board(running), 'extraction'));
   });
 });
+
+describe('the Board\'s horror draw', () => {
+  it('counts the Board\'s own charters, so a term is not all one horror', () => {
+    const g = promoted();
+    const rec = (horror: 'organism' | 'outbreak') => ({ scenario: 'extraction' as const, horror, shipName: 'X', ending: 'deliver', output: 1, outputUnit: 'T', specimens: 0, crewSurvived: 7, duration: 1 });
+    let b: GameState = { ...g, profile: { ...g.profile, history: [rec('organism'), rec('organism')] }, boardroom: { ...board(g), value: 1e12, slots: MAX_SLOTS } };
+    const drawn: string[] = [];
+    for (let i = 0; i < 30; i++) {
+      b = reduce(b, { type: 'commission', scenario: 'extraction', seed: 100 + i });
+      const c = board(b).contracts.at(-1)!;
+      drawn.push(c.mission.horror);
+      // Close it at once, so the office is free for the next charter.
+      b = { ...b, boardroom: { ...board(b), contracts: [], ledger: [...board(b).ledger, { ...rec(c.mission.horror as 'organism'), horror: c.mission.horror }] } };
+    }
+    expect(new Set(drawn)).toEqual(new Set(['organism', 'outbreak']));
+  });
+});

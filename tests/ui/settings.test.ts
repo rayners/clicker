@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { CONFIRM_GAP_MS } from '../../src/shared/ui/confirm';
 import { describe, it, expect } from 'vitest';
 import { screen, within } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
@@ -97,8 +98,16 @@ describe('settings dialog', () => {
     const reset = dialog.getByRole('button', { name: /hard reset/i });
     await user.click(reset);
     expect(ext(store.getState().mission).ore).toBe(50);
+    await new Promise((r) => setTimeout(r, CONFIRM_GAP_MS + 50));
     await user.click(reset);
     expect(ext(store.getState().mission).ore).toBe(0);
+  });
+
+  it('does not erase anything on a double tap: the confirming tap has to come a moment later', async () => {
+    const user = setup((g) => ({ ...g, mission: { ...g.mission, ore: 50 } }));
+    const dialog = await open(user);
+    await user.dblClick(dialog.getByRole('button', { name: /hard reset/i }));
+    expect(ext(store.getState().mission).ore).toBe(50);
   });
 
   it('says both ways into the hunt while it is closed: contracts, or Legend as the creature', async () => {

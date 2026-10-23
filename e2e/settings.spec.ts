@@ -18,6 +18,8 @@ test('export a save, wipe the game, and import it back', async ({ page }) => {
   expect(code.length).toBeGreaterThan(100);
 
   await dialog.getByRole('button', { name: /hard reset/i }).click();
+  // A confirming tap must come a moment after the first: a double tap does not erase anything.
+  await page.waitForTimeout(450);
   await dialog.getByRole('button', { name: /confirm/i }).click();
   await acceptContract(page, 'overland');
   await expect(status.getByLabel('Credits')).toHaveText('0');

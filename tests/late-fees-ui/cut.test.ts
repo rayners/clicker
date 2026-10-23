@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { member } from '../helpers';
+import { member, confirmPause } from '../helpers';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { within, screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
@@ -95,6 +95,7 @@ describe("the Killer's Cut on screen", () => {
     const user = setup(inCut({ harvest: 400 }));
     await user.click(cutView().getByRole('button', { name: /end the cut for 4 legend/i }));
     expect(store.getState().cut).not.toBeNull();
+    await confirmPause();
     await user.click(cutView().getByRole('button', { name: /^confirm/i }));
     expect(store.getState().cut).toBeNull();
     expect(store.getState().profile.legend.drowned).toBe(4);
