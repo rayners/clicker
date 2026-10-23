@@ -2,6 +2,7 @@ import type { GameState } from '../core/game';
 import { assignmentUnlock, availableAssignments, missionConfigFor } from '../core/prestige';
 import type { Store } from '../core/store';
 import type { ScenarioId } from '../mission/state';
+import { createDialog } from '../engine/ui/dialog';
 import { h, setText } from '../engine/ui/dom';
 
 const BRIEFS: Record<ScenarioId, { title: string; name: string; brief: string }> = {
@@ -59,22 +60,13 @@ export function createAssignment(store: Store): { el: HTMLElement; render(game: 
   const warning = h('p', { class: 'assign-warning' }, 'ABANDONING THE CURRENT CONTRACT EARNS NOTHING. IT WILL NOT BE RECORDED.');
   const cancel = h('button', { class: 'buy', type: 'button' }, 'CANCEL');
   cancel.addEventListener('click', () => store.dispatch({ type: 'cancelReassignment' }));
-  const el = h(
-    'div',
-    { class: 'cfg assign', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'assign-title', hidden: true },
-    h(
-      'div',
-      { class: 'cfg-box' },
-      h('h2', { class: 'panel-title', id: 'assign-title' }, 'CONTRACT ASSIGNMENT'),
-      h('p', { class: 'term-intro' }, 'KESSLER-AMARI COMBINE // OPERATIONS INTELLIGENCE PLACEMENT'),
-      ...cards.map((c) => c.el),
-      warning,
-      cancel,
-    ),
-  );
+  // A contract has to be chosen; only a mid-contract request can be cancelled, by its own button.
+  const dialog = createDialog({ title: 'CONTRACT ASSIGNMENT', className: 'cfg', variant: 'assign', titleClass: 'panel-title', closable: false });
+  dialog.body.append(h('p', { class: 'term-intro' }, 'KESSLER-AMARI COMBINE // OPERATIONS INTELLIGENCE PLACEMENT'), ...cards.map((c) => c.el), warning, cancel);
+  const el = dialog.el;
 
   function render(game: GameState) {
-    el.hidden = !game.assigning;
+    dialog.set(!!game.assigning);
     if (!game.assigning) return;
     const offered = availableAssignments(game.profile);
     // Only a mid-contract request can be backed out of.

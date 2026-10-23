@@ -1,3 +1,4 @@
+import { createDialog } from '../engine/ui/dialog';
 import { h } from '../engine/ui/dom';
 import type { LateGame } from '../late-fees/game';
 import { CROSSOVERS, CUT_UNLOCK_FILMS, isCutUnlocked, isTapeStocked, ORIGINALS, runConfigFor, tapeUnlock, type TapeDef } from '../late-fees/sequels';
@@ -8,18 +9,11 @@ import type { KillerId } from '../late-fees/state';
 /** The horror shelf at Late Fees Video: pick a tape. The sequel replaces the original once a film is finished. */
 export function createShelf(store: LateStore): { el: HTMLElement; render(game: LateGame): void } {
   const list = h('ul', { class: 'shelf-list' });
-  const el = h(
-    'div',
-    { class: 'shelf', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'shelf-title', hidden: true },
-    h(
-      'div',
-      { class: 'shelf-box' },
-      h('p', { class: 'shelf-sign' }, 'LATE FEES VIDEO'),
-      h('h2', { class: 'shelf-title', id: 'shelf-title' }, 'HORROR · NEW RELEASES'),
-      list,
-      h('p', { class: 'shelf-small' }, 'BE KIND. REWIND. ALL RENTALS DUE BACK BY MIDNIGHT.'),
-    ),
-  );
+  // Between films the shelf is the only way on: a choice that must be made.
+  const dialog = createDialog({ title: 'HORROR · NEW RELEASES', className: 'shelf', closable: false });
+  dialog.body.prepend(h('p', { class: 'shelf-sign' }, 'LATE FEES VIDEO'));
+  dialog.body.append(list, h('p', { class: 'shelf-small' }, 'BE KIND. REWIND. ALL RENTALS DUE BACK BY MIDNIGHT.'));
+  const el = dialog.el;
   let shown = '';
 
   const tape = (game: LateGame, t: TapeDef) => {
@@ -49,7 +43,7 @@ export function createShelf(store: LateStore): { el: HTMLElement; render(game: L
   };
 
   function render(game: LateGame) {
-    el.hidden = !game.shelf;
+    dialog.set(game.shelf);
     if (!game.shelf) return;
     const key = `${game.profile.sequels}:${game.profile.history.length}:${game.cut?.killer ?? ''}`;
     if (key === shown) return;

@@ -11,6 +11,8 @@ export interface DialogOptions {
   title: string;
   /** Names its parts: `<class>`, `<class>-box`, `<class>-head`, `<class>-title` and `<class>-close`. */
   className: string;
+  /** Another class on the dialog itself, for a variant of a shared style. */
+  variant?: string;
   /** A class for the title in place of `<class>-title` (a game's shared heading style). */
   titleClass?: string;
   /** The close button's text, in the game's own words; its accessible name stays "Close". */
@@ -40,7 +42,7 @@ export function createDialog(options: DialogOptions): {
   const head = h('div', { class: `${cls}-head` }, title);
   if (closable) head.append(close);
   const body = h('div', { class: `${cls}-box` }, head);
-  const el = h('div', { class: cls, role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': titleId, hidden: true }, body);
+  const el = h('div', { class: options.variant ? `${cls} ${options.variant}` : cls, role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': titleId, hidden: true }, body);
   let opener: Element | null = null;
 
   const open = () => {

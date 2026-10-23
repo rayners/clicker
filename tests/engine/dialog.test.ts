@@ -76,6 +76,12 @@ describe('a modal dialog', () => {
     expect(screen.getByRole('dialog', { name: 'How the Source works' })).toBeTruthy();
   });
 
+  it('can wear a variant class beside the shared one, e.g. the contract choice styled like the settings', () => {
+    const { dialog } = mount({ title: 'Contract assignment', className: 'cfg', variant: 'assign', closable: false });
+    expect(dialog.el.className).toBe('cfg assign');
+    expect(dialog.el.querySelector('.cfg-box')).not.toBeNull();
+  });
+
   it('names its parts after the class it is given, so each game styles it its own way', () => {
     const { dialog } = mount({ title: 'Doors', className: 'doors', titleClass: 'panel-title' });
     expect(dialog.el.className).toBe('doors');
