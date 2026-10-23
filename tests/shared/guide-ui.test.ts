@@ -39,6 +39,27 @@ describe('the guide on screen', () => {
     expect(document.getElementById('drill')!.classList.contains('guide-target')).toBe(true);
   });
 
+  it('sits as one line until tapped, then opens to the whole tip with GOT IT and SKIP GUIDE', async () => {
+    const { view, user } = mount();
+    view.render({ drills: 0 });
+    const line = screen.getByRole('button', { name: /show the tip/i });
+    expect(line.textContent).toMatch(/^DRILL/);
+    expect(line.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByRole('button', { name: /got it/i })).toBeNull();
+    await user.click(line);
+    expect(line.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByRole('button', { name: /got it/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /skip guide/i })).toBeTruthy();
+  });
+
+  it('closes up again for each new tip', async () => {
+    const { view, user } = mount();
+    view.render({ drills: 0 });
+    await user.click(screen.getByRole('button', { name: /show the tip/i }));
+    view.render({ drills: 1 });
+    expect(screen.getByRole('button', { name: /show the tip/i }).getAttribute('aria-expanded')).toBe('false');
+  });
+
   it('moves on when the player does the thing, and lets go of the old control', () => {
     const { view } = mount();
     view.render({ drills: 0 });
@@ -50,9 +71,11 @@ describe('the guide on screen', () => {
   it('can be dismissed one tip at a time, or skipped altogether', async () => {
     const { view, user } = mount();
     view.render({ drills: 0 });
+    await user.click(screen.getByRole('button', { name: /show the tip/i }));
     await user.click(screen.getByRole('button', { name: /got it/i }));
     view.render({ drills: 0 });
     expect(screen.getByText('Then this.')).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: /show the tip/i }));
     await user.click(screen.getByRole('button', { name: /skip guide/i }));
     view.render({ drills: 0 });
     expect(screen.queryByRole('region', { name: /guide/i })).toBeNull();
@@ -88,6 +111,7 @@ describe('the guide on screen', () => {
     view.render({ drills: 0 });
     view.render({ drills: 1 });
     expect(heard).toContainEqual({ name: 'guide_step', props: { guide: 'k', step: 'drill', how: 'done' } });
+    await user.click(screen.getByRole('button', { name: /show the tip/i }));
     await user.click(screen.getByRole('button', { name: /got it/i }));
     expect(heard).toContainEqual({ name: 'guide_step', props: { guide: 'k', step: 'next', how: 'dismissed' } });
     document.removeEventListener(TELEMETRY_EVENT, listen);
@@ -99,6 +123,7 @@ describe('the guide on screen', () => {
     document.addEventListener(TELEMETRY_EVENT, listen);
     const { view, user } = mount();
     view.render({ drills: 0 });
+    await user.click(screen.getByRole('button', { name: /show the tip/i }));
     await user.click(screen.getByRole('button', { name: /skip guide/i }));
     expect(heard).toContainEqual({ name: 'guide_skipped', props: { guide: 'k', step: 'drill' } });
     document.removeEventListener(TELEMETRY_EVENT, listen);

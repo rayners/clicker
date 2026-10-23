@@ -15,12 +15,24 @@ export function createGuideView<S>(options: {
   rules(s: S): GuideRules;
   progress: ReturnType<typeof createGuideProgress>;
 }): { el: HTMLElement; rulesButton: HTMLButtonElement; rulesDialog: HTMLElement; render(s: S): void } {
-  const title = h('h3', { class: 'guide-title' });
-  const text = h('p', { class: 'guide-text' });
+  const tipId = `guide-tip-${views + 1}`;
+  const title = h('span', { class: 'guide-title', id: `${tipId}-title` });
+  const textId = `${tipId}-text`;
+  const text = h('span', { class: 'guide-text', id: textId });
+  // One line (the title and the start of the tip) until tapped, so it never crowds a phone; tapping opens the rest.
+  // Its name never repeats the control it describes (tips are often titled after it); the tip is its description.
+  const line = h('button', { class: 'guide-line', type: 'button', 'aria-expanded': 'false', 'aria-label': 'Show the tip', 'aria-describedby': `${tipId}-title ${textId}` }, title, text);
   const ok = h('button', { class: 'guide-ok', type: 'button', 'aria-label': 'Got it' }, 'GOT IT');
   const skip = h('button', { class: 'guide-skip', type: 'button', 'aria-label': 'Skip guide' }, 'SKIP GUIDE');
-  // Laid out as a small grid (title and skip on top, the text and "got it" side by side) so it stays short on a phone.
-  const el = h('section', { class: 'guide', 'aria-label': 'Guide', hidden: true }, title, skip, text, ok);
+  const actions = h('div', { class: 'guide-actions', hidden: true }, skip, ok);
+  const el = h('section', { class: 'guide', 'aria-label': 'Guide', hidden: true }, line, actions);
+  let shownStep = '';
+  const expand = (open: boolean) => {
+    line.setAttribute('aria-expanded', String(open));
+    el.dataset.open = String(open);
+    actions.hidden = !open;
+  };
+  line.addEventListener('click', () => expand(line.getAttribute('aria-expanded') !== 'true'));
 
   const rulesButton = h('button', { class: 'guide-rules-open', type: 'button', 'aria-label': 'How this works' }, '?');
   const titleId = `guide-rules-title-${++views}`;
@@ -84,6 +96,11 @@ export function createGuideView<S>(options: {
     el.hidden = !current;
     mark(current?.target);
     if (!current) return;
+    // Each new tip starts as one line.
+    if (current.id !== shownStep) {
+      shownStep = current.id;
+      expand(false);
+    }
     setText(title, current.title);
     setText(text, current.text);
   }
