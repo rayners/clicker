@@ -155,4 +155,13 @@ describe('the setup menu', () => {
     await user.click(dialog.getByRole('checkbox', { name: /share anonymous play data/i }));
     expect(createOptOut(localStorage).sharing()).toBe(false);
   });
+
+  it('has a sound switch in SETUP, off until the player turns it on', async () => {
+    const user = setup(playing());
+    await user.click(screen.getByRole('button', { name: /setup/i }));
+    const box = screen.getByRole('checkbox', { name: /sound/i }) as HTMLInputElement;
+    expect(box.checked).toBe(false);
+    await user.click(box);
+    expect(store.getState().profile.settings.sound).toBe(true);
+  });
 });

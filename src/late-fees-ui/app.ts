@@ -5,6 +5,8 @@ import type { LateGame } from '../late-fees/game';
 import type { EntryKind } from '../late-fees/state';
 import type { LateStore } from '../late-fees/store';
 import { creditsIn } from '../late-fees/story';
+import { createLateSound, soundCues } from './sound';
+import type { Run } from '../late-fees/state';
 import { createCredits } from './credits';
 import { createSetup } from './setup';
 import { createShelf } from './shelf';
@@ -40,6 +42,10 @@ const GUIDE_KEY = 'latefees.guide';
 
 export function mountLate(root: HTMLElement, store: LateStore): void {
   const setup = createSetup(store);
+  const sound = createLateSound();
+  root.addEventListener('pointerdown', () => sound.unlock(), { passive: true });
+  let pressed = false;
+  let lastRun: Run | null = null;
   const shelf = createShelf(store);
   const cutView = createCutView(store);
   const venues = createVenueUis(store);
@@ -122,6 +128,7 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
   const press = () => {
     if (!view) return;
     const power = view.action.perPress(store.getState().run);
+    pressed = true;
     store.dispatch(view.action.action);
     const tick = h('span', { class: 'whistle-tick', 'aria-hidden': 'true', style: `--x:${Math.round(Math.random() * 80 - 40)}px` }, `+${formatNumber(power)}`);
     action.append(tick);
@@ -183,6 +190,13 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
     setText(finale, rolled ? 'CHOOSE AN ENDING IN CREDITS' : left === null ? '' : `FINAL ACT · CREDITS IN ${formatDuration(left)}`);
     shelf.render(game);
     setup.render(game);
+    const playing = game.mode === 'films' && !game.shelf;
+    sound.setEnabled(game.profile.settings.sound);
+    sound.setHum(playing ? r.act : 0);
+    // A new film starts the comparison over, so its first frame makes no sound of its own.
+    if (playing && lastRun && lastRun.seed === r.seed) for (const cue of soundCues(lastRun, r, pressed)) sound.play(cue);
+    pressed = false;
+    lastRun = r;
     cutView.render(game);
     guide.render(game);
     root.dataset.mode = game.mode;

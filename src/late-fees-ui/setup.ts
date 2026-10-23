@@ -6,9 +6,10 @@ import type { LateStore } from '../late-fees/store';
 
 const CONFIRM_TIMEOUT_MS = 5000;
 
-/** The VCR's SETUP menu: motion, analytics, the save code, and erasing the tape. */
+/** The VCR's SETUP menu: sound, motion, analytics, the save code, and erasing the tape. */
 export function createSetup(store: LateStore): { button: HTMLButtonElement; dialog: HTMLElement; render(game: LateGame): void } {
   const button = h('button', { class: 'setup-open', type: 'button', 'aria-label': 'Setup' }, 'SETUP');
+  const sound = h('input', { type: 'checkbox', id: 'lf-sound' });
   const motion = h('input', { type: 'checkbox', id: 'lf-motion' });
   const share = h('input', { type: 'checkbox', id: 'lf-share' });
   const code = h('textarea', { class: 'setup-code', rows: 4, spellcheck: 'false', 'aria-label': 'Save code' });
@@ -24,6 +25,7 @@ export function createSetup(store: LateStore): { button: HTMLButtonElement; dial
       'div',
       { class: 'setup-box' },
       h('div', { class: 'setup-head' }, h('h2', { class: 'panel-title', id: 'lf-setup-title' }, 'SETUP'), close),
+      h('label', { class: 'setup-toggle', for: 'lf-sound' }, sound, ' SOUND'),
       h('label', { class: 'setup-toggle', for: 'lf-motion' }, motion, ' REDUCE MOTION (NO TRACKING NOISE)'),
       h('label', { class: 'setup-toggle', for: 'lf-share' }, share, ' SHARE ANONYMOUS PLAY DATA'),
       h('p', { class: 'setup-note' }, 'MILESTONES AND ERRORS ONLY. NO COOKIES, NO PERSONAL DATA.'),
@@ -49,6 +51,7 @@ export function createSetup(store: LateStore): { button: HTMLButtonElement; dial
   share.checked = optOut.sharing();
   share.addEventListener('change', () => optOut.setSharing(share.checked));
   motion.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'reducedMotion', value: motion.checked }));
+  sound.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'sound', value: sound.checked }));
   exportButton.addEventListener('click', () => {
     code.value = lateSaves.exportSave(store.getState());
     code.select();
@@ -87,6 +90,7 @@ export function createSetup(store: LateStore): { button: HTMLButtonElement; dial
     dialog,
     render(game) {
       motion.checked = game.profile.settings.reducedMotion;
+      sound.checked = game.profile.settings.sound;
     },
   };
 }
