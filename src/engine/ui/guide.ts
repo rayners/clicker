@@ -3,6 +3,7 @@
  * @module
  */
 import { nextStep, type GuideRules, type GuideStep, type createGuideProgress } from '../guide';
+import { createDialog } from './dialog';
 import { h, setText } from './dom';
 import { announce } from '../telemetry';
 
@@ -39,15 +40,11 @@ export function createGuideView<S>(options: {
   line.addEventListener('click', () => expand(line.getAttribute('aria-expanded') !== 'true'));
 
   const rulesButton = h('button', { class: 'guide-rules-open', type: 'button', 'aria-label': 'How this works' }, '?');
-  const titleId = `guide-rules-title-${++views}`;
-  const rulesTitle = h('h2', { class: 'guide-rules-title', id: titleId });
+  views++;
   const rulesBody = h('div', { class: 'guide-rules-body' });
-  const close = h('button', { class: 'guide-rules-close', type: 'button', 'aria-label': 'Close' }, '✕');
-  const rulesDialog = h(
-    'div',
-    { class: 'guide-rules', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': titleId, hidden: true },
-    h('div', { class: 'guide-rules-box' }, h('div', { class: 'guide-rules-head' }, rulesTitle, close), rulesBody),
-  );
+  const rulesView = createDialog({ title: '', className: 'guide-rules' });
+  rulesView.body.append(rulesBody);
+  const rulesDialog = rulesView.el;
 
   let current: GuideStep<S> | null = null;
   let last: S | null = null;
@@ -74,21 +71,14 @@ export function createGuideView<S>(options: {
     if (last) render(last);
   });
   let shownRules = '';
-  rulesButton.addEventListener('click', () => {
-    rulesDialog.hidden = false;
-    close.focus();
-  });
-  close.addEventListener('click', () => (rulesDialog.hidden = true));
-  rulesDialog.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') rulesDialog.hidden = true;
-  });
+  rulesButton.addEventListener('click', rulesView.open);
 
   function render(s: S) {
     last = s;
     const rules = options.rules(s);
     if (rules.title !== shownRules) {
       shownRules = rules.title;
-      setText(rulesTitle, rules.title);
+      rulesView.setTitle(rules.title);
       rulesBody.replaceChildren(...rules.sections.flatMap((x) => [h('h3', { class: 'guide-rules-heading' }, x.heading), h('p', { class: 'guide-rules-text' }, x.text)]));
     }
     // A step the player has just done counts as seen, so it never comes back.

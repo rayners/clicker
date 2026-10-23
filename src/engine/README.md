@@ -89,6 +89,7 @@ published build only, persistent storage, and the site's service worker.
 | `ui/monitor` | `createMonitor`: animated rows showing automation at work. |
 | `ui/log` | `createLogView`: an append-only feed that prints only new entries. |
 | `ui/guide` | `createGuideView`: the one-line walkthrough tip (tap to open) and the rules page. |
+| `ui/dialog` | `createDialog`: a modal dialog named after a class you give it, closed by its button or Escape, focus moved in and back; or a choice that must be made (`closable: false`). |
 | `ui/doors` | `createDoors`: a masthead button opening a dialog of doors to a game's other tiers; a closed door says what opens it. |
 | `ui/confirm` | `createConfirmButton`, `confirmedInTime`: two-tap confirms that a double tap cannot pass. |
 | `ui/sprites` | `createSpriteKit`: draws sprites on canvases, tinted from CSS variables so themes re-colour them. |

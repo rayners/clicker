@@ -2,6 +2,7 @@
  * A masthead button opening a dialog of doors to a game's other tiers.
  * @module
  */
+import { createDialog } from './dialog';
 import { h, setAttr, setText } from './dom';
 
 /** One door: a play-as-the-horror tier or another side of a game, with what it says now and what it opens. */
@@ -13,8 +14,6 @@ export interface Door<S> {
   onOpen(s: S): void;
 }
 
-let dialogs = 0;
-
 /**
  * The doors to a game's other sides, behind their own masthead button rather than in the settings beside hard reset.
  * A closed door says what opens it.
@@ -24,33 +23,21 @@ export function createDoors<S>(options: {
   title: string;
   doors: readonly Door<S>[];
 }): { button: HTMLButtonElement; dialog: HTMLElement; render(s: S): void } {
-  const titleId = `doors-title-${++dialogs}`;
   const button = h('button', { class: options.button.className, type: 'button', 'aria-label': options.button.aria }, options.button.text) as HTMLButtonElement;
-  const close = h('button', { class: 'doors-close', type: 'button', 'aria-label': 'Close' }, '✕');
+  const dialog = createDialog({ title: options.title, className: 'doors' });
   let last: S | null = null;
   const rows = options.doors.map((door) => {
     const b = h('button', { class: 'doors-door', type: 'button' }) as HTMLButtonElement;
     b.addEventListener('click', () => {
       if (!last) return;
-      dialog.hidden = true;
+      dialog.close();
       door.onOpen(last);
     });
     const desc = h('p', { class: 'doors-desc' }, door.describe);
     return { door, b, desc, el: h('li', { class: 'doors-row' }, b, desc) };
   });
-  const dialog = h(
-    'div',
-    { class: 'doors', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': titleId, hidden: true },
-    h('div', { class: 'doors-box' }, h('div', { class: 'doors-head' }, h('h2', { class: 'doors-title', id: titleId }, options.title), close), h('ul', { class: 'doors-list' }, ...rows.map((r) => r.el))),
-  );
-  button.addEventListener('click', () => {
-    dialog.hidden = false;
-    close.focus();
-  });
-  close.addEventListener('click', () => (dialog.hidden = true));
-  dialog.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') dialog.hidden = true;
-  });
+  dialog.body.append(h('ul', { class: 'doors-list' }, ...rows.map((r) => r.el)));
+  button.addEventListener('click', dialog.open);
 
   function render(s: S) {
     last = s;
@@ -63,5 +50,5 @@ export function createDoors<S>(options: {
     }
   }
 
-  return { button, dialog, render };
+  return { button, dialog: dialog.el, render };
 }
