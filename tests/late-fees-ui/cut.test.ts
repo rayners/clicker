@@ -116,4 +116,10 @@ describe("the Killer's Cut on screen", () => {
     await user.click(cutView().getByRole('button', { name: /how this works/i }));
     expect(screen.getByRole('dialog', { name: /how the killer's cut works/i })).toBeTruthy();
   });
+
+  it('makes the game behind it inert, so its controls cannot be reached or pressed', () => {
+    setup(inCut());
+    const button = screen.getByRole('button', { name: /blow the whistle/i, hidden: true });
+    expect(button.closest('[inert]')).not.toBeNull();
+  });
 });

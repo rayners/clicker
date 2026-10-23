@@ -188,7 +188,8 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
   });
 
   root.classList.add('ledger-shell');
-  root.replaceChildren(masthead, standing, ...panels.map((p) => p.el), h('div', { class: 'forage-bay' }, guide.el, forage), tabbar, woodView.el, dragonView.el, config.dialog, guide.rulesDialog);
+  const shell = [masthead, standing, ...panels.map((p) => p.el), h('div', { class: 'forage-bay' }, guide.el, forage), tabbar];
+  root.replaceChildren(...shell, woodView.el, dragonView.el, config.dialog, guide.rulesDialog);
   select('ledger');
   const palette = kit.readPalette(root);
   kit.paintAll(root);
@@ -209,6 +210,8 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
     root.dataset.motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
     config.render(game);
     woodView.render(game);
+    // Behind the wood or the dragon, the charter is out of reach.
+    for (const el of shell) el.toggleAttribute('inert', game.mode !== 'charter');
     const charter = game.mode === 'charter';
     sound.setEnabled(game.profile.settings.sound);
     sound.setHum(charter ? c.act : 0);

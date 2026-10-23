@@ -165,7 +165,8 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
   });
 
   root.classList.add('sonar-shell');
-  root.replaceChildren(banner, status, ...panels.map((p) => p.el), h('div', { class: 'pass-bay' }, guide.el, pass), tabbar, deepView.el, config.dialog, guide.rulesDialog);
+  const shell = [banner, status, ...panels.map((p) => p.el), h('div', { class: 'pass-bay' }, guide.el, pass), tabbar];
+  root.replaceChildren(...shell, deepView.el, config.dialog, guide.rulesDialog);
   select('log');
 
   function render(game: FathomGame) {
@@ -180,6 +181,8 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
     root.dataset.motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
     config.render(game);
     deepView.render(game);
+    // Behind the Source, the season is out of reach.
+    for (const el of shell) el.toggleAttribute('inert', game.mode !== 'season');
     sound.setEnabled(game.profile.settings.sound);
     sound.setHum(game.mode === 'season' ? o.act : 0);
     if (lastOutfit && game.mode === 'season') for (const cue of soundCues(lastOutfit, o, soldByHand)) sound.play(cue);

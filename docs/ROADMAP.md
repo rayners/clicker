@@ -170,7 +170,7 @@ Two subagent passes at the user's request: an adversarial QA run and a design re
 - (Done: resting restores hunger) Every horror tier dead-ends at hunger 0 (nothing refills it; the rules page says something will).
 - (Done) The Boardroom's horror draw collapses to one horror for a whole term (the anti-streak rule reads the player's own history).
 - (Done) DEEP CONTRACT: REQUEST REASSIGNMENT overrides the start and renewal screens; CANCEL then runs a placeholder contract.
-- Overlays do not make the covered contract inert: its controls stay focusable and usable behind the Boardroom and the assignment screen.
+- (Done, in all four games) Overlays do not make the covered contract inert: its controls stay focusable and usable behind the Boardroom and the assignment screen.
 - (Done: a 400 ms gap) A double tap passes every two-step confirm, including HARD RESET (no minimum delay between taps).
 - (Done for the opening screens, with an e2e check; party steppers and the Killer's Cut buttons still to check) Tap targets under 44 px: DEEP CONTRACT's CFG, Elderdark's config, every "Skip guide", Elderdark's party steppers, the Killer's Cut buttons.
 - (Done) DEEP CONTRACT first load on touch: the tap that skips the boot also taps the assignment button beneath it.

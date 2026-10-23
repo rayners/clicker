@@ -111,4 +111,14 @@ describe('the BOARDROOM on screen', () => {
     await user.click(view().getByRole('button', { name: /how this works/i }));
     expect(screen.getByRole('dialog', { name: /how the boardroom works/i })).toBeTruthy();
   });
+
+  it('makes the contract behind it inert, so its controls cannot be reached or pressed', async () => {
+    const user = setup(veteran(createGame(1, 0)));
+    const drill = screen.getByRole('button', { name: /execute drill cycle/i, hidden: true });
+    expect(drill.closest('[inert]')).toBeNull();
+    promoted();
+    expect(drill.closest('[inert]')).not.toBeNull();
+    await user.click(view().getByRole('button', { name: /return to the contract/i }));
+    expect(drill.closest('[inert]')).toBeNull();
+  });
 });

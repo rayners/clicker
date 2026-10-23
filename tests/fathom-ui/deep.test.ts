@@ -118,4 +118,10 @@ describe('the Source on screen', () => {
     await user.click(source().getByRole('button', { name: /how this works/i }));
     expect(screen.getByRole('dialog', { name: /how the source works/i })).toBeTruthy();
   });
+
+  it('makes the game behind it inert, so its controls cannot be reached or pressed', () => {
+    setup(inDeep());
+    const button = screen.getByRole('button', { name: /sell a beach pass/i, hidden: true });
+    expect(button.closest('[inert]')).not.toBeNull();
+  });
 });

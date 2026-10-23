@@ -120,4 +120,10 @@ describe('closed doors in the configuration', () => {
     await user.click(woodView().getByRole('button', { name: /how this works/i }));
     expect(screen.getByRole('dialog', { name: /how the wood works/i })).toBeTruthy();
   });
+
+  it('makes the game behind it inert, so its controls cannot be reached or pressed', () => {
+    setup(inWood());
+    const button = screen.getByRole('button', { name: /forage the eaves/i, hidden: true });
+    expect(button.closest('[inert]')).not.toBeNull();
+  });
 });

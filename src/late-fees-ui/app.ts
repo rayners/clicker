@@ -156,12 +156,9 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
   }
 
   root.classList.add('vhs-shell');
+  const shell = [banner, status, ...panels.map((p) => p.el), h('div', { class: 'whistle-bay' }, guide.el, action), tabbar];
   root.replaceChildren(
-    banner,
-    status,
-    ...panels.map((p) => p.el),
-    h('div', { class: 'whistle-bay' }, guide.el, action),
-    tabbar,
+    ...shell,
     h('div', { class: 'vhs-noise', 'aria-hidden': 'true' }),
     cutView.el,
     shelf.el,
@@ -199,6 +196,8 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
     lastRun = r;
     cutView.render(game);
     guide.render(game);
+    // Behind the shelf or the Killer's Cut, the film is out of reach.
+    for (const el of shell) el.toggleAttribute('inert', game.mode !== 'films' || game.shelf);
     root.dataset.mode = game.mode;
     for (const p of panels) {
       const shown = p.visible?.(game) ?? true;

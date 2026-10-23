@@ -280,7 +280,8 @@ export function mountApp(root: HTMLElement, store: Store): void {
   }
 
   root.classList.add('shell');
-  root.replaceChildren(masthead, status, ...panels.map((p) => p.el), drillBay, tabbar, settings.dialog, assignment.el, creatureView.el, hunterView.el, boardroomView.el, guide.rulesDialog);
+  const shell = [masthead, status, ...panels.map((p) => p.el), drillBay, tabbar];
+  root.replaceChildren(...shell, settings.dialog, assignment.el, creatureView.el, hunterView.el, boardroomView.el, guide.rulesDialog);
   selectTab('ops');
   let palette = readPalette(root);
   paintAll(root);
@@ -313,6 +314,9 @@ export function mountApp(root: HTMLElement, store: Store): void {
     guide.render(game);
     hunterView.render(game);
     boardroomView.render(game);
+    // Behind a full-screen layer (a horror tier, the Boardroom, choosing a contract) the contract is out of reach.
+    const covered = game.mode !== 'mission' || !!game.assigning;
+    for (const el of shell) el.toggleAttribute('inert', covered);
     if (root.dataset.mode !== game.mode) root.dataset.mode = game.mode;
     const m = game.mission;
     if (root.dataset.scenario !== m.scenario) showScenario(m.scenario);
