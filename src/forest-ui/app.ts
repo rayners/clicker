@@ -7,6 +7,9 @@ import { forestGuideRules, forestGuideSteps } from '../forest-data/guide';
 import { h, setText } from '../engine/ui/dom';
 import { createFlow } from '../engine/ui/flow';
 import { createLogView } from '../engine/ui/log';
+import { createTabs } from '../engine/ui/tabs';
+import { createActionButton } from '../engine/ui/action';
+import { createShell } from '../engine/ui/shell';
 import { createSpriteKit } from '../engine/ui/sprites';
 import { CLASS_IDS } from '../forest-data/classes';
 import { FOREST_SPRITES } from '../forest-data/sprites';
@@ -38,17 +41,6 @@ const kit = createSpriteKit({
   paletteVars: { a: '--faint', b: '--ink-dim', c: '--ink', d: '--gilt', e: '--rubric' },
   fallback: '#e8dcc0',
 });
-
-interface Panel {
-  id: string;
-  label: string;
-  el: HTMLElement;
-  render(c: Company, game: ForestGame): void;
-  /** Tabs appear only when their panel has something to show. */
-  visible?(c: Company): boolean;
-  /** Lights the tab when something there wants attention. */
-  attention?(c: Company): boolean;
-}
 
 function stat(label: string, aria: string) {
   const value = h('dd', { class: 'stat-value', 'aria-label': aria }, '0');
@@ -101,8 +93,8 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
   const lost = stat('TURNED', 'Turned');
   keys.el.classList.add('stat-dark');
   lost.el.classList.add('stat-dark');
-  // select() is declared below; the strip only calls it on a tap.
-  const map = createMapStrip(() => select('expeditions'));
+  // The tabs are made below; the strip only reaches for them on a tap.
+  const map = createMapStrip(() => tabs.select('expeditions'));
   const standing = h(
     'section',
     { class: 'status', 'aria-label': 'Company standing' },
@@ -117,82 +109,52 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
   const rosterPanel = createRoster(store);
   const hall = createHall(store);
   const reckoning = createReckoning(store);
-  const section = (id: string, ...children: HTMLElement[]) =>
-    h('section', { class: `panel panel-${id}`, role: 'tabpanel', id: `panel-${id}`, 'aria-labelledby': `tab-${id}` }, ...children);
-  const panels: Panel[] = [
-    {
-      id: 'ledger',
-      label: 'LEDGER',
-      el: section('ledger', board.el, log.el),
-      render: (c) => {
-        board.render(c);
-        log.render(c.log, String(c.seed));
+  // On desktop the ledger is always shown; the side column shows the chosen section (expeditions by default).
+  const tabs = createTabs<ForestGame>({
+    label: 'Ledger sections',
+    home: 'ledger',
+    side: 'expeditions',
+    root,
+    panels: [
+      {
+        id: 'ledger',
+        label: 'LEDGER',
+        content: [board.el, log.el],
+        render: (g) => {
+          board.render(g.company);
+          log.render(g.company.log, String(g.company.seed));
+        },
       },
-    },
-    { id: 'expeditions', label: 'EXPEDITIONS', el: section('expeditions', expeditions.el), render: (c) => expeditions.render(c) },
-    { id: 'roster', label: 'ROSTER', el: section('roster', rosterPanel.el), render: (c) => rosterPanel.render(c) },
-    {
-      id: 'hall',
-      label: 'HALL',
-      el: section('hall', hall.el),
-      render: (c) => hall.render(c),
-      attention: (c) => availableUpgrades(c).some((u) => u.cost <= c.silver),
-    },
-    {
-      id: 'reckoning',
-      label: 'RECKONING',
-      el: section('reckoning', reckoning.el),
-      render: (_c, game) => reckoning.render(game),
-      visible: (c) => c.flags.includes('terminus'),
-      attention: () => true,
-    },
-  ];
-
-  const tabs = panels.map((p) => {
-    const b = h('button', { class: `tab tab-${p.id}`, role: 'tab', id: `tab-${p.id}`, 'aria-controls': `panel-${p.id}`, type: 'button' }, p.label);
-    b.addEventListener('click', () => select(p.id));
-    return b;
+      { id: 'expeditions', label: 'EXPEDITIONS', content: [expeditions.el], render: (g) => expeditions.render(g.company) },
+      { id: 'roster', label: 'ROSTER', content: [rosterPanel.el], render: (g) => rosterPanel.render(g.company) },
+      { id: 'hall', label: 'HALL', content: [hall.el], render: (g) => hall.render(g.company), attention: (g) => availableUpgrades(g.company).some((u) => u.cost <= g.company.silver) },
+      { id: 'reckoning', label: 'RECKONING', content: [reckoning.el], render: (g) => reckoning.render(g), visible: (g) => g.company.flags.includes('terminus'), attention: () => true },
+    ],
   });
-  const tabbar = h('nav', { class: 'tabbar', role: 'tablist', 'aria-label': 'Ledger sections' }, ...tabs);
-
-  function select(id: string) {
-    root.dataset.tab = id;
-    // On desktop the ledger is always shown; the side column shows the chosen section (expeditions by default).
-    const side = id === 'ledger' ? 'expeditions' : id;
-    panels.forEach((p, i) => {
-      p.el.classList.toggle('is-active', p.id === id);
-      p.el.classList.toggle('is-side', p.id === side);
-      tabs[i]!.classList.toggle('is-side', p.id === side);
-      tabs[i]!.setAttribute('aria-selected', String(p.id === id));
-    });
-  }
 
   const keyBit = kit.spriteCanvas('key', 'forage-sprite');
-  const forage = h('button', { class: 'forage', type: 'button', 'aria-label': 'Forage the eaves' }, keyBit, h('span', { class: 'forage-label' }, 'FORAGE THE EAVES'));
   const sound = createForestSound();
   root.addEventListener('pointerdown', () => sound.unlock(), { passive: true });
   let foraged = false;
   let lastCompany: Company | null = null;
-  const forageOnce = () => {
-    foraged = true;
-    store.dispatch({ type: 'forage' });
-    kit.advanceFrame(keyBit);
-    kit.paintSprite(keyBit, palette);
-    const tick = h('span', { class: 'forage-tick', 'aria-hidden': 'true', style: `--x:${Math.round(Math.random() * 60 - 30)}px` }, '+1');
-    forage.append(tick);
-    setTimeout(() => tick.remove(), 700);
-  };
-  forage.addEventListener('pointerdown', (e) => {
-    if (e.button === 0) forageOnce();
-  });
-  forage.addEventListener('click', (e) => {
-    if (e.detail === 0) forageOnce();
+  const forage = createActionButton({
+    className: 'forage',
+    label: 'Forage the eaves',
+    content: [keyBit, h('span', { class: 'forage-label' }, 'FORAGE THE EAVES')],
+    onPress: () => {
+      foraged = true;
+      store.dispatch({ type: 'forage' });
+      kit.advanceFrame(keyBit);
+      kit.paintSprite(keyBit, palette);
+      return '+1';
+    },
   });
 
-  root.classList.add('ledger-shell');
-  const shell = [masthead, standing, ...panels.map((p) => p.el), h('div', { class: 'forage-bay' }, guide.el, forage), tabbar];
-  root.replaceChildren(...shell, woodView.el, dragonView.el, config.dialog, palisade.dialog, guide.rulesDialog);
-  select('ledger');
+  const shell = createShell(root, {
+    className: 'ledger-shell',
+    parts: [masthead, standing, ...tabs.sections, h('div', { class: 'forage-bay' }, guide.el, forage.el), tabs.tabbar],
+    overlays: [woodView.el, dragonView.el, config.dialog, palisade.dialog, guide.rulesDialog],
+  });
   const palette = kit.readPalette(root);
   kit.paintAll(root);
 
@@ -214,7 +176,7 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
     woodView.render(game);
     palisade.render(game);
     // Behind the wood or the dragon, the charter is out of reach.
-    for (const el of shell) el.toggleAttribute('inert', game.mode !== 'charter');
+    shell.cover(game.mode !== 'charter');
     const charter = game.mode === 'charter';
     sound.setEnabled(game.profile.settings.sound);
     sound.setHum(charter ? c.act : 0);
@@ -225,26 +187,7 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
     guide.render(game);
     dragonView.render(game);
     root.dataset.mode = game.mode;
-    panels.forEach((p, i) => {
-      const lit = p.attention?.(c) ?? false;
-      if ((tabs[i]!.dataset.attention === 'active') !== lit) {
-        if (lit) tabs[i]!.dataset.attention = 'active';
-        else delete tabs[i]!.dataset.attention;
-      }
-    });
-    for (const [i, p] of panels.entries()) {
-      const shown = p.visible?.(c) ?? true;
-      tabs[i]!.hidden = !shown;
-      if (!shown) {
-        if (root.dataset.tab === p.id) select('ledger');
-        continue;
-      }
-      try {
-        p.render(c, game);
-      } catch (error) {
-        console.error(`panel ${p.id} failed to render`, error);
-      }
-    }
+    tabs.render(game);
   }
 
   store.subscribe(render);

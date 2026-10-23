@@ -7,6 +7,9 @@ import type { Store } from '../core/store';
 import { h, setText } from '../engine/ui/dom';
 import { createLogView } from './log';
 import { createFlow } from '../engine/ui/flow';
+import { createTabs } from '../engine/ui/tabs';
+import { createActionButton } from '../engine/ui/action';
+import { createShell } from '../engine/ui/shell';
 import { createMonitor } from '../engine/ui/monitor';
 import { createExtractionUi } from './scenarios/extraction';
 import { createTerraformUi } from './scenarios/terraform';
@@ -40,18 +43,6 @@ const GLITCH_INTERVAL = 1.5;
 const TRACKER_PING_INTERVAL = 2.5;
 /** Visible autocycle presses are capped so high rates don't flood the drill with ticks. */
 const MAX_AUTO_TICKS_PER_SECOND = 4;
-
-interface Panel {
-  id: string;
-  label: string;
-  /** Phone tab bars are narrow. */
-  short: string;
-  el: HTMLElement;
-  render(game: GameState): void;
-  visible(game: GameState): boolean;
-  /** Draws the eye to the tab: 'active' (something running) or 'alert' (something needs doing). */
-  attention?(game: GameState): 'active' | 'alert' | null;
-}
 
 function stat(label: string, ariaLabel: string) {
   const value = h('dd', { class: 'stat-value', 'aria-label': ariaLabel }, '0');
@@ -125,8 +116,8 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const offSick = stat('OFF SICK', 'Off sick');
   const turned = stat('TURNED', 'Turned');
   turned.el.classList.add('stat-alert');
-  // selectTab is declared below; alerts only call it on a tap, long after mounting.
-  const alerts = createAlerts((panel) => selectTab(panel));
+  // The tabs are made below; alerts only reach for them on a tap, long after mounting.
+  const alerts = createAlerts((panel) => tabs.select(panel));
   const status = h(
     'section',
     { class: 'status', 'aria-label': 'Ship status' },
@@ -140,40 +131,40 @@ export function mountApp(root: HTMLElement, store: Store): void {
   const log = createLogView();
   const drillBit = spriteCanvas('drill', 'drill-sprite');
   const drillLabel = h('span', { class: 'drill-label' });
-  const drill = h('button', { class: 'drill', type: 'button' }, drillBit, drillLabel);
-  const drillOnce = () => {
-    const power = view.ui.action.perPress(store.getState().mission);
-    store.dispatch(view.ui.action.action);
-    sound.play('click');
-    spawnTick(drill, `+${formatNumber(power)}`);
-    advanceFrame(drillBit);
-    paintSprite(drillBit, palette);
-  };
-  // pointerdown fires immediately on touch (no click delay) so rapid tapping on phones feels right.
-  drill.addEventListener('pointerdown', (e) => {
-    if (e.button === 0) drillOnce();
-  });
-  // Keyboard activation produces a click with detail 0; pointer clicks were already handled above.
-  drill.addEventListener('click', (e) => {
-    if (e.detail === 0) drillOnce();
+  const drill = createActionButton({
+    className: 'drill',
+    label: 'Execute drill cycle',
+    content: [drillBit, drillLabel],
+    onPress: () => {
+      const power = view.ui.action.perPress(store.getState().mission);
+      store.dispatch(view.ui.action.action);
+      sound.play('click');
+      advanceFrame(drillBit);
+      paintSprite(drillBit, palette);
+      return `+${formatNumber(power)}`;
+    },
   });
   // Outside the panels so it stays reachable on phones whichever tab is open.
-  const drillBay = h('div', { class: 'drill-bay' }, guide.el, drill);
+  const drillBay = h('div', { class: 'drill-bay' }, guide.el, drill.el);
 
-  const panelSection = (id: string, ...children: HTMLElement[]) =>
-    h('section', { class: `panel panel-${id}`, role: 'tabpanel', id: `panel-${id}`, 'aria-labelledby': `tab-${id}` }, ...children);
   const crew = createCrewPanel(store);
   const directives = createDirectivesPanel();
   const projects = createProjectsPanel(store);
   const sickBay = createSickBayPanel(store);
   const archive = createArchivePanel();
   const terminus = createTerminusPanel(store);
-  const panels: Panel[] = [
+  // On desktop the ops column is always visible, so the side column shows systems while ops is selected.
+  const tabs = createTabs<GameState>({
+    label: 'Panels',
+    home: 'ops',
+    side: 'systems',
+    root,
+    panels: [
     {
       id: 'ops',
       label: 'OPS',
       short: 'OPS',
-      el: panelSection('ops', monitorSlot, log.el),
+      content: [monitorSlot, log.el],
       render: (g) => {
         view.monitor.render(g.mission);
         const fresh = log.render(g.mission.log, `${g.mission.config.shipName}:${g.mission.seed}`);
@@ -182,21 +173,19 @@ export function mountApp(root: HTMLElement, store: Store): void {
         const last = fresh[fresh.length - 1];
         if (last && cueForLog(last.kind) !== 'teletype') sound.play(cueForLog(last.kind), Math.min(fresh.length, MAX_PRINTED_LINES) * PRINT_STAGGER + PRINT_SECONDS);
       },
-      visible: () => true,
     },
     {
       id: 'systems',
       label: 'SYSTEMS',
       short: 'SYS',
-      el: panelSection('systems', systemsSlot),
+      content: [systemsSlot],
       render: (g) => view.ui.systems.render(g.mission),
-      visible: () => true,
     },
     {
       id: 'upgrades',
       label: 'UPGRADES',
       short: 'UPG',
-      el: panelSection('upgrades', upgradesSlot),
+      content: [upgradesSlot],
       render: (g) => view.ui.upgrades.render(g.mission),
       visible: (g) => views[g.mission.scenario].ui.upgrades.hasAny(g.mission),
     },
@@ -254,38 +243,14 @@ export function mountApp(root: HTMLElement, store: Store): void {
       render: (g) => terminus.render(g),
       visible: (g) => g.mission.flags.includes('terminus'),
     },
-  ];
-
-  const tabs = panels.map((p) => {
-    const b = h(
-      'button',
-      { class: `tab tab-${p.id}`, role: 'tab', id: `tab-${p.id}`, 'aria-controls': `panel-${p.id}`, 'aria-label': p.label, type: 'button' },
-      h('span', { class: 'tab-full' }, p.label),
-      h('span', { class: 'tab-short' }, p.short),
-    );
-    b.addEventListener('click', () => selectTab(p.id));
-    return b;
+    ],
   });
-  const tabbar = h('nav', { class: 'tabbar', role: 'tablist', 'aria-label': 'Panels' }, ...tabs);
 
-  let current = 'ops';
-  function selectTab(id: string) {
-    current = id;
-    root.dataset.tab = id;
-    // On desktop the ops column is always visible, so the side column shows systems while "ops" is selected.
-    const side = id === 'ops' ? 'systems' : id;
-    panels.forEach((p, i) => {
-      p.el.classList.toggle('is-active', p.id === id);
-      p.el.classList.toggle('is-side', p.id === side);
-      tabs[i]!.classList.toggle('is-side', p.id === side);
-      tabs[i]!.setAttribute('aria-selected', String(p.id === id));
-    });
-  }
-
-  root.classList.add('shell');
-  const shell = [masthead, status, ...panels.map((p) => p.el), drillBay, tabbar];
-  root.replaceChildren(...shell, settings.dialog, restricted.dialog, assignment.el, creatureView.el, hunterView.el, boardroomView.el, guide.rulesDialog);
-  selectTab('ops');
+  const shell = createShell(root, {
+    className: 'shell',
+    parts: [masthead, status, ...tabs.sections, drillBay, tabs.tabbar],
+    overlays: [settings.dialog, restricted.dialog, assignment.el, creatureView.el, hunterView.el, boardroomView.el, guide.rulesDialog],
+  });
   let palette = readPalette(root);
   paintAll(root);
   let paintedAct = 0;
@@ -302,8 +267,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     monitorSlot.replaceChildren(view.monitor.el);
     systemsSlot.replaceChildren(view.ui.systems.el);
     upgradesSlot.replaceChildren(view.ui.upgrades.el);
-    setText(drillLabel, view.ui.action.label);
-    drill.setAttribute('aria-label', view.ui.action.aria);
+    drill.setLabel(view.ui.action.aria, view.ui.action.label);
     const sprites = view.ui.sprites ?? DEFAULT_SPRITES;
     setSprite(vesselBit, sprites.vessel);
     setSprite(targetBit, sprites.target);
@@ -320,7 +284,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     restricted.render(game);
     // Behind a full-screen layer (a horror tier, the Boardroom, choosing a contract) the contract is out of reach.
     const covered = game.mode !== 'mission' || !!game.assigning;
-    for (const el of shell) el.toggleAttribute('inert', covered);
+    shell.cover(covered);
     if (root.dataset.mode !== game.mode) root.dataset.mode = game.mode;
     const m = game.mission;
     if (root.dataset.scenario !== m.scenario) showScenario(m.scenario);
@@ -358,32 +322,14 @@ export function mountApp(root: HTMLElement, store: Store): void {
       sound.play('ping');
     }
     alerts.render(m);
-    panels.forEach((p, i) => {
-      const visible = p.visible(game);
-      const tab = tabs[i]!;
-      tab.hidden = !visible;
-      const attention = visible ? (p.attention?.(game) ?? null) : null;
-      if ((tab.dataset.attention ?? null) !== attention) {
-        if (attention) tab.dataset.attention = attention;
-        else delete tab.dataset.attention;
-        tab.setAttribute('aria-label', attention ? `${p.label} (${attention === 'alert' ? 'needs attention' : 'active'})` : p.label);
-      }
-      if (!visible && current === p.id) selectTab('ops');
-      if (!visible) return;
-      try {
-        p.render(game);
-      } catch (error) {
-        // One broken panel must never freeze the whole game loop.
-        console.error(`panel ${p.id} failed to render`, error);
-      }
-    });
+    tabs.render(game);
   }
 
   /** WARDEN's automation visibly presses the button on its own. */
   function autoCycle(m: GameState['mission']) {
     const cycles = view.ui.action.autoRate(m);
     const auto = cycles > 0 ? 'on' : 'off';
-    if (drill.dataset.auto !== auto) drill.dataset.auto = auto;
+    if (drill.el.dataset.auto !== auto) drill.el.dataset.auto = auto;
     const dt = lastElapsed === null || m.elapsed < lastElapsed ? 0 : m.elapsed - lastElapsed;
     lastElapsed = m.elapsed;
     if (cycles === 0) return;
@@ -392,7 +338,7 @@ export function mountApp(root: HTMLElement, store: Store): void {
     if (autoClock < interval) return;
     autoClock = Math.min(autoClock - interval, interval);
     const perPress = view.ui.action.autoYieldPerSecond(m) * interval;
-    spawnTick(drill, `+${formatNumber(perPress)}`, 'drill-tick is-auto');
+    drill.tick(`+${formatNumber(perPress)}`, 'drill-tick is-auto');
     advanceFrame(drillBit);
     paintSprite(drillBit, palette);
   }
@@ -413,10 +359,4 @@ export function mountApp(root: HTMLElement, store: Store): void {
 
   store.subscribe(render);
   render(store.getState());
-}
-
-function spawnTick(anchor: HTMLElement, text: string, cls = 'drill-tick') {
-  const tick = h('span', { class: cls, 'aria-hidden': 'true', style: `--x:${Math.round(Math.random() * 60 - 30)}px` }, text);
-  anchor.append(tick);
-  setTimeout(() => tick.remove(), 700);
 }

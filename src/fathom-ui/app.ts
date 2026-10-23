@@ -1,6 +1,9 @@
 import { formatNumber } from '../engine/format';
 import { h, setText } from '../engine/ui/dom';
 import { createFlow } from '../engine/ui/flow';
+import { createTabs, type TabPanel } from '../engine/ui/tabs';
+import { createActionButton } from '../engine/ui/action';
+import { createShell } from '../engine/ui/shell';
 import { createLogView } from '../engine/ui/log';
 import { depth } from '../fathom/depth';
 import { exposed, inWater, passPrice } from '../fathom/shallows';
@@ -26,15 +29,6 @@ export function seasonClock(seconds: number): string {
   const day = Math.floor(seconds / 600) + 1;
   const into = Math.floor(seconds % 600);
   return `DAY ${day} ${String(Math.floor(into / 25)).padStart(2, '0')}:00`;
-}
-
-interface Panel {
-  id: string;
-  label: string;
-  el: HTMLElement;
-  render(game: FathomGame): void;
-  visible?(o: Outfit): boolean;
-  attention?(o: Outfit): boolean;
 }
 
 function stat(label: string, aria: string) {
@@ -105,70 +99,48 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
   const coast = createCoast(store);
   const shop = createStorePanel(store);
   const end = createEndPanel(store);
-  const section = (id: string, label: string, child: HTMLElement) =>
-    h('section', { class: `panel panel-${id}`, role: 'tabpanel', id: `fa-panel-${id}`, 'aria-labelledby': `fa-tab-${id}`, 'aria-label': label }, child);
-  const zonePanel = (id: string, label: string, c: Component, visible?: (o: Outfit) => boolean): Panel => ({
+  const zone = (id: string, label: string, c: Component, visible?: (o: Outfit) => boolean): TabPanel<FathomGame> => ({
     id,
     label,
-    el: section(id, label, c.el),
+    content: [c.el],
     render: (g) => c.render(g.outfit),
-    visible,
+    visible: visible && ((g) => visible(g.outfit)),
   });
-  const panels: Panel[] = [
-    { id: 'log', label: 'LOG', el: section('log', 'Log', log.el), render: (g) => void log.render(g.outfit.log, `${g.outfit.terms.season}:${g.outfit.seed}`) },
-    zonePanel('beach', 'BEACH', beach),
-    zonePanel('shelf', 'SHELF', shelf, isShelfOpen),
-    zonePanel('station', 'STATION', station, isOpenWaterOpen),
-    zonePanel('trench', 'TRENCH', trench, isTrenchOpen),
-    zonePanel('coast', 'COAST', coast, isBreachOpen),
-    { id: 'store', label: 'STORE', el: section('store', 'Store', shop.el), render: (g) => shop.render(g.outfit), attention: (o) => shop.hasAffordable(o) },
-    {
-      id: 'end',
-      label: "SEASON'S END",
-      el: section('end', "Season's end", end.el),
-      render: (g) => end.render(g),
-      visible: (o) => o.flags.includes('terminus'),
-      attention: () => true,
+  // On desktop the log is always shown; the side column shows the chosen zone (the beach by default).
+  const tabs = createTabs<FathomGame>({
+    label: 'Zones',
+    idPrefix: 'fa-',
+    home: 'log',
+    side: 'beach',
+    root,
+    panels: [
+      { id: 'log', label: 'LOG', content: [log.el], render: (g) => void log.render(g.outfit.log, `${g.outfit.terms.season}:${g.outfit.seed}`) },
+      zone('beach', 'BEACH', beach),
+      zone('shelf', 'SHELF', shelf, isShelfOpen),
+      zone('station', 'STATION', station, isOpenWaterOpen),
+      zone('trench', 'TRENCH', trench, isTrenchOpen),
+      zone('coast', 'COAST', coast, isBreachOpen),
+      { id: 'store', label: 'STORE', content: [shop.el], render: (g) => shop.render(g.outfit), attention: (g) => shop.hasAffordable(g.outfit) },
+      { id: 'end', label: "SEASON'S END", content: [end.el], render: (g) => end.render(g), visible: (g) => g.outfit.flags.includes('terminus'), attention: () => true },
+    ],
+  });
+
+  const pass = createActionButton({
+    className: 'pass',
+    label: 'Sell a beach pass',
+    onPress: () => {
+      const price = passPrice(store.getState().outfit);
+      soldByHand = true;
+      store.dispatch({ type: 'sellPass' });
+      return `+$${formatNumber(price)}`;
     },
-  ];
-  const tabs = panels.map((p) => {
-    const b = h('button', { class: 'tab', role: 'tab', id: `fa-tab-${p.id}`, 'aria-controls': `fa-panel-${p.id}`, type: 'button' }, p.label);
-    b.addEventListener('click', () => select(p.id));
-    return b;
-  });
-  const tabbar = h('nav', { class: 'tabbar', role: 'tablist', 'aria-label': 'Zones' }, ...tabs);
-
-  function select(id: string) {
-    root.dataset.tab = id;
-    // On desktop the log is always shown; the side column shows the chosen zone (the beach by default).
-    const side = id === 'log' ? 'beach' : id;
-    panels.forEach((p, i) => {
-      p.el.classList.toggle('is-active', p.id === id);
-      p.el.classList.toggle('is-side', p.id === side);
-      tabs[i]!.setAttribute('aria-selected', String(p.id === id));
-    });
-  }
-
-  const pass = h('button', { class: 'pass', type: 'button', 'aria-label': 'Sell a beach pass' }, 'SELL A BEACH PASS');
-  const sell = () => {
-    const price = passPrice(store.getState().outfit);
-    soldByHand = true;
-    store.dispatch({ type: 'sellPass' });
-    const tick = h('span', { class: 'pass-tick', 'aria-hidden': 'true', style: `--x:${Math.round(Math.random() * 80 - 40)}px` }, `+$${formatNumber(price)}`);
-    pass.append(tick);
-    setTimeout(() => tick.remove(), 700);
-  };
-  pass.addEventListener('pointerdown', (e) => {
-    if (e.button === 0) sell();
-  });
-  pass.addEventListener('click', (e) => {
-    if (e.detail === 0) sell();
   });
 
-  root.classList.add('sonar-shell');
-  const shell = [banner, status, ...panels.map((p) => p.el), h('div', { class: 'pass-bay' }, guide.el, pass), tabbar];
-  root.replaceChildren(...shell, deepView.el, config.dialog, seam.dialog, guide.rulesDialog);
-  select('log');
+  const shell = createShell(root, {
+    className: 'sonar-shell',
+    parts: [banner, status, ...tabs.sections, h('div', { class: 'pass-bay' }, guide.el, pass.el), tabs.tabbar],
+    overlays: [deepView.el, config.dialog, seam.dialog, guide.rulesDialog],
+  });
 
   function render(game: FathomGame) {
     const o = game.outfit;
@@ -184,7 +156,7 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
     deepView.render(game);
     seam.render(game);
     // Behind the Source, the season is out of reach.
-    for (const el of shell) el.toggleAttribute('inert', game.mode !== 'season');
+    shell.cover(game.mode !== 'season');
     sound.setEnabled(game.profile.settings.sound);
     sound.setHum(game.mode === 'season' ? o.act : 0);
     if (lastOutfit && game.mode === 'season') for (const cue of soundCues(lastOutfit, o, soldByHand)) sound.play(cue);
@@ -196,17 +168,7 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
       sound.play('sonar');
     }
     guide.render(game);
-    panels.forEach((p, i) => {
-      const shown = p.visible?.(o) ?? true;
-      tabs[i]!.hidden = !shown;
-      if (shown && (p.attention?.(o) ?? false)) tabs[i]!.dataset.attention = 'active';
-      else delete tabs[i]!.dataset.attention;
-      if (!shown) {
-        if (root.dataset.tab === p.id) select('log');
-        return;
-      }
-      p.render(game);
-    });
+    tabs.render(game);
   }
 
   store.subscribe(render);

@@ -84,6 +84,9 @@ published build only, persistent storage, and the site's service worker.
 
 | Module | What it does |
 |---|---|
+| `ui/shell` | `createShell`: mounts a game's parts and overlays into its root, and covers the game (inert) while a full-screen layer is open. |
+| `ui/tabs` | `createTabs`: the tab bar and a panel per tab; tabs appear as they apply, fall back home when they go, are marked (and named aloud) when they want attention, and can be renamed; a desktop side column; one broken panel never stops the rest. |
+| `ui/action` | `createActionButton`: the big button that acts on the press itself (rapid taps on a phone all count), works from the keyboard, and floats what each press earned. |
 | `ui/dom` | `h()` builds elements; `setText` and `setAttr` change them only when needed; `aboutLink` links to the About page. |
 | `ui/flow` | `createFlow`: the three-stage production readout that highlights the limiting stage and calls out every change in rate. |
 | `ui/monitor` | `createMonitor`: animated rows showing automation at work. |

@@ -1,6 +1,9 @@
 import { formatDuration, formatNumber } from '../engine/format';
 import { h, setText } from '../engine/ui/dom';
 import { createLogView } from '../engine/ui/log';
+import { createTabs } from '../engine/ui/tabs';
+import { createActionButton } from '../engine/ui/action';
+import { createShell } from '../engine/ui/shell';
 import type { LateGame } from '../late-fees/game';
 import type { EntryKind } from '../late-fees/state';
 import type { LateStore } from '../late-fees/store';
@@ -26,15 +29,6 @@ function stat(label: string, aria: string) {
   const name = h('dt', { class: 'stat-label' }, label);
   const value = h('dd', { class: 'stat-value', 'aria-label': aria }, '0');
   return { name, value, el: h('div', { class: 'stat' }, name, value) };
-}
-
-interface Panel {
-  id: string;
-  el: HTMLElement;
-  tab: HTMLButtonElement;
-  render(game: LateGame): void;
-  visible?(game: LateGame): boolean;
-  attention?(game: LateGame): boolean;
 }
 
 /** The guide's progress is a per-device convenience, kept apart from the save. */
@@ -77,68 +71,40 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
 
   const log = createLogView<EntryKind>({ label: 'Tape log', stamp: tapeCounter });
   const credits = createCredits(store);
-  const section = (id: string, label: string, ...children: HTMLElement[]) =>
-    h('section', { class: `panel panel-${id}`, role: 'tabpanel', id: `lf-panel-${id}`, 'aria-labelledby': `lf-tab-${id}`, 'aria-label': label }, ...children);
-  const tab = (id: string, label: string) => {
-    const b = h('button', { class: 'tab', role: 'tab', id: `lf-tab-${id}`, 'aria-controls': `lf-panel-${id}`, type: 'button' }, label);
-    b.addEventListener('click', () => select(id));
-    return b;
-  };
-  const panels: Panel[] = [
-    {
-      id: 'camp',
-      el: section('camp', 'Main', mainSlot, log.el),
-      tab: tab('camp', 'MAIN'),
-      render: (g) => {
-        view!.main.render(g.run);
-        log.render(g.run.log, `${g.run.config.title}:${g.run.seed}`);
+  // On desktop the main panel is always shown; the side column shows the chosen section (staff by default).
+  const tabs = createTabs<LateGame>({
+    label: 'Sections',
+    idPrefix: 'lf-',
+    home: 'camp',
+    side: 'staff',
+    root,
+    panels: [
+      {
+        id: 'camp',
+        label: 'MAIN',
+        content: [mainSlot, log.el],
+        render: (g) => {
+          view!.main.render(g.run);
+          log.render(g.run.log, `${g.run.config.title}:${g.run.seed}`);
+        },
       },
-    },
-    { id: 'staff', el: section('staff', 'Staff', staffSlot), tab: tab('staff', 'STAFF'), render: (g) => view!.staff.render(g.run) },
-    {
-      id: 'store',
-      el: section('store', 'Store', storeSlot),
-      tab: tab('store', 'STORE'),
-      render: (g) => view!.store.render(g.run),
-      attention: (g) => view!.store.hasAffordable(g.run),
-    },
-    {
-      id: 'credits',
-      el: section('credits', 'Credits', credits.el),
-      tab: tab('credits', 'CREDITS'),
-      render: (g) => credits.render(g),
-      visible: (g) => g.run.flags.includes('terminus'),
-      attention: () => true,
-    },
-  ];
-  const tabbar = h('nav', { class: 'tabbar', role: 'tablist', 'aria-label': 'Sections' }, ...panels.map((p) => p.tab));
-  function select(id: string) {
-    root.dataset.tab = id;
-    // On desktop the main panel is always shown; the side column shows the chosen section (staff by default).
-    const side = id === 'camp' ? 'staff' : id;
-    for (const p of panels) {
-      p.el.classList.toggle('is-active', p.id === id);
-      p.el.classList.toggle('is-side', p.id === side);
-      p.tab.setAttribute('aria-selected', String(p.id === id));
-    }
-  }
-
-  const actionLabel = h('span', { class: 'whistle-label' });
-  const action = h('button', { class: 'whistle', type: 'button' }, actionLabel);
-  const press = () => {
-    if (!view) return;
-    const power = view.action.perPress(store.getState().run);
-    pressed = true;
-    store.dispatch(view.action.action);
-    const tick = h('span', { class: 'whistle-tick', 'aria-hidden': 'true', style: `--x:${Math.round(Math.random() * 80 - 40)}px` }, `+${formatNumber(power)}`);
-    action.append(tick);
-    setTimeout(() => tick.remove(), 700);
-  };
-  action.addEventListener('pointerdown', (e) => {
-    if (e.button === 0) press();
+      { id: 'staff', label: 'STAFF', content: [staffSlot], render: (g) => view!.staff.render(g.run) },
+      { id: 'store', label: 'STORE', content: [storeSlot], render: (g) => view!.store.render(g.run), attention: (g) => view!.store.hasAffordable(g.run) },
+      { id: 'credits', label: 'CREDITS', content: [credits.el], render: (g) => credits.render(g), visible: (g) => g.run.flags.includes('terminus'), attention: () => true },
+    ],
   });
-  action.addEventListener('click', (e) => {
-    if (e.detail === 0) press();
+
+  const action = createActionButton({
+    className: 'whistle',
+    label: 'Blow the whistle',
+    content: [h('span', { class: 'whistle-label' })],
+    onPress: () => {
+      if (!view) return;
+      const power = view.action.perPress(store.getState().run);
+      pressed = true;
+      store.dispatch(view.action.action);
+      return `+${formatNumber(power)}`;
+    },
   });
 
   /** Swap the running venue's elements into the slots. */
@@ -148,24 +114,17 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
     mainSlot.replaceChildren(next.main.el);
     staffSlot.replaceChildren(next.staff.el);
     storeSlot.replaceChildren(next.store.el);
-    setText(actionLabel, next.action.label);
-    action.setAttribute('aria-label', next.action.aria);
+    action.setLabel(next.action.aria, next.action.label);
     setText(clock.name, next.clock.label);
     clock.value.setAttribute('aria-label', next.clock.aria);
-    setText(panels[1]!.tab, next.staffTab);
+    tabs.setLabel('staff', next.staffTab);
   }
 
-  root.classList.add('vhs-shell');
-  const shell = [banner, status, ...panels.map((p) => p.el), h('div', { class: 'whistle-bay' }, guide.el, action), tabbar];
-  root.replaceChildren(
-    ...shell,
-    h('div', { class: 'vhs-noise', 'aria-hidden': 'true' }),
-    cutView.el,
-    shelf.el,
-    setup.dialog,
-    guide.rulesDialog,
-  );
-  select('camp');
+  const shell = createShell(root, {
+    className: 'vhs-shell',
+    parts: [banner, status, ...tabs.sections, h('div', { class: 'whistle-bay' }, guide.el, action.el), tabs.tabbar],
+    overlays: [h('div', { class: 'vhs-noise', 'aria-hidden': 'true' }), cutView.el, shelf.el, setup.dialog, guide.rulesDialog],
+  });
 
   function render(game: LateGame) {
     const r = game.run;
@@ -197,19 +156,9 @@ export function mountLate(root: HTMLElement, store: LateStore): void {
     cutView.render(game);
     guide.render(game);
     // Behind the shelf or the Killer's Cut, the film is out of reach.
-    for (const el of shell) el.toggleAttribute('inert', game.mode !== 'films' || game.shelf);
+    shell.cover(game.mode !== 'films' || game.shelf);
     root.dataset.mode = game.mode;
-    for (const p of panels) {
-      const shown = p.visible?.(game) ?? true;
-      p.tab.hidden = !shown;
-      if (shown && (p.attention?.(game) ?? false)) p.tab.dataset.attention = 'active';
-      else delete p.tab.dataset.attention;
-      if (!shown) {
-        if (root.dataset.tab === p.id) select('camp');
-        continue;
-      }
-      p.render(game);
-    }
+    tabs.render(game);
   }
 
   store.subscribe(render);
