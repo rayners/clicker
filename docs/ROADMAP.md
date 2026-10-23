@@ -178,18 +178,18 @@ Two subagent passes at the user's request: an adversarial QA run and a design re
 
 ### Design
 - (Done) Sideways (844×390), all four games: a guide tip makes the tab bar row about 190 px tall.
-- Elderdark upright: panels get about 50 px; the masthead, map, stats and tip take the rest.
-- DEEP CONTRACT upright: the guide tip takes about 110 px on every tab, even ones it is not about.
+- (Done, with an e2e check: at least 200 px on a 390×664 phone) Elderdark upright: panels get about 50 px; the masthead, map, stats and tip take the rest.
+- (Done: one line until tapped, in every game) DEEP CONTRACT upright: the guide tip takes about 110 px on every tab, even ones it is not about.
 - (Done: road words on screen and in its own guide steps) Overland, the first contract: space words on a road haul (thrusters, KM/S, thrust, the HAUL guide steps).
 - (Done) Picker: DEEP CONTRACT's door describes extraction, but new players start on the overland haul.
 - (Done, with an e2e check) Elderdark config on a phone: locked-feature buttons overflow and their unlock conditions are clipped.
 - Terraform and security status block overflows on phones; monitor strips show through.
 - Boardroom: the minutes are buried under the divisions; value has no net rate; charters give no expected return; cards cannot be dropped into.
 - Outbreak Act IV: the SICK BAY keeps its Act II order; the sick-bay guide step stays until Wellness is bought.
-- DEEP CONTRACT config names the locked horror tiers on a first contract (an early horror leak).
+- (Done: RESTRICTED · CLEARANCE REQUIRED until the first contract ends) DEEP CONTRACT config names the locked horror tiers on a first contract (an early horror leak).
 - Config dialogs: inconsistent insets and close glyphs; LATE FEES SETUP's close button says EJECT.
 - LATE FEES camp: "PREP" means three things; the shelf's stock stamps collide with titles on phones.
-- The play-as-the-horror entry points live in config dialogs next to hard reset (LATE FEES's shelf is the exception).
+- (Done: a door of their own in each masthead, RESTRICTED FILES / Beyond the palisade / The seam) The play-as-the-horror entry points live in config dialogs next to hard reset (LATE FEES's shelf is the exception).
 - Elderdark: the Keep still says FORAGE THE EAVES; old-style numerals make readouts hard to read; "~" reads as a minus.
 - Low: desktop tabs wrap; boot lines wrap on phones; "12 MORE LOST" on a fresh security contract; DOWN THERE depth 0 vs 4 m; the picker sideways shows one game; About uses old-style numerals and a small GitHub link.
 

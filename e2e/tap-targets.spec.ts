@@ -40,3 +40,12 @@ test('Elderdark: every button in the configuration fits on a phone, so a closed 
   width);
   expect(over).toEqual([]);
 });
+
+test('Elderdark: a phone held upright leaves the open tab room to read (at least 200px)', async ({ page }, info) => {
+  test.skip(info.project.name !== 'iphone', 'phone layout only');
+  await page.setViewportSize({ width: 390, height: 664 });
+  await page.goto('/forest/');
+  await page.getByRole('tab', { name: /roster/i }).click();
+  const height = await page.getByRole('tabpanel', { name: /roster/i }).evaluate((el) => el.getBoundingClientRect().height);
+  expect(height).toBeGreaterThanOrEqual(200);
+});

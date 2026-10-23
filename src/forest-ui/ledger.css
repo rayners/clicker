@@ -1714,3 +1714,61 @@ button:focus-visible {
 .guide-actions[hidden] {
   display: none;
 }
+
+/* ---------- a short phone held upright: the ledger's chrome steps back so the open tab has room ---------- */
+
+@media (orientation: portrait) and (max-height: 760px) {
+  .masthead {
+    padding-top: calc(env(safe-area-inset-top) + 4px);
+    padding-bottom: 2px;
+  }
+
+  .brand-name {
+    font-size: 1.25em;
+  }
+
+  /* The treeline and the place name are decoration; the day and the buttons stay. */
+  .mast-trees,
+  .mast-place {
+    display: none;
+  }
+
+  .mast-line {
+    justify-content: flex-end;
+  }
+
+  .status {
+    max-height: 30dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  /* The map as one line: where, and how far charted. */
+  .map-hint,
+  .map-bar {
+    display: none;
+  }
+
+  .map-head {
+    display: flex;
+    min-width: 0;
+  }
+
+  .map-count {
+    flex: none;
+  }
+
+  .map-where {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .forage {
+    min-height: 48px;
+  }
+}

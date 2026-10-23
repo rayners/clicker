@@ -250,3 +250,7 @@ Every tier shows the shared hunt guide (`src/shared/hunt-guide.ts`): push, hunge
 ## Legend as a key
 
 A game's second tier also opens on Legend from its first: the hunter after 3 Legend as the creature (or 5 contracts), the dragon after 3 Legend as the wood (or 4 charters). A horror that does well earns the next one.
+
+## Where the tiers are entered
+
+Each game's tiers sit behind a door of their own in the masthead (`src/shared/ui/doors.ts`), not in the settings: RESTRICTED FILES in DEEP CONTRACT (with the Boardroom; every file reads RESTRICTED · CLEARANCE REQUIRED until the first contract is done), Beyond the palisade in Elderdark, The seam in DOWN THERE. LATE FEES keeps its shelf.
