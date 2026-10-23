@@ -10,11 +10,13 @@ const BASE = process.argv[2] ?? 'http://localhost:5173';
 const OUT = 'docs/screenshots';
 const PHONE = { ...devices['iPhone 13'], deviceScaleFactor: 2 };
 const DESKTOP = { viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 };
+/** GitHub's social preview card. */
+const CARD = { viewport: { width: 1280, height: 640 }, deviceScaleFactor: 1 };
 
 interface Shot {
   name: string;
   path: string;
-  device: typeof PHONE | typeof DESKTOP;
+  device: typeof PHONE | typeof DESKTOP | typeof CARD;
   /** Clicks after load: skip a boot screen, open a tape. */
   then?: (page: Page) => Promise<void>;
 }
@@ -37,6 +39,7 @@ const SHOTS: Shot[] = [
     device: PHONE,
     then: (page) => page.getByRole('button', { name: 'Rent FRIDAY THE 12TH', exact: true }).click(),
   },
+  { name: 'social-preview', path: '/contract/?debug=act4', device: CARD, then: async (page) => (await skipBoot(page), page.waitForTimeout(6000)) },
   { name: 'down-there', path: '/down-there/?debug=veteran', device: PHONE },
 ];
 
