@@ -3,53 +3,22 @@ import '@fontsource/michroma';
 import './fathom-ui/sonar.css';
 import { catchUp } from './fathom/game';
 import { applyFathomScenario } from './fathom/debug';
-import { fathomSaves } from './fathom/save';
+import { FATHOM_SAVE_KEY, fathomSaves } from './fathom/save';
 import { createFathomStore } from './fathom/store';
 import { seasonEvents, seasonProperties } from './fathom/telemetry';
 import { mountFathom } from './fathom-ui/app';
-import { startAnalytics } from './engine/posthog';
-import { createOptOut, telemetryAllowed } from './engine/telemetry';
+import { runGame } from './engine/run';
 
-const TICK_MS = 100;
-const AUTOSAVE_MS = 10_000;
-
-const storage = window.localStorage;
-const seed = (Math.random() * 2 ** 31) | 0;
-const loaded = fathomSaves.loadGame(storage, Date.now(), seed);
 // Debug jumps (dev builds only): ?debug=veteran opens what a new outfit cannot reach yet.
-const debug = import.meta.env.DEV ? new URLSearchParams(location.search).get('debug') : null;
-const caught = catchUp(loaded.game, Date.now());
-const store = createFathomStore(debug ? applyFathomScenario(caught, debug) : caught);
-
-mountFathom(document.getElementById('app')!, store);
-
-const optOut = createOptOut(storage);
-startAnalytics({
-  store,
-  diff: seasonEvents,
-  context: seasonProperties,
-  optOut,
-  allowed: telemetryAllowed({ prod: import.meta.env.PROD, hostname: location.hostname, search: location.search, optedOut: !optOut.sharing() }),
-});
-
-// Wall-clock dt so time with the phone asleep still counts.
-let last = Date.now();
-setInterval(() => {
-  const now = Date.now();
-  store.dispatch({ type: 'tick', dt: (now - last) / 1000 });
-  last = now;
-}, TICK_MS);
-
-const save = () => fathomSaves.saveGame(storage, store.getState(), Date.now());
-setInterval(save, AUTOSAVE_MS);
-// iOS Safari may kill a backgrounded tab without firing beforeunload; these two are reliable.
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') save();
-});
-window.addEventListener('pagehide', save);
-void navigator.storage?.persist?.();
-
-// One service worker at the site root serves every page; register it from here too. Only built pages have one.
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  navigator.serviceWorker.register(new URL('../sw.js', location.href), { scope: new URL('../', location.href).pathname }).catch(() => undefined);
-}
+runGame(
+  {
+    saveKey: FATHOM_SAVE_KEY,
+    saves: fathomSaves,
+    catchUp,
+    createStore: createFathomStore,
+    mount: mountFathom,
+    telemetry: { diff: seasonEvents, context: seasonProperties },
+    debug: applyFathomScenario,
+  },
+  { dev: import.meta.env.DEV, prod: import.meta.env.PROD },
+);
