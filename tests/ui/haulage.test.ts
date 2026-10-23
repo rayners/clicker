@@ -122,3 +122,16 @@ describe('a haulage contract on screen', () => {
     expect(document.getElementById('panel-crew')!.textContent).toMatch(/WATCHES TIRE CREW X1\.35/);
   });
 });
+
+describe('what one more engine or car adds, on the haulage panel', () => {
+  it('shows the income one more would add, and says so when weight would cost more than freight earns', async () => {
+    const user = setup({ ...powered, fuel: 1e6, credits: 1e6 });
+    await user.click(screen.getByRole('tab', { name: /systems/i }));
+    const engine = screen.getAllByLabelText(/ income$/)[0]!;
+    expect(engine.textContent).toMatch(/^\+[\d.]+\w* CR\/S$|^\+0 CR\/S · /);
+    document.body.innerHTML = '';
+    const user2 = setup({ engines: blank().engines, cars: { ...blank().cars, hopper: 400 }, fuel: 1e6 });
+    await user2.click(screen.getByRole('tab', { name: /systems/i }));
+    expect(screen.getAllByText('+0 CR/S · TOO HEAVY FOR THE ENGINES').length).toBeGreaterThan(0);
+  });
+});

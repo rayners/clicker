@@ -27,6 +27,8 @@ import {
   toggleAutopilot,
   trainMass,
   trainValue,
+  incomeGain,
+  incomeRate as haulIncome,
 } from '../../src/mission/haulage/economy';
 import { SPACE_HAUL } from '../../src/mission/haulage/profiles';
 
@@ -242,5 +244,19 @@ describe('long watches', () => {
     for (const s of Object.values(SCENARIOS)) {
       if (s.id !== 'haulage' && s.id !== 'overland') expect(s.watchStrain ?? 1).toBeLessThan(SCENARIOS.haulage.watchStrain!);
     }
+  });
+});
+
+describe('what one more engine or car adds to haulage income', () => {
+  it('is the difference it would make to income, never negative', () => {
+    const m = fresh({ fuel: 1e6 });
+    const id = ENGINES[0]!.id;
+    const after = { ...m, engines: { ...m.engines, [id]: (m.engines[id] ?? 0) + 1 } };
+    expect(incomeGain(m, { engine: id })).toBeCloseTo(Math.max(0, haulIncome(after) - haulIncome(m)));
+  });
+
+  it('says a car adds nothing when its weight costs more speed than its freight is worth', () => {
+    const heavy = fresh({ fuel: 1e6, cars: { ...fresh().cars, [hopper.id]: 400 } });
+    expect(incomeGain(heavy, { car: hopper.id })).toBe(0);
   });
 });

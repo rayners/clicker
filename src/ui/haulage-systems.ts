@@ -1,6 +1,6 @@
 import { formatNumber } from '../shared/format';
 import type { Store } from '../core/store';
-import { carCost, carValue, engineCost, engineThrust, isCarRevealed, isEngineRevealed, thrust, trainMass, trainValue } from '../mission/haulage/economy';
+import { carCost, carValue, engineCost, engineThrust, incomeGain, isCarRevealed, isEngineRevealed, thrust, trainMass, trainValue } from '../mission/haulage/economy';
 import type { HaulageMission } from '../mission/state';
 import { h, setAttr, setText } from '../shared/ui/dom';
 import type { HaulProfile } from '../mission/haulage/profiles';
@@ -10,12 +10,14 @@ interface Row {
   el: HTMLLIElement;
   owned: HTMLElement;
   rate: HTMLElement;
+  gain: HTMLElement;
   button: HTMLButtonElement;
 }
 
 function row(name: string, description: string, action: () => void): Row {
   const owned = h('span', { class: 'sys-owned', 'aria-label': `${name} owned` }, '0');
   const rate = h('span', { class: 'sys-rate' });
+  const gain = h('span', { class: 'sys-gain', 'aria-label': `${name} income` });
   const button = h('button', { class: 'buy', type: 'button' });
   button.addEventListener('click', action);
   const el = h(
@@ -23,9 +25,15 @@ function row(name: string, description: string, action: () => void): Row {
     { class: 'sys-row' },
     h('div', { class: 'sys-head' }, h('span', { class: 'sys-name' }, name), owned),
     h('p', { class: 'sys-desc' }, description),
-    h('div', { class: 'sys-foot' }, rate, button),
+    h('div', { class: 'sys-foot' }, h('span', { class: 'sys-rates' }, rate, gain), button),
   );
-  return { el, owned, rate, button };
+  return { el, owned, rate, gain, button };
+}
+
+/** What one more adds to income, which is what the player is really buying; and why, when it adds nothing. */
+function showGain(r: Row, gain: number, why: string) {
+  setText(r.gain, gain > 0 ? `+${formatNumber(gain)} CR/S` : `+0 CR/S · ${why}`);
+  r.gain.dataset.wasted = String(gain <= 0);
 }
 
 function price(r: Row, verb: string, name: string, cost: number, credits: number) {
@@ -61,6 +69,7 @@ export function createHaulageSystemsPanel(store: Store, profile: HaulProfile, wo
       const count = m.engines[e.def.id] ?? 0;
       setText(e.owned, String(count));
       setText(e.rate, `+${formatNumber(engineThrust(m, e.def))} THRUST EA`);
+      showGain(e, incomeGain(m, { engine: e.def.id }), m.fuel <= 0 ? 'NO FUEL ABOARD' : 'NOTHING TO HAUL');
       price(e, words.fit, e.def.name, engineCost(e.def, count), m.credits);
     }
     for (const c of cars) {
@@ -70,6 +79,7 @@ export function createHaulageSystemsPanel(store: Store, profile: HaulProfile, wo
       const count = m.cars[c.def.id] ?? 0;
       setText(c.owned, String(count));
       setText(c.rate, `+${formatNumber(carValue(m, c.def))} CR/KM · +${formatNumber(c.def.mass)} T EA`);
+      showGain(c, incomeGain(m, { car: c.def.id }), 'TOO HEAVY FOR THE ENGINES');
       price(c, words.couple, c.def.name, carCost(c.def, count), m.credits);
     }
   }

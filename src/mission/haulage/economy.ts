@@ -345,6 +345,15 @@ function travel<M extends MissionState>(m: M, t: Train, distance: number, burn: 
 }
 
 /** A burst on the manoeuvring thrusters: a little distance, no fuel. Nothing to push against at a dock. */
+/** How much income one more engine or car would add: nothing when fuel runs out or the weight costs more than the freight. */
+export function incomeGain(m: MissionState, purchase: { engine: string } | { car: string }): number {
+  const after =
+    'engine' in purchase
+      ? { ...m, engines: { ...m.engines, [purchase.engine]: (m.engines[purchase.engine] ?? 0) + 1 } }
+      : { ...m, cars: { ...m.cars, [purchase.car]: (m.cars[purchase.car] ?? 0) + 1 } };
+  return Math.max(0, incomeRate(after) - incomeRate(m));
+}
+
 export function fireThrusters<M extends MissionState>(m: M): M {
   if (isDocked(m)) return m;
   const t = train(m);
