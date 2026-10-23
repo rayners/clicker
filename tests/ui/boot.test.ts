@@ -26,6 +26,17 @@ describe('the boot sequence on a first load', () => {
     expect(document.body.contains(boot.el)).toBe(false);
   });
 
+  it('waits for the whole tap before getting out of the way, so the tap does not land on what is underneath', () => {
+    const onDone = vi.fn();
+    const boot = createBootScreen({ onDone });
+    document.body.append(boot.el);
+    boot.el.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+    expect(document.body.contains(boot.el)).toBe(true);
+    boot.el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(onDone).toHaveBeenCalledTimes(1);
+    expect(document.body.contains(boot.el)).toBe(false);
+  });
+
   it('finishes on its own once every line has printed', () => {
     vi.useFakeTimers();
     const onDone = vi.fn();

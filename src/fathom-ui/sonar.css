@@ -790,10 +790,10 @@ button:disabled {
   border-color: var(--ping);
 }
 
-/* Small on purpose: the tip should not crowd the screen. */
+/* Quiet but still a full tap target: the tip should not crowd the screen. */
 .guide-skip {
   grid-area: skip;
-  min-height: 32px;
+  min-height: 44px;
   padding: 0 8px;
   border: 0;
   color: var(--dim);

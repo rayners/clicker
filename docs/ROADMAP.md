@@ -165,15 +165,15 @@ Two subagent passes at the user's request: an adversarial QA run and a design re
 - (Done) DEEP CONTRACT ran time backwards when the device clock was set back (negative `dt`).
 - (Done) Offline catch-up froze the page for 20–40 s in the horror tiers and the Boardroom (1 s steps, `multipliers()` recomputed per item): now 5 s steps and memoised multipliers, about 2 s.
 - (Done) The Boardroom could be stranded (funding a division below a charter's cost): the treasury now advances a charter.
-- LATE FEES: flipping another killer's side B silently destroys a paused Killer's Cut, with no Legend banked (`startCut`, `shelf.ts`).
-- Save validation checks only the top level: an import with a missing nested field bricks the game, and the import reports "nothing changed" after replacing state (all four games).
-- Every horror tier dead-ends at hunger 0 (nothing refills it; the rules page says something will).
-- The Boardroom's horror draw collapses to one horror for a whole term (the anti-streak rule reads the player's own history).
-- DEEP CONTRACT: REQUEST REASSIGNMENT overrides the start and renewal screens; CANCEL then runs a placeholder contract.
+- (Done) LATE FEES: flipping another killer's side B silently destroys a paused Killer's Cut, with no Legend banked (`startCut`, `shelf.ts`).
+- (Done: each game checks a loaded save against a fresh one) Save validation checks only the top level: an import with a missing nested field bricks the game, and the import reports "nothing changed" after replacing state (all four games).
+- (Done: resting restores hunger) Every horror tier dead-ends at hunger 0 (nothing refills it; the rules page says something will).
+- (Done) The Boardroom's horror draw collapses to one horror for a whole term (the anti-streak rule reads the player's own history).
+- (Done) DEEP CONTRACT: REQUEST REASSIGNMENT overrides the start and renewal screens; CANCEL then runs a placeholder contract.
 - Overlays do not make the covered contract inert: its controls stay focusable and usable behind the Boardroom and the assignment screen.
-- A double tap passes every two-step confirm, including HARD RESET (no minimum delay between taps).
-- Tap targets under 44 px: DEEP CONTRACT's CFG, Elderdark's config, every "Skip guide", Elderdark's party steppers, the Killer's Cut buttons.
-- DEEP CONTRACT first load on touch: the tap that skips the boot also taps the assignment button beneath it.
+- (Done: a 400 ms gap) A double tap passes every two-step confirm, including HARD RESET (no minimum delay between taps).
+- (Done for the opening screens, with an e2e check; party steppers and the Killer's Cut buttons still to check) Tap targets under 44 px: DEEP CONTRACT's CFG, Elderdark's config, every "Skip guide", Elderdark's party steppers, the Killer's Cut buttons.
+- (Done) DEEP CONTRACT first load on touch: the tap that skips the boot also taps the assignment button beneath it.
 - Suspected: the haulage "fuel at stations" guide step loses its target between stations; IPv6 loopback is not treated as local by `telemetryAllowed`; blocked storage throws at startup.
 
 ### Design

@@ -35,10 +35,8 @@ export function createBootScreen(options: { onDone(): void; reducedMotion?: bool
     options.onDone();
   };
   const timer = setTimeout(finish, (BOOT_LINES.length * LINE_SECONDS + HOLD_SECONDS) * 1000);
-  skip.addEventListener('click', finish);
-  el.addEventListener('pointerdown', (e) => {
-    if (e.target !== skip) finish();
-  });
+  // On the click, not the pointerdown: removing the overlay mid-tap would let the tap land on whatever is beneath.
+  el.addEventListener('click', finish);
   document.addEventListener('keydown', finish);
   return { el };
 }

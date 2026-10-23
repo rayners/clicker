@@ -1164,7 +1164,7 @@ button:focus-visible {
 
 .cfg-open {
   min-width: 44px;
-  min-height: 28px;
+  min-height: 44px;
   border: 1px solid var(--phosphor-dim);
   background: transparent;
   font-family: var(--font-term);
@@ -2481,10 +2481,10 @@ button:focus-visible {
   border-color: var(--phosphor);
 }
 
-/* Small on purpose: the tip should not crowd the screen. Still a comfortable tap with its padding. */
+/* Quiet but still a full tap target: the tip should not crowd the screen. */
 .guide-skip {
   grid-area: skip;
-  min-height: 32px;
+  min-height: 44px;
   padding: 0 8px;
   border: 0;
   font-size: 0.85em;

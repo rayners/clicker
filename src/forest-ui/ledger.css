@@ -897,8 +897,8 @@ button:focus-visible {
 }
 
 .cfg-open {
-  min-width: 36px;
-  min-height: 36px;
+  min-width: 44px;
+  min-height: 44px;
   margin: -6px -8px -6px 0;
   border: 0;
   background: transparent;
@@ -1455,7 +1455,7 @@ button:focus-visible {
 
 .guide-skip {
   grid-area: skip;
-  min-height: 32px;
+  min-height: 44px;
   padding: 0 8px;
   border: 0;
   font-size: 0.85em;
