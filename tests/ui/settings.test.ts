@@ -100,4 +100,10 @@ describe('settings dialog', () => {
     await user.click(reset);
     expect(ext(store.getState().mission).ore).toBe(0);
   });
+
+  it('says both ways into the hunt while it is closed: contracts, or Legend as the creature', async () => {
+    const user = setup();
+    await user.click(screen.getByRole('button', { name: /configuration/i }));
+    expect(screen.getByRole('button', { name: /accept the hunt/i }).textContent).toBe('THE HUNT · AFTER 5 CONTRACTS OR 3 LEGEND');
+  });
 });

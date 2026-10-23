@@ -246,3 +246,7 @@ Legend works the same way in every game, with the engine part in `src/shared/hun
 ## Walkthrough
 
 Every tier shows the shared hunt guide (`src/shared/hunt-guide.ts`): push, hunger, the harvest, notoriety and Legend as each comes up, plus a rules page, all in the tier's own words (`HuntWords`). **A new tier supplies its words and mounts the guide in its view.**
+
+## Legend as a key
+
+A game's second tier also opens on Legend from its first: the hunter after 3 Legend as the creature (or 5 contracts), the dragon after 3 Legend as the wood (or 4 charters). A horror that does well earns the next one.

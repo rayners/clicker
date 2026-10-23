@@ -1,5 +1,5 @@
 import { h, setText } from '../shared/ui/dom';
-import { DRAGON_UNLOCK_CHARTERS, isDragonUnlocked, isKeepUnlocked, isWoodUnlocked, KEEP_UNLOCK_CHARTERS, WOOD_UNLOCK_CHARTERS } from '../forest/charter';
+import { DRAGON_LEGEND, DRAGON_UNLOCK_CHARTERS, isDragonUnlocked, isKeepUnlocked, isWoodUnlocked, KEEP_UNLOCK_CHARTERS, WOOD_UNLOCK_CHARTERS } from '../forest/charter';
 import { createOptOut } from '../shared/telemetry';
 import { forestSaves } from '../forest/save';
 import type { ForestGame } from '../forest/game';
@@ -157,7 +157,7 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
       setText(listen, woodOpen ? 'LISTEN TO THE WOOD' : `LISTEN TO THE WOOD · AFTER ${WOOD_UNLOCK_CHARTERS} CHARTERS`);
       const dragonOpen = !!game.dragon || isDragonUnlocked(game.profile);
       wake.disabled = !dragonOpen;
-      setText(wake, dragonOpen ? 'WAKE THE DRAGON' : `WAKE THE DRAGON · AFTER ${DRAGON_UNLOCK_CHARTERS} CHARTERS`);
+      setText(wake, dragonOpen ? 'WAKE THE DRAGON' : `WAKE THE DRAGON · AFTER ${DRAGON_UNLOCK_CHARTERS} CHARTERS OR ${DRAGON_LEGEND} LEGEND`);
     },
   };
 }

@@ -141,7 +141,10 @@ export function availableAssignments(profile: Profile): ScenarioId[] {
 }
 
 export const isCreatureUnlocked = (profile: Profile): boolean => profile.contractsCompleted >= CREATURE_UNLOCK_CONTRACTS;
-export const isHunterUnlocked = (profile: Profile): boolean => profile.contractsCompleted >= HUNTER_UNLOCK_CONTRACTS;
+/** Legend as the creature that opens the hunt early: a horror that has done well earns the next one. */
+export const HUNTER_LEGEND = 3;
+export const isHunterUnlocked = (profile: Profile): boolean =>
+  profile.contractsCompleted >= HUNTER_UNLOCK_CONTRACTS || (profile.legend.creature ?? 0) >= HUNTER_LEGEND;
 
 /**
  * Which horror a new contract gets: the scenario's own until the outbreak is unlocked, then organism or outbreak drawn

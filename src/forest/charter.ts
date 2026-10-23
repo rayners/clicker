@@ -15,7 +15,9 @@ export const DRAGON_UNLOCK_CHARTERS = 4;
 
 export const isKeepUnlocked = (p: ForestProfile): boolean => p.chartersCompleted >= KEEP_UNLOCK_CHARTERS;
 export const isWoodUnlocked = (p: ForestProfile): boolean => p.chartersCompleted >= WOOD_UNLOCK_CHARTERS;
-export const isDragonUnlocked = (p: ForestProfile): boolean => p.chartersCompleted >= DRAGON_UNLOCK_CHARTERS;
+/** Legend as the wood that wakes the dragon early: a horror that has done well earns the next one. */
+export const DRAGON_LEGEND = 3;
+export const isDragonUnlocked = (p: ForestProfile): boolean => p.chartersCompleted >= DRAGON_UNLOCK_CHARTERS || (p.legend.wood ?? 0) >= DRAGON_LEGEND;
 const isSiteOpen = (p: ForestProfile, site: SiteId): boolean => site === 'forest' || isKeepUnlocked(p);
 
 const BURN_MIN_CHARTERS = 3;

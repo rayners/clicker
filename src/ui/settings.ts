@@ -1,5 +1,5 @@
 import type { GameState } from '../core/game';
-import { BOARDROOM_UNLOCK_CONTRACTS, CREATURE_UNLOCK_CONTRACTS, HUNTER_UNLOCK_CONTRACTS, isBoardroomUnlocked, isCreatureUnlocked, isHunterUnlocked } from '../core/prestige';
+import { HUNTER_LEGEND, BOARDROOM_UNLOCK_CONTRACTS, CREATURE_UNLOCK_CONTRACTS, HUNTER_UNLOCK_CONTRACTS, isBoardroomUnlocked, isCreatureUnlocked, isHunterUnlocked } from '../core/prestige';
 import { exportSave, importSave } from '../core/save';
 import type { Store } from '../core/store';
 import { h, setAttr, setText } from '../shared/ui/dom';
@@ -163,7 +163,7 @@ export function createSettings(store: Store): { button: HTMLButtonElement; dialo
     setAttr(promotion, 'aria-label', game.boardroom ? 'Return to the Boardroom' : promoted ? 'Accept promotion' : promotionText.toLowerCase());
     const huntOpen = !!game.hunter || isHunterUnlocked(game.profile);
     theHunt.disabled = !huntOpen;
-    setText(theHunt, game.hunter ? 'THE HUNT: RESUME' : huntOpen ? 'THE HUNT: ACCEPT' : `THE HUNT · AFTER ${HUNTER_UNLOCK_CONTRACTS} CONTRACTS`);
+    setText(theHunt, game.hunter ? 'THE HUNT: RESUME' : huntOpen ? 'THE HUNT: ACCEPT' : `THE HUNT · AFTER ${HUNTER_UNLOCK_CONTRACTS} CONTRACTS OR ${HUNTER_LEGEND} LEGEND`);
     // Closed tiers say what opens them.
     const creatureOpen = !!game.creature || isCreatureUnlocked(game.profile);
     specialOrder.disabled = !creatureOpen;

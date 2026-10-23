@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createForestGame, type ForestGame } from '../../src/forest/game';
-import { completeCharter, DRAGON_UNLOCK_CHARTERS, isDragonUnlocked, isKeepUnlocked, isWoodUnlocked, KEEP_UNLOCK_CHARTERS, WOOD_UNLOCK_CHARTERS } from '../../src/forest/charter';
+import { completeCharter, DRAGON_LEGEND, DRAGON_UNLOCK_CHARTERS, isDragonUnlocked, isKeepUnlocked, isWoodUnlocked, KEEP_UNLOCK_CHARTERS, WOOD_UNLOCK_CHARTERS } from '../../src/forest/charter';
 import { reduce } from '../../src/forest/store';
 
 const NOW = 1_000_000;
@@ -37,5 +37,14 @@ describe('Elderdark opens up charter by charter', () => {
     expect(reduce(after(2), { type: 'startWood', seed: 1 }).mode).toBe('wood');
     expect(reduce(after(3), { type: 'wakeDragon', seed: 1 }).mode).toBe('charter');
     expect(reduce(after(4), { type: 'wakeDragon', seed: 1 }).mode).toBe('dragon');
+  });
+});
+
+describe('Legend opens the next horror early', () => {
+  it('wakes the dragon for a company whose wood has earned enough Legend, before the fourth charter', () => {
+    const g = after(2);
+    expect(isDragonUnlocked(g.profile)).toBe(false);
+    expect(isDragonUnlocked({ ...g.profile, legend: { wood: DRAGON_LEGEND - 1 } })).toBe(false);
+    expect(isDragonUnlocked({ ...g.profile, legend: { wood: DRAGON_LEGEND } })).toBe(true);
   });
 });
