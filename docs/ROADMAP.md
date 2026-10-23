@@ -148,6 +148,13 @@ In order. Each item has its design written down first, so nothing lives only in 
 - (Done 2026-10-22, extraction) **More flow feedback:** every generator and the refinery show what one more would add to income. It reads "+0 CR/S · REFINERY FULL" (or "NEEDS MORE ORE") in red when the other end of the line would swallow it. Terraform has it too (2026-10-22): reactors and processors, with NO PROCESSORS TO FEED, PROCESSORS FULLY POWERED, NO POWER TO SPARE or OFF SPEC when one more would add nothing. **Still open:** security, haulage and salvage.
 - (Done 2026-10-22) The **Boardroom** layer (`docs/BOARDROOM.md`, build queue item 8).
 
+- **(User idea, 2026-10-22, undecided) Tip jar and paid unlocks.** Small payments, for this browser only, no backend: a tip jar, and/or unlocking every scenario (for all games, or one genre at a time). Notes for when it is decided:
+  - A tip jar is just a link to a payment page (Ko-fi, Buy Me a Coffee or a Stripe Payment Link) in each game's configuration and on the picker. No game code depends on it.
+  - Without a server, an unlock can only be on the honour system: a payment page that redirects back to a page setting a flag on the device. Anyone could set the flag by hand. That is fine at these stakes. Codes that cannot be forged need something to sign them (for example a small serverless function on the payment webhook), which is a backend.
+  - The flag should travel in save export/import, or a player moving devices, or clearing storage, loses it. Safari also clears site storage after seven days without a visit unless the game is installed to the home screen.
+  - Card fees take a large share of very small payments (Stripe: 30¢ plus 2.9%), so a few dollars or pay-what-you-want works better than cents.
+  - Unlocking skips the progression the user chose on 2026-10-22 (one scenario per game at the start), so it should be clearly a shortcut, and debug jumps stay the testing route.
+
 ## Balance notes
 
 Re-run `npm run simulate` after any economy change. The current first-contract timings (all seeds, with autocycle) are: Act II 52m, Act III 2h25m, Act IV 3h04m, Terminus 4h19m. A repeat contract with Seniority 3 is faster.
