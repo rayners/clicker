@@ -91,6 +91,8 @@ export const CUT_ADAPTER: PreyAdapter<CutPrey> = {
 /** Flip the tape: start (or resume) the Killer's Cut with this killer. */
 export function startCut(game: LateGame, killer: KillerId, seed: number): LateGame {
   if (game.cut && game.cut.killer === killer) return { ...game, mode: 'cut', shelf: false };
+  // Another killer's cut is paused: end it properly first, so its body count is banked as Legend.
+  if (game.cut) game = endCut(game);
   const prey = CUT_VENUES.map((venue, i) => ({ run: createRun(runConfigFor(game.profile, venue, killer), seed + i), presses: 0, decideIn: 0 }));
   const cut: KillerCut = { killer, hunt: createHunt(prey, { strength: START_STRENGTH, hunger: START_HUNGER, legend: game.profile.legend[killer] ?? 0 }), bought: {} };
   return { ...game, mode: 'cut', shelf: false, cut };

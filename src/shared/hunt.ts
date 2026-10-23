@@ -59,6 +59,8 @@ const LEGEND_HARVEST = 25;
 /** Legend per extra step of strength a new hunt starts with, and harvest in hand per Legend. */
 const LEGEND_PER_STRENGTH = 2;
 const LEGEND_DREAD = 10;
+/** Share of full hunger a resting horror recovers each second: a starved hunt can always start again. */
+const REST_RECOVERY = 1 / 600;
 
 /** What a finished hunt leaves behind, carried into the next hunt by the same horror. */
 export const legendEarned = (harvest: number): number => Math.floor(Math.sqrt(Math.max(0, harvest) / LEGEND_HARVEST));
@@ -111,7 +113,8 @@ export function tickHunt<P>(h: HuntState<P>, adapter: PreyAdapter<P>, dt: number
     return adapter.spawn(next, h.notoriety);
   });
   const spent = active(h) ? assigned(h) * rules.hungerPerStep * dt : 0;
-  const hunger = Math.max(0, Math.min(rules.maxHunger, h.hunger - spent + gained * rules.feed));
+  const rested = h.dormant ? rules.maxHunger * REST_RECOVERY * dt : 0;
+  const hunger = Math.max(0, Math.min(rules.maxHunger, h.hunger - spent + gained * rules.feed + rested));
   const decay = (h.dormant ? rules.dormantDecay : rules.notorietyDecay) * dt;
   const notoriety = Math.max(0, h.notoriety + gained * rules.notorietyPerHarvest - decay);
   return {

@@ -113,6 +113,17 @@ describe('the hunt', () => {
   });
 });
 
+describe('starving', () => {
+  it('recovers hunger while the horror rests, so a starved hunt can always start again', () => {
+    let h = { ...createHunt([stub(), stub(), stub()], { strength: 3, hunger: 0 }), split: [3, 0, 0] };
+    for (let t = 0; t < 600; t++) h = tickHunt(h, adapter, 1, RULES);
+    expect(h.hunger).toBe(0);
+    h = toggleDormant(h);
+    for (let t = 0; t < 600; t++) h = tickHunt(h, adapter, 1, RULES);
+    expect(h.hunger).toBeGreaterThan(0);
+  });
+});
+
 describe('Legend: what a finished hunt leaves behind', () => {
   it('grows with the square root of the harvest, so the first hunts count most', () => {
     expect(legendEarned(0)).toBe(0);

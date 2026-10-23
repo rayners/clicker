@@ -121,3 +121,13 @@ describe("the Killer's Cut, played through", () => {
     expect(played.final.cut!.hunt.strength).toBeGreaterThan(3);
   });
 });
+
+describe('switching killers', () => {
+  it('banks the paused cut\'s Legend before starting another killer\'s, so nothing earned is lost', () => {
+    const g = startCut(newLateGame(1, 0), 'drowned', 3);
+    const earned = { ...g, cut: { ...g.cut!, hunt: { ...g.cut!.hunt, harvest: 400 } } };
+    const switched = startCut({ ...earned, mode: 'films', shelf: true }, 'burned', 4);
+    expect(switched.cut!.killer).toBe('burned');
+    expect(switched.profile.legend.drowned).toBe(4);
+  });
+});

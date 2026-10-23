@@ -40,7 +40,7 @@ export function huntGuide<S>(hunt: (s: S) => HuntState<unknown> | null, w: HuntW
     {
       id: 'hunt-hunger',
       title: 'HUNGER',
-      text: `Pushing spends hunger; what you take feeds it. At zero, the hunt stalls until something feeds you.`,
+      text: `Pushing spends hunger; what you take feeds it. At zero, the hunt stalls: ${w.rest} to recover.`,
       target: `${w.root} [aria-label="Hunger"]`,
       show: on(pushing),
       done: () => false,
@@ -71,7 +71,7 @@ export function huntGuide<S>(hunt: (s: S) => HuntState<unknown> | null, w: HuntW
     title: `HOW ${w.title} WORKS`,
     sections: [
       { heading: 'STRENGTH', text: `Split your strength across the ${w.prey}s with − and +. Each step pushes harder there.` },
-      { heading: 'HUNGER', text: 'Every step pushed spends hunger each second; what you take feeds it back. Starving, the hunt stalls until something feeds you.' },
+      { heading: 'HUNGER', text: `Every step pushed spends hunger each second; what you take feeds it back. Starving, the hunt stalls; resting (${w.rest}) slowly restores it.` },
       { heading: w.harvest, text: `Everything you take, to spend under ${w.growth}. All of it counts toward Legend, spent or not.` },
       { heading: w.notoriety, text: `Grows with every taking and makes every ${w.prey} defend harder. It fades with time, faster while you ${w.rest.toLowerCase()}.` },
       { heading: `THE END OF A ${w.prey.toUpperCase()}`, text: `Each ${w.prey} runs its own story and slowly works you out. One that reaches its end beats you back: you lie low for a while, and a fresh ${w.prey} takes its place.` },
