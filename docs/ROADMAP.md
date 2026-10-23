@@ -193,6 +193,25 @@ Two subagent passes at the user's request: an adversarial QA run and a design re
 - Elderdark: the Keep still says FORAGE THE EAVES; old-style numerals make readouts hard to read; "~" reads as a minus.
 - Low: desktop tabs wrap; boot lines wrap on phones; "12 MORE LOST" on a fresh security contract; DOWN THERE depth 0 vs 4 m; the picker sideways shows one game; About uses old-style numerals and a small GitHub link.
 
+## The engine and its example (2026-10-23)
+
+- (Done) `src/shared/` became `src/engine/`, with a README, a doc comment on every export (tested), and a generated
+  reference published at `/engine/`.
+- (Done) Extracted from the four games into the engine, each game moved onto it in the same change: the page shell
+  (`runGame`), the clock, dialogs, settings, the ending chooser, stepper and dial, buy lists and shops, tabs, the
+  action button and shell, the hunt screen, the pacing bots, `newStory`, and the one-line guide styles
+  (`engine.css`). Game UI code is about 1,900 lines shorter.
+- (Done) Bugs found along the way: DOWN THERE never sent `upgrade_bought`/`beat_seen`; LATE FEES ended a film in one
+  tap; the terminus, the reckoning, the season's end and the charter rewrite had no double-tap guard; the log feed
+  dropped entry 0; Elderdark's short-phone map was a 24px button.
+- (Done) CLIP WORKS (`/clips/`), the classic paperclip game built from the engine's docs alone, with a pacing bot.
+  Its README lists the gaps building it showed.
+- Open: a neutral default theme for every engine class, so a new game looks right before it has a stylesheet.
+- Open: page scaffolding (`index.html`, the PWA manifest and icons are written by hand per game).
+- Not done, on purpose: a milestone-telemetry helper. Each game's "act went up" diff is one line, and a helper would
+  not save code.
+- Open: the license, now that the engine/games line is clear (user's decision).
+
 ## Balance notes
 
 Re-run `npm run simulate` after any economy change. The current first-contract timings (all seeds, with autocycle) are: Act II 52m, Act III 2h25m, Act IV 3h04m, Terminus 4h19m. A repeat contract with Seniority 3 is faster.
