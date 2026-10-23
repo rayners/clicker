@@ -209,6 +209,19 @@ export function cutPayRate(m: MissionState): number {
 
 export const incomeRate = (m: MissionState): number => stripRate(m) + cutPayRate(m);
 
+/** What one more cutter adds to salvage pay, or one more shoring to the bracing open compartments still need. */
+export function salvageGain(m: MissionState, purchase: { cutter: string } | { shoring: string }): { income: number; hold: number } {
+  const after =
+    'cutter' in purchase
+      ? { ...m, cutters: { ...m.cutters, [purchase.cutter]: (m.cutters[purchase.cutter] ?? 0) + 1 } }
+      : { ...m, shoring: { ...m.shoring, [purchase.shoring]: (m.shoring[purchase.shoring] ?? 0) + 1 } };
+  const need = holdNeeded(m);
+  return {
+    income: Math.max(0, incomeRate(after) - incomeRate(m)),
+    hold: Math.max(0, Math.min(shoringHold(after), need) - Math.min(shoringHold(m), need)),
+  };
+}
+
 const earn = <M extends MissionState>(m: M, amount: number): M =>
   amount <= 0 ? m : { ...m, credits: m.credits + amount, lifetimeCredits: m.lifetimeCredits + amount, recovered: m.recovered + amount };
 

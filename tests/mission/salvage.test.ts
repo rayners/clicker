@@ -23,6 +23,7 @@ import {
   shoringHold,
   stripRate,
   toggleGovernor,
+  salvageGain,
 } from '../../src/mission/salvage/economy';
 import { frontier, held, isSecured } from '../../src/shared/ground';
 
@@ -197,5 +198,21 @@ describe('a salvage contract as a mission', () => {
     const m = run(fresh({ cutters: crew(10), shoring: braces(20) }), 3_600);
     expect(JSON.parse(JSON.stringify(m))).toEqual(m);
     expect(m.lifetimeCredits).toBeGreaterThan(0);
+  });
+});
+
+describe('what one more cutter or shoring adds on a salvage contract', () => {
+  const open = (n: number) => COMPARTMENTS.map((_, i) => ({ control: i < n ? 1 : 0, garrison: 0, secured: i < n }));
+
+  it('says a cutter adds salvage pay at the frontier', () => {
+    const m = fresh({ cutters: { ...fresh().cutters, [welders.id]: 2 } });
+    expect(salvageGain(m, { cutter: welders.id }).income).toBeGreaterThan(0);
+  });
+
+  it('says shoring adds hold only while open compartments need bracing', () => {
+    const needy = fresh({ ground: open(3), deepest: 3 });
+    expect(salvageGain(needy, { shoring: frames.id }).hold).toBeGreaterThan(0);
+    const braced = fresh({ ground: open(1), deepest: 1, shoring: { ...fresh().shoring, [frames.id]: 500 } });
+    expect(salvageGain(braced, { shoring: frames.id }).hold).toBe(0);
   });
 });

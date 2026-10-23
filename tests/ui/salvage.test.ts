@@ -125,3 +125,12 @@ describe('a salvage contract on screen', () => {
     expect(hull().getByText('5 MORE SHUT')).toBeTruthy();
   });
 });
+
+describe('what one more cutter or shoring adds, on the salvage panel', () => {
+  it('shows the pay a cutter adds, and says when the open compartments are braced enough', async () => {
+    const user = setup({ credits: 1e6 });
+    await user.click(screen.getByRole('tab', { name: /systems/i }));
+    expect(screen.getByLabelText(`${CUTTERS[0]!.name} gain`).textContent).toMatch(/CR\/S/);
+    expect(screen.getByLabelText(`${SHORING[0]!.name} gain`).textContent).toBe('+0 · BRACED ENOUGH');
+  });
+});
