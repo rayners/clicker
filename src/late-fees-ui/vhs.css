@@ -1431,10 +1431,13 @@ button:disabled {
 @media (orientation: landscape) and (max-height: 499px) {
   .vhs-shell {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    /* The action bay (with any guide tip) spans the last two rows on the left; the tabs keep a fixed row, so a tall
+       tip never stretches them and the panel keeps the space. */
+    grid-template-rows: auto minmax(0, 1fr) auto calc(var(--tabbar-h) + env(safe-area-inset-bottom));
     grid-template-areas:
       'osd osd'
       'status main'
+      'action main'
       'action tabs';
   }
 
