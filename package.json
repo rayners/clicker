@@ -16,7 +16,8 @@
     "simulate:forest": "tsx scripts/simulate-forest.ts",
     "simulate:fathom": "tsx scripts/simulate-fathom.ts",
     "simulate:late": "tsx scripts/simulate-late.ts",
-    "simulate:board": "tsx scripts/simulate-board.ts"
+    "simulate:board": "tsx scripts/simulate-board.ts",
+    "screenshots": "tsx scripts/screenshots.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",
