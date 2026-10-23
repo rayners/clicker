@@ -1,5 +1,6 @@
 import { formatNumber } from '../shared/format';
 import { createGuideView } from '../shared/ui/guide';
+import { createForestSound, soundCues } from './sound';
 import { createGuideProgress } from '../shared/guide';
 import { forestGuideRules, forestGuideSteps } from '../forest-data/guide';
 import { h, setText } from '../shared/ui/dom';
@@ -166,7 +167,12 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
 
   const keyBit = kit.spriteCanvas('key', 'forage-sprite');
   const forage = h('button', { class: 'forage', type: 'button', 'aria-label': 'Forage the eaves' }, keyBit, h('span', { class: 'forage-label' }, 'FORAGE THE EAVES'));
+  const sound = createForestSound();
+  root.addEventListener('pointerdown', () => sound.unlock(), { passive: true });
+  let foraged = false;
+  let lastCompany: Company | null = null;
   const forageOnce = () => {
+    foraged = true;
     store.dispatch({ type: 'forage' });
     kit.advanceFrame(keyBit);
     kit.paintSprite(keyBit, palette);
@@ -203,6 +209,13 @@ export function mountForest(root: HTMLElement, store: ForestStore): void {
     root.dataset.motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
     config.render(game);
     woodView.render(game);
+    const charter = game.mode === 'charter';
+    sound.setEnabled(game.profile.settings.sound);
+    sound.setHum(charter ? c.act : 0);
+    // A new charter starts the comparison over, so its first frame makes no sound of its own.
+    if (charter && lastCompany && lastCompany.seed === c.seed) for (const cue of soundCues(lastCompany, c, foraged)) sound.play(cue);
+    foraged = false;
+    lastCompany = c;
     guide.render(game);
     dragonView.render(game);
     root.dataset.mode = game.mode;

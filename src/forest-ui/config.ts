@@ -7,9 +7,10 @@ import type { ForestStore } from '../forest/store';
 
 const CONFIRM_TIMEOUT_MS = 5000;
 
-/** Settings and the save book: reduce motion, export/import, and a fresh charter. */
+/** Settings and the save book: sound, reduce motion, export/import, and a fresh charter. */
 export function createConfig(store: ForestStore): { button: HTMLButtonElement; dialog: HTMLElement; render(game: ForestGame): void } {
   const button = h('button', { class: 'cfg-open', type: 'button', 'aria-label': 'Configuration' }, '⚙');
+  const sound = h('input', { type: 'checkbox', id: 'ed-sound' });
   const motion = h('input', { type: 'checkbox', id: 'ed-motion' });
   const share = h('input', { type: 'checkbox', id: 'ed-share' });
   const code = h('textarea', { class: 'cfg-code', rows: 4, spellcheck: 'false', 'aria-label': 'Save code' });
@@ -32,6 +33,7 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
       'div',
       { class: 'cfg-box' },
       h('div', { class: 'cfg-head' }, h('h2', { class: 'panel-title', id: 'ed-cfg-title' }, 'Configuration'), close),
+      h('label', { class: 'cfg-toggle', for: 'ed-sound' }, sound, ' SOUND'),
       h('label', { class: 'cfg-toggle', for: 'ed-motion' }, motion, ' REDUCE MOTION'),
       h('label', { class: 'cfg-toggle', for: 'ed-share' }, share, ' SHARE ANONYMOUS PLAY DATA'),
       h('p', { class: 'cfg-note' }, 'MILESTONES AND ERRORS ONLY. NO COOKIES, NO PERSONAL DATA.'),
@@ -71,6 +73,7 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
     show(false);
   });
   motion.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'reducedMotion', value: motion.checked }));
+  sound.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'sound', value: sound.checked }));
   exportButton.addEventListener('click', () => {
     code.value = forestSaves.exportSave(store.getState());
     code.select();
@@ -146,6 +149,7 @@ export function createConfig(store: ForestStore): { button: HTMLButtonElement; d
     dialog,
     render(game) {
       motion.checked = game.profile.settings.reducedMotion;
+      sound.checked = game.profile.settings.sound;
       labelRewrite();
       // Closed tiers say what opens them.
       const woodOpen = !!game.wood || isWoodUnlocked(game.profile);

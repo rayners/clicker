@@ -270,4 +270,13 @@ describe('configuration', () => {
     await user.click(share);
     expect(createOptOut(localStorage).sharing()).toBe(false);
   });
+
+  it('has a sound switch in the configuration, off until the player turns it on', async () => {
+    const user = setup();
+    await user.click(screen.getByRole('button', { name: /configuration/i }));
+    const box = screen.getByRole('checkbox', { name: /sound/i }) as HTMLInputElement;
+    expect(box.checked).toBe(false);
+    await user.click(box);
+    expect(store.getState().profile.settings.sound).toBe(true);
+  });
 });
