@@ -1,4 +1,5 @@
 import { h, setText } from '../engine/ui/dom';
+import { createConfirmButton } from '../engine/ui/confirm';
 import { interpolate } from '../engine/lexicon';
 import type { LateGame } from '../late-fees/game';
 import { venueOf } from '../late-fees/registry';
@@ -24,9 +25,10 @@ export function createCredits(store: LateStore): { el: HTMLElement; render(game:
       list.replaceChildren(
         ...endings.map((id) => {
           const e = endingFor(r, id);
-          const go = h('button', { class: 'buy credits-go', type: 'button', 'aria-label': e.title }, e.title);
-          go.addEventListener('click', () => store.dispatch({ type: 'completeRun', ending: id, seed: (Math.random() * 2 ** 31) | 0 }));
-          return h('section', { class: 'credits-ending' }, h('p', { class: 'item-desc' }, interpolate(e.text, words)), go);
+          // Ending the film is for good, so it takes a second tap.
+          const go = createConfirmButton({ className: 'buy credits-go', onConfirm: () => store.dispatch({ type: 'completeRun', ending: id, seed: (Math.random() * 2 ** 31) | 0 }) });
+          go.label(e.title, e.title);
+          return h('section', { class: 'credits-ending' }, h('p', { class: 'item-desc' }, interpolate(e.text, words)), go.el);
         }),
       );
     },

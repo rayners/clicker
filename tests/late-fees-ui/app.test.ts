@@ -1,3 +1,4 @@
+import { confirmPause } from '../helpers';
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest';
 import { within, screen } from '@testing-library/dom';
@@ -135,12 +136,15 @@ describe('Camp Blackwater on tape', () => {
     expect(screen.queryByRole('status', { name: /finale/i })).toBeNull();
   });
 
-  it('rolls credits with the endings, and the sequel goes on the shelf', async () => {
+  it('rolls credits with the endings, each confirmed by a second tap, and the sequel goes on the shelf', async () => {
     const user = setup(playing({ flags: ['terminus'], bodyCount: 40 }));
     await user.click(screen.getByRole('tab', { name: /credits/i }));
     const credits = within(screen.getByRole('tabpanel', { name: /credits/i }));
     expect(credits.getByText(/40 DEAD THIS SUMMER/)).toBeTruthy();
     await user.click(credits.getByRole('button', { name: /put him back in the water/i }));
+    expect(store.getState().shelf).toBe(false);
+    await confirmPause();
+    await user.click(credits.getByRole('button', { name: /confirm: put him back in the water/i }));
     expect(store.getState().shelf).toBe(true);
     expect(within(screen.getByRole('dialog', { name: /horror/i })).getByRole('button', { name: /^rent friday the 12th part ii$/i })).toBeTruthy();
   });
