@@ -225,6 +225,13 @@ function recharter(game: GameState): GameState {
   return g;
 }
 
+/** A Board with nothing running and too little to charter could never earn again: the treasury advances one charter. */
+function advanceCharter(b: BoardroomState): BoardroomState {
+  const cost = charterCost(b, 'extraction');
+  if (b.contracts.length > 0 || b.value >= cost) return b;
+  return appendLog<BoardLogKind, BoardroomState>({ ...b, value: cost }, 'memo', `TREASURY: A CHARTER ADVANCED AGAINST NEXT QUARTER. ₭${formatNumber(cost - b.value)}.`);
+}
+
 /** Scrutiny past the line: a fine, a freeze on charters, and the matter minuted. */
 function inquiry(b: BoardroomState): BoardroomState {
   const fine = b.value * INQUIRY_FINE;
@@ -310,6 +317,7 @@ export function tickBoardroom(game: GameState, dt: number): GameState {
   };
   for (const c of contracts) if (c.mission.flags.includes('terminus')) next = close(next, c, game.profile);
   if (next.scrutiny >= INQUIRY_AT) next = inquiry(next);
+  next = advanceCharter(next);
   next = runBoardStory(next, game);
   let after: GameState = { ...game, boardroom: next };
   if (level(next, 'coo') > 0) after = recharter(after);

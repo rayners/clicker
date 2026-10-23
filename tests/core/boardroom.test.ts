@@ -296,3 +296,19 @@ describe('the Boardroom calendar', () => {
     expect(contractYears({ ...c, mission: { ...c.mission, elapsed: 8 * 60 * BOARD_SPEED } })).toBe(2);
   });
 });
+
+describe('the Boardroom never strands a term', () => {
+  it('has the treasury advance a charter when no contract is running and the Board cannot afford one', () => {
+    const g = promoted();
+    const broke = { ...g, boardroom: { ...board(g), value: 1e6, contracts: [] } };
+    const after = tickGame(broke, 1);
+    expect(board(after).value).toBeGreaterThanOrEqual(charterCost(board(after), 'extraction'));
+    expect(board(after).log.some((e) => /TREASURY/.test(e.text))).toBe(true);
+    expect(reduce(after, { type: 'commission', scenario: 'extraction', seed: 2 }).boardroom!.contracts).toHaveLength(1);
+  });
+
+  it('advances nothing while a contract is still running, or while it can already pay', () => {
+    const running = reduce({ ...promoted(), boardroom: { ...board(promoted()), value: 2e6 } }, { type: 'commission', scenario: 'extraction', seed: 2 });
+    expect(board(tickGame(running, 1)).value).toBeLessThan(charterCost(board(running), 'extraction'));
+  });
+});
