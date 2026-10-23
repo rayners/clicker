@@ -103,6 +103,7 @@ export function createEndPanel(store: FathomStore): { el: HTMLElement; render(ga
 /** Settings and the save book. */
 export function createConfig(store: FathomStore): { button: HTMLButtonElement; dialog: HTMLElement; render(game: FathomGame): void } {
   const button = h('button', { class: 'cfg-open', type: 'button', 'aria-label': 'Configuration' }, 'CFG');
+  const sound = h('input', { type: 'checkbox', id: 'fa-sound' });
   const motion = h('input', { type: 'checkbox', id: 'fa-motion' });
   const share = h('input', { type: 'checkbox', id: 'fa-share' });
   const code = h('textarea', { class: 'cfg-code', rows: 4, spellcheck: 'false', 'aria-label': 'Save code' });
@@ -120,6 +121,7 @@ export function createConfig(store: FathomStore): { button: HTMLButtonElement; d
       'div',
       { class: 'cfg-box' },
       h('div', { class: 'cfg-head' }, h('h2', { class: 'panel-title', id: 'fa-cfg-title' }, 'Configuration'), close),
+      h('label', { class: 'cfg-toggle', for: 'fa-sound' }, sound, ' SOUND'),
       h('label', { class: 'cfg-toggle', for: 'fa-motion' }, motion, ' REDUCE MOTION'),
       h('label', { class: 'cfg-toggle', for: 'fa-share' }, share, ' SHARE ANONYMOUS PLAY DATA'),
       h('p', { class: 'cfg-note' }, 'MILESTONES AND ERRORS ONLY. NO COOKIES, NO PERSONAL DATA.'),
@@ -147,6 +149,7 @@ export function createConfig(store: FathomStore): { button: HTMLButtonElement; d
   share.checked = optOut.sharing();
   share.addEventListener('change', () => optOut.setSharing(share.checked));
   motion.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'reducedMotion', value: motion.checked }));
+  sound.addEventListener('change', () => store.dispatch({ type: 'setSetting', key: 'sound', value: sound.checked }));
   exportButton.addEventListener('click', () => {
     code.value = fathomSaves.exportSave(store.getState());
     code.select();
@@ -188,6 +191,7 @@ export function createConfig(store: FathomStore): { button: HTMLButtonElement; d
     dialog,
     render(game) {
       motion.checked = game.profile.settings.reducedMotion;
+      sound.checked = game.profile.settings.sound;
       // A closed door says what opens it.
       const open = !!game.deep || isDeepUnlocked(game.profile);
       answer.disabled = !open;

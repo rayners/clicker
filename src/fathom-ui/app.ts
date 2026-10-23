@@ -17,6 +17,7 @@ import { createBeach, createCoast, createShelf, createStation, createTrench, typ
 import { createConfig, createEndPanel, createStorePanel } from './panels';
 import { createDeepView } from './deep';
 import { createGuideView } from '../shared/ui/guide';
+import { createFathomSound, SONAR_EVERY, soundCues } from './sound';
 import { createGuideProgress } from '../shared/guide';
 import { fathomGuideRules, fathomGuideSteps } from '../fathom-data/guide';
 
@@ -47,6 +48,11 @@ const GUIDE_KEY = 'fathom.guide';
 export function mountFathom(root: HTMLElement, store: FathomStore): void {
   const config = createConfig(store);
   const deepView = createDeepView(store);
+  const sound = createFathomSound();
+  root.addEventListener('pointerdown', () => sound.unlock(), { passive: true });
+  let soldByHand = false;
+  let lastOutfit: Outfit | null = null;
+  let lastSonar = 0;
   const guide = createGuideView<FathomGame>({ steps: fathomGuideSteps, rules: fathomGuideRules, progress: createGuideProgress(window.localStorage, GUIDE_KEY) });
   const depthValue = h('span', { class: 'mast-depth', 'aria-label': 'Depth' }, '0 M');
   const season = h('span', { class: 'mast-season', 'aria-label': 'Season' }, 'SEASON 1');
@@ -145,6 +151,7 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
   const pass = h('button', { class: 'pass', type: 'button', 'aria-label': 'Sell a beach pass' }, 'SELL A BEACH PASS');
   const sell = () => {
     const price = passPrice(store.getState().outfit);
+    soldByHand = true;
     store.dispatch({ type: 'sellPass' });
     const tick = h('span', { class: 'pass-tick', 'aria-hidden': 'true', style: `--x:${Math.round(Math.random() * 80 - 40)}px` }, `+$${formatNumber(price)}`);
     pass.append(tick);
@@ -173,6 +180,16 @@ export function mountFathom(root: HTMLElement, store: FathomStore): void {
     root.dataset.motion = game.profile.settings.reducedMotion ? 'reduced' : 'full';
     config.render(game);
     deepView.render(game);
+    sound.setEnabled(game.profile.settings.sound);
+    sound.setHum(game.mode === 'season' ? o.act : 0);
+    if (lastOutfit && game.mode === 'season') for (const cue of soundCues(lastOutfit, o, soldByHand)) sound.play(cue);
+    soldByHand = false;
+    lastOutfit = o;
+    // The sonar sweeps on a slow clock while the season runs.
+    if (game.mode === 'season' && (o.elapsed - lastSonar >= SONAR_EVERY || o.elapsed < lastSonar)) {
+      lastSonar = o.elapsed;
+      sound.play('sonar');
+    }
     guide.render(game);
     panels.forEach((p, i) => {
       const shown = p.visible?.(o) ?? true;

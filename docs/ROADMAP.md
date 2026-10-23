@@ -140,7 +140,8 @@ In order. Each item has its design written down first, so nothing lives only in 
 - (Done 2026-10-22, DEEP CONTRACT) **Sound polish**, only with sound turned on:
   - A held hum per act (60 Hz steady → beating → lower and rougher → a pulsing 41 Hz sawtooth), silent in the horror tiers.
   - Teletype clicks timed to each log line's print animation (6 per line, at most 4 lines at once), with the memo chime or anomaly drone closing the burst.
-  - **To do:** listen on the iPhone and tune the levels. The other games have no sound yet.
+  - **To do:** listen on the iPhone and tune the levels.
+  - The synth is shared now (`src/shared/ui/sound.ts`, a palette of voices and hums per game). DOWN THERE has sound (2026-10-22): a sonar ping every six seconds, a ping per pass sold, a low thud for anyone lost to the water, a landfall alarm, and a hum that sinks act by act; a SOUND switch in its configuration. **Still to do:** LATE FEES and Elderdark.
 - (Done 2026-10-22) **A first-load boot sequence** for DEEP CONTRACT: WARDEN's BIOS lines type out on a brand-new player's first visit only (no save yet). Any tap or key skips it, it leaves by itself after about 4.4 s, and it prints at once with reduced motion. The e2e helper `skipBoot` steps past it.
 - (Done 2026-10-22) `TERRAFORM_UNLOCK_CONTRACTS` is 2, with the unlock ladder (build queue item 6).
 - (Done 2026-10-22) **A second horror:** the outbreak (`docs/OUTBREAK.md`, build queue item 7), with `horrorFor` choosing a contract's horror.

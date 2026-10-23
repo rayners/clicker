@@ -145,4 +145,13 @@ describe('the deep-water game on screen', () => {
     expect(pairs[1]!.textContent).toMatch(/LINK 30%.*RESERVE/);
     expect(panel(/coast/i).getByLabelText('Pilot fatigue').textContent).toBe('40%');
   });
+
+  it('has a sound switch in the configuration, off until the player turns it on', async () => {
+    const user = setup();
+    await user.click(screen.getByRole('button', { name: /configuration/i }));
+    const box = screen.getByRole('checkbox', { name: /sound/i }) as HTMLInputElement;
+    expect(box.checked).toBe(false);
+    await user.click(box);
+    expect(store.getState().profile.settings.sound).toBe(true);
+  });
 });
