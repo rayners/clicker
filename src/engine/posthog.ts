@@ -1,8 +1,13 @@
+/**
+ * Anonymous, opt-out analytics through PostHog, loaded only when allowed.
+ * @module
+ */
 import type { Store } from './store';
 import { createTelemetry, TELEMETRY_EVENT, type OptOut, type TelemetryEvent, type TelemetryProps, type TelemetrySink } from './telemetry';
 
 /** Public by design: a PostHog project key only allows sending events. */
 const POSTHOG_KEY = 'phc_sWEhq5z9p3HygDsTtgBJv8xrF3jLhKLAVy8ev2hgvZLx';
+/** Where telemetry goes (PostHog's US cloud). */
 export const POSTHOG_HOST = 'https://us.i.posthog.com';
 
 /** Loads PostHog on demand (its own chunk, off the boot path) and adapts it to a telemetry sink. */

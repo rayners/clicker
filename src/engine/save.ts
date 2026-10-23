@@ -1,6 +1,12 @@
+/**
+ * Versioned, migrating, corruption-tolerant saves in localStorage, with export codes.
+ * @module
+ */
 /** A versioned, migrating, corruption-tolerant localStorage save, shared by every game in the repo. */
 export type StorageLike = Pick<Storage, 'getItem' | 'setItem'>;
+/** A parsed save before migration: any object with a version number. */
 export type RawSave = Record<string, unknown> & { version: number };
+/** Upgrades a save by one version. */
 export type Migration = (save: Record<string, unknown>) => Record<string, unknown>;
 
 /** migrations[n] upgrades a version n-1 save to version n. */
@@ -14,6 +20,7 @@ export function migrate(save: RawSave, migrations: Record<number, Migration>, ta
   return current as RawSave;
 }
 
+/** What a game tells the save system about its saves. */
 export interface SaveSpec<T> {
   key: string;
   corruptKey: string;
@@ -40,6 +47,10 @@ export function hasShape(value: unknown, reference: object): boolean {
   return Object.entries(reference).every(([k, ref]) => ref === null || ref === undefined || kind(v[k]) === kind(ref));
 }
 
+/**
+ * Saving, loading, export codes and import for one game. Loading never throws: an unreadable save is backed up
+ * under `corruptKey` and a fresh game starts.
+ */
 export interface SaveSystem<T> {
   serialize(game: T): string;
   deserialize(text: string): T;
@@ -57,6 +68,7 @@ const safely = (check: () => boolean): boolean => {
   }
 };
 
+/** A save system for a game, from its spec. */
 export function createSaveSystem<T extends object>(spec: SaveSpec<T>): SaveSystem<T> {
   const isRawSave = (value: unknown): value is RawSave => {
     if (typeof value !== 'object' || value === null) return false;

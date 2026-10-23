@@ -1,3 +1,7 @@
+/**
+ * A masthead button opening a dialog of doors to a game's other tiers.
+ * @module
+ */
 import { h, setAttr, setText } from './dom';
 
 /** One door: a play-as-the-horror tier or another side of a game, with what it says now and what it opens. */

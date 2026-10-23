@@ -1,5 +1,10 @@
+/**
+ * Animated rows showing automation at work.
+ * @module
+ */
 import { h, setText } from './dom';
 
+/** One automated system on the operations monitor: whether it is working, how many, and what it puts out. */
 export interface MonitorRow<S> {
   id: string;
   label: string;

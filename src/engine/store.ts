@@ -1,5 +1,14 @@
+/**
+ * A minimal immutable store.
+ * @module
+ */
+/** Called with the new state after every change. */
 export type Listener<S> = (state: S) => void;
 
+/**
+ * Holds a game's immutable state; the UI subscribes to it and dispatches actions to it. `replace` swaps the whole
+ * state (an imported save).
+ */
 export interface Store<S, A> {
   getState(): S;
   dispatch(action: A): void;

@@ -1,8 +1,14 @@
+/**
+ * Drawing palette-indexed sprites tinted from CSS variables.
+ * @module
+ */
 import { corruptFrame, framePixels, type Sprite } from '../pixels';
 import { h } from './dom';
 
+/** Palette key to colour, resolved from the theme at paint time. */
 export type Palette = Record<string, string>;
 
+/** A game's sprites and how their palette keys map to its CSS variables. */
 export interface SpriteKitOptions {
   sprites: Readonly<Record<string, Sprite>>;
   /** Palette key -> CSS custom property, read from the themed root at paint time. */

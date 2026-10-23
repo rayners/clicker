@@ -1,11 +1,17 @@
+/**
+ * Turning state changes into analytics events, the device-wide opt-out, and when sending is allowed.
+ * @module
+ */
 /** Anonymous play analytics: milestones derived from state changes, sent to a pluggable sink (PostHog in production). */
 
 export type TelemetryProps = Record<string, string | number | boolean>;
+/** One analytics event: a name and a few flat properties. */
 export interface TelemetryEvent {
   name: string;
   props?: TelemetryProps;
 }
 
+/** Where events go once analytics has loaded (PostHog in the published build). */
 export interface TelemetrySink {
   capture(event: TelemetryEvent): void;
   captureError(error: unknown): void;
@@ -15,6 +21,7 @@ const OPT_OUT_KEY = 'clicker.telemetry';
 /** Screen code with something to report but no state change to show it (the walkthrough) announces it on the document. */
 export const TELEMETRY_EVENT = 'clicker:telemetry';
 
+/** Reports an event that no state change shows, through the document, to whichever game is listening. */
 export function announce(event: TelemetryEvent): void {
   document.dispatchEvent(new CustomEvent<TelemetryEvent>(TELEMETRY_EVENT, { detail: event }));
 }
@@ -48,6 +55,7 @@ export function createOptOut(storage: Storage) {
     },
   };
 }
+/** The device-wide telemetry switch (see `createOptOut`). */
 export type OptOut = ReturnType<typeof createOptOut>;
 
 type Pending = { kind: 'event'; event: TelemetryEvent } | { kind: 'error'; error: unknown };

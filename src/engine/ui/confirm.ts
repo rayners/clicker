@@ -1,3 +1,7 @@
+/**
+ * Two-tap confirms that a double tap cannot pass.
+ * @module
+ */
 import { h, setAttr, setText } from './dom';
 
 /** A confirming tap this soon after the first is ignored: a double tap (or a phone's doubled click) must not act. */

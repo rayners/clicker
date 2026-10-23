@@ -1,4 +1,9 @@
-type Attrs = Record<string, string | number | boolean | undefined>;
+/**
+ * Building and updating DOM by hand, touching it only when something changed.
+ * @module
+ */
+/** Attributes for `h()`: `false` and `undefined` leave an attribute off, `true` sets it empty. */
+export type Attrs = Record<string, string | number | boolean | undefined>;
 
 /** Tiny element builder: h('button', { class: 'x', 'aria-label': 'y' }, 'text', child). */
 export function h<K extends keyof HTMLElementTagNameMap>(
@@ -20,6 +25,7 @@ export function setText(el: Element, text: string): void {
   if (el.textContent !== text) el.textContent = text;
 }
 
+/** Sets an attribute only when it changes, so re-rendering every tick does not touch the DOM needlessly. */
 export function setAttr(el: Element, name: string, value: string): void {
   if (el.getAttribute(name) !== value) el.setAttribute(name, value);
 }

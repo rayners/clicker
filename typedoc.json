@@ -1,0 +1,13 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "Clicker engine",
+  "entryPoints": ["src/engine/*.ts", "src/engine/ui/*.ts"],
+  "entryPointStrategy": "resolve",
+  "readme": "src/engine/README.md",
+  "out": "dist/engine",
+  "tsconfig": "tsconfig.json",
+  "excludePrivate": true,
+  "githubPages": false,
+  "sourceLinkTemplate": "https://github.com/rayners/clicker/blob/main/{path}#L{line}",
+  "treatWarningsAsErrors": false
+}

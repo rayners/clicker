@@ -1,3 +1,7 @@
+/**
+ * Palette-indexed pixel art and deterministic glitching.
+ * @module
+ */
 import { nextRandom } from './rng';
 
 /**
@@ -6,22 +10,26 @@ import { nextRandom } from './rng';
  */
 export const PALETTE_KEYS = ['.', 'a', 'b', 'c', 'd', 'e'] as const;
 
+/** Palette-indexed pixel art: frames of equal-length strings, one character per pixel (see `PALETTE_KEYS`). */
 export interface Sprite {
   width: number;
   height: number;
   frames: string[][];
 }
 
+/** A sprite from its frames; the size is read off the first frame. */
 export function sprite(...frames: string[][]): Sprite {
   return { width: frames[0]![0]!.length, height: frames[0]!.length, frames };
 }
 
+/** One opaque pixel of a frame and its palette key. */
 export interface Pixel {
   x: number;
   y: number;
   key: string;
 }
 
+/** The opaque pixels of a frame (everything but `.`), for drawing. */
 export function framePixels(frame: readonly string[]): Pixel[] {
   const pixels: Pixel[] = [];
   frame.forEach((row, y) => {

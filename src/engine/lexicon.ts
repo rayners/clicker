@@ -1,8 +1,13 @@
+/**
+ * Text written once with `{placeholders}`, filled from each scenario's phrases.
+ * @module
+ */
 /** Named phrases a scenario supplies so horror text can be written once and fit any scenario. */
 export type Lexicon = Readonly<Record<string, string>>;
 
 const PLACEHOLDER = /\{([a-zA-Z][a-zA-Z0-9]*)\}/g;
 
+/** The `{placeholder}` keys a text uses, in order (tests check every scenario supplies them). */
 export function placeholders(text: string): string[] {
   return [...text.matchAll(PLACEHOLDER)].map((match) => match[1]!);
 }

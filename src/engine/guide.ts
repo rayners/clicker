@@ -1,4 +1,8 @@
 /**
+ * The walkthrough: steps that show when they apply and go once done, with progress kept per device.
+ * @module
+ */
+/**
  * The walkthrough: short steps that introduce a scenario's levers one at a time, each shown when it applies and
  * gone once the player has done the thing or dismissed it. Pure; the progress lives on the device, not in the save.
  */
@@ -20,6 +24,7 @@ export interface GuideRules {
   sections: readonly { heading: string; text: string }[];
 }
 
+/** The first step the player has not seen, that applies now and is not yet done; null when there is none. */
 export function nextStep<S>(steps: readonly GuideStep<S>[], s: S, seen: readonly string[]): GuideStep<S> | null {
   return steps.find((step) => !seen.includes(step.id) && step.show(s) && !step.done(s)) ?? null;
 }

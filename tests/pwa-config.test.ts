@@ -11,4 +11,9 @@ describe('the service worker', () => {
     expect(config).toMatch(/skipWaiting:\s*true/);
     expect(config).toMatch(/clientsClaim:\s*true/);
   });
+
+  // The engine's generated reference sits beside the games but is not precached; the picker must not stand in for it.
+  it('never answers a navigation to the engine reference with the picker', () => {
+    expect(config).toMatch(/navigateFallbackDenylist:[^\n]*\/\\\/engine\\\//);
+  });
 });

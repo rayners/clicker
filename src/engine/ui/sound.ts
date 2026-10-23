@@ -1,3 +1,7 @@
+/**
+ * WebAudio cues and a hum per level of tension.
+ * @module
+ */
 /** A tiny WebAudio synth for every game: short voiced cues and a held hum per level, from a game's own palette. */
 export interface Voice {
   type: OscillatorType;
@@ -7,6 +11,7 @@ export interface Voice {
   gain: number;
 }
 
+/** A background drone, one per level of tension. */
 export interface Hum {
   /** Base tone, Hz. */
   freq: number;
@@ -18,6 +23,7 @@ export interface Hum {
   pulse: number;
 }
 
+/** A game's sounds: short voices for each kind of cue, and a hum for each level. */
 export interface Palette<C extends string> {
   voices: Record<C, Voice[]>;
   /** One hum per level (act, depth), quiet at first. */

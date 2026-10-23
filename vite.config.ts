@@ -22,8 +22,8 @@ export default defineConfig({
         // We register sw.js by hand, so nothing would send SKIP_WAITING: a new build activates by itself instead.
         skipWaiting: true,
         clientsClaim: true,
-        // Each game has its own page; never answer its navigations with the picker.
-        navigateFallbackDenylist: [/\/contract\//, /\/forest\//, /\/late-fees\//, /\/down-there\//],
+        // Each game has its own page, and the engine reference its own (not precached); never answer them with the picker.
+        navigateFallbackDenylist: [/\/contract\//, /\/forest\//, /\/late-fees\//, /\/down-there\//, /\/engine\//],
       },
     }),
   ],

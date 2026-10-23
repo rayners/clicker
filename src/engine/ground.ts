@@ -1,6 +1,7 @@
 /**
  * Held ground: an ordered run of sections (rooms, decks, buildings, floors) taken at the frontier and kept only
  * while garrisoned. Shared by DEEP CONTRACT's security detachment and Elderdark's Keep. Pure; no game imports.
+ * @module
  */
 
 export interface SectionDef {
@@ -12,6 +13,7 @@ export interface SectionDef {
   reclaim: number;
 }
 
+/** How a section stands right now. */
 export interface SectionState {
   /** 0 = lost, 1 = secured. */
   control: number;
@@ -28,8 +30,10 @@ const MAX_FORCE_RATIO = 4;
 /** A secured section slipping below this much control is lost, and the frontier falls back to it. */
 export const LOST_BELOW = 0.5;
 
+/** Every section lost and unguarded, ready for the first assault. */
 export const createGround = (defs: readonly SectionDef[]): SectionState[] => defs.map(() => ({ control: 0, garrison: 0, secured: false }));
 
+/** Whether a section is held. */
 export const isSecured = (s: SectionState): boolean => s.secured;
 
 /** Index of the first section not yet secured; the number of sections once all are. */
@@ -38,8 +42,10 @@ export function frontier(states: SectionState[]): number {
   return i === -1 ? states.length : i;
 }
 
+/** How many sections are held. */
 export const held = (states: SectionState[]): number => states.filter(isSecured).length;
 
+/** The force tied up in garrisons, across every section. */
 export const upkeep = (states: SectionState[]): number => states.reduce((sum, s) => sum + s.garrison, 0);
 
 /** Push on the frontier. Exposure is the attackers' risk (seconds weighted by how outmatched they are). */

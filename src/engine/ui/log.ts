@@ -1,6 +1,11 @@
+/**
+ * An append-only log feed that prints only new entries.
+ * @module
+ */
 import { LOG_LIMIT, type LogEntry } from '../log';
 import { h } from './dom';
 
+/** How a game's log feed is named and stamped. */
 export interface LogViewOptions {
   /** Accessible name of the feed. */
   label: string;

@@ -1,3 +1,7 @@
+/**
+ * The one-line walkthrough tip and the rules page.
+ * @module
+ */
 import { nextStep, type GuideRules, type GuideStep, type createGuideProgress } from '../guide';
 import { h, setText } from './dom';
 import { announce } from '../telemetry';

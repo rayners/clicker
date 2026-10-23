@@ -60,6 +60,7 @@ more, and has the tip jar.
 | `npm run build` | Typecheck and static build to `dist/` (with service worker). |
 | `npm run icons` | Regenerate the PWA icons from the pixel sprites. |
 | `npm run screenshots` | Retake the README screenshots from a running dev server. |
+| `npm run docs` | Generate the engine's API reference into `dist/engine/` (published at `/engine/`). |
 
 Dev builds have debug jumps (e.g. `/contract/?debug=act4`, `/forest/?debug=keep`, `/late-fees/?debug=member`);
 [`CLAUDE.md`](CLAUDE.md) lists them all.
@@ -67,8 +68,9 @@ Dev builds have debug jumps (e.g. `/contract/?debug=act4`, `/forest/?debug=keep`
 ## Layout
 
 - `index.html`, `src/picker/`: the front page that picks a game, and the About page.
-- `src/engine/`: engine code every game uses (saves, store, story engine, held-ground and hunt engines, walkthrough,
-  sound, sprites, telemetry). It imports nothing from the games, and no game imports another.
+- `src/engine/`: the engine every game runs on (the page shell, saves, store, story, held-ground and hunt engines,
+  walkthrough, sound, sprites, telemetry). It imports nothing from the games, and no game imports another. See
+  [its README](src/engine/README.md) and the [API reference](https://rayners.github.io/clicker/engine/).
 - DEEP CONTRACT:
   - `src/mission/`: one self-contained, JSON-serializable contract (scenarios × horrors, crew, directives, story).
     No DOM, globals or wall-clock time, so the Boardroom can run many at once.
@@ -82,6 +84,8 @@ Dev builds have debug jumps (e.g. `/contract/?debug=act4`, `/forest/?debug=keep`
 
 ## Docs
 
+- [`src/engine/README.md`](src/engine/README.md): what the engine offers and how a game plugs into it; the
+  [API reference](https://rayners.github.io/clicker/engine/) is generated from its doc comments.
 - [`docs/DESIGN.md`](docs/DESIGN.md): DEEP CONTRACT's premise, systems, acts and pacing, prestige, UI direction.
 - [`docs/TERRAFORM.md`](docs/TERRAFORM.md): the terraforming scenario and the scenario × horror architecture.
 - [`docs/MISSIONS.md`](docs/MISSIONS.md): security, haulage, salvage and the shared held-ground engine.

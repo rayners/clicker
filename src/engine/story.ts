@@ -1,3 +1,7 @@
+/**
+ * Story beats: conditions, log entries and effects, fired at most one per tick.
+ * @module
+ */
 import { appendLog, type LogHost } from './log';
 import { interpolate, type Lexicon } from './lexicon';
 
@@ -10,12 +14,17 @@ export interface StoryHost<K extends string = string> extends LogHost<K> {
   flags: string[];
 }
 
+/** What a beat changes besides the log: the act, a flag, or a game-specific action. */
 export type StoryEffect =
   | { kind: 'setAct'; act: number }
   | { kind: 'setFlag'; flag: string }
   /** Interpreted by the game (e.g. a horror's forced breach); ignored when nothing handles it. */
   | { kind: 'action'; action: string };
 
+/**
+ * One piece of story: when it fires (once), the log entries it writes, and its effects. `A` is whatever the game
+ * passes to `when`.
+ */
 export interface Beat<A, K extends string = string> {
   id: string;
   /** Which act this content belongs to (documentation and tests); defaults to 1. */
@@ -27,6 +36,7 @@ export interface Beat<A, K extends string = string> {
   urgent?: boolean;
 }
 
+/** How a game runs the story engine: the gap between beats, its lexicon, and who handles actions. */
 export interface StoryOptions<H> {
   /** Seconds between non-urgent beats. */
   minGap: number;

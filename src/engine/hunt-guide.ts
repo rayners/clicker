@@ -1,3 +1,7 @@
+/**
+ * Walkthrough steps and a rules page for any hunt, in the game's own words.
+ * @module
+ */
 import type { GuideRules, GuideStep } from './guide';
 import { legendEarned, type HuntState } from './hunt';
 

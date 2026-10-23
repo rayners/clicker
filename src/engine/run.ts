@@ -1,3 +1,7 @@
+/**
+ * Running a game in the page: load, catch up, mount, tick, autosave, telemetry and the service worker.
+ * @module
+ */
 import type { SaveSystem } from './save';
 import type { Store } from './store';
 import { startAnalytics } from './posthog';
@@ -30,6 +34,10 @@ export interface GameDef<G, A> {
   speed?(search: string): number;
 }
 
+/**
+ * The page a game runs in. Only `dev` and `prod` are required; the rest default to the real browser and are there
+ * for tests.
+ */
 export interface RunEnv {
   dev: boolean;
   prod: boolean;

@@ -2,6 +2,7 @@
  * The hunt: the play-as-the-horror tier's engine (docs/HORROR-TIER.md). Several prey (first-tier runs, each
  * defended by its own bot) run at once; the horror splits its strength across them, spends hunger to push,
  * feeds on the harvest, and grows notorious, which makes every prey harder to take. Pure; no game imports.
+ * @module
  */
 
 /** What a game supplies to put one of its first-tier runs in front of the horror. */
@@ -36,6 +37,10 @@ export interface HuntRules {
   beatenFor: number;
 }
 
+/**
+ * A hunt in progress: the prey, how the horror's strength is split across them, and its hunger, harvest and
+ * notoriety.
+ */
 export interface HuntState<P> {
   prey: P[];
   /** Steps of strength on each prey. */
@@ -65,6 +70,7 @@ const REST_RECOVERY = 1 / 600;
 /** What a finished hunt leaves behind, carried into the next hunt by the same horror. */
 export const legendEarned = (harvest: number): number => Math.floor(Math.sqrt(Math.max(0, harvest) / LEGEND_HARVEST));
 
+/** A new hunt against these prey. Legend from earlier hunts adds strength and harvest in hand. */
 export function createHunt<P>(prey: P[], options: { strength: number; hunger: number; legend?: number }): HuntState<P> {
   const legend = options.legend ?? 0;
   return {
@@ -91,6 +97,7 @@ export function shiftPush<H extends HuntState<unknown>>(h: H, index: number, ste
   return { ...h, split: h.split.map((s, i) => (i === index ? s + step : s)) };
 }
 
+/** Sleep or wake: a dormant horror pushes on nothing, recovers hunger and is forgotten faster. */
 export function toggleDormant<H extends HuntState<unknown>>(h: H): H {
   return { ...h, dormant: !h.dormant };
 }
@@ -98,10 +105,15 @@ export function toggleDormant<H extends HuntState<unknown>>(h: H): H {
 /** Whether the horror can push at all: awake, fed, and not lying low. */
 const active = (h: HuntState<unknown>) => !h.dormant && h.hunger > 0 && h.beatenFor <= 0;
 
+/** The pressure the horror puts on one prey now: none while dormant, starved or lying low. */
 export function pushOn(h: HuntState<unknown>, index: number, rules: HuntRules): number {
   return active(h) ? (h.split[index] ?? 0) * rules.pushPerStep : 0;
 }
 
+/**
+ * Advances every prey under the horror's pressure, feeds the horror on what it takes, and replaces prey that beat
+ * it back.
+ */
 export function tickHunt<P>(h: HuntState<P>, adapter: PreyAdapter<P>, dt: number, rules: HuntRules): HuntState<P> {
   let gained = 0;
   let beaten = 0;

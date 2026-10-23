@@ -1,6 +1,11 @@
+/**
+ * The three-stage production readout that highlights the limiting stage.
+ * @module
+ */
 import { formatNumber } from '../format';
 import { h, setAttr, setText } from './dom';
 
+/** One of the three stages in the production flow readout (e.g. extract, refine, income). */
 export interface FlowCell {
   label: string;
   /** Accessible name of the value. */
@@ -8,6 +13,7 @@ export interface FlowCell {
   unit: string;
 }
 
+/** The readout at one moment: the three values, the meter, and what is holding production back. */
 export interface FlowReading {
   values: [number, number, number];
   /** 0-100 for the meter under the cells. */
@@ -23,6 +29,7 @@ export interface FlowReading {
   rate: number;
 }
 
+/** How a game fills the production flow readout: its three cells and how to read them off the state. */
 export interface FlowSpec<S> {
   cells: [FlowCell, FlowCell, FlowCell];
   meterLabel: string;

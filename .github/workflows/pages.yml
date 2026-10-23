@@ -1,4 +1,4 @@
-# Test, build and publish both games to GitHub Pages on every push to main.
+# Test, build and publish the games (and the engine reference) to GitHub Pages on every push to main.
 name: Pages
 
 on:
@@ -27,6 +27,8 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      # The engine's API reference, generated into dist/engine after the games are built.
+      - run: npm run docs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
