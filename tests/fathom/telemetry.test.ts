@@ -22,6 +22,12 @@ describe('deep-water play events', () => {
     expect(seasonEvents(before, after)).toEqual([{ name: 'zone_reached', props: { zone: 'shelf', minutes: 20, season: 1 } }]);
   });
 
+  it('reports each upgrade bought and story beat seen, like every game, to fill the time before the first milestone', () => {
+    const before = g();
+    const after = with_(before, { upgrades: ['u1'], beats: { first: 1_200 } });
+    expect(seasonEvents(before, after).map((e) => e.name)).toEqual(['upgrade_bought', 'beat_seen']);
+  });
+
   it('reports each act reached', () => {
     expect(seasonEvents(g(), with_(g(), { act: 2 }))).toEqual([{ name: 'act_reached', props: { act: 2, minutes: 20, season: 1 } }]);
   });

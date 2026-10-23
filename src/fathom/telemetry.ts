@@ -1,4 +1,4 @@
-import type { TelemetryEvent, TelemetryProps } from '../engine/telemetry';
+import { progressEvents, type TelemetryEvent, type TelemetryProps } from '../engine/telemetry';
 import { depth } from './depth';
 import { LEGEND_KEY } from './deep';
 import type { FathomGame } from './game';
@@ -18,7 +18,7 @@ export function seasonProperties(game: FathomGame): TelemetryProps {
   return { game: 'fathom', act: game.outfit.act, season: game.outfit.terms.season };
 }
 
-/** Milestones between two successive states: zones reached, acts, landfalls, seasons ended, and the Source's hunt. */
+/** Milestones between two successive states: zones reached, acts, landfalls, upgrades and beats, seasons ended, and the Source's hunt. */
 export function seasonEvents(prev: FathomGame, next: FathomGame): TelemetryEvent[] {
   if (prev.deep && !next.deep) {
     const legend = (next.profile.legend[LEGEND_KEY] ?? 0) - (prev.profile.legend[LEGEND_KEY] ?? 0);
@@ -44,5 +44,6 @@ export function seasonEvents(prev: FathomGame, next: FathomGame): TelemetryEvent
   for (const [zone, opens] of ZONES) if (before < opens && now >= opens) events.push({ name: 'zone_reached', props: { zone, ...at } });
   if (o.act > was.act) events.push({ name: 'act_reached', props: { act: o.act, ...at } });
   if (o.category > was.category && was.category > 0) events.push({ name: 'landfall', props: { category: o.category, ...at } });
+  events.push(...progressEvents(was, o, o.elapsed));
   return events;
 }
