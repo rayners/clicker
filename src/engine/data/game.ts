@@ -59,6 +59,8 @@ export interface DataGame {
   evaluate(run: DataRun, source: string): number | boolean;
   /** Compiles a condition against this game's names (for the screen and the guide). */
   condition(source: string, where: string): Expr;
+  /** Whether a compiled condition holds for a run. */
+  holds(condition: Expr, run: DataRun): boolean;
 }
 
 /** Compiles a definition, checking every name in every condition. */
@@ -278,5 +280,6 @@ export function compileGame(def: GameDefinition): DataGame {
     },
     evaluate: (run, source) => condition(source, 'expression').evaluate(scope(run)),
     condition,
+    holds,
   };
 }

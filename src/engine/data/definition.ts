@@ -104,12 +104,27 @@ export interface SupplyDef {
   neverStuck?: boolean;
 }
 
+/** The look: colours as CSS colours, and a font family from a short list. Each becomes a `--theme-*` token. */
+export interface ThemeDef {
+  background?: string;
+  surface?: string;
+  ink?: string;
+  dim?: string;
+  rule?: string;
+  accent?: string;
+  alert?: string;
+  font?: 'serif' | 'sans' | 'mono';
+}
+
 /** A whole game. */
 export interface GameDefinition {
   id: string;
   version: number;
   title: string;
   description?: string;
+  theme?: ThemeDef;
+  /** The rules page (the guide's "how this works"). */
+  rules?: { heading: string; text: string }[];
   /** Currencies kept across runs (good will, legend), granted by endings. */
   carried?: Record<string, { label: string; effects?: EffectDef[] }>;
   resources: Record<string, ResourceDef>;

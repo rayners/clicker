@@ -30,6 +30,7 @@ export function mountAbout(root: HTMLElement): void {
         h('a', { href: 'https://creativecommons.org/licenses/by/4.0/', target: '_blank', rel: 'noopener noreferrer' }, 'CC BY 4.0'),
         '. Either way, keep a credit to David Raynes with it.',
       ),
+      h('p', {}, 'The engine under them can also play games written entirely as data: see the ', h('a', { href: '../made/' }, 'games made with the engine'), '.'),
       h('h2', { class: 'about-sub' }, 'Your data'),
       h(
         'p',

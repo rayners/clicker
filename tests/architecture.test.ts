@@ -25,6 +25,8 @@ const area = (path: string) => {
   if (path.startsWith('picker') || path.startsWith('about')) return 'picker';
   // The example game, built from the engine's docs: engine code only, and no game may lean on it.
   if (path.startsWith('clips')) return 'clips';
+  // The page of games made of data: engine code only.
+  if (path.startsWith('made')) return 'made';
   if (path.startsWith('late-fees')) return 'late-fees';
   if (path.startsWith('fathom')) return 'fathom';
   if (path.startsWith('forest')) return 'elderdark';
@@ -70,5 +72,10 @@ describe('code boundaries between the engine and the games', () => {
     const outward = edges.filter(([from, to]) => area(from) === 'clips' && area(to) !== 'engine' && area(to) !== 'clips');
     const inward = edges.filter(([from, to]) => area(from) !== 'clips' && area(to) === 'clips');
     expect([...outward, ...inward]).toEqual([]);
+  });
+
+  it('keeps the page of games made of data to the engine alone', () => {
+    const outward = edges.filter(([from, to]) => area(from) === 'made' && area(to) !== 'engine' && area(to) !== 'made');
+    expect(outward).toEqual([]);
   });
 });

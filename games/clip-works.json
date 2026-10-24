@@ -3,68 +3,342 @@
   "version": 1,
   "title": "CLIP WORKS",
   "description": "Bend wire into clips, sell them, grow the works. The engine's example, written as data.",
+  "theme": {
+    "background": "#f3eee2",
+    "surface": "#fbf8f0",
+    "ink": "#1d2a36",
+    "dim": "#5b6670",
+    "rule": "#c9c0ad",
+    "accent": "#2f5d8a",
+    "alert": "#b3261e",
+    "font": "serif"
+  },
+  "rules": [
+    {
+      "heading": "CLIPS",
+      "text": "Each clip takes an inch of wire. Make them by hand, or buy autoclippers to make them for you."
+    },
+    {
+      "heading": "SALES",
+      "text": "People buy clips every second. How many depends on the price and on marketing; what you earn is what they buy times the price."
+    },
+    {
+      "heading": "WIRE",
+      "text": "Wire comes by the spool, and its price drifts every ten seconds. Buy low if you can wait."
+    },
+    {
+      "heading": "THE MILLION",
+      "text": "At a million clips, sell the works or hand it on, and start again with good will: more customers from the first day."
+    }
+  ],
   "carried": {
-    "goodwill": { "label": "GOOD WILL", "effects": [{ "target": "market.demand", "plus": 0.25 }] }
+    "goodwill": {
+      "label": "GOOD WILL",
+      "effects": [
+        {
+          "target": "market.demand",
+          "plus": 0.25
+        }
+      ]
+    }
   },
   "resources": {
-    "wire": { "label": "WIRE", "unit": "IN", "start": 1000 },
-    "clips": { "label": "CLIPS", "unit": "ON HAND" },
-    "funds": { "label": "FUNDS", "format": "money" },
-    "made": { "label": "MADE", "lifetime": "clips" }
+    "wire": {
+      "label": "WIRE",
+      "unit": "IN",
+      "start": 1000
+    },
+    "clips": {
+      "label": "CLIPS",
+      "unit": "ON HAND"
+    },
+    "funds": {
+      "label": "FUNDS",
+      "format": "money"
+    },
+    "made": {
+      "label": "MADE",
+      "lifetime": "clips"
+    }
   },
-  "press": { "label": "MAKE A PAPERCLIP", "converts": { "wire": -1, "clips": 1 } },
+  "press": {
+    "label": "MAKE A PAPERCLIP",
+    "converts": {
+      "wire": -1,
+      "clips": 1
+    }
+  },
   "items": [
     {
       "id": "autoclipper",
       "label": "AUTOCLIPPER",
       "text": "Bends a clip a second while there is wire on the bench.",
-      "cost": { "resource": "funds", "base": 5, "growth": 1.1 },
-      "converts": { "wire": -1, "clips": 1 },
+      "cost": {
+        "resource": "funds",
+        "base": 5,
+        "growth": 1.1
+      },
+      "converts": {
+        "wire": -1,
+        "clips": 1
+      },
       "rate": 1
     },
     {
       "id": "marketing",
       "label": "MARKETING",
       "text": "Posters, then papers, then the radio. More people want clips at any price.",
-      "cost": { "resource": "funds", "base": 100, "growth": 2 },
-      "effects": [{ "target": "market.demand", "times": 1.6 }]
+      "cost": {
+        "resource": "funds",
+        "base": 100,
+        "growth": 2
+      },
+      "effects": [
+        {
+          "target": "market.demand",
+          "times": 1.6
+        }
+      ]
     }
   ],
   "upgrades": [
-    { "id": "sharper-dies", "label": "Sharper dies", "text": "Autoclippers bend half again as fast.", "cost": { "resource": "funds", "amount": 50 }, "shown": "made >= 200", "effects": [{ "target": "autoclipper.rate", "times": 1.5 }] },
-    { "id": "longer-spools", "label": "Longer spools", "text": "Each spool of wire runs 1,500 inches.", "cost": { "resource": "funds", "amount": 80 }, "shown": "made >= 500", "effects": [{ "target": "supply.lot", "times": 1.5 }] },
-    { "id": "wire-buyer", "label": "Standing wire order", "text": "Keeps the bench in wire.", "cost": { "resource": "funds", "amount": 200 }, "shown": "made >= 1000", "automate": "supply" },
-    { "id": "jingle", "label": "A jingle", "text": "Half again as many people want clips.", "cost": { "resource": "funds", "amount": 500 }, "shown": "made >= 2000", "effects": [{ "target": "market.demand", "times": 1.5 }] },
-    { "id": "megaclippers", "label": "Megaclippers", "text": "Autoclippers bend three times as fast.", "cost": { "resource": "funds", "amount": 1500 }, "shown": "made >= 20000", "effects": [{ "target": "autoclipper.rate", "times": 3 }] },
-    { "id": "night-shift", "label": "A night shift", "text": "The bench never stops. Autoclippers bend twice as much.", "cost": { "resource": "funds", "amount": 6000 }, "shown": "made >= 100000", "effects": [{ "target": "autoclipper.rate", "times": 2 }] },
-    { "id": "factory", "label": "The factory", "text": "A building on the edge of town, full of benches. Autoclippers bend four times as much.", "cost": { "resource": "funds", "amount": 25000 }, "shown": "made >= 300000", "effects": [{ "target": "autoclipper.rate", "times": 4 }] }
+    {
+      "id": "sharper-dies",
+      "label": "Sharper dies",
+      "text": "Autoclippers bend half again as fast.",
+      "cost": {
+        "resource": "funds",
+        "amount": 50
+      },
+      "shown": "made >= 200",
+      "effects": [
+        {
+          "target": "autoclipper.rate",
+          "times": 1.5
+        }
+      ]
+    },
+    {
+      "id": "longer-spools",
+      "label": "Longer spools",
+      "text": "Each spool of wire runs 1,500 inches.",
+      "cost": {
+        "resource": "funds",
+        "amount": 80
+      },
+      "shown": "made >= 500",
+      "effects": [
+        {
+          "target": "supply.lot",
+          "times": 1.5
+        }
+      ]
+    },
+    {
+      "id": "wire-buyer",
+      "label": "Standing wire order",
+      "text": "Keeps the bench in wire.",
+      "cost": {
+        "resource": "funds",
+        "amount": 200
+      },
+      "shown": "made >= 1000",
+      "automate": "supply"
+    },
+    {
+      "id": "jingle",
+      "label": "A jingle",
+      "text": "Half again as many people want clips.",
+      "cost": {
+        "resource": "funds",
+        "amount": 500
+      },
+      "shown": "made >= 2000",
+      "effects": [
+        {
+          "target": "market.demand",
+          "times": 1.5
+        }
+      ]
+    },
+    {
+      "id": "megaclippers",
+      "label": "Megaclippers",
+      "text": "Autoclippers bend three times as fast.",
+      "cost": {
+        "resource": "funds",
+        "amount": 1500
+      },
+      "shown": "made >= 20000",
+      "effects": [
+        {
+          "target": "autoclipper.rate",
+          "times": 3
+        }
+      ]
+    },
+    {
+      "id": "night-shift",
+      "label": "A night shift",
+      "text": "The bench never stops. Autoclippers bend twice as much.",
+      "cost": {
+        "resource": "funds",
+        "amount": 6000
+      },
+      "shown": "made >= 100000",
+      "effects": [
+        {
+          "target": "autoclipper.rate",
+          "times": 2
+        }
+      ]
+    },
+    {
+      "id": "factory",
+      "label": "The factory",
+      "text": "A building on the edge of town, full of benches. Autoclippers bend four times as much.",
+      "cost": {
+        "resource": "funds",
+        "amount": 25000
+      },
+      "shown": "made >= 300000",
+      "effects": [
+        {
+          "target": "autoclipper.rate",
+          "times": 4
+        }
+      ]
+    }
   ],
   "mechanics": {
-    "market": { "sells": "clips", "for": "funds", "price": { "start": 0.05, "step": 0.01, "min": 0.01 }, "demand": { "base": 20, "elasticity": 2 } },
-    "supply": { "buys": "wire", "with": "funds", "lot": 1000, "price": { "start": 20, "drift": 2, "every": 10, "min": 12, "max": 32 }, "neverStuck": true }
+    "market": {
+      "sells": "clips",
+      "for": "funds",
+      "price": {
+        "start": 0.05,
+        "step": 0.01,
+        "min": 0.01
+      },
+      "demand": {
+        "base": 20,
+        "elasticity": 2
+      }
+    },
+    "supply": {
+      "buys": "wire",
+      "with": "funds",
+      "lot": 1000,
+      "price": {
+        "start": 20,
+        "drift": 2,
+        "every": 10,
+        "min": 12,
+        "max": 32
+      },
+      "neverStuck": true
+    }
   },
   "story": {
     "gap": 30,
     "opening": "CLIP WORKS. One bench, one spool of wire, and a hand-lettered sign: CLIPS 5¢.",
     "beats": [
-      { "id": "first-hundred", "when": "made >= 100", "text": "A hundred clips. The jar by the till is filling." },
-      { "id": "automation", "act": 2, "when": "made >= 2000", "kind": "letter", "text": "LETTER: The stationers on Fourth Street would like to stock your clips. All of them." },
-      { "id": "wire-talk", "when": "made >= 10000", "text": "The wire merchant asks what we are doing with it all." },
-      { "id": "factory", "act": 3, "when": "made >= 100000", "kind": "letter", "text": "LETTER: A buyer from the capital. They have heard of us. Everyone has." },
-      { "id": "million", "when": "made >= 1000000", "text": "One million clips. Time to decide what the works is for.", "ends": true, "urgent": true }
+      {
+        "id": "first-hundred",
+        "when": "made >= 100",
+        "text": "A hundred clips. The jar by the till is filling."
+      },
+      {
+        "id": "automation",
+        "act": 2,
+        "when": "made >= 2000",
+        "kind": "letter",
+        "text": "LETTER: The stationers on Fourth Street would like to stock your clips. All of them."
+      },
+      {
+        "id": "wire-talk",
+        "when": "made >= 10000",
+        "text": "The wire merchant asks what we are doing with it all."
+      },
+      {
+        "id": "factory",
+        "act": 3,
+        "when": "made >= 100000",
+        "kind": "letter",
+        "text": "LETTER: A buyer from the capital. They have heard of us. Everyone has."
+      },
+      {
+        "id": "million",
+        "when": "made >= 1000000",
+        "text": "One million clips. Time to decide what the works is for.",
+        "ends": true,
+        "urgent": true
+      }
     ]
   },
   "endings": [
-    { "id": "sell", "title": "SELL THE WORKS", "text": "A firm from the capital buys the bench, the dies and the name. You start again across town, and people remember you.", "grants": { "goodwill": 1 } },
-    { "id": "cooperative", "title": "HAND IT TO THE WORKERS", "text": "The people who bent the clips own the works now. You start again across town, and people remember that too.", "grants": { "goodwill": 1 } }
+    {
+      "id": "sell",
+      "title": "SELL THE WORKS",
+      "text": "A firm from the capital buys the bench, the dies and the name. You start again across town, and people remember you.",
+      "grants": {
+        "goodwill": 1
+      }
+    },
+    {
+      "id": "cooperative",
+      "title": "HAND IT TO THE WORKERS",
+      "text": "The people who bent the clips own the works now. You start again across town, and people remember that too.",
+      "grants": {
+        "goodwill": 1
+      }
+    }
   ],
   "guide": [
-    { "id": "make", "title": "MAKE A CLIP", "text": "Tap the big button to bend an inch of wire into a clip. Clips sell on their own at the price you set.", "target": "press", "done": "made >= 10" },
-    { "id": "price", "title": "PRICE", "text": "Cheaper clips sell faster; dearer ones earn more each. Find the price where the pile stays small.", "target": "market.price", "show": "made >= 10", "done": "market.price != 0.05" },
-    { "id": "wire", "title": "WIRE", "text": "Every clip is an inch of wire. Buy a spool before the bench runs dry; its price moves.", "show": "wire < 500", "done": "wire > 1000 or autoclipper > 0" },
-    { "id": "clippers", "title": "AUTOCLIPPERS", "text": "An autoclipper bends a clip a second for you. Each costs a little more than the last.", "target": "autoclipper", "show": "funds >= 5", "done": "autoclipper > 0" }
+    {
+      "id": "make",
+      "title": "MAKE A CLIP",
+      "text": "Tap the big button to bend an inch of wire into a clip. Clips sell on their own at the price you set.",
+      "target": "press",
+      "done": "made >= 10"
+    },
+    {
+      "id": "price",
+      "title": "PRICE",
+      "text": "Cheaper clips sell faster; dearer ones earn more each. Find the price where the pile stays small.",
+      "target": "market.price",
+      "show": "made >= 10",
+      "done": "market.price != 0.05"
+    },
+    {
+      "id": "wire",
+      "title": "WIRE",
+      "text": "Every clip is an inch of wire. Buy a spool before the bench runs dry; its price moves.",
+      "show": "wire < 500",
+      "done": "wire > 1000 or autoclipper > 0"
+    },
+    {
+      "id": "clippers",
+      "title": "AUTOCLIPPERS",
+      "text": "An autoclipper bends a clip a second for you. Each costs a little more than the last.",
+      "target": "autoclipper",
+      "show": "funds >= 5",
+      "done": "autoclipper > 0"
+    }
   ],
   "pacing": {
-    "targets": { "act2": ["3m", "10m"], "act3": ["30m", "75m"], "end": ["90m", "4h"] }
+    "targets": {
+      "act2": [
+        "3m",
+        "10m"
+      ],
+      "act3": [
+        "30m",
+        "75m"
+      ],
+      "end": [
+        "90m",
+        "4h"
+      ]
+    }
   }
 }

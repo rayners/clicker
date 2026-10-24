@@ -65,6 +65,11 @@ describe('the About page', () => {
     expect(screen.getByText(/credit/i)).toBeTruthy();
   });
 
+  it('points to the games made with the engine, each written as data', () => {
+    mount();
+    expect((screen.getByRole('link', { name: /made with the engine/i }) as HTMLAnchorElement).getAttribute('href')).toBe('../made/');
+  });
+
   it('leads back to the games', () => {
     mount();
     expect((screen.getByRole('link', { name: /back to the games/i }) as HTMLAnchorElement).getAttribute('href')).toBe('../');

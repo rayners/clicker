@@ -97,6 +97,9 @@ See [`docs/DATA-GAMES.md`](../../docs/DATA-GAMES.md) for the design.
 | `data/expr` | `compile`: conditions and formulas as short strings (`made >= 2000 and has('jingle')`), parsed by jsep and evaluated against only the names and functions a game allows; mistakes are caught at load, with their column. |
 | `data/definition` | The JSON a data game is written in: resources, the big button, items, upgrades, mechanics, story, endings, the guide. |
 | `data/bot` | `playDataGame`, `decideData`: a generic bot that plays any data game (market, supply, producers, boosters, upgrades) for the pacing targets in its file; `parseDuration` for those targets. |
+| `data/play` | `createDataPlay`: a run's saved state (settings, version), its reducer with reset and endings, its save system and clock. |
+| `data/screen` | `mountDataGame`: the whole screen built from a definition (flow, price, stats, log, buy tab, upgrades, endings, the big button, settings, the guide), themed from its tokens. |
+| `data/run` | `runDataGame`: plays a definition in a page with one call. Import `ui/engine.css` and `ui/theme.css` (the default theme, dressed by the definition's `--theme-*` tokens) beside it. |
 | `data/game` | `compileGame`: turns a definition into a pure simulation (create, reduce, tick) with stats under every effect, the story, endings that carry currencies, and errors that name the path to a mistake. |
 
 ### Telemetry

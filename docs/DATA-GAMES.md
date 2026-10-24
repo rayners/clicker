@@ -205,6 +205,21 @@ on the engine's existing migration system.
   - unbalanced pacing (the bot never finishes).
 - The engine's invariant tests run against every definition in the repo.
 
+## Progress
+
+- (Done) Step 1: the expression language (`data/expr`, on jsep), the definition's types, the interpreter
+  (`data/game`), and the screen from data (`data/screen`). Market and supply are built in, since CLIP WORKS needs
+  them.
+- (Done) Step 2, mostly: the generic bot (`data/bot`), pacing targets in the file (checked for every game in
+  `games/` by `tests/engine/data-bot.test.ts`), `npm run simulate:data`, the default theme (`ui/theme.css`, dressed by
+  `theme` tokens), and the page at `/made/` that lists every definition in `games/` and plays one with `?game=<id>`.
+  Still to do from this step: the validator command, and per-game generated pages (the single page covered the need
+  for now).
+- Acceptance met: `games/clip-works.json` plays CLIP WORKS with no code of its own, inside the TypeScript version's
+  pacing windows.
+- Next: the other mechanics, one at a time with a small sample game each (converter chain, dial, meter, cycle,
+  objectives, ground), then hooks for game code and the hunt.
+
 ## Build order (when approved)
 
 1. The expression language, the core schema (resources, press, producers, upgrades as modifiers, story, endings,
