@@ -19,6 +19,7 @@ Read before changing things:
 - `docs/kaiju/DESIGN.md`: the fourth game, DOWN THERE (named by the user 2026-10-21; working title FATHOM in code): deep water to kaiju, sharks on the coast down to mechs at the breach.
 - `docs/MISSIONS.md`: the approved new missions (security detachment, haulage, salvage, the Keep), the shared held-ground engine, and the build order.
 - `docs/OUTBREAK.md`: the second first-tier horror for DEEP CONTRACT (a pathogen turning the workforce against the company), and the rule for which horror a contract gets. Built: `src/mission/outbreak/`, `src/data/outbreak/`, the SICK BAY in `src/ui/sick-bay.ts`.
+- `docs/DATA-GAMES.md`: proposal (not built) for games defined in JSON: mechanics as selectable modules, a safe expression language, the screen and theme as data, generated pacing tests.
 - `docs/TELEMETRY.md`: anonymous PostHog analytics (published site only, opt-out, events derived from state diffs). Add an event there when a new milestone matters for pacing.
 
 ## Non-negotiable requirements

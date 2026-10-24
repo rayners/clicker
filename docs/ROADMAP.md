@@ -210,7 +210,8 @@ Two subagent passes at the user's request: an adversarial QA run and a design re
 - Open: page scaffolding (`index.html`, the PWA manifest and icons are written by hand per game).
 - Not done, on purpose: a milestone-telemetry helper. Each game's "act went up" diff is one line, and a helper would
   not save code.
-- Open: the license, now that the engine/games line is clear (user's decision).
+- (Done) Licenses: code under MIT, game content under CC BY 4.0.
+- Proposed: games made of data (`docs/DATA-GAMES.md`), waiting on the user's answers to its open questions.
 
 ## Balance notes
 
