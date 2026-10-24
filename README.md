@@ -103,3 +103,9 @@ Dev builds have debug jumps (e.g. `/contract/?debug=act4`, `/forest/?debug=keep`
 - [`docs/TELEMETRY.md`](docs/TELEMETRY.md): anonymous analytics and exactly what is sent.
 - [`docs/ROADMAP.md`](docs/ROADMAP.md): status, deviations from the plan, backlog, balance notes.
 - [`CLAUDE.md`](CLAUDE.md): working rules (strict TDD, phone and desktop first-class, no backend, mission isolation).
+
+## License
+
+The code, including the engine and every game's code, is under the [MIT license](LICENSE). The games' content
+(their writing, story and pixel art) is under [CC BY 4.0](LICENSE-CONTENT.md), which says exactly what counts as
+content. Both let you reuse the work freely, as long as a credit to David Raynes goes with it.

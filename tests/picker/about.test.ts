@@ -19,7 +19,7 @@ describe('the About page', () => {
   it('says who made the games, and puts thirty years of writing software and building them with Claude in the same sentence', () => {
     mount();
     expect(screen.getByRole('heading', { level: 1 }).textContent).toMatch(/about/i);
-    expect(screen.getByText(/David Raynes/)).toBeTruthy();
+    expect(screen.getByText(/made by David Raynes/)).toBeTruthy();
     const trust = screen.getByText(/30 years/);
     expect(trust.textContent).toMatch(/Claude/);
   });
@@ -56,6 +56,13 @@ describe('the About page', () => {
     mount();
     expect(REPOSITORY).toBe('https://github.com/rayners/clicker');
     expect((screen.getByRole('link', { name: /source code/i }) as HTMLAnchorElement).href).toBe(REPOSITORY);
+  });
+
+  it('says how the work may be reused: the code under MIT, the writing and art under CC BY 4.0, both with credit', () => {
+    mount();
+    expect((screen.getByRole('link', { name: 'MIT' }) as HTMLAnchorElement).href).toBe(`${REPOSITORY}/blob/main/LICENSE`);
+    expect((screen.getByRole('link', { name: 'CC BY 4.0' }) as HTMLAnchorElement).href).toBe('https://creativecommons.org/licenses/by/4.0/');
+    expect(screen.getByText(/credit/i)).toBeTruthy();
   });
 
   it('leads back to the games', () => {

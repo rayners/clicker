@@ -7,6 +7,10 @@ this style would need again belongs here. Anything with a game's names, numbers 
 Full API reference: the generated pages at <https://rayners.github.io/clicker/engine/> (`npm run docs` builds them
 locally). Every export carries a doc comment, and `tests/engine/docs.test.ts` keeps it that way.
 
+## License
+
+The engine is under the [MIT license](../../LICENSE): use it for anything, keeping the copyright notice with it.
+
 ## Example
 
 CLIP WORKS (`src/clips/`, played at `/clips/`) is a whole game built from this README and the reference alone:

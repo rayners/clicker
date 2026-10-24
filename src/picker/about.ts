@@ -21,6 +21,15 @@ export function mountAbout(root: HTMLElement): void {
         'I have been writing software for 30 years, and I built all four of these games with Claude, Anthropic’s AI: I set the direction and play the games as they grow, and Claude writes the code with me, a test at a time.',
       ),
       h('p', {}, 'Every line is public: ', h('a', { href: REPOSITORY, target: '_blank', rel: 'noopener noreferrer' }, 'read the source code on GitHub'), ', with the design notes and the history of how it was built.'),
+      h(
+        'p',
+        {},
+        'You may reuse it. The code is under the ',
+        h('a', { href: `${REPOSITORY}/blob/main/LICENSE`, target: '_blank', rel: 'noopener noreferrer' }, 'MIT'),
+        ' license, and the writing and art under ',
+        h('a', { href: 'https://creativecommons.org/licenses/by/4.0/', target: '_blank', rel: 'noopener noreferrer' }, 'CC BY 4.0'),
+        '. Either way, keep a credit to David Raynes with it.',
+      ),
       h('h2', { class: 'about-sub' }, 'Your data'),
       h(
         'p',
