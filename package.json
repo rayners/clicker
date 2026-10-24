@@ -19,6 +19,7 @@
     "simulate:late": "tsx scripts/simulate-late.ts",
     "simulate:board": "tsx scripts/simulate-board.ts",
     "simulate:clips": "tsx scripts/simulate-clips.ts",
+    "simulate:data": "tsx scripts/simulate-data.ts",
     "screenshots": "tsx scripts/screenshots.ts",
     "docs": "typedoc"
   },

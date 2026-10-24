@@ -121,4 +121,6 @@ export interface GameDefinition {
   story?: { gap?: number; opening?: string; beats: BeatDef[] };
   endings?: EndingDef[];
   guide?: GuideDef[];
+  /** When the generic bot should reach each act (`act2`) and the end, as `[earliest, latest]` (`'3m'`, `'4h'`). */
+  pacing?: { targets?: Record<string, [string, string]> };
 }
