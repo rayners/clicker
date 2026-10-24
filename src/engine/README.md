@@ -88,6 +88,16 @@ published build only, persistent storage, and the site's service worker.
 | `bot` | Pacing bots: `playthrough` (a sensible player who taps early and checks in later, timing each act, the end and any milestones), `huntDecider` and `playHunt` (the horror bot), `defend` (a prey run played by its own bot), and `applyDecisions`. |
 | `format` | `formatNumber`, `formatDuration`, `formatClock`. |
 
+### Games made of data
+
+See [`docs/DATA-GAMES.md`](../../docs/DATA-GAMES.md) for the design.
+
+| Module | What it does |
+|---|---|
+| `data/expr` | `compile`: conditions and formulas as short strings (`made >= 2000 and has('jingle')`), parsed by jsep and evaluated against only the names and functions a game allows; mistakes are caught at load, with their column. |
+| `data/definition` | The JSON a data game is written in: resources, the big button, items, upgrades, mechanics, story, endings, the guide. |
+| `data/game` | `compileGame`: turns a definition into a pure simulation (create, reduce, tick) with stats under every effect, the story, endings that carry currencies, and errors that name the path to a mistake. |
+
 ### Telemetry
 
 | Module | What it does |

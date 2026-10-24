@@ -1,6 +1,6 @@
 # Games made of data
 
-Status: **proposal, not built.** A design pass before any engine changes (user, 2026-10-23).
+Status: **approved, being built** (user, 2026-10-23). The decisions below are settled.
 
 ## The goal
 
@@ -217,9 +217,12 @@ on the engine's existing migration system.
 The existing four games stay as they are. They keep using the engine directly. Nothing here asks them to move to
 data, though some of their content tables could later be read from JSON if that ever helps.
 
-## Open questions for the user
+## Decisions (user, 2026-10-23)
 
-1. Strings for conditions and formulas (recommended), or JSON trees?
-2. Build-time pages only to start (recommended), or the runtime loader too, from the start?
-3. Should data games appear in the picker, or live on their own page of "made with the engine" games?
-4. Is the hunt-for-every-data-game idea (step 4) worth keeping on the list?
+1. **Strings** for conditions and formulas, parsed by an existing parser rather than a hand-rolled one: **jsep**
+   (MIT, no dependencies, parse-only), evaluated by the engine against a whitelist of names and functions.
+2. **Build-time pages** first, as the simpler path. A generic page where someone uploads or pastes their own JSON is
+   a likely later step, so nothing should rule it out.
+3. Data games live **on their own page**, not in the picker.
+4. **The hunt is optional** for any game, but it is used often enough that the engine should support it as a
+   mechanic.
